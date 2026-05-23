@@ -57,3 +57,4 @@ Add MDX files under `src/content/case-studies/` and route them via the App Route
 - `npm run build` — production build
 - `npm run start` — serve production build
 - `npm run lint` — ESLint
+# gridfun
