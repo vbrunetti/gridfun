@@ -1,18 +1,71 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fafafa;
-  --foreground: #111111;
-  --muted: #666666;
-  --line: #e5e5e5;
+  /* Brand palette */
+  --color-paper: #f6f0e5;
+  --color-flesh: #f5dcbf;
+  --color-ink: #1c1916;
+  --color-brown: #574038;
+  --color-orange: #ff662e;
+  --color-leaf-green: #008755;
+  --color-crimson: #a41e34;
+  --color-electric-blue: #2a5bb5;
+  --color-flamingo-pink: #d46b7a;
+  --color-golden-yellow: #d9a028;
 
-  /* Swiss grid tokens — tune these as the visual system evolves */
-  --grid-columns: 12;
-  --grid-margin: clamp(1rem, 4vw, 3rem);
-  --grid-gutter: clamp(0.75rem, 2vw, 1.25rem);
+  /* Text on light surfaces (ink) */
+  --text-primary: var(--color-ink);
+  --text-secondary: color-mix(in srgb, var(--color-ink) 80%, transparent);
+  --text-tertiary: color-mix(in srgb, var(--color-ink) 60%, transparent);
+
+  /* Semantic */
+  --background: var(--color-paper);
+  --foreground: var(--text-primary);
+  --accent: var(--color-orange);
+  --accent-secondary: var(--color-leaf-green);
+  --rule-light: color-mix(in srgb, var(--color-ink) 12%, transparent);
+  --rule-strong: var(--color-ink);
+
+  /*
+   * Master build grid
+   * Mobile: 6 columns · 2px gutter · 1rem side margin
+   * Desktop (lg+): 12 columns · 8px gutter · side margin · max 1440px centered
+   */
+  --grid-columns: 6;
+  --grid-gutter: 2px;
+  --grid-margin: 1rem;
+  --grid-max: none;
   --grid-row-gap: clamp(1.5rem, 4vw, 3rem);
-  --content-max: 72rem;
-  --media-column: min(100%, 26rem);
+
+  --rail-width: 5.5rem;
+  --chrome-hit: 2.75rem;
+  --chrome-pad: 1.25rem;
+  --chrome-top-offset: calc(var(--chrome-pad) * 2 + var(--chrome-hit));
+
+  --section-dark-bg: var(--color-ink);
+  --section-dark-rule: color-mix(in srgb, var(--color-paper) 22%, transparent);
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --grid-columns: 12;
+    --grid-gutter: 8px;
+    --grid-margin: clamp(1rem, 4vw, 3rem);
+    --grid-max: 90rem; /* 1440px — common design-artboard width on large screens */
+  }
+}
+
+/* Text on dark surfaces (paper) */
+.theme-dark {
+  --text-primary: var(--color-paper);
+  --text-secondary: color-mix(in srgb, var(--color-paper) 80%, transparent);
+  --text-tertiary: color-mix(in srgb, var(--color-paper) 60%, transparent);
+  --foreground: var(--text-primary);
+  --rule-light: color-mix(in srgb, var(--color-paper) 18%, transparent);
+  --rule-strong: color-mix(in srgb, var(--color-paper) 40%, transparent);
+
+  background: var(--section-dark-bg);
+  color: var(--text-primary);
 }
 
 @theme inline {
@@ -22,16 +75,196 @@
   --font-mono: var(--font-geist-mono);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   background: var(--background);
-  color: var(--foreground);
+  color: var(--text-primary);
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
-.prose-case-study {
-  max-width: var(--media-column);
+.text-primary {
+  color: var(--text-primary);
 }
 
-.prose-case-study > * + * {
-  margin-top: var(--grid-row-gap);
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-tertiary {
+  color: var(--text-tertiary);
+}
+
+/* ——— Master build grid ——— */
+.site-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+  column-gap: var(--grid-gutter);
+  row-gap: var(--grid-row-gap);
+  width: 100%;
+  max-width: var(--grid-max);
+  margin-inline: auto;
+  padding-inline: var(--grid-margin);
+}
+
+.skeleton-wrap {
+  width: 100%;
+  max-width: var(--grid-max);
+  height: 100%;
+  margin-inline: auto;
+  padding-inline: var(--grid-margin);
+}
+
+.site-grid > .col-full {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 1024px) {
+  .col-main {
+    grid-column: 1 / -1;
+  }
+
+  .col-narrow {
+    grid-column: 1 / 8;
+  }
+}
+
+@media (max-width: 1023px) {
+  .col-main,
+  .col-narrow {
+    grid-column: 1 / -1;
+  }
+}
+
+/*
+ * Subgrid: children share the parent site-grid tracks exactly.
+ * Never nest a full .site-grid inside another — use this instead.
+ */
+.site-grid-subgrid {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  column-gap: var(--grid-gutter);
+  row-gap: var(--grid-row-gap);
+  width: 100%;
+  min-width: 0;
+}
+
+.grid-span-1 {
+  grid-column: span 1;
+  min-width: 0;
+}
+
+.grid-span-2 {
+  grid-column: span 2;
+  min-width: 0;
+}
+
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+  column-gap: var(--grid-gutter);
+  height: 100%;
+  width: 100%;
+}
+
+.demo-col-hidden-mobile {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .demo-col-hidden-mobile {
+    display: block;
+  }
+}
+
+.lock-screen-left,
+.lock-screen-right {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .lock-screen-left {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    z-index: 50;
+    top: 0;
+    left: 0;
+    height: 100dvh;
+    width: var(--rail-width);
+  }
+
+  .lock-screen-right {
+    display: block;
+    position: fixed;
+    z-index: 30;
+    pointer-events: none;
+  }
+}
+
+.theme-light {
+  background: var(--color-paper);
+  color: var(--text-primary);
+}
+
+.text-meta {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.display-xl {
+  font-size: clamp(2.5rem, 6vw, 4.75rem);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  color: var(--text-primary);
+}
+
+.display-lg {
+  font-size: clamp(1.75rem, 4vw, 3.25rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+}
+
+.rail-label-vertical {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  letter-spacing: 0.14em;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.swatch {
+  aspect-ratio: 1;
+  border: 1px solid var(--rule-strong);
+}
+
+.chrome-hit-target {
+  display: flex;
+  height: var(--chrome-hit);
+  width: var(--chrome-hit);
+  align-items: center;
+  justify-content: center;
+  color: inherit;
 }

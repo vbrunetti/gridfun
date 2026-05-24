@@ -21,6 +21,10 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+## Design docs
+
+- **[Phase 1 — Chrome](./docs/phase-1-chrome.md)** — inspiration synthesis, tokens, IA, and build order (shell before content).
+
 ## Project structure
 
 ```
