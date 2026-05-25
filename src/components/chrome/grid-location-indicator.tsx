@@ -22,7 +22,7 @@ export function GridLocationIndicator() {
 
   return (
     <span
-      className="rail-label-vertical pointer-events-none whitespace-nowrap text-[0.6rem] tracking-[0.18em] text-tertiary"
+      className="rail-label-vertical pointer-events-none whitespace-nowrap"
       aria-label={`${location.pageLabel}, grid column ${column}${
         location.subLabel ? `, ${location.subLabel}` : ""
       }`}

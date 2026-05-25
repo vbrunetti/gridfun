@@ -127,15 +127,12 @@ Five sites were reviewed for chrome and interaction — not for content or illus
 | Token | Value / role |
 |-------|----------------|
 | `--canvas-blue` | IKONY electric blue — Work, hero fields |
-| `--surface-gray` | Warm light gray — cards, panels |
+| `--surface-white` | Pure white — high-contrast sections, cards |
 | `--ink` | Near black — text, rules on light |
 | `--accent` | Red-orange (primary) — active states, CTAs, rings |
 | `--accent-alt` | DES yellow — optional second CTA on dark sections only |
 | `--rule-light` | Light gray — default column lines (LVNG) |
 | `--rule-strong` | Black — menu, contact, structural pages (Duling) |
-| `--surface-sage` | Salt — About / calm sections (optional) |
-| `--surface-green` | Salt forest — block fields (optional) |
-| `--surface-blue-muted` | Salt dusty blue — block fields (optional) |
 
 ### Typography
 

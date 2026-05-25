@@ -26,7 +26,7 @@ export function VimeoEmbed({
   return (
     <figure className={className}>
       <div
-        className="relative w-full overflow-hidden bg-neutral-100"
+        className="relative w-full overflow-hidden border border-[var(--rule-light)] bg-[var(--color-flesh)]/40"
         style={{ aspectRatio }}
       >
         <iframe

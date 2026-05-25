@@ -41,7 +41,7 @@ export function MenuOverlay() {
                           onClick={closeMenu}
                           className={`block py-3 text-4xl font-semibold tracking-tight transition-opacity hover:opacity-70 md:text-6xl ${
                             active
-                              ? "text-[var(--color-orange)]"
+                              ? "text-[var(--accent)]"
                               : "text-primary"
                           }`}
                         >

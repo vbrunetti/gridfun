@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ChromeProvider } from "@/components/chrome/chrome-provider";
 import { SiteShell } from "@/components/chrome/site-shell";
+import { HeroScrubProvider } from "@/components/sections/primary-hero/hero-scrub-context";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -34,7 +35,9 @@ export default function RootLayout({
     >
       <body className="min-h-full">
         <ChromeProvider>
-          <SiteShell>{children}</SiteShell>
+          <HeroScrubProvider>
+            <SiteShell>{children}</SiteShell>
+          </HeroScrubProvider>
         </ChromeProvider>
       </body>
     </html>

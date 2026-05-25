@@ -21,7 +21,7 @@ export function PortfolioFigure({
 }: PortfolioFigureProps) {
   return (
     <figure className={className}>
-      <div className="relative w-full overflow-hidden bg-neutral-100">
+      <div className="relative w-full overflow-hidden border border-[var(--rule-light)] bg-[var(--color-flesh)]/40">
         <Image
           src={src}
           alt={alt}
@@ -33,7 +33,7 @@ export function PortfolioFigure({
         />
       </div>
       {caption ? (
-        <figcaption className="mt-2 text-sm leading-relaxed text-neutral-600">
+        <figcaption className="mt-2 text-sm leading-relaxed text-secondary">
           {caption}
         </figcaption>
       ) : null}

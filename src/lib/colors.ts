@@ -4,6 +4,7 @@
  */
 export const palette = {
   paper: "#F6F0E5",
+  white: "#FFFFFF",
   flesh: "#F5DCBF",
   ink: "#1C1916",
   brown: "#574038",
