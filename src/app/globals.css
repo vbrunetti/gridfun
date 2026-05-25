@@ -44,6 +44,7 @@
   --chrome-top-offset: calc(var(--chrome-pad) * 2 + var(--chrome-hit));
   --chrome-rail-gap: 1.5rem; /* space between hero dots + grid label on shared axis */
   --home-cover-peek: 4.5rem; /* home secondary visible above fold during hero chapters */
+  --hero-chapter-shift: 4.5rem; /* vertical travel during hero chapter crossfade */
 
   --section-dark-bg: var(--color-ink);
   --section-dark-rule: color-mix(in srgb, var(--color-paper) 22%, transparent);
@@ -336,75 +337,90 @@ body {
 }
 
 /* Sticky cover sections (DES) */
-/* Home: last section scrolls over pinned hero (hero track does not scroll away first) */
+/* Home: fixed viewport column — hero chapters scroll in .hero-chapters-container (native snap). */
 .home-hero-cover-flow {
   position: relative;
+  height: calc(100dvh - var(--chrome-top-offset));
+  overflow: hidden;
   --home-secondary-top: calc(100dvh - var(--home-cover-peek));
+  --hero-chapter-slide-height: calc(
+    100dvh - var(--chrome-top-offset) - var(--home-cover-peek)
+  );
+}
+
+.home-hero-cover-flow > section {
+  height: 100%;
+  min-height: 0;
+}
+
+@media (min-width: 1024px) {
+  .home-hero-cover-flow {
+    height: 100dvh;
+    --hero-chapter-slide-height: calc(100dvh - var(--home-cover-peek));
+  }
 }
 
 .home-hero-cover-flow .primary-hero-track {
   position: relative;
   z-index: 0;
+  height: calc(100dvh - var(--chrome-top-offset) - var(--home-cover-peek));
+  min-height: calc(100dvh - var(--chrome-top-offset) - var(--home-cover-peek));
   border-bottom-width: 0;
 }
 
-.home-hero-cover-flow .primary-hero-sticky {
-  z-index: 1;
-  height: calc(100dvh - var(--home-cover-peek));
-  min-height: calc(100dvh - var(--home-cover-peek));
-}
-
-/* Hero type + viz — centered in the hero band (above peek) */
-.home-hero-cover-flow .primary-hero-copy {
-  position: absolute;
-  inset: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  pointer-events: none;
-}
-
-.home-hero-cover-flow .primary-hero-copy > * {
-  pointer-events: auto;
-  width: 100%;
-}
-
-/* Secondary: always fixed; --home-secondary-top driven by scroll (peek → 0) */
-.home-hero-cover-flow .home-secondary-slot {
-  position: relative;
-  z-index: 2;
-  height: 0;
-  overflow: visible;
-}
-
-.home-hero-cover-flow .home-secondary-panel {
-  position: fixed;
-  top: var(--home-secondary-top, calc(100dvh - var(--home-cover-peek)));
-  right: 0;
-  left: 0;
-  z-index: 2;
-  width: 100%;
-  height: 100dvh;
-  min-height: 100dvh;
-  margin: 0;
-  isolation: isolate;
-  box-sizing: border-box;
-}
-
 @media (min-width: 1024px) {
-  .home-hero-cover-flow .home-secondary-panel {
-    left: var(--rail-width);
-    width: calc(100% - var(--rail-width));
+  .home-hero-cover-flow .primary-hero-track {
+    height: calc(100dvh - var(--home-cover-peek));
+    min-height: calc(100dvh - var(--home-cover-peek));
   }
 }
 
-/* Scroll runway: peek → full viewport */
-.home-hero-cover-flow .home-cover-stage {
-  position: relative;
-  z-index: 2;
-  height: calc(100dvh - var(--home-cover-peek));
-  overflow: clip;
+/* Hero type + viz — centered in the hero band (above peek) */
+.home-hero-cover-flow .primary-hero-sticky {
+  z-index: 1;
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
 }
+
+/* Hero chapter crossfade — stacked layers, scroll-driven transform/opacity */
+.primary-hero-chapters {
+  display: grid;
+  width: 100%;
+}
+
+.primary-hero-chapter-layer {
+  grid-area: 1 / 1;
+  align-self: center;
+  min-width: 0;
+  will-change: transform, opacity;
+}
+
+/* Secondary panel — always full viewport, translated by JS based on scroll progress.
+   Always pointer-events: none so wheel/touch reach the scroll container behind it.
+   Interactive elements opt back in. Stays under rail (z=50) + chrome (z=80). */
+.home-hero-cover-flow .home-secondary-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100dvh;
+  z-index: 3;
+  margin: 0;
+  box-sizing: border-box;
+  transform: translateY(var(--home-secondary-translate, calc(100dvh - var(--home-cover-peek))));
+  will-change: transform;
+  pointer-events: none;
+}
+
+.home-hero-cover-flow .home-secondary-panel :where(a, button, input, select, textarea, [role="button"]) {
+  pointer-events: auto;
+}
+
+.home-hero-cover-flow.home-secondary-settled {
+  --home-secondary-translate: 0px;
+}
+
 
 .sticky-cover-stack {
   position: relative;
@@ -441,22 +457,84 @@ body {
   color: var(--text-primary);
 }
 
-/* Primary hero — pinned scrub + scroll snap per slate */
+/* Primary hero — native scroll-snap chapters (feed-style; no JS gesture layer) */
 .primary-hero-track {
   position: relative;
-}
-
-.primary-hero-scroll-segment {
-  height: calc(var(--hero-segment-vh, 70) * 1vh);
-}
-
-.primary-hero-scroll-release {
-  height: 25vh;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
 }
 
 .primary-hero-sticky {
-  position: sticky;
-  top: 0;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.primary-hero-copy {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.primary-hero-copy > * {
+  width: 100%;
+}
+
+/* Reduced-motion hero has no scroll layer — links stay clickable in copy */
+.primary-hero-track:not(:has(.hero-chapters-container)) .primary-hero-copy a,
+.primary-hero-track:not(:has(.hero-chapters-container)) .primary-hero-copy button {
+  pointer-events: auto;
+}
+
+/* Scroll region — always absolute inset within hero track. Container stays the same
+   size at all phases so scroll-snap math is stable (coverEnd = max scrollTop). */
+.hero-chapters-container {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.hero-chapters-container::-webkit-scrollbar {
+  display: none;
+}
+
+.hero-chapter-slide {
+  position: relative;
+  height: var(--hero-chapter-slide-height, 100%);
+  min-height: var(--hero-chapter-slide-height, 100%);
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  flex-shrink: 0;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* CTAs float above scroll layer on chapter 0 only — buttons stay clickable */
+.hero-chapter-cta-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.hero-chapter-cta-layer a,
+.hero-chapter-cta-layer button {
+  pointer-events: auto;
 }
 
 /* Right chrome — grid label (default: viewport center) */
