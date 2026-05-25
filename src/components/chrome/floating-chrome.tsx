@@ -10,9 +10,8 @@ export function FloatingChrome() {
 
   return (
     <div
-      className={`pointer-events-none fixed top-0 right-0 z-[80] flex h-[100dvh] w-[calc(var(--chrome-hit)+var(--chrome-pad)*2)] flex-col items-center ${
-        menuOpen ? "text-[var(--color-paper)]" : "text-[var(--color-ink)]"
-      }`}
+      data-chrome-state={menuOpen ? "menu" : "default"}
+      className="floating-chrome pointer-events-none fixed top-0 right-0 z-[80] flex h-[100dvh] w-[calc(var(--chrome-hit)+var(--chrome-pad)*2)] flex-col items-center"
     >
       {/* Menu trigger — top of column, centered on shared axis */}
       <div className="pointer-events-auto relative z-20 shrink-0 p-[var(--chrome-pad)]">

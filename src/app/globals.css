@@ -647,6 +647,30 @@ body:has(.primary-hero-track) .chrome-rail-grid-label {
   color: var(--text-tertiary);
 }
 
+/* ── Chrome theme inversion ──────────────────────────────────
+   When a dark section sits under the floating chrome (hamburger + grid label),
+   flip those elements to the light variant so they stay legible.
+   Triggers (any of):
+     • `.home-hero-cover-flow` is in covering/settled state (home page)
+     • `body.chrome-on-dark` is set (JS-driven generic detection — see
+       ChromeThemeWatcher for non-home dark sections that need it). */
+.floating-chrome {
+  color: var(--color-ink);
+}
+
+.floating-chrome[data-chrome-state="menu"],
+body:has(.home-hero-cover-flow.home-secondary-covering) .floating-chrome,
+body:has(.home-hero-cover-flow.home-secondary-settled) .floating-chrome,
+body.chrome-on-dark .floating-chrome {
+  color: var(--color-paper);
+}
+
+body:has(.home-hero-cover-flow.home-secondary-covering) .floating-chrome .rail-label-vertical,
+body:has(.home-hero-cover-flow.home-secondary-settled) .floating-chrome .rail-label-vertical,
+body.chrome-on-dark .floating-chrome .rail-label-vertical {
+  color: color-mix(in srgb, var(--color-paper) 70%, transparent);
+}
+
 .swatch {
   aspect-ratio: 1;
   border: 1px solid var(--rule-strong);

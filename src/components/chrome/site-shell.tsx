@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { ChromeLogo } from "./chrome-logo";
+import { ChromeThemeWatcher } from "./chrome-theme-watcher";
 import { FloatingChrome } from "./floating-chrome";
 import { LeftRail } from "./left-rail";
 import { MenuOverlay } from "./menu-overlay";
@@ -13,6 +14,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
       <MenuOverlay />
       <ChromeLogo />
       <FloatingChrome />
+      <ChromeThemeWatcher />
       <div className="min-h-[100dvh] lg:pl-[var(--rail-width)]">
         <main
           id="main-content"
