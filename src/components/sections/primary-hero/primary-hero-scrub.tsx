@@ -36,6 +36,7 @@ function getHomeCoverPeekPx() {
     .trim();
   const match = raw.match(/^([\d.]+)rem$/);
   if (match) return Number.parseFloat(match[1]!) * rootFont;
+  if (raw === "0" || raw === "0px") return 0;
   return 4.5 * rootFont;
 }
 
@@ -166,11 +167,12 @@ export function PrimaryHeroScrub({
     setIsCovering(onLastChapter && scrollY > lastOffset + 16);
   }, [getChapterMetrics, getSnapOffsets, reducedMotion, secondary, slateCount]);
 
+  /** End of cover scroll — secondary flush to viewport top (matches track layout). */
   const getMaxHomeScroll = useCallback(() => {
-    const chapter = getChapterMetrics();
-    if (!chapter) return null;
-    return chapter.chapterEnd - getHomeCoverPeekPx();
-  }, [getChapterMetrics]);
+    const metrics = getTrackMetrics();
+    if (!metrics) return null;
+    return metrics.trackBottom - window.innerHeight;
+  }, [getTrackMetrics]);
 
   const clampHomeScroll = useCallback(() => {
     if (!secondary || reducedMotion || snappingRef.current) return;
@@ -197,6 +199,55 @@ export function PrimaryHeroScrub({
 
     setIsCoverSettled(window.scrollY >= maxY - 4);
   }, [getMaxHomeScroll, reducedMotion, secondary]);
+
+  /** Drive fixed secondary top: peek band → flush viewport top over cover runway. */
+  const updateSecondaryTop = useCallback(() => {
+    const flow = trackRef.current?.closest(".home-hero-cover-flow");
+    if (!flow || !secondary || reducedMotion) {
+      flow?.style.removeProperty("--home-secondary-top");
+      return;
+    }
+
+    const chapter = getChapterMetrics();
+    const track = getTrackMetrics();
+    if (!chapter || !track) return;
+
+    const viewport = window.innerHeight;
+    const peekPx = getHomeCoverPeekPx();
+    const scrollY = window.scrollY;
+    const offsets = getSnapOffsets();
+    const lastOffset = offsets[offsets.length - 1];
+    if (lastOffset === undefined) return;
+
+    const coverStart = lastOffset + 16;
+    const coverEnd = track.trackBottom - viewport;
+    const peekTop = viewport - peekPx;
+
+    let topPx = peekTop;
+    if (scrollY >= coverEnd - 2) {
+      topPx = 0;
+    } else if (scrollY > coverStart) {
+      const runway = Math.max(coverEnd - coverStart, 1);
+      const t = clamp((scrollY - coverStart) / runway, 0, 1);
+      topPx = peekTop * (1 - t);
+    }
+
+    flow.style.setProperty("--home-secondary-top", `${topPx}px`);
+  }, [getChapterMetrics, getSnapOffsets, getTrackMetrics, reducedMotion, secondary]);
+
+  const isPastChapterScroll = useCallback(
+    (scrollY: number) => {
+      const chapter = getChapterMetrics();
+      if (!chapter) return false;
+      const offsets = getSnapOffsets();
+      const lastOffset = offsets[offsets.length - 1];
+      if (lastOffset === undefined) return false;
+      const viewport = window.innerHeight;
+      const exitThreshold = (segmentVh / 100) * viewport * 0.35;
+      return scrollY > lastOffset + exitThreshold;
+    },
+    [getChapterMetrics, getSnapOffsets, segmentVh],
+  );
 
   const updateDotsVisibility = useCallback(() => {
     if (reducedMotion) {
@@ -243,17 +294,10 @@ export function PrimaryHeroScrub({
     if (scrollY + viewport > trackBottom - 24) return;
     if (scrollY < trackTop - 24) return;
 
-    if (secondary) {
-      const chapter = getChapterMetrics();
-      if (chapter && scrollY > chapter.chapterEnd - 24) return;
-    }
+    if (secondary && isPastChapterScroll(scrollY)) return;
 
     const offsets = getSnapOffsets();
     if (offsets.length === 0) return;
-
-    const lastOffset = offsets[offsets.length - 1] ?? trackTop;
-    const exitThreshold = (segmentVh / 100) * viewport * 0.35;
-    if (scrollY > lastOffset + exitThreshold) return;
 
     let nearest = 0;
     let minDist = Infinity;
@@ -274,12 +318,11 @@ export function PrimaryHeroScrub({
       snappingRef.current = false;
     }, 400);
   }, [
-    getChapterMetrics,
     getSnapOffsets,
     getTrackMetrics,
+    isPastChapterScroll,
     reducedMotion,
     secondary,
-    segmentVh,
   ]);
 
   const scrollToSlate = useCallback(
@@ -340,6 +383,7 @@ export function PrimaryHeroScrub({
         updateProgress();
         updateCoverPhase();
         updateCoverSettled();
+        updateSecondaryTop();
         clampHomeScroll();
         updateDotsVisibility();
       });
@@ -348,6 +392,7 @@ export function PrimaryHeroScrub({
     updateProgress();
     updateCoverPhase();
     updateCoverSettled();
+    updateSecondaryTop();
     clampHomeScroll();
     updateDotsVisibility();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -377,6 +422,7 @@ export function PrimaryHeroScrub({
     clampHomeScroll,
     updateCoverPhase,
     updateCoverSettled,
+    updateSecondaryTop,
     updateDotsVisibility,
     updateProgress,
   ]);
@@ -423,7 +469,7 @@ export function PrimaryHeroScrub({
           reducedMotion={reducedMotion}
         />
 
-        <div className="relative z-10 flex h-full flex-col justify-end pb-[var(--grid-row-gap)]">
+        <div className="primary-hero-copy">
           <RuledGrid className="w-full">
             <div className="col-span-hero">
               <h1 className="sr-only">{activeSlate.headline}</h1>

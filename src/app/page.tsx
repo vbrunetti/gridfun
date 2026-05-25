@@ -9,7 +9,7 @@ export default function Home() {
         slates={heroSlates}
         scrollRelease={false}
         secondary={
-          <section className="theme-dark home-secondary-panel sticky-cover-panel flex items-center border-b border-[var(--section-dark-rule)]">
+          <section className="theme-dark home-secondary-panel flex items-center border-b border-[var(--section-dark-rule)]">
             <RuledGrid className="w-full py-16">
               <div className="col-span-content">
                 <p className="text-meta">Home secondary</p>
