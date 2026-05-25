@@ -202,7 +202,9 @@ export function PrimaryHeroScrub({
 
   /** Drive fixed secondary top: peek band → flush viewport top over cover runway. */
   const updateSecondaryTop = useCallback(() => {
-    const flow = trackRef.current?.closest(".home-hero-cover-flow");
+    const flow = trackRef.current?.closest(
+      ".home-hero-cover-flow",
+    ) as HTMLElement | null;
     if (!flow || !secondary || reducedMotion) {
       flow?.style.removeProperty("--home-secondary-top");
       return;
