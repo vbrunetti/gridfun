@@ -287,6 +287,10 @@ body {
   grid-column: 1 / -1;
 }
 
+.site-grid > .col-span-hero {
+  grid-column: 1 / 6; /* mobile: 5 of 6 columns */
+}
+
 @media (min-width: 1024px) {
   .site-grid > .col-span-content {
     grid-column: 2 / -2;
@@ -651,22 +655,23 @@ body:has(.primary-hero-track) .chrome-rail-grid-label {
    When a dark section sits under the floating chrome (hamburger + grid label),
    flip those elements to the light variant so they stay legible.
    Triggers (any of):
-     • `.home-hero-cover-flow` is in covering/settled state (home page)
-     • `body.chrome-on-dark` is set (JS-driven generic detection — see
-       ChromeThemeWatcher for non-home dark sections that need it). */
+     • the menu overlay is open (`data-chrome-state="menu"`)
+     • `body.chrome-on-dark` is set by ChromeThemeWatcher when any
+       `.theme-dark` element intersects the top-right chrome probe.
+   Note: we deliberately do NOT key off `.home-secondary-covering/settled`
+   here — that class flips on at the start of the cover scroll phase, while
+   the dark panel is still translated mostly off-screen, so the chrome would
+   invert too early against the still-visible light hero. The probe-based
+   watcher flips only once the dark surface actually reaches the chrome. */
 .floating-chrome {
   color: var(--color-ink);
 }
 
 .floating-chrome[data-chrome-state="menu"],
-body:has(.home-hero-cover-flow.home-secondary-covering) .floating-chrome,
-body:has(.home-hero-cover-flow.home-secondary-settled) .floating-chrome,
 body.chrome-on-dark .floating-chrome {
   color: var(--color-paper);
 }
 
-body:has(.home-hero-cover-flow.home-secondary-covering) .floating-chrome .rail-label-vertical,
-body:has(.home-hero-cover-flow.home-secondary-settled) .floating-chrome .rail-label-vertical,
 body.chrome-on-dark .floating-chrome .rail-label-vertical {
   color: color-mix(in srgb, var(--color-paper) 70%, transparent);
 }

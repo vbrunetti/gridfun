@@ -271,10 +271,6 @@ export function PrimaryHeroScrub({
                   </CtaButton>
                 </div>
               ) : null}
-
-              {!reducedMotion && slateCount > 1 ? (
-                <p className="text-meta mt-12">(Scroll)</p>
-              ) : null}
             </div>
           </RuledGrid>
         </div>

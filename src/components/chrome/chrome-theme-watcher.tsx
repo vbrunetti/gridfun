@@ -5,10 +5,10 @@ import { useEffect } from "react";
 /**
  * Toggles `body.chrome-on-dark` whenever any visible `.theme-dark` element
  * intersects the floating chrome's region (top-right of viewport). Used so the
- * hamburger + grid label flip to their light variant for legibility.
- *
- * Note: home secondary cover is handled via CSS `:has()` in globals.css since
- * its panel has `pointer-events: none` (incompatible with hit-testing).
+ * hamburger + grid label flip to their light variant for legibility on any
+ * dark surface — including the home secondary cover as it scrolls up into the
+ * chrome area. Detection uses `getBoundingClientRect()`, which is unaffected
+ * by `pointer-events: none` on the probed elements.
  */
 export function ChromeThemeWatcher() {
   useEffect(() => {
