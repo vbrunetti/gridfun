@@ -3,9 +3,18 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
+import {
+  GravityClusterCanvas,
+  type GravityClusterBlend,
+} from "@/components/effects/gravity-cluster-canvas";
+import {
+  buildChapterPresets,
+  resolveClusterParams,
+} from "@/components/effects/gravity-cluster-presets";
 import { CtaButton } from "@/components/chrome/cta-button";
 import { RuledGrid } from "@/components/layout/ruled-grid";
 import type { HeroSlate } from "@/content/hero-slates";
@@ -14,7 +23,6 @@ import {
   type ChapterBlend,
 } from "./hero-chapter-copy";
 import { useHeroScrubRegister } from "./hero-scrub-context";
-import { NebulaCanvas } from "./nebula-canvas";
 
 type PrimaryHeroScrubProps = {
   slates: HeroSlate[];
@@ -62,6 +70,35 @@ export function PrimaryHeroScrub({
   const rafScrollRef = useRef<number>(0);
 
   const slateCount = slates.length;
+
+  const gravityPresets = useMemo(
+    () => buildChapterPresets(Math.max(slateCount, 1)),
+    [slateCount],
+  );
+
+  const gravityBlend: GravityClusterBlend = useMemo(
+    () => ({
+      chapterProgress,
+      from: chapterBlend.from,
+      to: slateCount <= 1 ? chapterBlend.from : chapterBlend.to,
+      t:
+        slateCount <= 1 ||
+        chapterBlend.from === chapterBlend.to
+          ? 0
+          : chapterBlend.t,
+    }),
+    [chapterBlend, chapterProgress, slateCount],
+  );
+
+  const gravityLiveParams = useMemo(() => {
+    const safeFrom = clamp(chapterBlend.from, 0, gravityPresets.length - 1);
+    const safeTo = clamp(gravityBlend.to, 0, gravityPresets.length - 1);
+    const stepT =
+      gravityPresets.length <= 1 || safeFrom === safeTo ? 0 : gravityBlend.t;
+    const a = gravityPresets[safeFrom] ?? gravityPresets[0]!;
+    const b = gravityPresets[safeTo] ?? a;
+    return resolveClusterParams(a, b, stepT);
+  }, [gravityBlend, gravityPresets]);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -214,12 +251,6 @@ export function PrimaryHeroScrub({
     return () => io.disconnect();
   }, []);
 
-  const easedIntensity = reducedMotion
-    ? 0.35
-    : slateCount <= 1
-      ? 0
-      : Math.pow(chapterProgress / (slateCount - 1), 1.4);
-
   const slideCount =
     reducedMotion || slateCount <= 1
       ? 0
@@ -245,10 +276,12 @@ export function PrimaryHeroScrub({
       ) : null}
 
       <div className="primary-hero-sticky relative w-full overflow-hidden">
-        <NebulaCanvas
-          intensity={easedIntensity}
+        <GravityClusterCanvas
+          presets={gravityPresets}
+          params={gravityLiveParams}
+          blend={gravityBlend}
           paused={canvasPaused}
-          reducedMotion={reducedMotion}
+          showOutline={false}
         />
 
         <div className="primary-hero-copy">

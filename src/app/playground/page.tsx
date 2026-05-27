@@ -15,6 +15,14 @@ export default function PlaygroundPage() {
             </h1>
             <p className="mt-6 leading-relaxed text-secondary">
               Demos moved from the homepage while the Primary Hero ships on /.
+              Hero effect prototypes are under{" "}
+              <Link
+                href="/effects"
+                className="border-b border-current text-primary"
+              >
+                Effects
+              </Link>
+              .
             </p>
           </div>
         </RuledGrid>

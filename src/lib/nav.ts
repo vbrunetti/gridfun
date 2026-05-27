@@ -5,11 +5,33 @@ export type NavLink = {
   label: string;
 };
 
-export const menuNav: NavLink[] = [
+export type NavSection = {
+  href: string;
+  label: string;
+  children: NavLink[];
+};
+
+export type MenuNavItem = NavLink | NavSection;
+
+export function isNavSection(item: MenuNavItem): item is NavSection {
+  return "children" in item;
+}
+
+export const effectsNav: NavSection = {
+  href: "/effects",
+  label: "Effects",
+  children: [
+    { href: "/effects/gravity-cluster", label: "Gravity cluster" },
+    { href: "/effects/spark-particles", label: "Spark particles" },
+  ],
+};
+
+export const menuNav: MenuNavItem[] = [
   { href: "/", label: "Home" },
   { href: "/work", label: "Work" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
+  effectsNav,
   { href: "/playground", label: "Playground" },
   { href: "/test", label: "Test" },
 ];

@@ -3,8 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SiteGrid, SiteGridCell } from "@/components/layout/site-grid";
-import { menuNav } from "@/lib/nav";
+import { isNavSection, menuNav } from "@/lib/nav";
 import { useChrome } from "./chrome-provider";
+
+function isActive(pathname: string, href: string) {
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
 
 export function MenuOverlay() {
   const pathname = usePathname();
@@ -29,10 +34,47 @@ export function MenuOverlay() {
               <nav aria-label="Main menu">
                 <ul className="space-y-1">
                   {menuNav.map((item) => {
-                    const active =
-                      item.href === "/"
-                        ? pathname === "/"
-                        : pathname.startsWith(item.href);
+                    if (isNavSection(item)) {
+                      const sectionActive = isActive(pathname, item.href);
+
+                      return (
+                        <li key={item.href}>
+                          <Link
+                            href={item.href}
+                            onClick={closeMenu}
+                            className={`block py-3 text-4xl font-semibold tracking-tight transition-opacity hover:opacity-70 md:text-6xl ${
+                              sectionActive
+                                ? "text-[var(--accent)]"
+                                : "text-primary"
+                            }`}
+                          >
+                            {item.label}
+                          </Link>
+                          <ul className="mb-2 space-y-0.5 pl-1">
+                            {item.children.map((child) => {
+                              const childActive = isActive(pathname, child.href);
+                              return (
+                                <li key={child.href}>
+                                  <Link
+                                    href={child.href}
+                                    onClick={closeMenu}
+                                    className={`block py-2 text-xl font-medium tracking-tight transition-opacity hover:opacity-70 md:text-3xl ${
+                                      childActive
+                                        ? "text-[var(--accent)]"
+                                        : "text-secondary"
+                                    }`}
+                                  >
+                                    {child.label}
+                                  </Link>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </li>
+                      );
+                    }
+
+                    const active = isActive(pathname, item.href);
 
                     return (
                       <li key={item.href}>
@@ -40,9 +82,7 @@ export function MenuOverlay() {
                           href={item.href}
                           onClick={closeMenu}
                           className={`block py-3 text-4xl font-semibold tracking-tight transition-opacity hover:opacity-70 md:text-6xl ${
-                            active
-                              ? "text-[var(--accent)]"
-                              : "text-primary"
+                            active ? "text-[var(--accent)]" : "text-primary"
                           }`}
                         >
                           {item.label}
