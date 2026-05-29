@@ -7,14 +7,9 @@ import {
   useRef,
   useState,
 } from "react";
-import {
-  GravityClusterCanvas,
-  type GravityClusterBlend,
-} from "@/components/effects/gravity-cluster-canvas";
-import {
-  buildChapterPresets,
-  resolveClusterParams,
-} from "@/components/effects/gravity-cluster-presets";
+import { presetsForChapterCount } from "./particle-presets";
+import { HERO_SPARK_COLOR, HERO_SPARK_PRESETS, HERO_SPARK_SHAPE_SCALE } from "./spark-hero-config";
+import { SparkCanvas, type SparkBlend } from "./spark-canvas";
 import { CtaButton } from "@/components/chrome/cta-button";
 import { RuledGrid } from "@/components/layout/ruled-grid";
 import type { HeroSlate } from "@/content/hero-slates";
@@ -63,7 +58,6 @@ export function PrimaryHeroScrub({
     to: 0,
     t: 0,
   });
-  const [chapterProgress, setChapterProgress] = useState(0);
   const [dotsVisible, setDotsVisible] = useState(true);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [canvasPaused, setCanvasPaused] = useState(false);
@@ -71,14 +65,13 @@ export function PrimaryHeroScrub({
 
   const slateCount = slates.length;
 
-  const gravityPresets = useMemo(
-    () => buildChapterPresets(Math.max(slateCount, 1)),
-    [slateCount],
-  );
+  const sparkPresets = useMemo(() => {
+    if (slateCount === HERO_SPARK_PRESETS.length) return HERO_SPARK_PRESETS;
+    return presetsForChapterCount(Math.max(slateCount, 1));
+  }, [slateCount]);
 
-  const gravityBlend: GravityClusterBlend = useMemo(
+  const sparkBlend: SparkBlend = useMemo(
     () => ({
-      chapterProgress,
       from: chapterBlend.from,
       to: slateCount <= 1 ? chapterBlend.from : chapterBlend.to,
       t:
@@ -87,18 +80,8 @@ export function PrimaryHeroScrub({
           ? 0
           : chapterBlend.t,
     }),
-    [chapterBlend, chapterProgress, slateCount],
+    [chapterBlend, slateCount],
   );
-
-  const gravityLiveParams = useMemo(() => {
-    const safeFrom = clamp(chapterBlend.from, 0, gravityPresets.length - 1);
-    const safeTo = clamp(gravityBlend.to, 0, gravityPresets.length - 1);
-    const stepT =
-      gravityPresets.length <= 1 || safeFrom === safeTo ? 0 : gravityBlend.t;
-    const a = gravityPresets[safeFrom] ?? gravityPresets[0]!;
-    const b = gravityPresets[safeTo] ?? a;
-    return resolveClusterParams(a, b, stepT);
-  }, [gravityBlend, gravityPresets]);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -116,7 +99,6 @@ export function PrimaryHeroScrub({
 
     if (!container || reducedMotion) {
       setActiveIndex(0);
-      setChapterProgress(0);
       setChapterBlend({ from: 0, to: 0, t: 0 });
       setDotsVisible(false);
       flow?.style.removeProperty("--home-secondary-translate");
@@ -151,7 +133,6 @@ export function PrimaryHeroScrub({
         ? slateCount - 1
         : clamp(Math.round(rawChapter), 0, slateCount - 1),
     );
-    setChapterProgress(inCoverPhase ? slateCount - 1 : rawChapter);
     setChapterBlend(
       inCoverPhase || slateCount <= 1
         ? {
@@ -275,15 +256,18 @@ export function PrimaryHeroScrub({
         </div>
       ) : null}
 
-      <div className="primary-hero-sticky relative w-full overflow-hidden">
-        <GravityClusterCanvas
-          presets={gravityPresets}
-          params={gravityLiveParams}
-          blend={gravityBlend}
+      <div className="primary-hero-spark-layer">
+        <SparkCanvas
+          presets={sparkPresets}
+          blend={sparkBlend}
           paused={canvasPaused}
-          showOutline={false}
+          showBoundary={false}
+          shapeScale={HERO_SPARK_SHAPE_SCALE}
+          {...HERO_SPARK_COLOR}
         />
+      </div>
 
+      <div className="primary-hero-sticky">
         <div className="primary-hero-copy">
           <RuledGrid className="w-full">
             <div className="col-span-hero">

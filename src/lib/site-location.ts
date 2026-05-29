@@ -23,6 +23,7 @@ const EFFECTS_SUBPAGES: Record<string, { subLabel: string; gridColumn: number }>
   {
     "gravity-cluster": { subLabel: "GRAVITY", gridColumn: 10 },
     "spark-particles": { subLabel: "SPARK", gridColumn: 11 },
+    "spark-particles/preview": { subLabel: "PREVIEW", gridColumn: 12 },
   };
 
 const WORK_SUBPAGES: Record<string, { subLabel: string; gridColumn: number }> = {
@@ -39,9 +40,9 @@ export function resolveSiteLocation(pathname: string): SiteLocation {
     return PAGE_COLUMNS[pathname];
   }
 
-  const effectsMatch = pathname.match(/^\/effects\/([^/]+)\/?$/);
+  const effectsMatch = pathname.match(/^\/effects\/(.+)\/?$/);
   if (effectsMatch) {
-    const slug = effectsMatch[1];
+    const slug = effectsMatch[1]!;
     const sub = EFFECTS_SUBPAGES[slug];
     const base = PAGE_COLUMNS["/effects"];
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import Link from "next/link";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   DEFAULT_CHAPTER_PRESETS,
   PARTICLE_SHAPES,
@@ -10,9 +11,23 @@ import {
   type ParticleShape,
 } from "@/components/sections/primary-hero/particle-presets";
 import {
+  HERO_SPARK_SNAPSHOT,
+  presetsForHeroChapters,
+} from "@/components/sections/primary-hero/spark-hero-config";
+import {
   SparkCanvas,
+  SPARK_COMPOSITE_MODES,
   type SparkBlend,
+  type SparkColorMode,
+  type SparkCompositeMode,
 } from "@/components/sections/primary-hero/spark-canvas";
+import { sparkPalette } from "@/lib/colors";
+import { createDefaultSparkHeroSnapshot } from "@/lib/spark-hero-snapshot";
+import {
+  readSparkTunerDraft,
+  snapshotFromTunerState,
+  writeSparkTunerDraft,
+} from "@/lib/spark-tuner-storage";
 
 type TunerMode = "chapter" | "morph";
 
@@ -20,17 +35,80 @@ function clonePresets(presets: ParticlePreset[]) {
   return presets.map((p) => ({ ...p }));
 }
 
+function applySnapshot(snapshot: typeof HERO_SPARK_SNAPSHOT) {
+  return {
+    presets: clonePresets(snapshot.presets),
+    colorMode: snapshot.color.colorMode,
+    compositeMode: snapshot.color.compositeMode,
+    colorCycleSpeed: snapshot.color.colorCycleSpeed,
+    showBoundary: snapshot.showBoundary ?? true,
+  };
+}
+
 export function ParticleTuner() {
+  const [ready, setReady] = useState(false);
   const [presets, setPresets] = useState(() =>
-    clonePresets(DEFAULT_CHAPTER_PRESETS),
+    clonePresets(HERO_SPARK_SNAPSHOT.presets),
   );
   const [activeChapter, setActiveChapter] = useState(0);
   const [mode, setMode] = useState<TunerMode>("chapter");
   const [morphFrom, setMorphFrom] = useState(0);
   const [morphTo, setMorphTo] = useState(1);
   const [morphT, setMorphT] = useState(0);
-  const [showBoundary, setShowBoundary] = useState(true);
+  const [showBoundary, setShowBoundary] = useState(
+    HERO_SPARK_SNAPSHOT.showBoundary ?? true,
+  );
+  const [colorMode, setColorMode] = useState<SparkColorMode>(
+    HERO_SPARK_SNAPSHOT.color.colorMode,
+  );
+  const [compositeMode, setCompositeMode] = useState<SparkCompositeMode>(
+    HERO_SPARK_SNAPSHOT.color.compositeMode,
+  );
+  const [colorCycleSpeed, setColorCycleSpeed] = useState(
+    HERO_SPARK_SNAPSHOT.color.colorCycleSpeed,
+  );
   const [copied, setCopied] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [draftSource, setDraftSource] = useState<"draft" | "saved" | "defaults">(
+    "saved",
+  );
+
+  useEffect(() => {
+    const draft = readSparkTunerDraft();
+    const initial = draft ?? HERO_SPARK_SNAPSHOT;
+    const next = applySnapshot({
+      ...initial,
+      presets: presetsForHeroChapters(initial.presets),
+    });
+    setPresets(next.presets);
+    setColorMode(next.colorMode);
+    setCompositeMode(next.compositeMode);
+    setColorCycleSpeed(next.colorCycleSpeed);
+    setShowBoundary(next.showBoundary);
+    setDraftSource(draft ? "draft" : "saved");
+    setReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
+    writeSparkTunerDraft(
+      snapshotFromTunerState({
+        presets,
+        colorMode,
+        compositeMode,
+        colorCycleSpeed,
+        showBoundary,
+      }),
+    );
+  }, [
+    ready,
+    presets,
+    colorMode,
+    compositeMode,
+    colorCycleSpeed,
+    showBoundary,
+  ]);
 
   const blend: SparkBlend = useMemo(() => {
     if (mode === "chapter") {
@@ -71,19 +149,87 @@ export function ParticleTuner() {
   };
 
   const resetAll = () => {
-    setPresets(clonePresets(DEFAULT_CHAPTER_PRESETS));
+    const defaults = createDefaultSparkHeroSnapshot();
+    const next = applySnapshot(defaults);
+    setPresets(next.presets);
     setActiveChapter(0);
+    setMode("chapter");
     setMorphFrom(0);
     setMorphTo(1);
     setMorphT(0);
+    setColorMode(next.colorMode);
+    setCompositeMode(next.compositeMode);
+    setColorCycleSpeed(next.colorCycleSpeed);
+    setShowBoundary(next.showBoundary);
+    setDraftSource("defaults");
   };
 
-  const copyPresets = async () => {
-    const json = JSON.stringify(presets, null, 2);
+  const loadSavedHomeConfig = () => {
+    const next = applySnapshot(HERO_SPARK_SNAPSHOT);
+    setPresets(next.presets);
+    setColorMode(next.colorMode);
+    setCompositeMode(next.compositeMode);
+    setColorCycleSpeed(next.colorCycleSpeed);
+    setShowBoundary(next.showBoundary);
+    setDraftSource("saved");
+  };
+
+  const copySnapshot = async () => {
+    const json = JSON.stringify(
+      snapshotFromTunerState({
+        presets,
+        colorMode,
+        compositeMode,
+        colorCycleSpeed,
+        showBoundary,
+      }),
+      null,
+      2,
+    );
     await navigator.clipboard.writeText(json);
     setCopied(true);
     window.setTimeout(() => setCopied(false), 2000);
   };
+
+  const saveAsHomeConfig = async () => {
+    setSaveError(null);
+    const snapshot = snapshotFromTunerState({
+      presets: presetsForHeroChapters(presets),
+      colorMode,
+      compositeMode,
+      colorCycleSpeed,
+      showBoundary: false,
+    });
+
+    try {
+      const response = await fetch("/api/dev/spark-hero-snapshot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(snapshot),
+      });
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        throw new Error(payload?.error ?? "Save failed");
+      }
+      setSaved(true);
+      setDraftSource("saved");
+      window.setTimeout(() => setSaved(false), 2500);
+    } catch (error) {
+      setSaveError(
+        error instanceof Error ? error.message : "Could not save home config",
+      );
+    }
+  };
+
+  if (!ready) {
+    return (
+      <div className="mx-auto max-w-[90rem] px-[var(--grid-margin)] py-24 text-sm text-secondary">
+        Loading tuner…
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-[90rem] px-[var(--grid-margin)] pb-24">
@@ -91,10 +237,32 @@ export function ParticleTuner() {
         <p className="text-meta">Effects · Direction A</p>
         <h1 className="display-lg mt-3">Hero spark presets</h1>
         <p className="mt-4 max-w-2xl leading-relaxed text-secondary">
-          Tune each chapter&apos;s feel before wiring into the scroll hero. Preview
-          at ~50% viewport in the canvas below. Morph mode blends adjacent
-          chapters the same way scroll crossfade will.
+          Tune each chapter&apos;s feel before wiring into the scroll hero. Your
+          session auto-saves in this browser. Use{" "}
+          <strong className="font-medium text-primary">Save as home config</strong>{" "}
+          to push the current look to the homepage and{" "}
+          <Link
+            href="/effects/spark-particles/preview"
+            className="border-b border-current text-primary"
+          >
+            preview page
+          </Link>
+          .
         </p>
+        {draftSource === "draft" ? (
+          <p className="mt-3 text-sm text-secondary">
+            Restored your last browser session. If this isn&apos;t what you
+            want, try{" "}
+            <button
+              type="button"
+              onClick={loadSavedHomeConfig}
+              className="border-b border-current text-primary"
+            >
+              load saved home config
+            </button>
+            .
+          </p>
+        ) : null}
       </header>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)]">
@@ -103,6 +271,9 @@ export function ParticleTuner() {
             presets={presets}
             blend={blend}
             showBoundary={showBoundary}
+            colorMode={colorMode}
+            compositeMode={compositeMode}
+            colorCycleSpeed={colorCycleSpeed}
           />
           <div className="pointer-events-none absolute inset-0 border border-dashed border-[var(--rule-light)]" />
           <p className="pointer-events-none absolute bottom-3 left-3 text-xs text-tertiary">
@@ -208,7 +379,86 @@ export function ParticleTuner() {
             </label>
           </div>
 
+          <div className="border border-[var(--rule-light)] p-4">
+            <p className="text-meta">Color</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {(
+                [
+                  ["ink", "Ink"],
+                  ["palette", "Palette"],
+                  ["cycle", "Cycle"],
+                ] as const
+              ).map(([mode, label]) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setColorMode(mode)}
+                  className={`rounded-sm border px-3 py-1.5 text-sm transition-colors ${
+                    colorMode === mode
+                      ? "border-[var(--color-ink)] bg-[var(--color-ink)] text-[var(--color-paper)]"
+                      : "border-[var(--rule-light)] text-secondary hover:border-[var(--rule-strong)]"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-1.5">
+              {sparkPalette.map((hex) => (
+                <span
+                  key={hex}
+                  className="h-4 w-4 rounded-sm border border-[var(--rule-light)]"
+                  style={{ backgroundColor: hex }}
+                  title={hex}
+                />
+              ))}
+            </div>
+
+            {colorMode === "cycle" ? (
+              <label className="mt-4 block text-xs text-secondary">
+                Cycle speed {colorCycleSpeed.toFixed(2)} rev/s
+                <input
+                  type="range"
+                  min={0.02}
+                  max={0.35}
+                  step={0.01}
+                  value={colorCycleSpeed}
+                  onChange={(e) =>
+                    setColorCycleSpeed(Number.parseFloat(e.target.value))
+                  }
+                  className="mt-1 w-full"
+                />
+              </label>
+            ) : null}
+
+            <p className="text-meta mt-6">Blend mode</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {SPARK_COMPOSITE_MODES.map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setCompositeMode(mode)}
+                  className={`rounded-sm border px-2.5 py-1 font-mono text-[11px] transition-colors ${
+                    compositeMode === mode
+                      ? "border-[var(--color-ink)] bg-[var(--color-ink)] text-[var(--color-paper)]"
+                      : "border-[var(--rule-light)] text-secondary hover:border-[var(--rule-strong)]"
+                  }`}
+                >
+                  {mode}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={saveAsHomeConfig}
+              className="rounded-sm border border-[var(--color-ink)] bg-[var(--color-ink)] px-3 py-1.5 text-xs text-[var(--color-paper)]"
+            >
+              {saved ? "Saved to home!" : "Save as home config"}
+            </button>
             <button
               type="button"
               onClick={resetChapter}
@@ -225,12 +475,15 @@ export function ParticleTuner() {
             </button>
             <button
               type="button"
-              onClick={copyPresets}
+              onClick={copySnapshot}
               className="rounded-sm border border-[var(--rule-light)] px-3 py-1.5 text-xs text-secondary hover:border-[var(--rule-strong)]"
             >
-              {copied ? "Copied!" : "Copy JSON"}
+              {copied ? "Copied!" : "Copy snapshot JSON"}
             </button>
           </div>
+          {saveError ? (
+            <p className="text-xs text-[var(--color-crimson)]">{saveError}</p>
+          ) : null}
         </aside>
       </div>
 

@@ -21,8 +21,9 @@ export const effectsNav: NavSection = {
   href: "/effects",
   label: "Effects",
   children: [
+    { href: "/effects/spark-particles", label: "Spark tuner" },
+    { href: "/effects/spark-particles/preview", label: "Spark preview (home)" },
     { href: "/effects/gravity-cluster", label: "Gravity cluster" },
-    { href: "/effects/spark-particles", label: "Spark particles" },
   ],
 };
 

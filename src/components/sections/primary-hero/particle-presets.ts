@@ -7,7 +7,7 @@ import {
 } from "./particle-shape";
 
 export type { ParticleShape };
-export { PARTICLE_SHAPES } from "./particle-shape";
+export { HERO_CHAPTER_SHAPES, PARTICLE_SHAPES } from "./particle-shape";
 
 export type ParticlePreset = {
   label: string;
@@ -58,9 +58,10 @@ export function blendPresets(
   t: number,
   width: number,
   height: number,
+  shapeScale = 1,
 ): ResolvedParticleParams {
   const minDim = Math.min(width, height);
-  const baseR = minDim * 0.5;
+  const baseR = minDim * 0.5 * shapeScale;
 
   const profileA = buildShapeProfile(
     a.shape,
@@ -90,7 +91,7 @@ export function blendPresets(
     outwardBias: lerp(a.outwardBias, b.outwardBias, t),
     alpha: lerp(a.alpha, b.alpha, t),
     glowScale: lerp(a.glowScale, b.glowScale, t),
-    linkDistance: lerp(a.linkDistance, b.linkDistance, t),
+    linkDistance: lerp(a.linkDistance, b.linkDistance, t) * shapeScale,
     linkOpacity: lerp(a.linkOpacity, b.linkOpacity, t) * mt + b.linkOpacity * t,
     spawnSpread: lerp(a.spawnSpread, b.spawnSpread, t),
     shapeProfile,

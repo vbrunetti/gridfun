@@ -479,6 +479,15 @@ body {
   pointer-events: none;
 }
 
+/* Spark viz — full hero chapter band */
+.primary-hero-spark-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
 .primary-hero-copy {
   position: absolute;
   inset: 0;

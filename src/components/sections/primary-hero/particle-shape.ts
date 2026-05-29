@@ -5,26 +5,35 @@ export type ParticleShape =
   | "diamond"
   | "spiral"
   | "pentagram"
+  | "star"
   | "octagon"
   | "ring"
-  | "cross";
+  | "cross"
+  | "trefoil"
+  | "chevron";
 
-/** Default hero chapter sequence — maximally distinct silhouettes. */
-export const CHAPTER_SHAPES: ParticleShape[] = [
+/** Home hero — one shape per scroll chapter. */
+export const HERO_CHAPTER_SHAPES: ParticleShape[] = [
   "circle",
   "triangle",
-  "diamond",
-  "pentagram",
-  "ring",
-  "cross",
+  "square",
+  "star",
+  "trefoil",
+  "chevron",
 ];
+
+/** Default hero chapter sequence — maximally distinct silhouettes. */
+export const CHAPTER_SHAPES: ParticleShape[] = HERO_CHAPTER_SHAPES;
 
 /** All shapes available in the tuner. */
 export const PARTICLE_SHAPES: ParticleShape[] = [
-  ...CHAPTER_SHAPES,
-  "square",
+  ...HERO_CHAPTER_SHAPES,
+  "diamond",
+  "pentagram",
   "spiral",
   "octagon",
+  "ring",
+  "cross",
 ];
 
 const SHAPE_SAMPLES = 128;
@@ -62,6 +71,18 @@ function pentagramRadius(theta: number, R: number, rotation: number) {
   return phase < 0.5 ? outer : innerAt;
 }
 
+/** Three-lobed trefoil (rose curve). */
+function trefoilRadius(theta: number, R: number, rotation: number) {
+  const t = theta - rotation;
+  const petal = Math.abs(Math.cos(1.5 * t));
+  return R * (0.38 + 0.62 * petal);
+}
+
+/** Five-point star (alias of pentagram). */
+function starRadius(theta: number, R: number, rotation: number) {
+  return pentagramRadius(theta, R, rotation - Math.PI / 2);
+}
+
 /** Plus / cross — distance to axis-aligned cross silhouette. */
 function crossRadiusAtAngle(theta: number, R: number, rotation: number) {
   const t = theta - rotation;
@@ -72,6 +93,57 @@ function crossRadiusAtAngle(theta: number, R: number, rotation: number) {
     return R / (c + arm * s);
   }
   return R / (s + arm * c);
+}
+
+function fillChevronPoints(
+  localPoints: Float32Array,
+  radii: Float32Array,
+  R: number,
+  rotation: number,
+) {
+  const c = Math.cos(rotation);
+  const s = Math.sin(rotation);
+  const rotate = (x: number, y: number): [number, number] => [
+    x * c - y * s,
+    x * s + y * c,
+  ];
+  const corners: [number, number][] = [
+    [0, -R * 0.92],
+    [R * 0.9, R * 0.28],
+    [0, R * 0.62],
+    [-R * 0.9, R * 0.28],
+  ].map(([x, y]) => rotate(x, y));
+
+  const n = radii.length;
+  const perim = corners.length;
+  let total = 0;
+  const segLen: number[] = [];
+  for (let i = 0; i < perim; i++) {
+    const [x0, y0] = corners[i]!;
+    const [x1, y1] = corners[(i + 1) % perim]!;
+    const len = Math.hypot(x1 - x0, y1 - y0);
+    segLen.push(len);
+    total += len;
+  }
+
+  for (let i = 0; i < n; i++) {
+    const f = (i / n) * total;
+    let acc = 0;
+    let seg = 0;
+    while (seg < perim && acc + segLen[seg]! < f) {
+      acc += segLen[seg]!;
+      seg++;
+    }
+    const [x0, y0] = corners[seg % perim]!;
+    const [x1, y1] = corners[(seg + 1) % perim]!;
+    const len = segLen[seg % perim]! || 0.001;
+    const frac = (f - acc) / len;
+    const x = x0 + (x1 - x0) * frac;
+    const y = y0 + (y1 - y0) * frac;
+    localPoints[i * 2] = x;
+    localPoints[i * 2 + 1] = y;
+    radii[i] = Math.hypot(x, y);
+  }
 }
 
 function fillCrossPoints(
@@ -136,6 +208,12 @@ export function shapeRadiusAtAngle(
       return crossRadiusAtAngle(theta, R, rotation);
     case "pentagram":
       return pentagramRadius(theta, R, rotation - Math.PI / 2);
+    case "star":
+      return starRadius(theta, R, rotation);
+    case "trefoil":
+      return trefoilRadius(theta, R, rotation);
+    case "chevron":
+      return R;
     case "octagon":
       return regularPolygonRadius(theta, R, 8, rotation);
     default:
@@ -205,6 +283,8 @@ export function buildShapeProfile(
     fillSpiralPoints(localPoints, radii, R, rotation);
   } else if (shape === "cross") {
     fillCrossPoints(localPoints, radii, R);
+  } else if (shape === "chevron") {
+    fillChevronPoints(localPoints, radii, R, rotation);
   } else {
     fillPolarPoints(localPoints, radii, R, rotation, (theta) =>
       shapeRadiusAtAngle(shape, theta, R, rotation),
