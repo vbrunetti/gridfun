@@ -19,13 +19,6 @@ const PAGE_COLUMNS: Record<string, Omit<SiteLocation, "subLabel">> = {
   "/test": { pageLabel: "TEST", gridColumn: 12 },
 };
 
-const EFFECTS_SUBPAGES: Record<string, { subLabel: string; gridColumn: number }> =
-  {
-    "gravity-cluster": { subLabel: "GRAVITY", gridColumn: 10 },
-    "spark-particles": { subLabel: "SPARK", gridColumn: 11 },
-    "spark-particles/preview": { subLabel: "PREVIEW", gridColumn: 12 },
-  };
-
 const WORK_SUBPAGES: Record<string, { subLabel: string; gridColumn: number }> = {
   "project-01": { subLabel: "01", gridColumn: 5 },
   "project-02": { subLabel: "02", gridColumn: 6 },
@@ -38,27 +31,6 @@ const WORK_SUBPAGES: Record<string, { subLabel: string; gridColumn: number }> = 
 export function resolveSiteLocation(pathname: string): SiteLocation {
   if (pathname in PAGE_COLUMNS) {
     return PAGE_COLUMNS[pathname];
-  }
-
-  const effectsMatch = pathname.match(/^\/effects\/(.+)\/?$/);
-  if (effectsMatch) {
-    const slug = effectsMatch[1]!;
-    const sub = EFFECTS_SUBPAGES[slug];
-    const base = PAGE_COLUMNS["/effects"];
-
-    if (sub) {
-      return {
-        pageLabel: base.pageLabel,
-        gridColumn: sub.gridColumn,
-        subLabel: sub.subLabel,
-      };
-    }
-
-    return {
-      pageLabel: base.pageLabel,
-      gridColumn: base.gridColumn,
-      subLabel: slug.slice(0, 8).toUpperCase(),
-    };
   }
 
   if (pathname.startsWith("/effects")) {

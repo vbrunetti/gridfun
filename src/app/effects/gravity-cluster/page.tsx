@@ -1,5 +1,5 @@
-import { GravityClusterDemo } from "./gravity-cluster-demo";
+import { redirect } from "next/navigation";
 
-export default function GravityClusterPage() {
-  return <GravityClusterDemo />;
+export default function LegacyGravityClusterPage() {
+  redirect("/effects");
 }

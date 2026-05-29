@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { RuledGrid } from "@/components/layout/ruled-grid";
 import { SiteGridSubgrid } from "@/components/layout/site-grid";
-import { CardRail } from "@/components/work/card-rail";
 
 export default function PlaygroundPage() {
   return (
@@ -15,12 +14,12 @@ export default function PlaygroundPage() {
             </h1>
             <p className="mt-6 leading-relaxed text-secondary">
               Demos moved from the homepage while the Primary Hero ships on /.
-              Hero effect prototypes are under{" "}
+              Tune the home hero spark layer in the{" "}
               <Link
                 href="/effects"
                 className="border-b border-current text-primary"
               >
-                Effects
+                Effects playground
               </Link>
               .
             </p>
@@ -80,25 +79,24 @@ export default function PlaygroundPage() {
           </RuledGrid>
         </section>
 
-        <section className="theme-canvas sticky-cover-panel">
+        <section className="theme-canvas sticky-cover-panel flex items-center border-b border-[var(--color-paper)]/20">
           <RuledGrid className="w-full py-16">
             <SiteGridSubgrid className="items-end">
               <div className="grid-span-6 lg:grid-span-8">
-                <p className="text-meta">Work preview</p>
-                <h2 className="display-lg mt-4">Horizontal card rail</h2>
+                <p className="text-meta">Work</p>
+                <h2 className="display-lg mt-4">Six project covers on /work</h2>
                 <p className="mt-4 text-secondary">
-                  9:16 cards — full-screen on mobile, gallery on desktop.
+                  Same sticky stack — one full-viewport panel per project.
                 </p>
               </div>
               <Link
                 href="/work"
-                className="text-meta grid-span-6 border-b border-current pb-0.5 text-secondary transition-opacity hover:opacity-70 lg:grid-span-4 lg:justify-self-end"
+                className="text-meta grid-span-6 border-b border-current pb-0.5 transition-opacity hover:opacity-70 lg:grid-span-4 lg:justify-self-end"
               >
-                All projects →
+                Open work index →
               </Link>
             </SiteGridSubgrid>
           </RuledGrid>
-          <CardRail />
         </section>
       </div>
     </>

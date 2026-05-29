@@ -1,5 +1,3 @@
-import { EffectsSubnav } from "@/components/effects/effects-subnav";
-
 export default function EffectsLayout({
   children,
 }: {
@@ -7,7 +5,6 @@ export default function EffectsLayout({
 }) {
   return (
     <div className="theme-light min-h-dvh bg-[var(--surface-light)]">
-      <EffectsSubnav />
       {children}
     </div>
   );

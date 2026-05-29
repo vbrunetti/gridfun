@@ -17,22 +17,12 @@ export function isNavSection(item: MenuNavItem): item is NavSection {
   return "children" in item;
 }
 
-export const effectsNav: NavSection = {
-  href: "/effects",
-  label: "Effects",
-  children: [
-    { href: "/effects/spark-particles", label: "Spark tuner" },
-    { href: "/effects/spark-particles/preview", label: "Spark preview (home)" },
-    { href: "/effects/gravity-cluster", label: "Gravity cluster" },
-  ],
-};
-
 export const menuNav: MenuNavItem[] = [
   { href: "/", label: "Home" },
   { href: "/work", label: "Work" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
-  effectsNav,
+  { href: "/effects", label: "Effects" },
   { href: "/playground", label: "Playground" },
   { href: "/test", label: "Test" },
 ];

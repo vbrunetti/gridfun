@@ -1,5 +1,5 @@
-import { SparkHeroPreview } from "@/components/sections/primary-hero/spark-hero-preview";
+import { redirect } from "next/navigation";
 
-export default function SparkParticlesPreviewPage() {
-  return <SparkHeroPreview />;
+export default function LegacySparkPreviewPage() {
+  redirect("/effects");
 }

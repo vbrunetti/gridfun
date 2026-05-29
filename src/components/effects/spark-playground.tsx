@@ -11,6 +11,8 @@ import {
   type ParticleShape,
 } from "@/components/sections/primary-hero/particle-presets";
 import {
+  HERO_SPARK_PRESETS,
+  HERO_SPARK_SHAPE_SCALE,
   HERO_SPARK_SNAPSHOT,
   presetsForHeroChapters,
 } from "@/components/sections/primary-hero/spark-hero-config";
@@ -45,16 +47,15 @@ function applySnapshot(snapshot: typeof HERO_SPARK_SNAPSHOT) {
   };
 }
 
-export function ParticleTuner() {
+export function SparkPlayground() {
   const [ready, setReady] = useState(false);
-  const [presets, setPresets] = useState(() =>
-    clonePresets(HERO_SPARK_SNAPSHOT.presets),
-  );
+  const [presets, setPresets] = useState(() => clonePresets(HERO_SPARK_PRESETS));
   const [activeChapter, setActiveChapter] = useState(0);
   const [mode, setMode] = useState<TunerMode>("chapter");
   const [morphFrom, setMorphFrom] = useState(0);
   const [morphTo, setMorphTo] = useState(1);
   const [morphT, setMorphT] = useState(0);
+  const [shapeScale, setShapeScale] = useState(HERO_SPARK_SHAPE_SCALE);
   const [showBoundary, setShowBoundary] = useState(
     HERO_SPARK_SNAPSHOT.showBoundary ?? true,
   );
@@ -76,17 +77,30 @@ export function ParticleTuner() {
 
   useEffect(() => {
     const draft = readSparkTunerDraft();
-    const initial = draft ?? HERO_SPARK_SNAPSHOT;
-    const next = applySnapshot({
-      ...initial,
-      presets: presetsForHeroChapters(initial.presets),
-    });
-    setPresets(next.presets);
-    setColorMode(next.colorMode);
-    setCompositeMode(next.compositeMode);
-    setColorCycleSpeed(next.colorCycleSpeed);
-    setShowBoundary(next.showBoundary);
-    setDraftSource(draft ? "draft" : "saved");
+    if (draft) {
+      const next = applySnapshot({
+        ...draft,
+        presets: presetsForHeroChapters(draft.presets),
+      });
+      setPresets(next.presets);
+      setColorMode(next.colorMode);
+      setCompositeMode(next.compositeMode);
+      setColorCycleSpeed(next.colorCycleSpeed);
+      setShowBoundary(next.showBoundary);
+      setDraftSource("draft");
+    } else {
+      const next = applySnapshot({
+        ...HERO_SPARK_SNAPSHOT,
+        presets: HERO_SPARK_PRESETS,
+      });
+      setPresets(next.presets);
+      setColorMode(next.colorMode);
+      setCompositeMode(next.compositeMode);
+      setColorCycleSpeed(next.colorCycleSpeed);
+      setShowBoundary(next.showBoundary);
+      setShapeScale(HERO_SPARK_SHAPE_SCALE);
+      setDraftSource("saved");
+    }
     setReady(true);
   }, []);
 
@@ -150,13 +164,17 @@ export function ParticleTuner() {
 
   const resetAll = () => {
     const defaults = createDefaultSparkHeroSnapshot();
-    const next = applySnapshot(defaults);
+    const next = applySnapshot({
+      ...defaults,
+      presets: presetsForHeroChapters(defaults.presets),
+    });
     setPresets(next.presets);
     setActiveChapter(0);
     setMode("chapter");
     setMorphFrom(0);
     setMorphTo(1);
     setMorphT(0);
+    setShapeScale(HERO_SPARK_SHAPE_SCALE);
     setColorMode(next.colorMode);
     setCompositeMode(next.compositeMode);
     setColorCycleSpeed(next.colorCycleSpeed);
@@ -165,12 +183,16 @@ export function ParticleTuner() {
   };
 
   const loadSavedHomeConfig = () => {
-    const next = applySnapshot(HERO_SPARK_SNAPSHOT);
+    const next = applySnapshot({
+      ...HERO_SPARK_SNAPSHOT,
+      presets: HERO_SPARK_PRESETS,
+    });
     setPresets(next.presets);
     setColorMode(next.colorMode);
     setCompositeMode(next.compositeMode);
     setColorCycleSpeed(next.colorCycleSpeed);
     setShowBoundary(next.showBoundary);
+    setShapeScale(HERO_SPARK_SHAPE_SCALE);
     setDraftSource("saved");
   };
 
@@ -226,7 +248,7 @@ export function ParticleTuner() {
   if (!ready) {
     return (
       <div className="mx-auto max-w-[90rem] px-[var(--grid-margin)] py-24 text-sm text-secondary">
-        Loading tuner…
+        Loading playground…
       </div>
     );
   }
@@ -234,18 +256,16 @@ export function ParticleTuner() {
   return (
     <div className="mx-auto max-w-[90rem] px-[var(--grid-margin)] pb-24">
       <header className="border-b border-[var(--rule-strong)] py-10">
-        <p className="text-meta">Effects · Direction A</p>
-        <h1 className="display-lg mt-3">Hero spark presets</h1>
+        <p className="text-meta">Effects · Home hero</p>
+        <h1 className="display-lg mt-3">Spark playground</h1>
         <p className="mt-4 max-w-2xl leading-relaxed text-secondary">
-          Tune each chapter&apos;s feel before wiring into the scroll hero. Your
-          session auto-saves in this browser. Use{" "}
+          Tune the homepage hero spark layer — six scroll chapters, palette and
+          blend modes, morph preview, and shape scale. Your session auto-saves in
+          this browser. Use{" "}
           <strong className="font-medium text-primary">Save as home config</strong>{" "}
-          to push the current look to the homepage and{" "}
-          <Link
-            href="/effects/spark-particles/preview"
-            className="border-b border-current text-primary"
-          >
-            preview page
+          to write the snapshot used on{" "}
+          <Link href="/" className="border-b border-current text-primary">
+            the home page
           </Link>
           .
         </p>
@@ -267,19 +287,24 @@ export function ParticleTuner() {
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)]">
         <div className="relative min-h-[50dvh] overflow-hidden border border-[var(--rule-light)] bg-[var(--surface-white)]">
-          <SparkCanvas
-            presets={presets}
-            blend={blend}
-            showBoundary={showBoundary}
-            colorMode={colorMode}
-            compositeMode={compositeMode}
-            colorCycleSpeed={colorCycleSpeed}
-          />
+          <div className="primary-hero-spark-layer">
+            <SparkCanvas
+              presets={presets}
+              blend={blend}
+              showBoundary={showBoundary}
+              shapeScale={shapeScale}
+              colorMode={colorMode}
+              compositeMode={compositeMode}
+              colorCycleSpeed={colorCycleSpeed}
+            />
+          </div>
           <div className="pointer-events-none absolute inset-0 border border-dashed border-[var(--rule-light)]" />
           <p className="pointer-events-none absolute bottom-3 left-3 text-xs text-tertiary">
             {mode === "chapter"
               ? activePreset.label
               : `Morph ${morphFrom + 1} → ${morphTo + 1} · ${Math.round(morphT * 100)}%`}
+            {" · "}
+            scale {shapeScale.toFixed(1)}×
           </p>
         </div>
 
@@ -376,6 +401,25 @@ export function ParticleTuner() {
                 onChange={(e) => setShowBoundary(e.target.checked)}
               />
               Show shape boundary
+            </label>
+          </div>
+
+          <div className="border border-[var(--rule-light)] p-4">
+            <p className="text-meta">Home viewport</p>
+            <label className="mt-3 block text-xs text-secondary">
+              Shape scale {shapeScale.toFixed(2)}× (home uses{" "}
+              {HERO_SPARK_SHAPE_SCALE}×)
+              <input
+                type="range"
+                min={0.8}
+                max={3.5}
+                step={0.05}
+                value={shapeScale}
+                onChange={(e) =>
+                  setShapeScale(Number.parseFloat(e.target.value))
+                }
+                className="mt-1 w-full"
+              />
             </label>
           </div>
 

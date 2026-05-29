@@ -1,5 +1,5 @@
-import { ParticleTuner } from "@/app/test/particles/particle-tuner";
+import { redirect } from "next/navigation";
 
-export default function SparkParticlesPage() {
-  return <ParticleTuner />;
+export default function LegacySparkParticlesPage() {
+  redirect("/effects");
 }

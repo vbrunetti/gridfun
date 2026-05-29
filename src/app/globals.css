@@ -43,6 +43,8 @@
   --chrome-pad: 1.25rem;
   --chrome-top-offset: calc(var(--chrome-pad) * 2 + var(--chrome-hit));
   --chrome-rail-gap: 1.5rem; /* space between hero dots + grid label on shared axis */
+  --chrome-right-width: calc(var(--chrome-hit) + var(--chrome-pad) * 2);
+  --chrome-right-inset: calc(var(--chrome-right-width) + var(--chrome-rail-gap));
   --home-cover-peek: 4.5rem; /* home secondary visible above fold during hero chapters */
   --hero-chapter-shift: 4.5rem; /* vertical travel during hero chapter crossfade */
 
@@ -128,7 +130,8 @@ body {
   width: 100%;
   max-width: var(--grid-max);
   margin-inline: auto;
-  padding-inline: var(--grid-margin);
+  padding-inline-start: var(--grid-margin);
+  padding-inline-end: max(var(--grid-margin), var(--chrome-right-inset));
 }
 
 .skeleton-wrap {
@@ -136,7 +139,8 @@ body {
   max-width: var(--grid-max);
   height: 100%;
   margin-inline: auto;
-  padding-inline: var(--grid-margin);
+  padding-inline-start: var(--grid-margin);
+  padding-inline-end: max(var(--grid-margin), var(--chrome-right-inset));
 }
 
 .site-grid > .col-full {
@@ -291,6 +295,11 @@ body {
   grid-column: 1 / 6; /* mobile: 5 of 6 columns */
 }
 
+/* Hero width, aligned to the first column line (no leading inset) */
+.site-grid > .col-span-hero-edge {
+  grid-column: 1 / 6;
+}
+
 @media (min-width: 1024px) {
   .site-grid > .col-span-content {
     grid-column: 2 / -2;
@@ -298,6 +307,10 @@ body {
 
   .site-grid > .col-span-hero {
     grid-column: 2 / 10;
+  }
+
+  .site-grid > .col-span-hero-edge {
+    grid-column: 1 / 10;
   }
 
   .site-grid > .col-span-narrow {
@@ -314,30 +327,6 @@ body {
 .grid-break-under {
   position: relative;
   z-index: 1;
-}
-
-/* Horizontal card rail (Work + home preview) */
-.card-rail {
-  display: flex;
-  gap: var(--grid-gutter);
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-padding-inline: var(--grid-margin);
-  padding-block: var(--grid-row-gap);
-  padding-inline: max(
-    var(--grid-margin),
-    calc((100% - min(100%, var(--grid-max))) / 2 + var(--grid-margin))
-  );
-  -webkit-overflow-scrolling: touch;
-}
-
-.card-rail::-webkit-scrollbar {
-  height: 4px;
-}
-
-.card-rail::-webkit-scrollbar-thumb {
-  background: var(--rule-strong);
-  border-radius: 2px;
 }
 
 /* Sticky cover sections (DES) */
@@ -443,6 +432,35 @@ body {
 
 .theme-dark.sticky-cover-panel + .sticky-cover-panel {
   box-shadow: 0 -1px 0 var(--section-dark-rule);
+}
+
+/* Work index — one viewport per section, snap on each scroll gesture */
+html:has(.work-scroll-snap) {
+  scroll-snap-type: y mandatory;
+  scroll-padding-top: var(--chrome-top-offset);
+  scroll-padding-right: var(--chrome-right-inset);
+  overscroll-behavior-y: none;
+}
+
+@media (min-width: 1024px) {
+  html:has(.work-scroll-snap) {
+    scroll-padding-top: 0;
+  }
+}
+
+.work-scroll-snap .work-snap-section {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  height: 100dvh;
+  min-height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.work-scroll-snap) {
+    scroll-snap-type: none;
+  }
 }
 
 .text-meta {
@@ -661,27 +679,21 @@ body:has(.primary-hero-track) .chrome-rail-grid-label {
 }
 
 /* ── Chrome theme inversion ──────────────────────────────────
-   When a dark section sits under the floating chrome (hamburger + grid label),
-   flip those elements to the light variant so they stay legible.
-   Triggers (any of):
-     • the menu overlay is open (`data-chrome-state="menu"`)
-     • `body.chrome-on-dark` is set by ChromeThemeWatcher when any
-       `.theme-dark` element intersects the top-right chrome probe.
-   Note: we deliberately do NOT key off `.home-secondary-covering/settled`
-   here — that class flips on at the start of the cover scroll phase, while
-   the dark panel is still translated mostly off-screen, so the chrome would
-   invert too early against the still-visible light hero. The probe-based
-   watcher flips only once the dark surface actually reaches the chrome. */
+   Flip hamburger + grid label to light ink when a dark or canvas section
+   sits behind the right chrome column. ChromeThemeWatcher probes the full
+   column height so the vertical label stays readable mid-viewport. */
 .floating-chrome {
   color: var(--color-ink);
 }
 
 .floating-chrome[data-chrome-state="menu"],
-body.chrome-on-dark .floating-chrome {
+body.chrome-on-dark .floating-chrome,
+body.chrome-on-canvas .floating-chrome {
   color: var(--color-paper);
 }
 
-body.chrome-on-dark .floating-chrome .rail-label-vertical {
+body.chrome-on-dark .floating-chrome .rail-label-vertical,
+body.chrome-on-canvas .floating-chrome .rail-label-vertical {
   color: color-mix(in srgb, var(--color-paper) 70%, transparent);
 }
 
