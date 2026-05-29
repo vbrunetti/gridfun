@@ -9,7 +9,7 @@ export const heroSlates: HeroSlate[] = [
   {
     id: "slate-1",
     eyebrow: "UX · Product",
-    headline: "Structure visible. Motion intentional.",
+    headline: "Change is constant. Growth is inevitable.",
     supporting:
       "A portfolio shell built on grid literacy, bold type, and deliberate interaction.",
   },
