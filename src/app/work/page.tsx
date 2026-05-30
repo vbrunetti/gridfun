@@ -9,7 +9,10 @@ export const metadata: Metadata = {
 export default function WorkPage() {
   return (
     <article className="work-scroll-snap">
-      <section className="work-snap-section theme-light flex items-center border-b border-[var(--rule-strong)]">
+      <section
+        className="work-snap-section theme-light flex items-center border-b border-[var(--rule-strong)]"
+        data-chrome-surface="light"
+      >
         <RuledGrid className="w-full py-[var(--grid-row-gap)]">
           <div className="col-full">
             <p className="text-meta">Work</p>

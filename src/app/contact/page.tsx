@@ -15,7 +15,7 @@ const contacts = [
 
 export default function ContactPage() {
   return (
-    <div className="theme-light">
+    <div className="theme-light" data-chrome-surface="light">
       <header className="border-b border-[var(--rule-strong)] bg-[var(--surface-light)]">
         <RuledGrid className="py-12">
           <SiteGridSubgrid className="lg:items-end">

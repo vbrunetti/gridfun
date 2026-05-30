@@ -679,21 +679,26 @@ body:has(.primary-hero-track) .chrome-rail-grid-label {
 }
 
 /* ── Chrome theme inversion ──────────────────────────────────
-   Flip hamburger + grid label to light ink when a dark or canvas section
-   sits behind the right chrome column. ChromeThemeWatcher probes the full
-   column height so the vertical label stays readable mid-viewport. */
+   Pages/sections declare data-chrome-surface="light|dark|canvas".
+   ChromeThemeWatcher sets body[data-chrome-surface] from the visible tag. */
 .floating-chrome {
   color: var(--color-ink);
+  transition: color 0.2s ease;
 }
 
 .floating-chrome[data-chrome-state="menu"],
-body.chrome-on-dark .floating-chrome,
-body.chrome-on-canvas .floating-chrome {
+body[data-chrome-surface="dark"] .floating-chrome,
+body[data-chrome-surface="canvas"] .floating-chrome {
   color: var(--color-paper);
 }
 
-body.chrome-on-dark .floating-chrome .rail-label-vertical,
-body.chrome-on-canvas .floating-chrome .rail-label-vertical {
+.floating-chrome .rail-label-vertical {
+  color: color-mix(in srgb, var(--color-ink) 58%, transparent);
+  transition: color 0.2s ease;
+}
+
+body[data-chrome-surface="dark"] .floating-chrome .rail-label-vertical,
+body[data-chrome-surface="canvas"] .floating-chrome .rail-label-vertical {
   color: color-mix(in srgb, var(--color-paper) 70%, transparent);
 }
 

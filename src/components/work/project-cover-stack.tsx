@@ -5,14 +5,17 @@ import { dummyProjects } from "@/lib/nav";
 const panelThemes = [
   {
     section: "theme-dark border-[var(--section-dark-rule)]",
+    chromeSurface: "dark" as const,
     placeholder: "border-[var(--section-dark-rule)] bg-[var(--color-flesh)]/10",
   },
   {
     section: "theme-light border-[var(--rule-strong)]",
+    chromeSurface: "light" as const,
     placeholder: "border-[var(--rule-light)] bg-[var(--color-flesh)]/40",
   },
   {
     section: "theme-canvas border-[var(--color-paper)]/20",
+    chromeSurface: "canvas" as const,
     placeholder: "border-[var(--color-paper)]/25 bg-[var(--color-paper)]/10",
   },
 ] as const;
@@ -27,6 +30,7 @@ export function ProjectCoverStack() {
           <section
             key={project.slug}
             className={`work-snap-section sticky-cover-panel flex min-h-0 items-center border-b ${theme.section}`}
+            data-chrome-surface={theme.chromeSurface}
           >
             <RuledGrid className="flex h-full min-h-0 w-full flex-col py-16">
               <div className="col-full shrink-0">

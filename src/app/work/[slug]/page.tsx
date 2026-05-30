@@ -35,7 +35,10 @@ export default async function CaseStudyPage({ params }: PageProps) {
 
   return (
     <article>
-      <section className="theme-light border-b border-[var(--rule-strong)]">
+      <section
+        className="theme-light border-b border-[var(--rule-strong)]"
+        data-chrome-surface="light"
+      >
         <RuledGrid className="py-[var(--grid-row-gap)]">
           <div className="col-span-hero">
             <p className="text-meta">
@@ -67,6 +70,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
                 ? "theme-dark border-[var(--section-dark-rule)]"
                 : "theme-light border-[var(--rule-strong)]"
             }`}
+            data-chrome-surface={chapterIndex % 2 === 0 ? "dark" : "light"}
           >
             <RuledGrid className="w-full py-20">
               <SiteGridSubgrid className="items-start">
@@ -89,7 +93,10 @@ export default async function CaseStudyPage({ params }: PageProps) {
       </div>
 
       {next ? (
-        <section className="theme-canvas border-t border-[var(--color-paper)]/20 py-12">
+        <section
+          className="theme-canvas border-t border-[var(--color-paper)]/20 py-12"
+          data-chrome-surface="canvas"
+        >
           <RuledGrid>
             <SiteGridSubgrid className="items-center">
               <p className="text-meta grid-span-6 lg:grid-span-4">Next project</p>

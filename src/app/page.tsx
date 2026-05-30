@@ -6,7 +6,10 @@ export default function Home() {
   return (
     <div className="home-hero-cover-flow">
       <PrimaryHero slates={heroSlates} scrollRelease={false} secondaryCover />
-      <section className="theme-dark home-secondary-panel flex items-center border-b border-[var(--section-dark-rule)]">
+      <section
+        className="theme-dark home-secondary-panel flex items-center border-b border-[var(--section-dark-rule)]"
+        data-chrome-surface="dark"
+      >
         <RuledGrid className="w-full py-16">
           <div className="col-span-content">
             <p className="text-meta">Home secondary</p>

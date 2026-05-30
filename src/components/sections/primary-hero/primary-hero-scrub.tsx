@@ -241,6 +241,7 @@ export function PrimaryHeroScrub({
     <div
       ref={trackRef}
       className="primary-hero-track theme-light w-full border-b border-[var(--rule-strong)]"
+      data-chrome-surface="light"
     >
       {!reducedMotion && slideCount > 0 ? (
         <div ref={containerRef} className="hero-chapters-container">

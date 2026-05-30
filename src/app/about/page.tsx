@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="theme-white min-h-[100dvh]">
+    <div className="theme-white min-h-[100dvh]" data-chrome-surface="light">
       <RuledGrid className="py-[var(--grid-row-gap)]">
         <div className="col-span-hero">
           <p className="text-meta">About</p>

@@ -5,7 +5,10 @@ import { SiteGridSubgrid } from "@/components/layout/site-grid";
 export default function PlaygroundPage() {
   return (
     <>
-      <section className="theme-light border-b border-[var(--rule-strong)]">
+      <section
+        className="theme-light border-b border-[var(--rule-strong)]"
+        data-chrome-surface="light"
+      >
         <RuledGrid className="py-[var(--grid-row-gap)]">
           <div className="col-span-hero">
             <p className="text-meta">Playground · Phase 1 demos</p>
@@ -52,7 +55,10 @@ export default function PlaygroundPage() {
       </section>
 
       <div className="sticky-cover-stack">
-        <section className="theme-dark sticky-cover-panel flex items-center border-b border-[var(--section-dark-rule)]">
+        <section
+          className="theme-dark sticky-cover-panel flex items-center border-b border-[var(--section-dark-rule)]"
+          data-chrome-surface="dark"
+        >
           <RuledGrid className="w-full py-16">
             <div className="col-span-hero">
               <p className="text-meta">Sticky · Cover</p>
@@ -66,7 +72,10 @@ export default function PlaygroundPage() {
           </RuledGrid>
         </section>
 
-        <section className="theme-light sticky-cover-panel flex items-center border-b border-[var(--rule-strong)]">
+        <section
+          className="theme-light sticky-cover-panel flex items-center border-b border-[var(--rule-strong)]"
+          data-chrome-surface="light"
+        >
           <RuledGrid className="w-full py-16">
             <div className="col-span-hero">
               <p className="text-meta">Reverse-out</p>
@@ -79,7 +88,10 @@ export default function PlaygroundPage() {
           </RuledGrid>
         </section>
 
-        <section className="theme-canvas sticky-cover-panel flex items-center border-b border-[var(--color-paper)]/20">
+        <section
+          className="theme-canvas sticky-cover-panel flex items-center border-b border-[var(--color-paper)]/20"
+          data-chrome-surface="canvas"
+        >
           <RuledGrid className="w-full py-16">
             <SiteGridSubgrid className="items-end">
               <div className="grid-span-6 lg:grid-span-8">
