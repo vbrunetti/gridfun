@@ -93,12 +93,12 @@ export function GridSpecTable({
   return (
     <>
       <SiteGridSubgrid
-        className={`border border-[var(--rule-light)] bg-[var(--color-flesh)]/30 ${rowBorder}`}
+        className={`border-t border-[var(--rule-light)] bg-[var(--color-flesh)]/30 ${rowBorder}`}
       >
         {headers.map((header) => (
           <div
             key={header}
-            className={`${cellClass} text-meta px-2 py-2 font-medium normal-case tracking-normal`}
+            className={`${cellClass} text-meta py-2 font-medium normal-case tracking-normal`}
           >
             {header}
           </div>
@@ -107,12 +107,14 @@ export function GridSpecTable({
       {rows.map((row, rowIndex) => (
         <SiteGridSubgrid
           key={rowIndex}
-          className={`border-x border-b border-[var(--rule-light)] ${rowBorder}`}
+          className={`border-t border-[var(--rule-light)] ${
+            rowIndex === rows.length - 1 ? "border-b" : ""
+          } ${rowBorder}`}
         >
           {row.map((cell, cellIndex) => (
             <div
               key={cellIndex}
-              className={`${cellClass} min-w-0 px-2 py-2 font-mono text-xs text-secondary`}
+              className={`${cellClass} min-w-0 py-2 font-mono text-xs text-secondary`}
             >
               {cell}
             </div>

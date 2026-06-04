@@ -1,29 +1,47 @@
 @import "tailwindcss";
 
-:root {
-  /* Brand palette */
-  --color-paper: #f6f0e5;
-  --color-white: #ffffff;
-  --color-flesh: #f5dcbf;
-  --color-ink: #1c1916;
-  --color-brown: #574038;
-  --color-orange: #ff662e;
-  --color-leaf-green: #008755;
-  --color-crimson: #a41e34;
-  --color-electric-blue: #2a5bb5;
-  --color-flamingo-pink: #d46b7a;
-  --color-golden-yellow: #d9a028;
+html {
+  scrollbar-gutter: stable;
+}
 
-  /* Text on light surfaces (ink) */
+:root {
+  /* Brand palette — neutral ramp + neon accents */
+  --color-white: #ffffff;
+  --color-off-white: #efefef;
+  --color-paper: #efefef;
+  --color-light-gray: #d4d4d4;
+  --color-flesh: #d4d4d4;
+  --color-medium-gray: #a8a8a8;
+  --color-charcoal: #333333;
+  --color-black: #000000;
+  --color-ink: #000000;
+  --color-brown: #333333;
+  --color-neon-lime: #d8ff00;
+  --color-orange: #d8ff00;
+  --color-leaf-green: #d8ff00;
+  --color-golden-yellow: #d8ff00;
+  --color-hot-pink: #ff2875;
+  --color-crimson: #ff2875;
+  --color-flamingo-pink: #ff2875;
+  --color-sky-blue: #5bc4ff;
+  --color-medium-blue: #2962ff;
+  --color-electric-blue: #2962ff;
+  --color-royal-blue: #0033ff;
+
+  /* Text on light surfaces */
   --text-primary: var(--color-ink);
-  --text-secondary: color-mix(in srgb, var(--color-ink) 80%, transparent);
-  --text-tertiary: color-mix(in srgb, var(--color-ink) 60%, transparent);
+  --text-secondary: color-mix(in srgb, var(--color-ink) 75%, transparent);
+  --text-tertiary: color-mix(
+    in srgb,
+    var(--color-charcoal) 50%,
+    var(--color-medium-gray)
+  );
 
   /* Semantic */
   --background: var(--color-paper);
   --foreground: var(--text-primary);
-  --accent: var(--color-golden-yellow);
-  --accent-secondary: var(--color-electric-blue);
+  --accent: var(--color-neon-lime);
+  --accent-secondary: var(--color-royal-blue);
   --rule-light: color-mix(in srgb, var(--color-ink) 12%, transparent);
   --rule-strong: var(--color-ink);
 
@@ -48,13 +66,13 @@
   --home-cover-peek: 4.5rem; /* home secondary visible above fold during hero chapters */
   --hero-chapter-shift: 4.5rem; /* vertical travel during hero chapter crossfade */
 
-  --section-dark-bg: var(--color-ink);
+  --section-dark-bg: var(--color-black);
   --section-dark-rule: color-mix(in srgb, var(--color-paper) 22%, transparent);
 
   /* Section surfaces */
   --surface-light: var(--color-paper);
   --surface-white: var(--color-white);
-  --canvas-blue: var(--color-electric-blue);
+  --canvas-blue: var(--color-royal-blue);
   --content-max: var(--grid-max);
   --media-column: min(100%, 22rem);
 }
@@ -134,15 +152,6 @@ body {
   padding-inline-end: max(var(--grid-margin), var(--chrome-right-inset));
 }
 
-.skeleton-wrap {
-  width: 100%;
-  max-width: var(--grid-max);
-  height: 100%;
-  margin-inline: auto;
-  padding-inline-start: var(--grid-margin);
-  padding-inline-end: max(var(--grid-margin), var(--chrome-right-inset));
-}
-
 .site-grid > .col-full {
   grid-column: 1 / -1;
 }
@@ -208,7 +217,20 @@ body {
   min-width: 0;
 }
 
+.col-start-2 {
+  grid-column-start: 2;
+}
+
+.col-2-to-end {
+  grid-column: 2 / -1;
+  min-width: 0;
+}
+
 @media (min-width: 1024px) {
+  .lg\:col-7-to-end {
+    grid-column: 7 / -1;
+  }
+
   .lg\:grid-span-2 {
     grid-column: span 2;
   }
@@ -238,8 +260,20 @@ body {
   display: grid;
   grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
   column-gap: var(--grid-gutter);
-  height: 100%;
   width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.skeleton-column {
+  min-height: 100%;
+  box-sizing: border-box;
+  background: color-mix(in srgb, #ff00ff 15%, transparent);
+  box-shadow: inset -1px 0 0 color-mix(in srgb, #ff00ff 50%, transparent);
+}
+
+.skeleton-column:last-child {
+  box-shadow: none;
 }
 
 .lock-screen-left,
@@ -714,4 +748,330 @@ body[data-chrome-surface="canvas"] .floating-chrome .rail-label-vertical {
   align-items: center;
   justify-content: center;
   color: inherit;
+}
+
+/* —— Craft impact index —— */
+/* Mobile: bleed paper behind fixed logo/menu (main keeps chrome offset for layout) */
+@media (max-width: 1023px) {
+  html:has(.craft-route),
+  body:has(.craft-route) {
+    background: var(--color-paper);
+  }
+
+  .site-main:has(.craft-route) {
+    padding-top: 0 !important;
+  }
+
+  .craft-route {
+    padding-top: var(--chrome-top-offset);
+    background: var(--color-paper);
+  }
+}
+
+.craft-page {
+  padding-inline-start: var(--grid-margin);
+  padding-inline-end: max(var(--grid-margin), var(--chrome-right-inset));
+  padding-bottom: var(--grid-row-gap);
+  max-width: var(--grid-max);
+  margin-inline: auto;
+  overflow-x: clip;
+}
+
+/* Contact-scale hero — cancel .craft-page padding so site-grid aligns once */
+.craft-hero-header {
+  position: relative;
+  margin-inline-start: calc(-1 * var(--grid-margin));
+  margin-inline-end: calc(-1 * max(var(--grid-margin), var(--chrome-right-inset)));
+  background: var(--color-paper);
+  box-sizing: border-box;
+}
+
+.craft-hero-meta {
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.craft-header-sentinel {
+  height: 1px;
+  margin: 0;
+  pointer-events: none;
+}
+
+/* Compact bar — fixed; paper from viewport top, content clears logo on mobile */
+.craft-sticky-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 20;
+  width: 100vw;
+  max-width: 100vw;
+  padding-top: var(--chrome-top-offset);
+  padding-right: max(var(--grid-margin), var(--chrome-right-inset));
+  padding-bottom: 0.65rem;
+  padding-left: var(--grid-margin);
+  background: var(--color-paper);
+  border-bottom: none;
+  box-sizing: border-box;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-0.35rem);
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease,
+    transform 0.2s ease;
+}
+
+.craft-sticky-header--visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .craft-sticky-header {
+    transition: none;
+    transform: none;
+  }
+
+  .craft-sticky-header--visible {
+    transform: none;
+  }
+}
+
+/* Key line — left at content edge, runs to viewport right */
+.craft-sticky-header::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: calc(50% - 50vw);
+  height: 1px;
+  background: var(--rule-strong);
+  pointer-events: none;
+}
+
+@media (min-width: 1024px) {
+  .craft-sticky-header {
+    top: 0;
+    left: calc(
+      var(--rail-width) +
+        max(0px, (100vw - var(--rail-width) - var(--grid-max)) / 2)
+    );
+    width: min(var(--grid-max), 100vw - var(--rail-width));
+    display: flex;
+    align-items: center;
+    height: var(--chrome-top-offset);
+    min-height: var(--chrome-top-offset);
+    max-height: var(--chrome-top-offset);
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+.craft-sticky-header__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .craft-sticky-header__inner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    height: 100%;
+  }
+}
+
+.craft-sticky-header__title {
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.craft-page-title {
+  line-height: 0.95;
+}
+
+@media (min-width: 1024px) {
+  .craft-page-title {
+    font-size: clamp(1.85rem, 2.8vw, 2.65rem);
+  }
+}
+
+.craft-filters {
+  display: flex;
+  min-width: 0;
+}
+
+.craft-filters--hero {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  max-width: 100%;
+}
+
+.craft-filters--compact {
+  flex-wrap: nowrap;
+  gap: 0.3rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.craft-filters--compact::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .craft-filters--compact {
+    flex: 1;
+    justify-content: flex-end;
+    overflow: hidden;
+  }
+}
+
+.craft-filter-chip {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  border: 1px solid var(--rule-light);
+  border-radius: 9999px;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  background: transparent;
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.craft-filter-chip--hero {
+  gap: 0.4rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+}
+
+.craft-filter-chip--compact {
+  gap: 0.28rem;
+  padding: 0.18rem 0.45rem;
+  font-size: 0.5625rem;
+  letter-spacing: 0.05em;
+}
+
+.craft-filter-chip:hover {
+  border-color: var(--rule-strong);
+  color: var(--text-secondary);
+}
+
+.craft-filter-chip--on {
+  border-color: var(--color-ink);
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--color-ink) 6%, transparent);
+}
+
+.craft-filter-chip__dot {
+  width: 0.3rem;
+  height: 0.3rem;
+  border-radius: 9999px;
+  border: 1px solid currentColor;
+  background: transparent;
+  transition: background-color 0.15s ease;
+}
+
+.craft-filter-chip--on .craft-filter-chip__dot {
+  background: currentColor;
+}
+
+.craft-filter-chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/*
+ * Masonry: fine-grained row grid + measured spans (see craft-masonry.tsx).
+ * Cards pack top-aligned per column like Pinterest — not CSS multi-column.
+ */
+.craft-masonry {
+  display: grid;
+  grid-template-columns: repeat(var(--craft-cols, 2), minmax(0, 1fr));
+  grid-auto-rows: 6px;
+  row-gap: clamp(0.75rem, 2vw, 1.25rem);
+  column-gap: clamp(1rem, 2.5vw, 1.5rem);
+  align-items: start;
+  padding-top: var(--grid-row-gap);
+  padding-bottom: var(--grid-row-gap);
+}
+
+.craft-masonry-item {
+  min-width: 0;
+  overflow: visible;
+}
+
+.craft-card {
+  display: flex;
+  flex-direction: column;
+  container-type: inline-size;
+}
+
+/* Ornament 1 — ghost index above portrait, no overlap */
+.craft-ghost-index {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0 0 0.5rem;
+  font-size: clamp(4.5rem, 62cqi, 15rem);
+  font-weight: 700;
+  line-height: 0.82;
+  letter-spacing: -0.07em;
+  text-align: left;
+  color: var(--color-ink);
+  pointer-events: none;
+  user-select: none;
+}
+
+@supports not (font-size: 1cqi) {
+  .craft-ghost-index {
+    font-size: clamp(4.5rem, 30vw, 15rem);
+  }
+}
+
+.craft-portrait {
+  width: 100%;
+  border: 1px solid var(--rule-light);
+}
+
+.craft-card-copy {
+  padding-top: 1rem;
+  padding-bottom: 0.25rem;
+}
+
+.craft-card-title {
+  font-size: clamp(1rem, 2.8cqi, 1.0625rem);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+@supports not (font-size: 1cqi) {
+  .craft-card-title {
+    font-size: 1.0625rem;
+  }
+}
+
+.craft-empty {
+  padding-top: var(--grid-row-gap);
+  padding-bottom: 4rem;
+  text-align: center;
 }

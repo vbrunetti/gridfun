@@ -20,6 +20,7 @@ export function isNavSection(item: MenuNavItem): item is NavSection {
 export const menuNav: MenuNavItem[] = [
   { href: "/", label: "Home" },
   { href: "/work", label: "Work" },
+  { href: "/craft", label: "Craft" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
   { href: "/effects", label: "Effects" },

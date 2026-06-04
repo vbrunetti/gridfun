@@ -12,6 +12,7 @@ export type SiteLocation = {
 const PAGE_COLUMNS: Record<string, Omit<SiteLocation, "subLabel">> = {
   "/": { pageLabel: "HOME", gridColumn: 1 },
   "/work": { pageLabel: "WORK", gridColumn: 4 },
+  "/craft": { pageLabel: "CRAFT", gridColumn: 6 },
   "/about": { pageLabel: "ABOUT", gridColumn: 8 },
   "/contact": { pageLabel: "CONTACT", gridColumn: 10 },
   "/effects": { pageLabel: "EFFECTS", gridColumn: 11 },

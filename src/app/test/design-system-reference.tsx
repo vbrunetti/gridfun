@@ -17,21 +17,22 @@ import {
   surfaces,
   themes,
   typographyRamp,
+  type TypographyRampEntry,
 } from "@/lib/design-tokens";
 import { GRID_COLUMNS } from "@/lib/site-location";
 
 const paletteHex: Record<string, string> = {
-  "--color-paper": palette.paper,
   "--color-white": palette.white,
-  "--color-flesh": palette.flesh,
-  "--color-ink": palette.ink,
-  "--color-brown": palette.brown,
-  "--color-orange": palette.orange,
-  "--color-leaf-green": palette.leafGreen,
-  "--color-crimson": palette.crimson,
-  "--color-electric-blue": palette.electricBlue,
-  "--color-flamingo-pink": palette.flamingoPink,
-  "--color-golden-yellow": palette.goldenYellow,
+  "--color-off-white": palette.offWhite,
+  "--color-light-gray": palette.lightGray,
+  "--color-medium-gray": palette.mediumGray,
+  "--color-charcoal": palette.charcoal,
+  "--color-black": palette.black,
+  "--color-neon-lime": palette.neonLime,
+  "--color-hot-pink": palette.hotPink,
+  "--color-sky-blue": palette.skyBlue,
+  "--color-medium-blue": palette.mediumBlue,
+  "--color-royal-blue": palette.royalBlue,
 };
 
 const NAV = [
@@ -56,7 +57,7 @@ function DsSectionHeader({
   description?: string;
 }) {
   return (
-    <SiteGridCell span="content" className="scroll-mt-24">
+    <SiteGridCell span="full" className="scroll-mt-24">
       <section
         id={id}
         className="border-t border-[var(--rule-light)] pt-[var(--grid-row-gap)]"
@@ -68,6 +69,73 @@ function DsSectionHeader({
         ) : null}
       </section>
     </SiteGridCell>
+  );
+}
+
+function TypeSpecimenRow({ style }: { style: TypographyRampEntry }) {
+  const sample =
+    style.sample ??
+    (style.label === "Rail label"
+      ? "© 2026"
+      : "The quick brown fox jumps over the lazy dog.");
+
+  const specimen = <span className={style.className}>{sample}</span>;
+  const isRail = style.className.includes("rail-label");
+  const isFilterChip = style.className.includes("craft-filter-chip");
+
+  return (
+    <SiteGridSubgrid className="border-b border-[var(--rule-light)] py-6">
+      <div className="grid-span-6 min-w-0 lg:grid-span-8">
+        <p className="text-meta normal-case tracking-normal">{style.label}</p>
+        {style.scope ? (
+          <p className="text-meta mt-1 normal-case tracking-normal text-tertiary">
+            {style.scope}
+          </p>
+        ) : null}
+        <div className={isRail ? "mt-4 flex h-24 items-start" : "mt-3 min-w-0"}>
+          {style.wrapperClass ? (
+            <div className={`${style.wrapperClass} w-full max-w-[14rem]`}>
+              {specimen}
+            </div>
+          ) : isFilterChip ? (
+            <span className={style.className}>
+              <span className="craft-filter-chip__dot" aria-hidden />
+              {sample}
+            </span>
+          ) : (
+            specimen
+          )}
+        </div>
+        <p className="text-meta mt-3 normal-case tracking-normal">Class</p>
+        <p className="font-mono text-xs text-tertiary">
+          {style.className.split(/\s+/).map((c) => `.${c}`).join(" ")}
+        </p>
+        {style.fontFamily ? (
+          <>
+            <p className="text-meta mt-2 normal-case tracking-normal">Font</p>
+            <p className="font-mono text-xs text-secondary">{style.fontFamily}</p>
+          </>
+        ) : null}
+      </div>
+      <div className="grid-span-3 min-w-0 lg:grid-span-2">
+        <p className="text-meta normal-case tracking-normal">Size</p>
+        <p className="mt-1 font-mono text-xs text-secondary">{style.size}</p>
+      </div>
+      <div className="grid-span-3 min-w-0 lg:grid-span-2">
+        <p className="text-meta normal-case tracking-normal">Weight</p>
+        <p className="mt-1 font-mono text-xs text-secondary">{style.weight}</p>
+      </div>
+      <div className="grid-span-3 min-w-0 lg:grid-span-2">
+        <p className="text-meta normal-case tracking-normal">Line height</p>
+        <p className="mt-1 font-mono text-xs text-secondary">{style.lineHeight}</p>
+      </div>
+      <div className="grid-span-3 min-w-0 lg:grid-span-2">
+        <p className="text-meta normal-case tracking-normal">Tracking</p>
+        <p className="mt-1 font-mono text-xs text-secondary">
+          {style.letterSpacing}
+        </p>
+      </div>
+    </SiteGridSubgrid>
   );
 }
 
@@ -98,7 +166,7 @@ function TokenSwatch({
 export function DesignSystemReference() {
   return (
     <RuledGrid>
-      <SiteGridCell span="hero">
+      <SiteGridCell span="full">
         <p className="text-meta">Design system</p>
         <h1 className="display-xl mt-4">Token reference &amp; ramps</h1>
         <p className="mt-6 leading-relaxed text-secondary">
@@ -126,41 +194,19 @@ export function DesignSystemReference() {
         id="type"
         meta="01 · Typography"
         title="Type ramp"
-        description="Display and meta styles are defined in globals.css. Body copy uses Geist Sans at default size (16px) unless overridden with Tailwind text-* utilities."
+        description="All typography classes from globals.css, including /craft (ghost index, card title, filter chips). Default body is Geist Sans 16px; roles use .text-primary / .text-secondary / .text-tertiary below."
       />
 
       {typographyRamp.map((style) => (
-        <SiteGridSubgrid key={style.className} className="border-b border-[var(--rule-light)] py-6">
-          <div className="grid-span-6 min-w-0 lg:grid-span-8">
-            <p className="text-meta normal-case tracking-normal">{style.label}</p>
-            <p className={style.className.includes("rail") ? "mt-4 h-24" : "mt-3"}>
-              <span className={style.className}>
-                {style.label === "Rail label" ? "© 2026" : "The quick brown fox jumps."}
-              </span>
-            </p>
-            <p className="text-meta mt-3 normal-case tracking-normal">Class</p>
-            <p className="font-mono text-xs text-tertiary">
-              .{style.className.split(" ")[0]}
-            </p>
-          </div>
-          <div className="grid-span-3 min-w-0 lg:grid-span-2">
-            <p className="text-meta normal-case tracking-normal">Size</p>
-            <p className="mt-1 font-mono text-xs text-secondary">{style.size}</p>
-          </div>
-          <div className="grid-span-3 min-w-0 lg:grid-span-2">
-            <p className="text-meta normal-case tracking-normal">Weight</p>
-            <p className="mt-1 font-mono text-xs text-secondary">{style.weight}</p>
-          </div>
-          <div className="grid-span-3 min-w-0 lg:grid-span-2">
-            <p className="text-meta normal-case tracking-normal">Line height</p>
-            <p className="mt-1 font-mono text-xs text-secondary">{style.lineHeight}</p>
-          </div>
-          <div className="grid-span-3 min-w-0 lg:grid-span-2">
-            <p className="text-meta normal-case tracking-normal">Tracking</p>
-            <p className="mt-1 font-mono text-xs text-secondary">{style.letterSpacing}</p>
-          </div>
-        </SiteGridSubgrid>
+        <TypeSpecimenRow key={`${style.label}-${style.className}`} style={style} />
       ))}
+
+      <SiteGridCell span="content">
+        <p className="text-sm text-secondary">
+          Craft card dates: <code className="font-mono text-xs">.text-meta</code> (same as
+          Meta above).
+        </p>
+      </SiteGridCell>
 
       <SiteGridCell span="content">
         <p className="text-meta">Text roles (light surface)</p>
@@ -211,7 +257,7 @@ export function DesignSystemReference() {
             {t.token}
           </code>
           <div
-            className="grid-span-2 h-4 self-center bg-[var(--color-orange)]"
+            className="grid-span-2 h-4 self-center bg-[var(--color-neon-lime)]"
             style={{ width: `var(${t.token})` }}
           />
         </SiteGridSubgrid>
@@ -226,7 +272,7 @@ export function DesignSystemReference() {
             className="grid-span-2 flex min-w-0 items-center gap-2 border border-[var(--rule-light)] p-2"
           >
             <div
-              className="shrink-0 bg-[var(--color-leaf-green)]"
+              className="shrink-0 bg-[var(--color-sky-blue)]"
               style={{ width: `${rem}rem`, height: `${rem}rem` }}
             />
             <div>

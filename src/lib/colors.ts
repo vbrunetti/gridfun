@@ -1,29 +1,59 @@
 /**
- * Portfolio palette — paper / flesh / orange / leaf green / crimson family.
+ * Portfolio palette — neutral ramp + neon accents.
  * Text uses ink or paper at 100% / 80% / 60% (see globals.css).
  */
 export const palette = {
-  paper: "#F6F0E5",
   white: "#FFFFFF",
-  flesh: "#F5DCBF",
-  ink: "#1C1916",
-  brown: "#574038",
-  orange: "#FF662E",
-  leafGreen: "#008755",
-  crimson: "#A41E34",
-  electricBlue: "#2A5BB5",
-  flamingoPink: "#D46B7A",
-  goldenYellow: "#D9A028",
+  offWhite: "#EFEFEF",
+  lightGray: "#D4D4D4",
+  mediumGray: "#A8A8A8",
+  charcoal: "#333333",
+  black: "#000000",
+  neonLime: "#D8FF00",
+  hotPink: "#FF2875",
+  skyBlue: "#5BC4FF",
+  mediumBlue: "#2962FF",
+  royalBlue: "#0033FF",
+  /** @deprecated Use offWhite — kept for existing token names */
+  paper: "#EFEFEF",
+  /** @deprecated Use lightGray */
+  flesh: "#D4D4D4",
+  /** @deprecated Use black */
+  ink: "#000000",
+  /** @deprecated Use charcoal */
+  brown: "#333333",
+  /** @deprecated Use neonLime */
+  orange: "#D8FF00",
+  /** @deprecated Use neonLime */
+  leafGreen: "#D8FF00",
+  /** @deprecated Use hotPink */
+  crimson: "#FF2875",
+  /** @deprecated Use mediumBlue */
+  electricBlue: "#2962FF",
+  /** @deprecated Use hotPink */
+  flamingoPink: "#FF2875",
+  /** @deprecated Use neonLime */
+  goldenYellow: "#D8FF00",
 } as const;
+
+/** Craft / impact portrait fills — rotate neons; grays for quieter tiles. */
+export const portraitAccents = [
+  "neonLime",
+  "hotPink",
+  "royalBlue",
+  "skyBlue",
+  "mediumBlue",
+  "charcoal",
+  "mediumGray",
+] as const satisfies readonly (keyof typeof palette)[];
 
 /** Accent colors used for spark / glow particle cycling. */
 export const sparkPalette = [
-  palette.orange,
-  palette.crimson,
-  palette.leafGreen,
-  palette.electricBlue,
-  palette.flamingoPink,
-  palette.goldenYellow,
+  palette.neonLime,
+  palette.hotPink,
+  palette.skyBlue,
+  palette.mediumBlue,
+  palette.royalBlue,
 ] as const;
 
 export type Rgb = readonly [number, number, number];

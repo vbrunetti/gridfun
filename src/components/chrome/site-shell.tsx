@@ -18,7 +18,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
       <div className="min-h-[100dvh] lg:pl-[var(--rail-width)]">
         <main
           id="main-content"
-          className="pt-[var(--chrome-top-offset)] lg:pt-0"
+          className="site-main pt-[var(--chrome-top-offset)] lg:pt-0"
         >
           {children}
         </main>

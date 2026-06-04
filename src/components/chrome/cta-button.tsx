@@ -32,11 +32,11 @@ export function CtaButton({
   return (
     <Link
       href={href}
-      className="inline-flex items-center gap-3 rounded-full bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-[var(--color-paper)] transition-opacity hover:opacity-90"
+      className="inline-flex items-center gap-3 rounded-full bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-[var(--color-ink)] transition-opacity hover:opacity-90"
     >
       {children}
       <span
-        className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-paper)]/20 text-xs"
+        className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-ink)]/12 text-xs text-[var(--color-ink)]"
         aria-hidden
       >
         →
