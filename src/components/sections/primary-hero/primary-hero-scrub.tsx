@@ -240,7 +240,7 @@ export function PrimaryHeroScrub({
   return (
     <div
       ref={trackRef}
-      className="primary-hero-track theme-light w-full border-b border-[var(--rule-strong)]"
+      className="primary-hero-track theme-light keyline-b w-full"
       data-chrome-surface="light"
     >
       {!reducedMotion && slideCount > 0 ? (
@@ -283,7 +283,7 @@ export function PrimaryHeroScrub({
 
               {reducedMotion ? (
                 <div className="mt-8 flex flex-wrap items-center gap-6">
-                  <CtaButton href="/work">View work</CtaButton>
+                  <CtaButton href="/case-studies">View case studies</CtaButton>
                   <CtaButton href="/about" variant="ghost">
                     About
                   </CtaButton>
@@ -305,7 +305,7 @@ export function PrimaryHeroScrub({
                 />
               </div>
               <div className="mt-8 flex flex-wrap items-center gap-6">
-                <CtaButton href="/work">View work</CtaButton>
+                <CtaButton href="/case-studies">View case studies</CtaButton>
                 <CtaButton href="/about" variant="ghost">
                   About
                 </CtaButton>

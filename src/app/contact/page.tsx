@@ -16,7 +16,7 @@ const contacts = [
 export default function ContactPage() {
   return (
     <div className="theme-light" data-chrome-surface="light">
-      <header className="border-b border-[var(--rule-strong)] bg-[var(--surface-light)]">
+      <header className="keyline-b bg-[var(--surface-light)]">
         <RuledGrid className="py-12">
           <SiteGridSubgrid className="lg:items-end">
             <h1 className="display-xl grid-span-6 lg:grid-span-5">Contact</h1>
@@ -40,7 +40,7 @@ export default function ContactPage() {
         {contacts.map((person) => (
           <SiteGridSubgrid
             key={person.email}
-            className="border-b border-[var(--rule-strong)] py-6"
+            className="keyline-b py-6"
           >
             <p className="grid-span-6 font-medium text-primary lg:grid-span-4">
               {person.name}

@@ -38,10 +38,8 @@ export function LeftRail() {
     >
       {/* Spacer matches ChromeLogo fixed slot; darkens behind logo when menu is open */}
       <div
-        className={`hidden shrink-0 border-b py-[var(--chrome-pad)] lg:block ${
-          menuOpen
-            ? "border-[var(--color-paper)] bg-[var(--color-ink)]"
-            : "border-[var(--rule-strong)] bg-[var(--color-paper)]"
+        className={`hidden shrink-0 py-[var(--chrome-pad)] lg:block ${
+          menuOpen ? "bg-[var(--color-ink)]" : "bg-[var(--color-paper)]"
         }`}
         style={{
           minHeight: "calc(var(--chrome-hit) + var(--chrome-pad) * 2)",

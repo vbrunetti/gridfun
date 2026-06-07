@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 export default function CraftPage() {
   return (
     <div
-      className="craft-route theme-light min-h-[100dvh] w-full min-w-0 overflow-x-clip"
+      className="craft-route theme-light min-h-[100dvh] w-full min-w-0"
       data-chrome-surface="light"
     >
       <CraftIndex />

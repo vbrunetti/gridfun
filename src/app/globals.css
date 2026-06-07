@@ -141,6 +141,69 @@ body {
   color: var(--text-tertiary);
 }
 
+/* ——— Full-viewport keylines ———
+   Structural horizontal rules span edge-to-edge regardless of max-width containers. */
+:root {
+  --keyline-rail: 0px;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --keyline-rail: var(--rail-width);
+  }
+}
+
+.keyline-b,
+.keyline-t {
+  position: relative;
+  --keyline-color: var(--rule-strong);
+}
+
+.keyline-b--dark {
+  --keyline-color: var(--section-dark-rule);
+}
+
+.keyline-b--light {
+  --keyline-color: var(--rule-light);
+}
+
+.keyline-b--canvas {
+  --keyline-color: color-mix(in srgb, var(--color-paper) 20%, transparent);
+}
+
+.keyline-b--paper {
+  --keyline-color: var(--color-paper);
+}
+
+/* Element already spans the viewport (fixed/full-bleed shells) */
+.keyline-b--viewport::after,
+.keyline-t--viewport::before {
+  left: 0;
+  width: 100vw;
+}
+
+.keyline-b::after,
+.keyline-t::before {
+  content: "";
+  position: absolute;
+  left: calc(
+    -1 * var(--keyline-rail) - max(0px, (100vw - var(--keyline-rail) - 100%) / 2)
+  );
+  width: 100vw;
+  height: 1px;
+  background: var(--keyline-color);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.keyline-b::after {
+  bottom: 0;
+}
+
+.keyline-t::before {
+  top: 0;
+}
+
 /* ——— Master build grid ——— */
 .site-grid {
   display: grid;
@@ -223,12 +286,21 @@ body {
   grid-column-start: 2;
 }
 
+.col-1-to-end {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
 .col-2-to-end {
   grid-column: 2 / -1;
   min-width: 0;
 }
 
 @media (min-width: 1024px) {
+  .lg\:col-6-to-end {
+    grid-column: 6 / -1;
+  }
+
   .lg\:col-7-to-end {
     grid-column: 7 / -1;
   }
@@ -463,40 +535,53 @@ body {
 }
 
 .sticky-cover-panel + .sticky-cover-panel {
-  box-shadow: 0 -1px 0 var(--rule-light);
+  --keyline-color: var(--rule-light);
+}
+
+.sticky-cover-panel + .sticky-cover-panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: calc(
+    -1 * var(--keyline-rail) - max(0px, (100vw - var(--keyline-rail) - 100%) / 2)
+  );
+  width: 100vw;
+  height: 1px;
+  background: var(--keyline-color);
+  pointer-events: none;
+  z-index: 1;
 }
 
 .theme-dark.sticky-cover-panel + .sticky-cover-panel {
-  box-shadow: 0 -1px 0 var(--section-dark-rule);
+  --keyline-color: var(--section-dark-rule);
 }
 
-/* Work index — one viewport per section, snap on each scroll gesture */
-html:has(.work-scroll-snap) {
-  scroll-snap-type: y mandatory;
+/* Case studies index — discrete step scroll (see case-studies-scroll.tsx) */
+html:has(.cs-index-scroll) {
   scroll-padding-top: var(--chrome-top-offset);
   overscroll-behavior-y: none;
 }
 
 @media (min-width: 1024px) {
-  html:has(.work-scroll-snap) {
+  html:has(.cs-index-scroll) {
     scroll-padding-top: 0;
     scroll-padding-right: var(--chrome-right-inset);
   }
 }
 
-.work-scroll-snap .work-snap-section {
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
+.work-scroll-snap .work-snap-section,
+.cs-index-scroll .work-snap-section {
   height: 100dvh;
   min-height: 100dvh;
   max-height: 100dvh;
   overflow: hidden;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html:has(.work-scroll-snap) {
-    scroll-snap-type: none;
-  }
+.work-scroll-snap .work-snap-section--intro,
+.cs-index-scroll .work-snap-section--intro {
+  height: 50dvh;
+  min-height: 50dvh;
+  max-height: 50dvh;
 }
 
 .text-meta {
@@ -776,7 +861,6 @@ body[data-chrome-surface="canvas"] .floating-chrome .rail-label-vertical {
   padding-bottom: var(--grid-row-gap);
   max-width: var(--grid-max);
   margin-inline: auto;
-  overflow-x: clip;
 }
 
 /* Contact-scale hero — cancel .craft-page padding so site-grid aligns once */
@@ -817,7 +901,6 @@ body[data-chrome-surface="canvas"] .floating-chrome .rail-label-vertical {
   padding-bottom: 0.65rem;
   padding-left: var(--grid-margin);
   background: var(--color-paper);
-  border-bottom: none;
   box-sizing: border-box;
   opacity: 0;
   visibility: hidden;
@@ -845,18 +928,6 @@ body[data-chrome-surface="canvas"] .floating-chrome .rail-label-vertical {
   .craft-sticky-header--visible {
     transform: none;
   }
-}
-
-/* Key line — left at content edge, runs to viewport right */
-.craft-sticky-header::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: calc(50% - 50vw);
-  height: 1px;
-  background: var(--rule-strong);
-  pointer-events: none;
 }
 
 @media (min-width: 1024px) {
@@ -1076,4 +1147,324 @@ body[data-chrome-surface="canvas"] .floating-chrome .rail-label-vertical {
   padding-top: var(--grid-row-gap);
   padding-bottom: 4rem;
   text-align: center;
+}
+
+/* ── Shared display size ─────────────────────────────────── */
+.display-md {
+  font-size: clamp(1.375rem, 3vw, 2.25rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+}
+
+/* ── Craft tags ──────────────────────────────────────────── */
+.craft-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.craft-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--rule-light);
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* ── Craft card as a link ────────────────────────────────── */
+a.craft-card {
+  text-decoration: none;
+  color: inherit;
+}
+
+a.craft-card:hover .craft-card-title {
+  opacity: 0.7;
+}
+
+a.craft-card:focus-visible {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 4px;
+}
+
+/* ── Case study cover (index) ────────────────────────────── */
+.cs-cover {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.cs-cover__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin: 0;
+}
+
+.cs-cover__meta-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cs-cover__meta-row dt {
+  margin: 0;
+}
+
+.cs-cover__meta-row dd {
+  margin: 0;
+}
+
+.cs-cover__client {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cs-cover__client-name {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.cs-cover__link {
+  align-self: flex-start;
+}
+
+/* ── Client logos ────────────────────────────────────────── */
+.client-logo {
+  display: block;
+  width: auto;
+  height: 1.25rem;
+  max-width: 9rem;
+  object-fit: contain;
+  color: inherit;
+}
+
+.client-logo--wordmark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-paper);
+}
+
+.cs-detail__client {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* ── Case study detail ───────────────────────────────────── */
+.cs-section {
+  scroll-margin-top: var(--chrome-top-offset, 0px);
+}
+
+.cs-section--vignette {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-flesh) 18%, transparent) 0%,
+    transparent 42%
+  );
+}
+
+.cs-prose__heading {
+  margin-bottom: 1rem;
+}
+
+.cs-prose__body {
+  margin-top: 1rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  font-size: clamp(1rem, 1.4vw, 1.125rem);
+}
+
+.cs-prose__body:first-of-type {
+  margin-top: 0;
+}
+
+.cs-vignette-head {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Vignette key image ──────────────────────────────────── */
+.vignette-key-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--rule-light);
+  object-fit: cover;
+}
+
+.vignette-detail__key {
+  align-self: start;
+}
+
+/* ── Horizontal image scroller (9×16 images + captions) ──── */
+.vignette-hscroll-wrap {
+  padding-bottom: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.vignette-hscroll-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-inline: var(--grid-margin);
+  padding-inline-end: var(--grid-margin-inline-end);
+  margin-bottom: 0.75rem;
+}
+
+/* Grid-aligned copy inside case study detail — no extra inset */
+.cs-detail .vignette-hscroll-wrap--grid .vignette-hscroll-head {
+  padding-inline: 0;
+  margin-bottom: 0.75rem;
+}
+
+.cs-detail .vignette-hscroll-wrap--grid .vignette-hscroll {
+  padding-inline-start: 0;
+  padding-inline-end: 0;
+  scroll-padding-inline: 0;
+}
+
+.cs-detail .vignette-hscroll-wrap--grid .vignette-hscroll-shell::before {
+  display: none;
+}
+
+.vignette-hscroll-hint {
+  opacity: 0.55;
+}
+
+.vignette-hscroll-shell {
+  position: relative;
+}
+
+.vignette-hscroll-shell::before,
+.vignette-hscroll-shell::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: clamp(1rem, 4vw, 2.5rem);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.vignette-hscroll-shell::before {
+  left: 0;
+  background: linear-gradient(
+    90deg,
+    var(--section-bg, var(--color-paper)) 0%,
+    transparent 100%
+  );
+}
+
+.vignette-hscroll-shell::after {
+  right: 0;
+  background: linear-gradient(
+    270deg,
+    var(--section-bg, var(--color-paper)) 0%,
+    transparent 100%
+  );
+}
+
+.vignette-hscroll {
+  display: flex;
+  gap: clamp(1.25rem, 2.5vw, 2rem);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--grid-margin);
+  padding-block: 0.25rem 0.5rem;
+  padding-inline-start: var(--grid-margin);
+  padding-inline-end: var(--grid-margin-inline-end);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.vignette-hscroll:focus-visible {
+  outline: 2px solid var(--text-primary);
+  outline-offset: -2px;
+}
+
+.vignette-himage {
+  flex: 0 0 auto;
+  width: clamp(260px, 72vw, 380px);
+  margin: 0;
+  scroll-snap-align: start;
+}
+
+.vignette-himage__frame {
+  position: relative;
+}
+
+.vignette-himage__index {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 1;
+  padding: 0.2rem 0.45rem;
+  background: color-mix(in srgb, var(--color-paper) 88%, transparent);
+  border: 1px solid var(--rule-light);
+  backdrop-filter: blur(6px);
+}
+
+.vignette-himage__media {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 9 / 16;
+  border: 1px solid var(--rule-light);
+  object-fit: cover;
+}
+
+.vignette-himage__caption {
+  min-height: 1.5rem;
+  margin-top: 0.875rem;
+  max-width: 38ch;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.vignette-himage__caption--empty {
+  visibility: hidden;
+}
+
+@media (min-width: 1024px) {
+  .vignette-himage {
+    width: clamp(300px, 32vw, 400px);
+  }
+}
+
+/* ── Vignette detail extras ──────────────────────────────── */
+.vignette-sibling-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vignette-sibling-link {
+  font-size: 1.0625rem;
+  font-weight: 500;
+  color: var(--text-primary);
 }

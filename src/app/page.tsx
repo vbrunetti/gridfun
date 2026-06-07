@@ -7,7 +7,7 @@ export default function Home() {
     <div className="home-hero-cover-flow">
       <PrimaryHero slates={heroSlates} scrollRelease={false} secondaryCover />
       <section
-        className="theme-dark home-secondary-panel flex items-center border-b border-[var(--section-dark-rule)]"
+        className="theme-dark home-secondary-panel keyline-b keyline-b--dark keyline-b--viewport flex items-center"
         data-chrome-surface="dark"
       >
         <RuledGrid className="w-full py-16">

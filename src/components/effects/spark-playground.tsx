@@ -214,7 +214,7 @@ export function SparkPlayground() {
 
   return (
     <div className="pb-24">
-      <header className="border-b border-[var(--rule-strong)]">
+      <header className="keyline-b">
         <RuledGrid className="py-10">
           <SiteGridSubgrid>
             <div className="grid-span-6 lg:grid-span-8">

@@ -1,29 +1,26 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CraftMasonry } from "@/components/craft/craft-masonry";
+import { VignetteKeyImage } from "@/components/craft/vignette-media";
 import { RuledGrid } from "@/components/layout/ruled-grid";
 import { SiteGridSubgrid } from "@/components/layout/site-grid";
 import {
-  craftHeaderFilterSkills,
-  craftSkillLabels,
-  craftSkills,
-  craftStoryIndexLabel,
-  impactStories,
-  storyMatchesActiveSkills,
-  type CraftSkill,
-  type ImpactStory,
-} from "@/content/craft-impact";
-import { palette } from "@/lib/colors";
-import { craftPortraitRatioForId } from "@/lib/craft-portrait-ratio";
+  allCraftTags,
+  getAllVignettes,
+  vignetteIndexLabel,
+  vignetteMatchesActiveTags,
+  type VignetteWithStudy,
+} from "@/content/portfolio";
 
 function CraftFilterToggle({
-  skill,
+  tag,
   active,
   onToggle,
   variant = "compact",
 }: {
-  skill: CraftSkill;
+  tag: string;
   active: boolean;
   onToggle: () => void;
   variant?: "hero" | "compact";
@@ -33,28 +30,28 @@ function CraftFilterToggle({
       type="button"
       role="switch"
       aria-checked={active}
-      aria-label={`${craftSkillLabels[skill]} filter ${active ? "on" : "off"}`}
+      aria-label={`${tag} filter ${active ? "on" : "off"}`}
       onClick={onToggle}
       className={`craft-filter-chip craft-filter-chip--${variant} ${
         active ? "craft-filter-chip--on" : ""
       }`}
     >
       <span className="craft-filter-chip__dot" aria-hidden />
-      {craftSkillLabels[skill]}
+      {tag}
     </button>
   );
 }
 
 function CraftFilters({
-  activeSkills,
+  activeTags,
   onToggle,
-  skills,
+  tags,
   variant,
   className = "",
 }: {
-  activeSkills: Set<CraftSkill>;
-  onToggle: (skill: CraftSkill) => void;
-  skills: CraftSkill[];
+  activeTags: Set<string>;
+  onToggle: (tag: string) => void;
+  tags: string[];
   variant: "hero" | "compact";
   className?: string;
 }) {
@@ -62,14 +59,14 @@ function CraftFilters({
     <div
       className={`craft-filters craft-filters--${variant} ${className}`.trim()}
       role="group"
-      aria-label="Filter by skill"
+      aria-label="Filter by craft tag"
     >
-      {skills.map((skill) => (
+      {tags.map((tag) => (
         <CraftFilterToggle
-          key={skill}
-          skill={skill}
-          active={activeSkills.has(skill)}
-          onToggle={() => onToggle(skill)}
+          key={tag}
+          tag={tag}
+          active={activeTags.has(tag)}
+          onToggle={() => onToggle(tag)}
           variant={variant}
         />
       ))}
@@ -77,48 +74,40 @@ function CraftFilters({
   );
 }
 
-function ImpactCard({ story }: { story: ImpactStory }) {
-  const fill = palette[story.accent];
-  const portraitH = craftPortraitRatioForId(story.id);
-  const indexLabel = craftStoryIndexLabel(story.id);
+function VignetteCard({ entry }: { entry: VignetteWithStudy }) {
+  const { vignette, caseStudy } = entry;
+  const indexLabel = vignetteIndexLabel(vignette.slug);
 
   return (
-    <article className="craft-card">
+    <Link href={`/craft/${vignette.slug}`} className="craft-card">
       <p className="craft-ghost-index" aria-hidden>
         {indexLabel}
       </p>
-      <div
-        className="craft-portrait"
-        style={
-          {
-            backgroundColor: fill,
-            aspectRatio: `9 / ${portraitH}`,
-          } as CSSProperties
-        }
-        role="img"
-        aria-label={`${story.title} — placeholder visual`}
-      />
+      <VignetteKeyImage vignette={vignette} className="craft-portrait" />
       <div className="craft-card-copy">
-        <h2 className="craft-card-title">{story.title}</h2>
-        <p className="text-meta mt-2">{story.date}</p>
+        <h2 className="craft-card-title">{vignette.name}</h2>
+        <p className="text-meta mt-2">{caseStudy.client}</p>
       </div>
-    </article>
+    </Link>
   );
 }
 
 export function CraftIndex() {
-  const [activeSkills, setActiveSkills] = useState<Set<CraftSkill>>(
-    () => new Set(craftSkills),
+  const allVignettes = useMemo(() => getAllVignettes(), []);
+  const allTags = useMemo(() => allCraftTags(), []);
+
+  const [activeTags, setActiveTags] = useState<Set<string>>(
+    () => new Set(allTags),
   );
   const [compactHeader, setCompactHeader] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
-  const visibleStories = useMemo(
+  const visibleVignettes = useMemo(
     () =>
-      impactStories.filter((story) =>
-        storyMatchesActiveSkills(story, activeSkills),
+      allVignettes.filter(({ vignette }) =>
+        vignetteMatchesActiveTags(vignette, activeTags),
       ),
-    [activeSkills],
+    [allVignettes, activeTags],
   );
 
   useEffect(() => {
@@ -134,13 +123,13 @@ export function CraftIndex() {
     return () => observer.disconnect();
   }, []);
 
-  function toggleSkill(skill: CraftSkill) {
-    setActiveSkills((prev) => {
+  function toggleTag(tag: string) {
+    setActiveTags((prev) => {
       const next = new Set(prev);
-      if (next.has(skill)) {
-        next.delete(skill);
+      if (next.has(tag)) {
+        next.delete(tag);
       } else {
-        next.add(skill);
+        next.add(tag);
       }
       return next;
     });
@@ -148,23 +137,20 @@ export function CraftIndex() {
 
   return (
     <div className="craft-page">
-      <header className="craft-hero-header border-b border-[var(--rule-strong)]">
+      <header className="craft-hero-header keyline-b">
         <RuledGrid className="py-12">
           <SiteGridSubgrid className="lg:items-end">
-            <h1 className="display-xl grid-span-6 lg:grid-span-5">Craft.</h1>
-            <div className="col-2-to-end lg:col-7-to-end">
+            <h1 className="display-xl grid-span-6 lg:grid-span-5">Craft</h1>
+            <div className="col-1-to-end lg:col-6-to-end">
               <p className="craft-hero-meta">
-                {visibleStories.length} STORIES · {craftSkills.length} SKILLS ·
+                {visibleVignettes.length} VIGNETTES · {allTags.length} TAGS ·
                 2023–2025
-              </p>
-              <p className="mt-4 text-sm leading-relaxed text-secondary">
-                Impact index — filter by skill to explore outcomes.
               </p>
               <CraftFilters
                 variant="hero"
-                skills={[...craftSkills]}
-                activeSkills={activeSkills}
-                onToggle={toggleSkill}
+                tags={allTags}
+                activeTags={activeTags}
+                onToggle={toggleTag}
                 className="mt-6"
               />
             </div>
@@ -175,32 +161,32 @@ export function CraftIndex() {
       <div ref={sentinelRef} className="craft-header-sentinel" aria-hidden />
 
       <header
-        className={`craft-sticky-header ${
+        className={`craft-sticky-header keyline-b ${
           compactHeader ? "craft-sticky-header--visible" : ""
         }`}
         aria-hidden={!compactHeader}
       >
         <div className="craft-sticky-header__inner">
           <div className="craft-sticky-header__title">
-            <p className="display-lg craft-page-title">Craft.</p>
+            <p className="display-lg craft-page-title">Craft</p>
           </div>
           <CraftFilters
             variant="compact"
-            skills={craftHeaderFilterSkills}
-            activeSkills={activeSkills}
-            onToggle={toggleSkill}
+            tags={allTags}
+            activeTags={activeTags}
+            onToggle={toggleTag}
           />
         </div>
       </header>
 
-      {visibleStories.length === 0 ? (
+      {visibleVignettes.length === 0 ? (
         <p className="craft-empty text-secondary">
-          Turn on at least one skill filter to show impact stories.
+          Turn on at least one craft tag to show vignettes.
         </p>
       ) : (
         <CraftMasonry>
-          {visibleStories.map((story) => (
-            <ImpactCard key={story.id} story={story} />
+          {visibleVignettes.map((entry) => (
+            <VignetteCard key={entry.vignette.slug} entry={entry} />
           ))}
         </CraftMasonry>
       )}

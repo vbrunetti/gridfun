@@ -60,7 +60,7 @@ function DsSectionHeader({
     <SiteGridCell span="full" className="scroll-mt-24">
       <section
         id={id}
-        className="border-t border-[var(--rule-light)] pt-[var(--grid-row-gap)]"
+        className="keyline-t keyline-b--light pt-[var(--grid-row-gap)]"
       >
         <p className="text-meta">{meta}</p>
         <h2 className="display-lg mt-3">{title}</h2>
@@ -84,7 +84,7 @@ function TypeSpecimenRow({ style }: { style: TypographyRampEntry }) {
   const isFilterChip = style.className.includes("craft-filter-chip");
 
   return (
-    <SiteGridSubgrid className="border-b border-[var(--rule-light)] py-6">
+    <SiteGridSubgrid className="keyline-b keyline-b--light py-6">
       <div className="grid-span-6 min-w-0 lg:grid-span-8">
         <p className="text-meta normal-case tracking-normal">{style.label}</p>
         {style.scope ? (
@@ -400,7 +400,7 @@ export function DesignSystemReference() {
           <CtaButton href="/contact">Primary CTA</CtaButton>
         </div>
         <div className="grid-span-6 min-w-0">
-          <CtaButton href="/work" variant="ghost">
+          <CtaButton href="/case-studies" variant="ghost">
             Ghost link
           </CtaButton>
         </div>

@@ -88,12 +88,12 @@ export function GridSpecTable({
 }: GridSpecTableProps) {
   const cellClass = COL_SPAN_CLASS[columns];
 
-  const rowBorder = `border-[var(--rule-light)] ${className}`.trim();
+  const rowBorder = className.trim();
 
   return (
     <>
       <SiteGridSubgrid
-        className={`border-t border-[var(--rule-light)] bg-[var(--color-flesh)]/30 ${rowBorder}`}
+        className={`keyline-t keyline-b--light bg-[var(--color-flesh)]/30 ${rowBorder}`}
       >
         {headers.map((header) => (
           <div
@@ -107,9 +107,7 @@ export function GridSpecTable({
       {rows.map((row, rowIndex) => (
         <SiteGridSubgrid
           key={rowIndex}
-          className={`border-t border-[var(--rule-light)] ${
-            rowIndex === rows.length - 1 ? "border-b" : ""
-          } ${rowBorder}`}
+          className={`keyline-t keyline-b--light ${rowIndex === rows.length - 1 ? "keyline-b" : ""} ${rowBorder}`}
         >
           {row.map((cell, cellIndex) => (
             <div

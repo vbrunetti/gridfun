@@ -11,22 +11,12 @@ export type SiteLocation = {
 
 const PAGE_COLUMNS: Record<string, Omit<SiteLocation, "subLabel">> = {
   "/": { pageLabel: "HOME", gridColumn: 1 },
-  "/work": { pageLabel: "WORK", gridColumn: 4 },
+  "/case-studies": { pageLabel: "CASE STUDIES", gridColumn: 4 },
   "/craft": { pageLabel: "CRAFT", gridColumn: 6 },
   "/about": { pageLabel: "ABOUT", gridColumn: 8 },
   "/contact": { pageLabel: "CONTACT", gridColumn: 10 },
   "/effects": { pageLabel: "EFFECTS", gridColumn: 11 },
-  "/playground": { pageLabel: "PLAYGROUND", gridColumn: 12 },
   "/test": { pageLabel: "TEST", gridColumn: 12 },
-};
-
-const WORK_SUBPAGES: Record<string, { subLabel: string; gridColumn: number }> = {
-  "project-01": { subLabel: "01", gridColumn: 5 },
-  "project-02": { subLabel: "02", gridColumn: 6 },
-  "project-03": { subLabel: "03", gridColumn: 7 },
-  "project-04": { subLabel: "04", gridColumn: 8 },
-  "project-05": { subLabel: "05", gridColumn: 9 },
-  "project-06": { subLabel: "06", gridColumn: 10 },
 };
 
 export function resolveSiteLocation(pathname: string): SiteLocation {
@@ -38,29 +28,28 @@ export function resolveSiteLocation(pathname: string): SiteLocation {
     return PAGE_COLUMNS["/effects"];
   }
 
-  const workMatch = pathname.match(/^\/work\/([^/]+)\/?$/);
-  if (workMatch) {
-    const slug = workMatch[1];
-    const sub = WORK_SUBPAGES[slug];
-    const base = PAGE_COLUMNS["/work"];
-
-    if (sub) {
-      return {
-        pageLabel: base.pageLabel,
-        gridColumn: sub.gridColumn,
-        subLabel: sub.subLabel,
-      };
-    }
-
+  const caseStudyMatch = pathname.match(/^\/case-studies\/([^/]+)\/?$/);
+  if (caseStudyMatch) {
+    const base = PAGE_COLUMNS["/case-studies"];
     return {
       pageLabel: base.pageLabel,
       gridColumn: base.gridColumn,
-      subLabel: slug.slice(0, 8).toUpperCase(),
+      subLabel: caseStudyMatch[1].slice(0, 8).toUpperCase(),
     };
   }
 
-  if (pathname.startsWith("/work")) {
-    return PAGE_COLUMNS["/work"];
+  if (pathname.startsWith("/case-studies")) {
+    return PAGE_COLUMNS["/case-studies"];
+  }
+
+  const vignetteMatch = pathname.match(/^\/craft\/([^/]+)\/?$/);
+  if (vignetteMatch) {
+    const base = PAGE_COLUMNS["/craft"];
+    return {
+      pageLabel: base.pageLabel,
+      gridColumn: base.gridColumn,
+      subLabel: vignetteMatch[1].slice(0, 8).toUpperCase(),
+    };
   }
 
   return { pageLabel: "SITE", gridColumn: 12 };
