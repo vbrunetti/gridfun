@@ -188,6 +188,12 @@ export const spacingTokens = [
     desktop: "clamp(1rem, 4vw, 3rem)",
   },
   {
+    token: "--grid-margin-inline-end",
+    label: "Grid end margin",
+    mobile: "1rem (menu floats over grid)",
+    desktop: "max(margin, chrome inset)",
+  },
+  {
     token: "--grid-max",
     label: "Grid max width",
     mobile: "none",

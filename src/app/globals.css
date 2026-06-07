@@ -47,12 +47,13 @@ html {
 
   /*
    * Master build grid
-   * Mobile: 6 columns · 2px gutter · 1rem side margin
-   * Desktop (lg+): 12 columns · 8px gutter · side margin · max 1440px centered
+   * Mobile: 6 columns · 2px gutter · 1rem side margin (logo + menu float over grid)
+   * Desktop (lg+): 12 columns · 8px gutter · side margin + right chrome inset · max 1440px centered
    */
   --grid-columns: 6;
   --grid-gutter: 2px;
   --grid-margin: 1rem;
+  --grid-margin-inline-end: var(--grid-margin);
   --grid-max: none;
   --grid-row-gap: clamp(1.5rem, 4vw, 3rem);
 
@@ -82,6 +83,7 @@ html {
     --grid-columns: 12;
     --grid-gutter: 8px;
     --grid-margin: clamp(1rem, 4vw, 3rem);
+    --grid-margin-inline-end: max(var(--grid-margin), var(--chrome-right-inset));
     --grid-max: 90rem; /* 1440px — common design-artboard width on large screens */
   }
 }
@@ -149,7 +151,7 @@ body {
   max-width: var(--grid-max);
   margin-inline: auto;
   padding-inline-start: var(--grid-margin);
-  padding-inline-end: max(var(--grid-margin), var(--chrome-right-inset));
+  padding-inline-end: var(--grid-margin-inline-end);
 }
 
 .site-grid > .col-full {
@@ -472,13 +474,13 @@ body {
 html:has(.work-scroll-snap) {
   scroll-snap-type: y mandatory;
   scroll-padding-top: var(--chrome-top-offset);
-  scroll-padding-right: var(--chrome-right-inset);
   overscroll-behavior-y: none;
 }
 
 @media (min-width: 1024px) {
   html:has(.work-scroll-snap) {
     scroll-padding-top: 0;
+    scroll-padding-right: var(--chrome-right-inset);
   }
 }
 
@@ -770,7 +772,7 @@ body[data-chrome-surface="canvas"] .floating-chrome .rail-label-vertical {
 
 .craft-page {
   padding-inline-start: var(--grid-margin);
-  padding-inline-end: max(var(--grid-margin), var(--chrome-right-inset));
+  padding-inline-end: var(--grid-margin-inline-end);
   padding-bottom: var(--grid-row-gap);
   max-width: var(--grid-max);
   margin-inline: auto;
@@ -781,7 +783,7 @@ body[data-chrome-surface="canvas"] .floating-chrome .rail-label-vertical {
 .craft-hero-header {
   position: relative;
   margin-inline-start: calc(-1 * var(--grid-margin));
-  margin-inline-end: calc(-1 * max(var(--grid-margin), var(--chrome-right-inset)));
+  margin-inline-end: calc(-1 * var(--grid-margin-inline-end));
   background: var(--color-paper);
   box-sizing: border-box;
 }
@@ -811,7 +813,7 @@ body[data-chrome-surface="canvas"] .floating-chrome .rail-label-vertical {
   width: 100vw;
   max-width: 100vw;
   padding-top: var(--chrome-top-offset);
-  padding-right: max(var(--grid-margin), var(--chrome-right-inset));
+  padding-right: var(--grid-margin-inline-end);
   padding-bottom: 0.65rem;
   padding-left: var(--grid-margin);
   background: var(--color-paper);

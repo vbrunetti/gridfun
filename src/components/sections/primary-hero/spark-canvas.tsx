@@ -386,7 +386,7 @@ export function SparkCanvas({
                   : next[0]?.colorOffset ?? 0,
               );
         ctx.strokeStyle = rgbaFromRgb(linkRgb, params.linkOpacity);
-        ctx.lineWidth = 0.5;
+        ctx.lineWidth = params.linkLineWidth;
         for (let i = 0; i < next.length; i++) {
           for (let j = i + 1; j < next.length; j++) {
             const a = next[i]!;

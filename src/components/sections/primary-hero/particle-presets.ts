@@ -7,7 +7,7 @@ import {
 } from "./particle-shape";
 
 export type { ParticleShape };
-export { HERO_CHAPTER_SHAPES, PARTICLE_SHAPES } from "./particle-shape";
+export { HERO_CHAPTER_SHAPES, PARTICLE_SHAPES, TREFOIL_FAMILY_SHAPES } from "./particle-shape";
 
 export type ParticlePreset = {
   label: string;
@@ -46,10 +46,69 @@ export type ResolvedParticleParams = Omit<
   "label" | "shape" | "rotationDeg"
 > & {
   shapeProfile: ShapeProfile;
+  /** Link stroke width in px — scales with viewport min-axis. */
+  linkLineWidth: number;
 };
 
 function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
+}
+
+/** Viewport min-axis (px) that preset size/density values are authored against. */
+export const PRESET_REFERENCE_MIN_DIM = 800;
+
+/** Link stroke width at PRESET_REFERENCE_MIN_DIM. */
+export const PRESET_REFERENCE_LINK_LINE_WIDTH = 0.5;
+
+/**
+ * Small-viewport tuning — blends pure scaling toward a floor so phones stay
+ * visible without the solid-blob look. Tuned for ~150 nodes at 390px width.
+ */
+const CANVAS_SCALE_FLOOR = 0.76;
+const COUNT_FLOOR_BLEND = 0.7;
+const LINK_FLOOR_BLEND = 0.42;
+/** Smallest dot/link scale on phones — keeps marks visible without going sub-pixel. */
+const MIN_SIZE_SCALE = 0.93;
+
+function rawCanvasMinDimScale(width: number, height: number) {
+  const minDim = Math.min(width, height);
+  if (minDim <= 0) return 1;
+  return minDim / PRESET_REFERENCE_MIN_DIM;
+}
+
+function blendTowardFloor(raw: number, floor: number, blend: number) {
+  const floored = Math.max(raw, floor);
+  return raw * (1 - blend) + floored * blend;
+}
+
+/** Blended area scale — midpoint between sparse (pure area) and dense (full floor). */
+function countAreaScale(width: number, height: number) {
+  const raw = rawCanvasMinDimScale(width, height);
+  const pure = raw * raw;
+  const floored = Math.max(raw, CANVAS_SCALE_FLOOR) ** 2;
+  return blendTowardFloor(pure, floored, COUNT_FLOOR_BLEND);
+}
+
+/** Link reach — slight floor boost so the mesh reads on small screens. */
+function spatialDimScale(width: number, height: number) {
+  const raw = rawCanvasMinDimScale(width, height);
+  return blendTowardFloor(raw, CANVAS_SCALE_FLOOR, LINK_FLOOR_BLEND);
+}
+
+/** Dot/link stroke scale — shrinks slightly on phones, grows on large screens. */
+function sizeCanvasMinDimScale(width: number, height: number) {
+  const raw = rawCanvasMinDimScale(width, height);
+  return Math.max(MIN_SIZE_SCALE, raw);
+}
+
+/** Keeps particle density consistent as the shape grows with viewport size. */
+export function scaleParticleCount(
+  count: number,
+  width: number,
+  height: number,
+): number {
+  const scale = countAreaScale(width, height);
+  return Math.max(40, Math.min(1200, Math.round(count * scale)));
 }
 
 export function blendPresets(
@@ -61,6 +120,8 @@ export function blendPresets(
   shapeScale = 1,
 ): ResolvedParticleParams {
   const minDim = Math.min(width, height);
+  const dimScale = spatialDimScale(width, height);
+  const sizeScale = sizeCanvasMinDimScale(width, height);
   const baseR = minDim * 0.5 * shapeScale;
 
   const profileA = buildShapeProfile(
@@ -78,9 +139,9 @@ export function blendPresets(
   const mt = 1 - t;
   return {
     boundaryScale: lerp(a.boundaryScale, b.boundaryScale, t),
-    count: Math.round(lerp(a.count, b.count, t)),
-    particleRadiusMin: lerp(a.particleRadiusMin, b.particleRadiusMin, t),
-    particleRadiusMax: lerp(a.particleRadiusMax, b.particleRadiusMax, t),
+    count: scaleParticleCount(Math.round(lerp(a.count, b.count, t)), width, height),
+    particleRadiusMin: lerp(a.particleRadiusMin, b.particleRadiusMin, t) * sizeScale,
+    particleRadiusMax: lerp(a.particleRadiusMax, b.particleRadiusMax, t) * sizeScale,
     lifespanMin: lerp(a.lifespanMin, b.lifespanMin, t),
     lifespanMax: lerp(a.lifespanMax, b.lifespanMax, t),
     turbulence: lerp(a.turbulence, b.turbulence, t),
@@ -91,8 +152,9 @@ export function blendPresets(
     outwardBias: lerp(a.outwardBias, b.outwardBias, t),
     alpha: lerp(a.alpha, b.alpha, t),
     glowScale: lerp(a.glowScale, b.glowScale, t),
-    linkDistance: lerp(a.linkDistance, b.linkDistance, t) * shapeScale,
+    linkDistance: lerp(a.linkDistance, b.linkDistance, t) * shapeScale * dimScale,
     linkOpacity: lerp(a.linkOpacity, b.linkOpacity, t) * mt + b.linkOpacity * t,
+    linkLineWidth: PRESET_REFERENCE_LINK_LINE_WIDTH * sizeScale,
     spawnSpread: lerp(a.spawnSpread, b.spawnSpread, t),
     shapeProfile,
   };
@@ -290,9 +352,24 @@ export const PRESET_PARAM_META: Record<
   shape: { min: 0, max: 0, step: 0 },
   boundaryScale: { min: 0.12, max: 0.4, step: 0.01, hint: "~0.25 = 50% viewport" },
   rotationDeg: { min: -180, max: 180, step: 1 },
-  count: { min: 80, max: 1200, step: 10 },
-  particleRadiusMin: { min: 0.1, max: 4, step: 0.05 },
-  particleRadiusMax: { min: 0.1, max: 6, step: 0.05 },
+  count: {
+    min: 80,
+    max: 1200,
+    step: 10,
+    hint: `density at ${PRESET_REFERENCE_MIN_DIM}px min viewport`,
+  },
+  particleRadiusMin: {
+    min: 0.1,
+    max: 4,
+    step: 0.05,
+    hint: `radius at ${PRESET_REFERENCE_MIN_DIM}px min viewport`,
+  },
+  particleRadiusMax: {
+    min: 0.1,
+    max: 6,
+    step: 0.05,
+    hint: `radius at ${PRESET_REFERENCE_MIN_DIM}px min viewport`,
+  },
   lifespanMin: { min: 0.03, max: 2, step: 0.01 },
   lifespanMax: { min: 0.05, max: 3, step: 0.01 },
   turbulence: { min: 0, max: 1, step: 0.01 },

@@ -10,20 +10,31 @@ export type ParticleShape =
   | "ring"
   | "cross"
   | "trefoil"
+  | "clover"
   | "chevron";
 
-/** Home hero — one shape per scroll chapter. */
+/** Home hero — one shape per scroll chapter (trefoil family). */
 export const HERO_CHAPTER_SHAPES: ParticleShape[] = [
-  "circle",
-  "triangle",
-  "square",
-  "star",
   "trefoil",
+  "clover",
+  "spiral",
+  "cross",
+  "ring",
   "chevron",
 ];
 
 /** Default hero chapter sequence — maximally distinct silhouettes. */
 export const CHAPTER_SHAPES: ParticleShape[] = HERO_CHAPTER_SHAPES;
+
+/** Radial / lobed shapes closest to the trefoil rose curve. */
+export const TREFOIL_FAMILY_SHAPES: ParticleShape[] = [
+  "trefoil",
+  "clover",
+  "spiral",
+  "cross",
+  "ring",
+  "chevron",
+];
 
 /** All shapes available in the tuner. */
 export const PARTICLE_SHAPES: ParticleShape[] = [
@@ -34,6 +45,7 @@ export const PARTICLE_SHAPES: ParticleShape[] = [
   "octagon",
   "ring",
   "cross",
+  "clover",
 ];
 
 const SHAPE_SAMPLES = 128;
@@ -76,6 +88,13 @@ function trefoilRadius(theta: number, R: number, rotation: number) {
   const t = theta - rotation;
   const petal = Math.abs(Math.cos(1.5 * t));
   return R * (0.38 + 0.62 * petal);
+}
+
+/** Four-lobed clover (rose curve). */
+function cloverRadius(theta: number, R: number, rotation: number) {
+  const t = theta - rotation;
+  const petal = Math.abs(Math.cos(2 * t));
+  return R * (0.36 + 0.64 * petal);
 }
 
 /** Five-point star (alias of pentagram). */
@@ -212,6 +231,8 @@ export function shapeRadiusAtAngle(
       return starRadius(theta, R, rotation);
     case "trefoil":
       return trefoilRadius(theta, R, rotation);
+    case "clover":
+      return cloverRadius(theta, R, rotation);
     case "chevron":
       return R;
     case "octagon":
