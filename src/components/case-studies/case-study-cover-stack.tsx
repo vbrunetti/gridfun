@@ -14,7 +14,7 @@ const panelThemes = [
   },
   {
     section: "theme-canvas keyline-b keyline-b--canvas",
-    chromeSurface: "canvas" as const,
+    chromeSurface: "light" as const,
   },
 ] as const;
 

@@ -13,7 +13,7 @@ function isActive(pathname: string, href: string) {
 
 export function MenuOverlay() {
   const pathname = usePathname();
-  const { menuOpen, closeMenu, skeletonVisible, toggleSkeleton } = useChrome();
+  const { menuOpen, closeMenu } = useChrome();
 
   if (!menuOpen) {
     return null;
@@ -95,19 +95,6 @@ export function MenuOverlay() {
             </SiteGridCell>
           </SiteGrid>
         </div>
-
-        <SiteGrid className="border-t border-[var(--section-dark-rule)] py-4">
-          <SiteGridCell span="main">
-            <button
-              type="button"
-              onClick={toggleSkeleton}
-              className="text-meta text-tertiary transition-opacity hover:text-secondary"
-              aria-pressed={skeletonVisible}
-            >
-              {skeletonVisible ? "Hide grid" : "Show grid"}
-            </button>
-          </SiteGridCell>
-        </SiteGrid>
       </div>
     </div>
   );

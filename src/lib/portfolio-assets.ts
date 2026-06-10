@@ -8,93 +8,45 @@ export const clientLogos = {
   atlas: "/portfolio/logos/atlas.svg",
 } as const;
 
-export type PortfolioImageRatio = "1x1" | "9x16";
+export type PortfolioImageRatio = "9x16" | "16x9" | "1x1";
 
 type PlaceholderSpec = {
   accent: AccentKey;
-  label: string;
   ratio: PortfolioImageRatio;
-  /** Stable seed for layout variation — e.g. vignette slug or frame index. */
-  seed: string;
-  frame?: number;
-  total?: number;
 };
 
-function hashSeed(seed: string): number {
-  let h = 2166136261;
-  for (let i = 0; i < seed.length; i++) {
-    h ^= seed.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return (h >>> 0) / 2 ** 32;
-}
-
-function frameLabel(frame?: number, total?: number): string {
-  if (frame === undefined) return "";
-  const f = String(frame).padStart(2, "0");
-  const t = total ? String(total).padStart(2, "0") : "";
-  return t ? `${f} / ${t}` : f;
+function ratioDimensions(ratio: PortfolioImageRatio): { w: number; h: number } {
+  if (ratio === "16x9") return { w: 1600, h: 900 };
+  if (ratio === "1x1") return { w: 1200, h: 1200 };
+  return { w: 900, h: 1600 };
 }
 
 /**
- * Inline SVG placeholder — editorial grid + UI mock blocks.
- * Used until real image sources replace accent-only fills in content.
+ * Inline SVG placeholder — a flat accent fill with a simple grid overlay.
+ * Stands in until real image sources replace accent-only fills in content.
  */
-export function portfolioPlaceholderSvg({
-  accent,
-  label,
-  ratio,
-  seed,
-  frame,
-  total,
-}: PlaceholderSpec): string {
-  const unit = hashSeed(seed);
+export function portfolioPlaceholderSvg({ accent, ratio }: PlaceholderSpec): string {
+  const { w, h } = ratioDimensions(ratio);
   const bg = palette[accent];
-  const ink = palette.black;
-  const paper = palette.white;
-  const muted = palette.mediumGray;
-  const accentInk = unit > 0.5 ? ink : paper;
-  const w = ratio === "1x1" ? 900 : 900;
-  const h = ratio === "1x1" ? 900 : 1600;
-  const pad = 72;
-  const innerW = w - pad * 2;
-  const innerH = h - pad * 2;
-  const cols = ratio === "1x1" ? 6 : 4;
-  const rows = ratio === "1x1" ? 6 : 10;
-  const colW = innerW / cols;
-  const rowH = innerH / rows;
-  const blockRow = Math.floor(unit * (rows - 3)) + 1;
-  const blockCol = Math.floor(hashSeed(`${seed}-col`) * (cols - 2)) + 1;
-  const blockRows = ratio === "1x1" ? 3 : 4;
-  const blockCols = ratio === "1x1" ? 4 : 3;
-  const index = frameLabel(frame, total);
+  const line = palette.black;
+  const cell = 100;
+  const cols = Math.round(w / cell);
+  const rows = Math.round(h / cell);
 
-  const gridLines = Array.from({ length: cols + 1 }, (_, i) => {
-    const x = pad + i * colW;
-    return `<line x1="${x}" y1="${pad}" x2="${x}" y2="${h - pad}" stroke="${muted}" stroke-opacity="0.35" stroke-width="1"/>`;
+  const verticals = Array.from({ length: cols + 1 }, (_, i) => {
+    const x = (i * w) / cols;
+    return `<line x1="${x}" y1="0" x2="${x}" y2="${h}" stroke="${line}" stroke-opacity="0.12" stroke-width="2"/>`;
   }).join("");
 
-  const rowLines = Array.from({ length: rows + 1 }, (_, i) => {
-    const y = pad + i * rowH;
-    return `<line x1="${pad}" y1="${y}" x2="${w - pad}" y2="${y}" stroke="${muted}" stroke-opacity="0.35" stroke-width="1"/>`;
+  const horizontals = Array.from({ length: rows + 1 }, (_, i) => {
+    const y = (i * h) / rows;
+    return `<line x1="0" y1="${y}" x2="${w}" y2="${y}" stroke="${line}" stroke-opacity="0.12" stroke-width="2"/>`;
   }).join("");
 
-  const bx = pad + (blockCol - 1) * colW;
-  const by = pad + (blockRow - 1) * rowH;
-  const bw = blockCols * colW - 12;
-  const bh = blockRows * rowH - 12;
-
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" role="img" aria-label="${label}">
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" role="img" aria-label="placeholder">
   <rect width="${w}" height="${h}" fill="${bg}"/>
-  ${gridLines}
-  ${rowLines}
-  <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="8" fill="${paper}" fill-opacity="0.92" stroke="${ink}" stroke-opacity="0.12" stroke-width="2"/>
-  <rect x="${bx + 24}" y="${by + 24}" width="${Math.min(bw * 0.55, 280)}" height="12" rx="2" fill="${ink}" fill-opacity="0.18"/>
-  <rect x="${bx + 24}" y="${by + 52}" width="${Math.min(bw * 0.75, 360)}" height="8" rx="2" fill="${ink}" fill-opacity="0.1"/>
-  <rect x="${bx + 24}" y="${by + 72}" width="${Math.min(bw * 0.65, 320)}" height="8" rx="2" fill="${ink}" fill-opacity="0.1"/>
-  <rect x="${bx + 24}" y="${by + bh - 56}" width="${Math.min(bw * 0.42, 200)}" height="32" rx="16" fill="${palette[accent === "offWhite" || accent === "white" ? "charcoal" : accent]}"/>
-  <text x="${pad}" y="${pad - 18}" fill="${accentInk}" fill-opacity="0.72" font-family="ui-sans-serif, system-ui, sans-serif" font-size="22" font-weight="600" letter-spacing="0.08em">${label.toUpperCase()}</text>
-  ${index ? `<text x="${w - pad}" y="${h - pad + 36}" text-anchor="end" fill="${accentInk}" fill-opacity="0.55" font-family="ui-monospace, monospace" font-size="20" letter-spacing="0.12em">${index}</text>` : ""}
+  ${verticals}
+  ${horizontals}
 </svg>`;
 }
 
@@ -104,32 +56,15 @@ export function portfolioPlaceholderDataUrl(spec: PlaceholderSpec): string {
 }
 
 export function vignetteKeyImageSrc(
-  slug: string,
   accent: AccentKey,
-  name: string,
   ratio: PortfolioImageRatio,
 ): string {
-  return portfolioPlaceholderDataUrl({
-    accent,
-    label: name,
-    ratio,
-    seed: `${slug}-key`,
-  });
+  return portfolioPlaceholderDataUrl({ accent, ratio });
 }
 
 export function vignetteFrameSrc(
-  slug: string,
   accent: AccentKey,
-  name: string,
-  frameIndex: number,
-  total: number,
+  ratio: PortfolioImageRatio,
 ): string {
-  return portfolioPlaceholderDataUrl({
-    accent,
-    label: name,
-    ratio: "9x16",
-    seed: `${slug}-frame-${frameIndex}`,
-    frame: frameIndex + 1,
-    total,
-  });
+  return portfolioPlaceholderDataUrl({ accent, ratio });
 }

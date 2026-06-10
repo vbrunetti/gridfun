@@ -1,22 +1,8 @@
-type VimeoEmbedProps = {
-  videoId: string;
-  title: string;
-  /** Portrait 9:16 by default — matches mobile-first case study video. */
-  aspectRatio?: "9/16" | "16/9" | "1/1";
-  className?: string;
-};
+import { VimeoPlayer, type VimeoPlayerProps } from "@/components/media/vimeo-player";
 
-function buildEmbedUrl(videoId: string) {
-  const params = new URLSearchParams({
-    title: "0",
-    byline: "0",
-    portrait: "0",
-    dnt: "1",
-  });
+type VimeoEmbedProps = VimeoPlayerProps;
 
-  return `https://player.vimeo.com/video/${videoId}?${params.toString()}`;
-}
-
+/** Standalone figure wrapper — for MDX and prose pages. */
 export function VimeoEmbed({
   videoId,
   title,
@@ -25,18 +11,14 @@ export function VimeoEmbed({
 }: VimeoEmbedProps) {
   return (
     <figure className={className}>
-      <div
-        className="relative w-full overflow-hidden border border-[var(--rule-light)] bg-[var(--color-flesh)]/40"
-        style={{ aspectRatio }}
-      >
-        <iframe
-          src={buildEmbedUrl(videoId)}
-          title={title}
-          className="absolute inset-0 h-full w-full border-0"
-          allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
-          allowFullScreen
-        />
-      </div>
+      <VimeoPlayer
+        videoId={videoId}
+        title={title}
+        aspectRatio={aspectRatio}
+        className="vimeo-embed relative w-full overflow-hidden border border-[var(--rule-light)] bg-[var(--color-flesh)]/40"
+      />
     </figure>
   );
 }
+
+export { VimeoPlayer } from "@/components/media/vimeo-player";

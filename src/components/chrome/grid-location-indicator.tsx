@@ -7,7 +7,7 @@ import {
 } from "@/lib/site-location";
 
 /**
- * Vertical grid / page label — render inside the right chrome column (under menu).
+ * Vertical grid / page label — rendered in the left rail, centered vertically.
  */
 export function GridLocationIndicator() {
   const pathname = usePathname();

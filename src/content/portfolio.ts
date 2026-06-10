@@ -7,27 +7,35 @@ import { palette, portraitAccents } from "@/lib/colors";
  *   CaseStudy
  *     └─ sections[]  (ordered, freely interleaved)
  *          ├─ ProseSection   — original writing (heading + body)
- *          └─ CraftVignette  — key image + tags + 9×16 images with captions
+ *          └─ CraftVignette  — key image + tags + images with captions
  *
  * A vignette belongs to exactly one case study. Craft tags are free-form
  * strings; the Craft page filter set is derived from the union of all tags
  * actually used across vignettes.
  *
- * Visuals are placeholder accent fills today — swap `accent` for real image
- * sources when content lands, without changing the shape of this model.
+ * Every gallery frame — image or Vimeo video — is either 9×16 portrait or 16×9
+ * landscape. Visuals are placeholder accent fills today — swap `accent`/`src` or
+ * add `vimeo` for real media without changing the shape of this model.
  */
 
 export type AccentKey = keyof typeof palette;
 
-/** Key image is square or portrait; drives the masonry tile shape. */
-export type KeyImageRatio = "1x1" | "9x16";
+/** Every portfolio image is portrait (9×16) or landscape (16×9). */
+export type ImageRatio = "9x16" | "16x9";
 
-/** One 9×16 image inside a vignette. Caption may be empty → a paragraph. */
+/** Back-compat alias — the key image uses the same ratio set. */
+export type KeyImageRatio = ImageRatio;
+
+/** One gallery frame — image and/or Vimeo video. Caption may be empty. */
 export type VignetteImage = {
+  /** Portrait (9×16) or landscape (16×9). */
+  ratio: ImageRatio;
   /** Placeholder fill until a real image source is provided. */
   accent: AccentKey;
   /** Optional real image source (overrides the placeholder fill). */
   src?: string;
+  /** Vimeo video ID or full vimeo.com URL — renders a player instead of an image. */
+  vimeo?: string;
   caption?: string;
 };
 
@@ -36,7 +44,8 @@ export type CraftVignette = {
   /** Unique across the whole site — powers /craft/[vignette]. */
   slug: string;
   name: string;
-  keyImageRatio: KeyImageRatio;
+  /** Portrait (9×16) or landscape (16×9); default key-image shape on detail pages. */
+  keyImageRatio: ImageRatio;
   /** Placeholder key-image fill until a real source is provided. */
   keyImageAccent: AccentKey;
   keyImageSrc?: string;
@@ -58,9 +67,14 @@ export type CaseStudySection = ProseSection | CraftVignette;
 export type CaseStudy = {
   slug: string;
   name: string;
+  /** One-line deck under the hero title. */
+  subhead: string;
   /** Display date, e.g. "2024" or "Mar 2024". */
   date: string;
   client: string;
+  location: string;
+  role: string;
+  tools: string;
   /** Placeholder client logo source; falls back to a wordmark when absent. */
   clientLogo?: string;
   /** Ordered mix of prose sections and craft vignettes. */
@@ -71,8 +85,13 @@ export const caseStudies: CaseStudy[] = [
   {
     slug: "northwind-payments",
     name: "Payments that recover themselves",
+    subhead:
+      "Rebuilding checkout failure as a recoverable fork — not a dead end.",
     date: "2024",
     client: "Northwind",
+    location: "Remote · US & EU",
+    role: "Lead product designer",
+    tools: "Figma, React, Amplitude",
     clientLogo: "/portfolio/logos/northwind.svg",
     sections: [
       {
@@ -90,13 +109,21 @@ export const caseStudies: CaseStudy[] = [
         tags: ["User research", "Interaction", "Web"],
         images: [
           {
+            ratio: "16x9",
             accent: "neonLime",
             caption:
               "The failure state, reframed. Instead of a dead end, a declined card now opens a calm recovery sheet with the next best action pre-selected.",
           },
-          { accent: "offWhite", caption: "Retry, switch method, or save for later — three doors, no shame." },
-          { accent: "lightGray" },
+          { ratio: "9x16", accent: "offWhite", caption: "Retry, switch method, or save for later — three doors, no shame." },
           {
+            ratio: "16x9",
+            accent: "lightGray",
+            vimeo: "1199955340",
+            caption:
+              "Recovery flow walkthrough — the sheet opens in context while the cart stays visible.",
+          },
+          {
+            ratio: "9x16",
             accent: "charcoal",
             caption:
               "Completed-purchase rate lifted 24% in the first month after launch.",
@@ -113,13 +140,13 @@ export const caseStudies: CaseStudy[] = [
         type: "vignette",
         slug: "express-pay-sheet",
         name: "Express pay sheet",
-        keyImageRatio: "1x1",
+        keyImageRatio: "16x9",
         keyImageAccent: portraitAccents[1],
         tags: ["Interaction", "Motion", "Mobile"],
         images: [
-          { accent: "hotPink", caption: "One-thumb reach: the primary action never leaves the bottom third." },
-          { accent: "offWhite" },
-          { accent: "skyBlue", caption: "Motion confirms success before the network does — perceived speed beats actual speed." },
+          { ratio: "9x16", accent: "hotPink", caption: "One-thumb reach: the primary action never leaves the bottom third." },
+          { ratio: "16x9", accent: "offWhite" },
+          { ratio: "9x16", accent: "skyBlue", caption: "Motion confirms success before the network does — perceived speed beats actual speed." },
         ],
       },
     ],
@@ -127,8 +154,13 @@ export const caseStudies: CaseStudy[] = [
   {
     slug: "meridian-care",
     name: "Triage at the speed of a shift",
+    subhead:
+      "A single triage board and a handoff ritual built for the chaos of a ward.",
     date: "2024",
     client: "Meridian Health",
+    location: "Boston, MA",
+    role: "Product designer",
+    tools: "Figma, Miro, React Native",
     clientLogo: "/portfolio/logos/meridian.svg",
     sections: [
       {
@@ -145,22 +177,22 @@ export const caseStudies: CaseStudy[] = [
         keyImageAccent: portraitAccents[2],
         tags: ["Service design", "User research", "Mobile"],
         images: [
-          { accent: "royalBlue", caption: "Priority sorts itself. The board re-ranks patients as vitals and wait times change." },
-          { accent: "offWhite", caption: "Color is information, never decoration — every hue maps to an acuity level." },
-          { accent: "lightGray" },
+          { ratio: "9x16", accent: "royalBlue", caption: "Priority sorts itself. The board re-ranks patients as vitals and wait times change." },
+          { ratio: "16x9", accent: "offWhite", caption: "Color is information, never decoration — every hue maps to an acuity level." },
+          { ratio: "9x16", accent: "lightGray" },
         ],
       },
       {
         type: "vignette",
         slug: "shift-handoff",
         name: "Shift handoff",
-        keyImageRatio: "1x1",
+        keyImageRatio: "16x9",
         keyImageAccent: portraitAccents[3],
         tags: ["Service design", "Accessibility", "Web"],
         images: [
-          { accent: "skyBlue", caption: "The handoff is a story, not a spreadsheet — outgoing nurses leave a narrative, not a data dump." },
-          { accent: "offWhite" },
-          { accent: "charcoal", caption: "Triage time fell by 18 minutes per shift." },
+          { ratio: "16x9", accent: "skyBlue", caption: "The handoff is a story, not a spreadsheet — outgoing nurses leave a narrative, not a data dump." },
+          { ratio: "9x16", accent: "offWhite" },
+          { ratio: "16x9", accent: "charcoal", caption: "Triage time fell by 18 minutes per shift." },
         ],
       },
     ],
@@ -168,8 +200,13 @@ export const caseStudies: CaseStudy[] = [
   {
     slug: "loft-discovery",
     name: "From browse to bag",
+    subhead:
+      "Giving discovery a direction — every interaction nudges toward the bag.",
     date: "2023",
     client: "Loft",
+    location: "New York, NY",
+    role: "Lead product designer",
+    tools: "Figma, Principle, Next.js",
     clientLogo: "/portfolio/logos/loft.svg",
     sections: [
       {
@@ -182,13 +219,13 @@ export const caseStudies: CaseStudy[] = [
         type: "vignette",
         slug: "discovery-rail",
         name: "Discovery rail",
-        keyImageRatio: "9x16",
+        keyImageRatio: "16x9",
         keyImageAccent: portraitAccents[5],
         tags: ["Visual design", "Interaction", "Web"],
         images: [
-          { accent: "mediumBlue", caption: "Editorial-grade imagery, shopping-grade intent. The rail reads like a magazine and behaves like a store." },
-          { accent: "offWhite" },
-          { accent: "lightGray", caption: "" },
+          { ratio: "16x9", accent: "mediumBlue", caption: "Editorial-grade imagery, shopping-grade intent. The rail reads like a magazine and behaves like a store." },
+          { ratio: "9x16", accent: "offWhite" },
+          { ratio: "16x9", accent: "lightGray", caption: "" },
         ],
       },
       {
@@ -201,12 +238,12 @@ export const caseStudies: CaseStudy[] = [
         type: "vignette",
         slug: "bag-and-checkout",
         name: "Bag & checkout",
-        keyImageRatio: "1x1",
+        keyImageRatio: "9x16",
         keyImageAccent: portraitAccents[6],
         tags: ["Interaction", "Prototyping", "Web"],
         images: [
-          { accent: "mediumGray", caption: "The bag is always one gesture away, and always honest about totals." },
-          { accent: "offWhite", caption: "Browse-to-bag rate improved 19% on discovery surfaces." },
+          { ratio: "9x16", accent: "mediumGray", caption: "The bag is always one gesture away, and always honest about totals." },
+          { ratio: "16x9", accent: "offWhite", caption: "Browse-to-bag rate improved 19% on discovery surfaces." },
         ],
       },
     ],
@@ -214,8 +251,13 @@ export const caseStudies: CaseStudy[] = [
   {
     slug: "atlas-design-system",
     name: "One system, six teams",
+    subhead:
+      "A design system good enough that adoption felt like relief, not mandate.",
     date: "2025",
     client: "Atlas",
+    location: "San Francisco, CA",
+    role: "Design systems lead",
+    tools: "Figma, Storybook, Style Dictionary",
     clientLogo: "/portfolio/logos/atlas.svg",
     sections: [
       {
@@ -228,13 +270,13 @@ export const caseStudies: CaseStudy[] = [
         type: "vignette",
         slug: "token-pipeline",
         name: "Token pipeline",
-        keyImageRatio: "1x1",
+        keyImageRatio: "16x9",
         keyImageAccent: portraitAccents[0],
         tags: ["Design systems", "Visual design", "Web"],
         images: [
-          { accent: "neonLime", caption: "One source of truth, every platform downstream. Tokens flow from design to code automatically." },
-          { accent: "offWhite" },
-          { accent: "lightGray", caption: "A single token rollout unified brand color across four legacy apps." },
+          { ratio: "16x9", accent: "neonLime", caption: "One source of truth, every platform downstream. Tokens flow from design to code automatically." },
+          { ratio: "9x16", accent: "offWhite" },
+          { ratio: "16x9", accent: "lightGray", caption: "A single token rollout unified brand color across four legacy apps." },
         ],
       },
       {
@@ -245,21 +287,21 @@ export const caseStudies: CaseStudy[] = [
         keyImageAccent: portraitAccents[1],
         tags: ["Design systems", "Accessibility", "Web"],
         images: [
-          { accent: "hotPink", caption: "Docs that ship with the code, so they can never drift out of date." },
-          { accent: "offWhite", caption: "Every component arrives with its accessibility contract written down." },
+          { ratio: "9x16", accent: "hotPink", caption: "Docs that ship with the code, so they can never drift out of date." },
+          { ratio: "16x9", accent: "offWhite", caption: "Every component arrives with its accessibility contract written down." },
         ],
       },
       {
         type: "vignette",
         slug: "adoption-dashboard",
         name: "Adoption dashboard",
-        keyImageRatio: "1x1",
+        keyImageRatio: "16x9",
         keyImageAccent: portraitAccents[2],
         tags: ["Data viz", "Leadership", "Web"],
         images: [
-          { accent: "royalBlue", caption: "Adoption made visible. Leaders could see, squad by squad, how much of each surface was on-system." },
-          { accent: "offWhite" },
-          { accent: "charcoal", caption: "Shipped to all six product squads in 90 days." },
+          { ratio: "16x9", accent: "royalBlue", caption: "Adoption made visible. Leaders could see, squad by squad, how much of each surface was on-system." },
+          { ratio: "9x16", accent: "offWhite" },
+          { ratio: "16x9", accent: "charcoal", caption: "Shipped to all six product squads in 90 days." },
         ],
       },
     ],

@@ -178,8 +178,8 @@ export const spacingTokens = [
   {
     token: "--grid-gutter",
     label: "Grid column gutter",
-    mobile: "2px",
-    desktop: "8px (lg+)",
+    mobile: "clamp(1rem, 2.5vw, 1.5rem)",
+    desktop: "same",
   },
   {
     token: "--grid-margin",

@@ -1,67 +1,73 @@
 import Image from "next/image";
 import type { CSSProperties } from "react";
-import type { CraftVignette, KeyImageRatio } from "@/content/portfolio";
+import type { CraftVignette, ImageRatio } from "@/content/portfolio";
 import { palette } from "@/lib/colors";
 import {
-  vignetteFrameSrc,
   vignetteKeyImageSrc,
+  type PortfolioImageRatio,
 } from "@/lib/portfolio-assets";
 
-function ratioValue(ratio: KeyImageRatio): string {
-  return ratio === "1x1" ? "1 / 1" : "9 / 16";
+export { VignetteImageScroll } from "@/components/craft/vignette-carousel";
+
+/** Craft index cards — square, landscape, or portrait (stable per slug). */
+export type CraftCardRatio = PortfolioImageRatio;
+
+const CRAFT_CARD_RATIOS: CraftCardRatio[] = ["1x1", "16x9", "9x16"];
+
+export function craftCardRatio(slug: string): CraftCardRatio {
+  let hash = 0;
+  for (let i = 0; i < slug.length; i++) {
+    hash = (hash * 31 + slug.charCodeAt(i)) >>> 0;
+  }
+  return CRAFT_CARD_RATIOS[hash % CRAFT_CARD_RATIOS.length];
 }
 
-function resolveKeySrc(vignette: CraftVignette): string {
-  return (
-    vignette.keyImageSrc ??
-    vignetteKeyImageSrc(
-      vignette.slug,
-      vignette.keyImageAccent,
-      vignette.name,
-      vignette.keyImageRatio,
-    )
-  );
+function ratioValue(ratio: PortfolioImageRatio): string {
+  if (ratio === "16x9") return "16 / 9";
+  if (ratio === "1x1") return "1 / 1";
+  return "9 / 16";
 }
 
-function resolveFrameSrc(
-  vignette: CraftVignette,
-  frameIndex: number,
-): string {
-  const image = vignette.images[frameIndex];
-  return (
-    image.src ??
-    vignetteFrameSrc(
-      vignette.slug,
-      image.accent,
-      vignette.name,
-      frameIndex,
-      vignette.images.length,
-    )
-  );
+function ratioDimensions(
+  ratio: PortfolioImageRatio,
+): { width: number; height: number } {
+  if (ratio === "16x9") return { width: 1600, height: 900 };
+  if (ratio === "1x1") return { width: 1200, height: 1200 };
+  return { width: 900, height: 1600 };
 }
 
-/** Vignette key image — square or 9×16 portrait. */
+function resolveKeySrc(vignette: CraftVignette, ratio: PortfolioImageRatio): string {
+  if (vignette.keyImageSrc) return vignette.keyImageSrc;
+  return vignetteKeyImageSrc(vignette.keyImageAccent, ratio);
+}
+
+/** Vignette key image — portrait, landscape, or square. */
 export function VignetteKeyImage({
   vignette,
   className = "",
   priority = false,
+  displayRatio,
 }: {
   vignette: CraftVignette;
   className?: string;
   priority?: boolean;
+  /** Override aspect ratio for presentation (craft index masonry). */
+  displayRatio?: PortfolioImageRatio;
 }) {
-  const src = resolveKeySrc(vignette);
+  const ratio = displayRatio ?? vignette.keyImageRatio;
+  const src = resolveKeySrc(vignette, ratio);
+  const { width, height } = ratioDimensions(ratio);
 
   return (
     <Image
       src={src}
       alt={vignette.name}
-      width={vignette.keyImageRatio === "1x1" ? 900 : 900}
-      height={vignette.keyImageRatio === "1x1" ? 900 : 1600}
+      width={width}
+      height={height}
       priority={priority}
       unoptimized={src.startsWith("data:")}
       className={`vignette-key-image ${className}`.trim()}
-      style={{ aspectRatio: ratioValue(vignette.keyImageRatio) } as CSSProperties}
+      style={{ aspectRatio: ratioValue(ratio) } as CSSProperties}
       sizes="(max-width: 768px) 100vw, min(420px, 40vw)"
     />
   );
@@ -83,100 +89,6 @@ export function CraftTagList({
         </li>
       ))}
     </ul>
-  );
-}
-
-/**
- * Horizontal scroller through a vignette's 9×16 images, each with an optional
- * caption. Pure CSS scroll-snap — no JS needed.
- *
- * `layout="grid"` — direct children of RuledGrid; copy aligns to col-span-content.
- */
-export function VignetteImageScroll({
-  vignette,
-  showHeader = true,
-  layout = "default",
-}: {
-  vignette: CraftVignette;
-  showHeader?: boolean;
-  layout?: "default" | "grid";
-}) {
-  if (vignette.images.length === 0) return null;
-
-  const total = vignette.images.length;
-
-  const header = showHeader ? (
-    <div className="vignette-hscroll-head">
-      <p className="text-meta vignette-hscroll-count">
-        {String(total).padStart(2, "0")} frames
-      </p>
-      <p className="text-meta vignette-hscroll-hint" aria-hidden>
-        Scroll →
-      </p>
-    </div>
-  ) : null;
-
-  const scroller = (
-    <div className="vignette-hscroll-shell">
-      <div
-        className="vignette-hscroll"
-        role="region"
-        aria-label={`${vignette.name} — images`}
-        tabIndex={0}
-      >
-        {vignette.images.map((image, index) => {
-          const src = resolveFrameSrc(vignette, index);
-          const alt =
-            image.caption?.trim() ||
-            `${vignette.name} frame ${String(index + 1).padStart(2, "0")}`;
-
-          return (
-            <figure className="vignette-himage" key={index}>
-              <div className="vignette-himage__frame">
-                <span className="vignette-himage__index text-meta" aria-hidden>
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <Image
-                  src={src}
-                  alt={alt}
-                  width={900}
-                  height={1600}
-                  unoptimized={src.startsWith("data:")}
-                  className="vignette-himage__media"
-                  sizes="(max-width: 768px) 78vw, 380px"
-                />
-              </div>
-              {image.caption ? (
-                <figcaption className="vignette-himage__caption">
-                  {image.caption}
-                </figcaption>
-              ) : (
-                <figcaption
-                  className="vignette-himage__caption vignette-himage__caption--empty"
-                  aria-hidden
-                />
-              )}
-            </figure>
-          );
-        })}
-      </div>
-    </div>
-  );
-
-  if (layout === "grid") {
-    return (
-      <div className="col-span-content vignette-hscroll-wrap vignette-hscroll-wrap--grid">
-        {header}
-        {scroller}
-      </div>
-    );
-  }
-
-  return (
-    <div className="vignette-hscroll-wrap">
-      {header}
-      {scroller}
-    </div>
   );
 }
 

@@ -8,7 +8,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type CSSProperties,
   type ReactElement,
   type ReactNode,
 } from "react";
@@ -21,6 +20,20 @@ const COLUMN_BREAKPOINTS = [
   { minWidth: 640, columns: 3 },
   { minWidth: 0, columns: 2 },
 ] as const;
+
+function useGridColumnCount() {
+  const [columns, setColumns] = useState(6);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const sync = () => setColumns(mq.matches ? 12 : 6);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  return columns;
+}
 
 type MasonryPlacement = {
   gridColumn: string;
@@ -60,11 +73,13 @@ function useMasonryColumnCount() {
   return columns;
 }
 
-/** Stories 01, 02, 03… left to right, wrapping rows; per-column row tracking. */
+/** Map masonry lanes onto master grid tracks (6-col mobile, 12-col desktop). */
 function computePlacements(
   entries: { id: string; span: number }[],
   columnCount: number,
+  gridColumns: number,
 ): MasonryPlacement[] {
+  const trackSpan = gridColumns / columnCount;
   const track = Array.from({ length: columnCount }, () => 1);
 
   return entries.map((entry, index) => {
@@ -74,7 +89,7 @@ function computePlacements(
     track[col] = rowStart + span;
 
     return {
-      gridColumn: String(col + 1),
+      gridColumn: `${col * trackSpan + 1} / span ${trackSpan}`,
       gridRowStart: rowStart,
       gridRowEnd: `span ${span}`,
     };
@@ -151,6 +166,7 @@ type CraftMasonryProps = {
  */
 export function CraftMasonry({ children }: CraftMasonryProps) {
   const columnCount = useMasonryColumnCount();
+  const gridColumns = useGridColumnCount();
   const [spans, setSpans] = useState<Record<string, number>>({});
 
   const items = Children.toArray(children).filter(isValidElement) as ReactElement[];
@@ -165,8 +181,8 @@ export function CraftMasonry({ children }: CraftMasonryProps) {
   );
 
   const placements = useMemo(
-    () => computePlacements(entries, columnCount),
-    [entries, columnCount],
+    () => computePlacements(entries, columnCount, gridColumns),
+    [entries, columnCount, gridColumns],
   );
 
   const handleSpan = useCallback((key: string, span: number) => {
@@ -174,11 +190,7 @@ export function CraftMasonry({ children }: CraftMasonryProps) {
   }, []);
 
   return (
-    <div
-      className="craft-masonry"
-      style={{ "--craft-cols": columnCount } as CSSProperties}
-      aria-live="polite"
-    >
+    <div className="craft-masonry" aria-live="polite">
       {items.map((child, index) => {
         const id = String(child.key ?? `masonry-${index}`);
         return (

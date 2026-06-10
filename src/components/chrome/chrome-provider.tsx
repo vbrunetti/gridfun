@@ -41,16 +41,6 @@ export function ChromeProvider({ children }: { children: ReactNode }) {
     };
   }, [menuOpen]);
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setMenuOpen(false);
-      }
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
-
   const openMenu = useCallback(() => setMenuOpen(true), []);
   const closeMenu = useCallback(() => setMenuOpen(false), []);
   const toggleMenu = useCallback(() => setMenuOpen((open) => !open), []);
@@ -62,6 +52,30 @@ export function ChromeProvider({ children }: { children: ReactNode }) {
       return next;
     });
   }, []);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+        return;
+      }
+
+      if (event.key !== "g" && event.key !== "G") return;
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+
+      const target = event.target as HTMLElement | null;
+      if (
+        target?.closest("input, textarea, select, [contenteditable='true']")
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      toggleSkeleton();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [toggleSkeleton]);
 
   const value = useMemo(
     () => ({

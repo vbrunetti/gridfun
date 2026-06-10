@@ -70,7 +70,7 @@ export default async function VignettePage({ params }: PageProps) {
         <VignetteImageScroll vignette={vignette} />
       </section>
 
-      <section className="theme-canvas py-12" data-chrome-surface="canvas">
+      <section className="theme-canvas py-12" data-chrome-surface="light">
         <RuledGrid>
           <SiteGridSubgrid className="items-start gap-y-8">
             <div className="grid-span-6 lg:grid-span-5">

@@ -1,8 +1,8 @@
 "use client";
 
 import { useChrome } from "./chrome-provider";
+import { CaseStudiesDotsRail } from "./case-studies-dots-rail";
 import { HeroDotsRail } from "./hero-dots-rail";
-import { GridLocationIndicator } from "./grid-location-indicator";
 import { IconMenuToggle } from "./icons";
 
 export function FloatingChrome() {
@@ -27,12 +27,12 @@ export function FloatingChrome() {
         </button>
       </div>
 
-      <HeroDotsRail />
-
-      {/* Grid label — .chrome-rail-grid-label positions on shared axis (see globals.css) */}
-      <div className="chrome-rail-grid-label">
-        <GridLocationIndicator />
-      </div>
+      {!menuOpen ? (
+        <>
+          <HeroDotsRail />
+          <CaseStudiesDotsRail />
+        </>
+      ) : null}
     </div>
   );
 }

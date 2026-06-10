@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { copyrightLine, socialLinks } from "@/lib/nav";
 import { IconGitHub, IconLinkedIn } from "./icons";
+import { GridLocationIndicator } from "./grid-location-indicator";
 import { useChrome } from "./chrome-provider";
 
 function SocialIconButton({
@@ -46,6 +47,11 @@ export function LeftRail() {
         }}
         aria-hidden
       />
+
+      {/* Grid / page location — vertically centered on the rail */}
+      <div className="pointer-events-none absolute top-1/2 right-0 left-0 flex -translate-y-1/2 justify-center">
+        <GridLocationIndicator />
+      </div>
 
       <div className="absolute right-0 bottom-0 left-0 flex flex-col items-center gap-0 pb-[var(--chrome-pad)]">
         <p className="rail-label-vertical">{copyrightLine}</p>

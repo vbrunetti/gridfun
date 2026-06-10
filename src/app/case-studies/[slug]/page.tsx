@@ -5,7 +5,6 @@ import { CtaButton } from "@/components/chrome/cta-button";
 import { RuledGrid } from "@/components/layout/ruled-grid";
 import { SiteGridSubgrid } from "@/components/layout/site-grid";
 import {
-  ClientLogo,
   CraftTagList,
   VignetteImageScroll,
 } from "@/components/craft/vignette-media";
@@ -42,19 +41,29 @@ export default async function CaseStudyPage({ params }: PageProps) {
   const index = caseStudies.findIndex((item) => item.slug === slug);
   const next = caseStudies[index + 1];
 
+  const heroFacts = [
+    { key: "client", label: "Client", value: study.client },
+    { key: "date", label: "Date", value: study.date },
+    { key: "role", label: "Role", value: study.role },
+    { key: "tools", label: "Tools", value: study.tools },
+  ] as const;
+
   return (
     <article className="cs-detail">
-      <section className="theme-light keyline-b" data-chrome-surface="light">
-        <RuledGrid className="py-[var(--grid-row-gap)]">
-          <div className="col-span-content">
-            <p className="text-meta">
-              Case study {String(index + 1).padStart(2, "0")} · {study.date}
-            </p>
-            <h1 className="display-xl mt-4">{study.name}</h1>
-            <div className="cs-detail__client mt-4">
-              <ClientLogo client={study.client} logoSrc={study.clientLogo} />
-              <span className="text-meta">{study.client}</span>
-            </div>
+      <section className="cs-hero theme-light keyline-b" data-chrome-surface="light">
+        <RuledGrid className="cs-hero__grid">
+          <div className="cs-hero__facts">
+            {heroFacts.map(({ key, label, value }) => (
+              <div key={key} className={`cs-hero__fact cs-hero__fact--${key}`}>
+                <p className="cs-hero__fact-kicker text-meta">{label}</p>
+                <p className="cs-hero__fact-value">{value}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="cs-hero__title-block">
+            <h1 className="cs-hero__title display-xl">{study.name}</h1>
+            <p className="cs-hero__subhead">{study.subhead}</p>
           </div>
         </RuledGrid>
       </section>
@@ -68,19 +77,19 @@ export default async function CaseStudyPage({ params }: PageProps) {
               data-chrome-surface="light"
               id={`vignette-${section.slug}`}
             >
-              <RuledGrid className="py-[var(--grid-row-gap)]">
-                <div className="col-span-content cs-vignette-head">
-                  <p className="text-meta">Vignette</p>
-                  <h2 className="display-lg mt-3">
-                    <Link
-                      href={`/craft/${section.slug}`}
-                      className="transition-opacity hover:opacity-70"
-                    >
-                      {section.name}
-                    </Link>
-                  </h2>
-                  <CraftTagList tags={section.tags} className="mt-4" />
-                </div>
+              <RuledGrid className="cs-vignette__grid">
+                <h2 className="cs-vignette__title display-lg">
+                  <Link
+                    href={`/craft/${section.slug}`}
+                    className="transition-opacity hover:opacity-70"
+                  >
+                    {section.name}
+                  </Link>
+                </h2>
+                <CraftTagList
+                  tags={section.tags}
+                  className="cs-vignette__tags"
+                />
                 <VignetteImageScroll vignette={section} layout="grid" />
               </RuledGrid>
             </section>
@@ -93,15 +102,15 @@ export default async function CaseStudyPage({ params }: PageProps) {
             className="cs-section cs-section--prose keyline-b"
             data-chrome-surface="light"
           >
-            <RuledGrid className="py-[var(--grid-row-gap)]">
-              <div className="col-span-content cs-prose">
-                {section.heading ? (
-                  <h2 className="display-md cs-prose__heading">
-                    {section.heading}
-                  </h2>
-                ) : null}
+            <RuledGrid>
+              {section.heading ? (
+                <h2 className="cs-prose__heading display-lg">
+                  {section.heading}
+                </h2>
+              ) : null}
+              <div className="cs-prose__body">
                 {section.body.split("\n\n").map((paragraph, i) => (
-                  <p key={i} className="cs-prose__body">
+                  <p key={i} className="cs-prose__paragraph">
                     {paragraph}
                   </p>
                 ))}
@@ -113,7 +122,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
 
       <section
         className="theme-canvas py-12"
-        data-chrome-surface="canvas"
+        data-chrome-surface="light"
       >
         <RuledGrid>
           <SiteGridSubgrid className="items-center">

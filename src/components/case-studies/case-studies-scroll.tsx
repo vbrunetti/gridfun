@@ -4,8 +4,10 @@ import {
   useCallback,
   useEffect,
   useRef,
+  useState,
   type ReactNode,
 } from "react";
+import { useCaseStudiesScrollRegister } from "@/components/case-studies/case-studies-scroll-context";
 
 const WHEEL_DELTA_MIN = 6;
 const SCROLL_LOCK_MS = 720;
@@ -63,12 +65,18 @@ export function CaseStudiesScroll({ children }: CaseStudiesScrollProps) {
   const lockRef = useRef(false);
   const stepRef = useRef(0);
   const offsetsRef = useRef<number[]>([0]);
+  const [activeStep, setActiveStep] = useState(0);
+  const [stepCount, setStepCount] = useState(1);
+  const [dotsVisible, setDotsVisible] = useState(false);
 
   const syncOffsets = useCallback(() => {
     const root = rootRef.current;
     if (!root) return;
     offsetsRef.current = computeStepOffsets(root);
-    stepRef.current = nearestStepIndex(offsetsRef.current, window.scrollY);
+    setStepCount(offsetsRef.current.length);
+    const nearest = nearestStepIndex(offsetsRef.current, window.scrollY);
+    stepRef.current = nearest;
+    setActiveStep(nearest);
   }, []);
 
   const scrollToStep = useCallback(
@@ -84,6 +92,7 @@ export function CaseStudiesScroll({ children }: CaseStudiesScrollProps) {
 
       lockRef.current = true;
       stepRef.current = next;
+      setActiveStep(next);
 
       window.scrollTo({
         top,
@@ -109,8 +118,29 @@ export function CaseStudiesScroll({ children }: CaseStudiesScrollProps) {
       scrollToStep(nearest);
     } else {
       stepRef.current = nearest;
+      setActiveStep(nearest);
     }
   }, [scrollToStep]);
+
+  useCaseStudiesScrollRegister(
+    true,
+    stepCount,
+    activeStep,
+    scrollToStep,
+    dotsVisible,
+  );
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setDotsVisible(entry?.isIntersecting ?? false),
+      { threshold: 0.05 },
+    );
+    observer.observe(root);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     syncOffsets();
