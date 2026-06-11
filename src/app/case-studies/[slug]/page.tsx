@@ -8,11 +8,21 @@ import {
   CraftTagList,
   VignetteImageScroll,
 } from "@/components/craft/vignette-media";
+import { VignetteChapter } from "@/components/craft/vignette-chapter";
 import {
   caseStudies,
   getCaseStudy,
   isVignette,
+  type CraftVignette,
 } from "@/content/portfolio";
+
+/** A vignette is a "chapter" once it carries narrative beats or a theme line. */
+function isNarrativeVignette(vignette: CraftVignette): boolean {
+  return (
+    Boolean(vignette.themeLine) ||
+    vignette.images.some((frame) => frame.label || frame.body)
+  );
+}
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -41,6 +51,15 @@ export default async function CaseStudyPage({ params }: PageProps) {
   const index = caseStudies.findIndex((item) => item.slug === slug);
   const next = caseStudies[index + 1];
 
+  const chapterNumbers = new Map<string, number>();
+  let chapterCount = 0;
+  for (const section of study.sections) {
+    if (isVignette(section) && isNarrativeVignette(section)) {
+      chapterCount += 1;
+      chapterNumbers.set(section.slug, chapterCount);
+    }
+  }
+
   const heroFacts = [
     { key: "client", label: "Client", value: study.client },
     { key: "date", label: "Date", value: study.date },
@@ -49,8 +68,8 @@ export default async function CaseStudyPage({ params }: PageProps) {
   ] as const;
 
   return (
-    <article className="cs-detail">
-      <section className="cs-hero theme-light keyline-b" data-chrome-surface="light">
+    <article className="cs-detail theme-dark">
+      <section className="cs-hero keyline-b" data-chrome-surface="dark">
         <RuledGrid className="cs-hero__grid">
           <div className="cs-hero__facts">
             {heroFacts.map(({ key, label, value }) => (
@@ -70,11 +89,21 @@ export default async function CaseStudyPage({ params }: PageProps) {
 
       {study.sections.map((section) => {
         if (isVignette(section)) {
+          if (isNarrativeVignette(section)) {
+            return (
+              <VignetteChapter
+                key={section.slug}
+                vignette={section}
+                chapterNumber={chapterNumbers.get(section.slug) ?? 1}
+                date={study.date}
+              />
+            );
+          }
           return (
             <section
               key={section.slug}
-              className="cs-section cs-section--vignette keyline-b theme-light"
-              data-chrome-surface="light"
+              className="cs-section cs-section--vignette keyline-b"
+              data-chrome-surface="dark"
               id={`vignette-${section.slug}`}
             >
               <RuledGrid className="cs-vignette__grid">
@@ -100,7 +129,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
           <section
             key={section.id}
             className="cs-section cs-section--prose keyline-b"
-            data-chrome-surface="light"
+            data-chrome-surface="dark"
           >
             <RuledGrid>
               {section.heading ? (

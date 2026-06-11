@@ -20,22 +20,40 @@ import { palette, portraitAccents } from "@/lib/colors";
 
 export type AccentKey = keyof typeof palette;
 
-/** Every portfolio image is portrait (9×16) or landscape (16×9). */
-export type ImageRatio = "9x16" | "16x9";
+/** Every portfolio frame is portrait (9×16), landscape (16×9), or square (1×1). */
+export type ImageRatio = "9x16" | "16x9" | "1x1";
 
 /** Back-compat alias — the key image uses the same ratio set. */
 export type KeyImageRatio = ImageRatio;
 
-/** One gallery frame — image and/or Vimeo video. Caption may be empty. */
+/** Reverse-out ground for a single frame. Defaults to a seeded pseudo-random pick. */
+export type FrameSurface = "light" | "dark";
+
+/**
+ * One frame in a vignette's horizontal chapter.
+ *
+ * A frame is either a *media* frame (image / gif via `src`, or Vimeo via `vimeo`)
+ * or a *color-field* frame (`colorField: true`) where type carries the beat and
+ * the accent is the ground. Either way it can hold a narrative beat: a `label`
+ * (mono-caps kicker, e.g. "The problem") plus `body` prose tied to this frame.
+ */
 export type VignetteImage = {
-  /** Portrait (9×16) or landscape (16×9). */
+  /** Portrait (9×16), landscape (16×9), or square (1×1). */
   ratio: ImageRatio;
-  /** Placeholder fill until a real image source is provided. */
+  /** Placeholder fill until a real source is provided; also the color-field ground. */
   accent: AccentKey;
-  /** Optional real image source (overrides the placeholder fill). */
+  /** Optional real image / gif source (overrides the placeholder fill). */
   src?: string;
   /** Vimeo video ID or full vimeo.com URL — renders a player instead of an image. */
   vimeo?: string;
+  /** Render as a type-driven color field instead of media. */
+  colorField?: boolean;
+  /** Beat kicker (mono caps), e.g. "The problem". */
+  label?: string;
+  /** Beat narrative — prose married to this frame. */
+  body?: string;
+  /** Reverse-out ground; omit to let the chapter pick a random-feeling surface. */
+  surface?: FrameSurface;
   caption?: string;
 };
 
@@ -44,13 +62,17 @@ export type CraftVignette = {
   /** Unique across the whole site — powers /craft/[vignette]. */
   slug: string;
   name: string;
-  /** Portrait (9×16) or landscape (16×9); default key-image shape on detail pages. */
+  /** Portrait (9×16), landscape (16×9), or square (1×1); default key-image shape. */
   keyImageRatio: ImageRatio;
   /** Placeholder key-image fill until a real source is provided. */
   keyImageAccent: AccentKey;
   keyImageSrc?: string;
   /** Free-form, ~1–3 words each, unlimited. */
   tags: string[];
+  /** Thematic line, e.g. "Context gain / semantic legibility / color as meaning". */
+  themeLine?: string;
+  /** Honest shipping status, e.g. "Never shipped — Figma prototypes exist". */
+  status?: string;
   images: VignetteImage[];
 };
 
@@ -82,6 +104,82 @@ export type CaseStudy = {
 };
 
 export const caseStudies: CaseStudy[] = [
+  {
+    slug: "cruise-teleops",
+    name: "Tele-Operations Terminal",
+    subhead:
+      "Designing the human side of an autonomous fleet — context gain over a black box.",
+    date: "2023",
+    client: "Cruise",
+    location: "San Francisco, CA",
+    role: "Lead product designer",
+    tools: "Figma, motion prototyping, operator research",
+    sections: [
+      {
+        type: "prose",
+        id: "cruise-intro",
+        heading: "The terminal",
+        body: "Cruise's remote operators were the humans in the loop of a driverless fleet — the people a stuck robotaxi phoned for help, often with seconds to act. The terminal they worked in was built by human-factors researchers on radar and air-traffic-control tradition: rigorous, safety-first, and almost entirely blind to what the machine already knew.\n\nThe through-line across this work is a single idea — context gain. The AV's AI perceived, classified, and planned constantly; very little of that intelligence reached the operator. Each vignette is one move toward closing that gap: surfacing what the system knew, in a form a human under stress could read in seconds.",
+      },
+      {
+        type: "vignette",
+        slug: "semantic-color-shape",
+        name: "Semantic Color + Shape Language",
+        keyImageRatio: "16x9",
+        keyImageAccent: "charcoal",
+        tags: ["Visual design", "Data viz", "Human factors"],
+        themeLine: "Context gain / semantic legibility / color as meaning",
+        status: "Shipped",
+        images: [
+          {
+            ratio: "16x9",
+            accent: "charcoal",
+            colorField: true,
+            label: "The problem",
+            body: "Operators viewed the AV scene entirely in orange-on-black. Every object — pedestrian, cyclist, vehicle, immovable obstacle — rendered identically. The convention was legitimate human-factors science (high contrast, eye-safe in the dark, ATC and gauge tradition). But it made every object in the scene visually equivalent.",
+          },
+          {
+            ratio: "16x9",
+            accent: "charcoal",
+            src: "/portfolio/cruise/before-16x9.jpg",
+            label: "Before",
+            caption:
+              "The legacy scene: a single orange encoding for every object type. Safe for the eyes, silent about meaning.",
+          },
+          {
+            ratio: "1x1",
+            accent: "charcoal",
+            colorField: true,
+            label: "The insight",
+            body: "The system was informed by human factors but not by color theory or semantic design. Meanwhile the AV's AI could already classify everything it perceived. That intelligence existed — it just wasn't surfaced. The machine knew. The human didn't.",
+          },
+          {
+            ratio: "1x1",
+            accent: "charcoal",
+            src: "/portfolio/cruise/solution-1x1.jpg",
+            label: "The solution",
+            caption:
+              "A universal color + shape language: each object class gets a distinct hue and a footprint shape mapped to its radar/lidar return.",
+          },
+          {
+            ratio: "9x16",
+            accent: "charcoal",
+            src: "/portfolio/cruise/scene-9x16.jpg",
+            label: "In scene",
+            caption:
+              "Pedestrians, cyclists, vehicles, and static objects read at a glance — the semantic meaning of the scene became immediately legible.",
+          },
+          {
+            ratio: "16x9",
+            accent: "charcoal",
+            colorField: true,
+            label: "Outcome",
+            body: "Operators gained context about the scene faster and more accurately — the first move in a broader context-gain philosophy that shaped the rest of the terminal.",
+          },
+        ],
+      },
+    ],
+  },
   {
     slug: "northwind-payments",
     name: "Payments that recover themselves",

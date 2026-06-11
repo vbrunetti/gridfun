@@ -326,7 +326,7 @@ export function CraftIndex() {
               tags={allTags}
               activeTags={activeTags}
               onToggle={toggleTag}
-              className="col-1-to-end lg:col-5-to-end mt-3 lg:mt-0"
+              className="col-1-to-end lg:col-5-to-end mt-2 lg:mt-0"
             />
           </SiteGridSubgrid>
         </RuledGrid>

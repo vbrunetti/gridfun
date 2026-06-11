@@ -27,6 +27,7 @@ html {
   --color-medium-blue: #2962ff;
   --color-electric-blue: #2962ff;
   --color-royal-blue: #0033ff;
+  --color-cruise: #ff4d37;
 
   /* Text on light surfaces */
   --text-primary: var(--color-ink);
@@ -95,6 +96,18 @@ html {
   --foreground: var(--text-primary);
   --rule-light: color-mix(in srgb, var(--color-paper) 18%, transparent);
   --rule-strong: color-mix(in srgb, var(--color-paper) 40%, transparent);
+  /* Panel surfaces — default dark; secondary/tertiary lift subtly off the base. */
+  --panel-surface: var(--section-dark-bg);
+  --panel-surface-secondary: color-mix(
+    in srgb,
+    var(--color-paper) 18%,
+    var(--section-dark-bg)
+  );
+  --panel-surface-tertiary: color-mix(
+    in srgb,
+    var(--color-paper) 10%,
+    var(--section-dark-bg)
+  );
 
   background: var(--section-dark-bg);
   color: var(--text-primary);
@@ -915,7 +928,7 @@ body[data-chrome-surface="dark"] .floating-chrome .rail-label-vertical {
 .craft-hero__main {
   grid-row: 2;
   grid-column: 1 / -1;
-  padding-top: clamp(0.65rem, 1.25vw, 0.85rem);
+  padding-top: 0.25rem;
 }
 
 .craft-hero-meta {
@@ -1430,12 +1443,8 @@ a.craft-card:focus-visible {
   scroll-margin-top: var(--chrome-top-offset, 0px);
 }
 
-.cs-section--vignette {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--color-flesh) 18%, transparent) 0%,
-    transparent 42%
-  );
+.cs-detail.theme-dark .cs-section--vignette {
+  background: transparent;
 }
 
 .cs-section--prose {
@@ -1929,4 +1938,304 @@ a.craft-card:focus-visible {
   font-size: 1.0625rem;
   font-weight: 500;
   color: var(--text-primary);
+}
+
+/* ── Vignette chapter — full-bleed filmstrip of abutted, grid-width panels ──
+   A title panel leads, then the frames. Panels bleed full-width and butt
+   together with no gaps; their widths follow the 12-col master grid (title 4 ·
+   text/portrait 6 · square 8 · landscape 12). While pinned, each scroll notch
+   pages one panel; color comes from the panels themselves. */
+.vchapter {
+  position: relative;
+  height: calc(var(--frames, 1) * 100svh);
+}
+
+.vchapter__pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  width: 100%;
+  overflow: hidden;
+  background: var(--panel-surface, var(--section-dark-bg));
+  container-type: inline-size;
+  transition: background-color 0.45s ease;
+}
+
+/* Zero-height mirror of the master grid — JS measures it to snap panel widths
+   to real grid columns and anchor the in-focus panel to grid line 1. */
+.vchapter__ruler {
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+  row-gap: 0;
+}
+
+.vchapter__ruler > i {
+  display: block;
+  height: 0;
+}
+
+/* Persistent slim progress bar + counter — orientation without taking room. */
+.vchapter__progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--rule-light);
+  z-index: 5;
+}
+
+.vchapter__progress-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.5s ease;
+}
+
+.vchapter__count {
+  position: absolute;
+  right: clamp(1rem, 2vw, 2rem);
+  bottom: 0.85rem;
+  margin: 0;
+  z-index: 5;
+  color: #fff;
+  mix-blend-mode: difference;
+}
+
+/* ── Title panel (4 cols) — scrolls away with the filmstrip ── */
+.vframe--title {
+  display: flex;
+  flex-direction: column;
+  background: var(--panel-surface, var(--section-dark-bg));
+  color: var(--text-primary);
+  padding: 0 clamp(1.5rem, 2vw, 2.25rem) clamp(1.5rem, 5vh, 3.5rem) 0;
+}
+
+.vchapter__date {
+  display: flex;
+  align-items: center;
+  height: var(--chrome-top-offset);
+  margin: 0;
+  padding-left: 0;
+}
+
+.vchapter__numeral {
+  margin: clamp(0.75rem, 3vh, 2rem) 0 0;
+  font-size: clamp(4rem, 9vw, 9rem);
+  font-weight: 700;
+  line-height: 0.86;
+  letter-spacing: -0.04em;
+  color: var(--text-primary);
+}
+
+.vchapter__title-block {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.vchapter__title {
+  margin: 0;
+  font-size: clamp(1.75rem, 3.4vw, 3.25rem);
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
+
+.vchapter__tags {
+  margin: 0;
+}
+
+.vchapter__status {
+  margin: 0;
+  color: var(--accent);
+}
+
+.vchapter__track {
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+  will-change: transform;
+  transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* Panels butt together (no gaps). Single keylines only — a right seam + a
+   bottom rule per panel, so seams never double. No top edge (avoids a doubled
+   horizontal line), and the outer-most edges stay open. Out-of-focus panels
+   are dimmed. Widths follow the master grid. */
+.vframe {
+  --vrule: var(--rule-light);
+  flex: none;
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  background: var(--panel-bg, var(--panel-surface, var(--section-dark-bg)));
+  color: var(--text-primary);
+  border-right: 1px solid var(--vrule);
+  border-bottom: 1px solid var(--vrule);
+  opacity: 0.45;
+  transition: opacity 0.4s ease;
+}
+
+.vframe.is-active {
+  opacity: 1;
+}
+
+/* Open the outer-most right edge (last panel). The first panel has no left
+   border by design, so its outer-left edge is already open. */
+.vchapter__track > .vframe:last-child {
+  border-right: 0;
+}
+
+.vframe--16x9 {
+  width: 100cqw;
+}
+
+.vframe--1x1 {
+  width: calc(100cqw * 8 / 12);
+}
+
+.vframe--9x16 {
+  width: calc(100cqw * 6 / 12);
+}
+
+/* Text beat — 6 cols; wins over its ratio class via source order. */
+.vframe--field {
+  width: calc(100cqw * 6 / 12);
+}
+
+.vframe--title {
+  width: calc(100cqw * 4 / 12);
+}
+
+/* Cruise brand panel — paper text on orange. */
+.vframe[data-panel-bg="brand"] {
+  color: var(--color-paper);
+}
+
+/* ── Text-only panel — color fills the panel, the beat reads big ── */
+.vframe__field {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(1rem, 2.5vh, 2rem);
+  padding: clamp(1.75rem, 3vw, 3.25rem);
+}
+
+.vframe__field-label {
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.vframe__field-beat {
+  margin: 0;
+  max-width: 22ch;
+  font-size: clamp(1.6rem, 2.4vw, 2.85rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+}
+
+/* ── Media panel — the media is the hero; chrome stays minimal ── */
+.vframe__inner {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.5rem, 1vh, 0.85rem);
+  padding: clamp(0.9rem, 1.5vw, 1.5rem);
+}
+
+.vframe__media-box {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vframe__media {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  display: block;
+}
+
+.vframe__media--placeholder {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: color-mix(in srgb, var(--color-ink) 12%, transparent);
+}
+
+.vframe__play {
+  font-size: 2rem;
+  opacity: 0.7;
+}
+
+.vframe__label {
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.vframe__caption {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  opacity: 0.85;
+}
+
+/* Mobile / reduced: drop the scroll-jack — panels stack and read top to bottom. */
+@media (max-width: 767px) {
+  .vchapter {
+    height: auto !important;
+  }
+
+  .vchapter__pin {
+    position: static;
+    height: auto;
+    container-type: normal;
+  }
+
+  .vframe--title {
+    padding-top: 1.5rem;
+    padding-left: var(--grid-margin);
+  }
+
+  .vchapter__numeral {
+    margin-top: 0.5rem;
+  }
+
+  .vchapter__track {
+    flex-direction: column;
+    align-items: stretch;
+    transform: none !important;
+    height: auto;
+  }
+
+  .vframe {
+    opacity: 1 !important;
+    width: 100% !important;
+    height: auto;
+    min-height: 60vh;
+    border-right: 0;
+    border-bottom: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  }
+
+  .vframe__media {
+    max-height: 70vh;
+  }
 }
