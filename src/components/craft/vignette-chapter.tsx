@@ -13,6 +13,7 @@ import type { CraftVignette, ImageRatio, VignetteImage } from "@/content/portfol
 import { vignetteFrameSrc } from "@/lib/portfolio-assets";
 import { parseVimeoId } from "@/lib/vimeo";
 import { VimeoPlayer } from "@/components/media/vimeo-embed";
+import { useCaseStudyVignetteProgressRegister } from "@/components/case-studies/case-study-detail-scroll-context";
 import { CraftTagList } from "@/components/craft/vignette-media";
 
 /** One wheel notch / key press = one panel; ignore micro-deltas. */
@@ -40,10 +41,10 @@ function ratioAspect(ratio: ImageRatio): "16/9" | "9/16" | "1/1" {
   return "9/16";
 }
 
-function ratioDimensions(ratio: ImageRatio): { width: number; height: number } {
-  if (ratio === "16x9") return { width: 1600, height: 900 };
-  if (ratio === "1x1") return { width: 1200, height: 1200 };
-  return { width: 900, height: 1600 };
+function ratioAspectNumbers(ratio: ImageRatio): { w: number; h: number } {
+  if (ratio === "16x9") return { w: 16, h: 9 };
+  if (ratio === "1x1") return { w: 1, h: 1 };
+  return { w: 9, h: 16 };
 }
 
 function isVideoFrame(frame: VignetteImage): boolean {
@@ -110,59 +111,76 @@ function FrameContent({
 }) {
   const aspect = ratioAspect(frame.ratio);
 
-  // Text-only panel — the color fills the whole panel; the beat reads big.
+  // Text-only panel — kicker / beat / foot share the panel grid with media + title.
   if (frame.colorField) {
     return (
-      <div className="vframe__field">
-        {frame.label ? <p className="vframe__field-label">{frame.label}</p> : null}
-        {frame.body ? <p className="vframe__field-beat">{frame.body}</p> : null}
-      </div>
+      <>
+        <header className="vframe__kicker">
+          {frame.label ? (
+            <p className="vframe__kicker-text text-meta">{frame.label}</p>
+          ) : null}
+        </header>
+        <div className="vframe__main vframe__main--field">
+          {frame.body ? <p className="vframe__beat">{frame.body}</p> : null}
+        </div>
+        <footer className="vframe__foot" aria-hidden />
+      </>
     );
   }
 
   const caption = frame.caption?.trim() || frame.body?.trim() || "";
   const title = caption || frame.label || `${vignette.name} — frame ${index + 1}`;
+  const { w: arW, h: arH } = ratioAspectNumbers(frame.ratio);
+  const mediaBoxStyle = {
+    "--media-ar-w": arW,
+    "--media-ar-h": arH,
+  } as React.CSSProperties;
 
-  // Media panel — image sits within a clean color panel, respecting its aspect.
   return (
-    <div className="vframe__inner">
-      {frame.label ? <p className="vframe__label">{frame.label}</p> : null}
-      <div className="vframe__media-box">
-        {isVideoFrame(frame) && frame.vimeo ? (
-          active ? (
-            <VimeoPlayer
-              videoId={frame.vimeo}
-              title={title}
-              aspectRatio={aspect === "1/1" ? "16/9" : aspect}
-              className="vframe__media"
-            />
-          ) : (
-            <div className="vframe__media vframe__media--placeholder" aria-hidden>
-              <span className="vframe__play">▶</span>
-            </div>
-          )
-        ) : (
-          (() => {
-            const { width, height } = ratioDimensions(frame.ratio);
-            const src = frame.src ?? vignetteFrameSrc(frame.accent, frame.ratio);
-            return (
-              <Image
-                src={src}
-                alt={title}
-                width={width}
-                height={height}
-                draggable={false}
-                priority={index === 0}
-                unoptimized={src.startsWith("data:")}
-                className="vframe__media"
-                sizes="(max-width: 767px) 92vw, 60vw"
+    <>
+      <header className="vframe__kicker">
+        {frame.label ? (
+          <p className="vframe__kicker-text text-meta">{frame.label}</p>
+        ) : null}
+      </header>
+      <div className="vframe__main vframe__main--media">
+        <div className="vframe__media-box" style={mediaBoxStyle}>
+          {isVideoFrame(frame) && frame.vimeo ? (
+            active ? (
+              <VimeoPlayer
+                videoId={frame.vimeo}
+                title={title}
+                aspectRatio={aspect === "1/1" ? "16/9" : aspect}
+                className="vframe__media vframe__media--video"
               />
-            );
-          })()
-        )}
+            ) : (
+              <div className="vframe__media vframe__media--placeholder" aria-hidden>
+                <span className="vframe__play">▶</span>
+              </div>
+            )
+          ) : (
+            (() => {
+              const src = frame.src ?? vignetteFrameSrc(frame.accent, frame.ratio);
+              return (
+                <Image
+                  src={src}
+                  alt={title}
+                  fill
+                  draggable={false}
+                  priority={index === 0}
+                  unoptimized={src.startsWith("data:")}
+                  className="vframe__media"
+                  sizes="(max-width: 767px) 92vw, min(100vw, 90rem)"
+                />
+              );
+            })()
+          )}
+        </div>
       </div>
-      {caption ? <p className="vframe__caption">{caption}</p> : null}
-    </div>
+      <footer className="vframe__foot">
+        {caption ? <p className="vframe__caption">{caption}</p> : null}
+      </footer>
+    </>
   );
 }
 
@@ -223,14 +241,30 @@ export function VignetteChapter({
 
   const [index, setIndex] = useState(0);
   const [translate, setTranslate] = useState(0);
+  const [pinned, setPinned] = useState(false);
 
   const indexRef = useRef(0);
   const insetRef = useRef(0);
   const lockRef = useRef(false);
+  const pinnedRef = useRef(false);
 
   useEffect(() => {
     indexRef.current = index;
   }, [index]);
+
+  const vignetteProgress = useMemo(
+    () =>
+      pinned
+        ? {
+            vignetteSlug: vignette.slug,
+            panelIndex: index,
+            panelCount: steps,
+          }
+        : null,
+    [pinned, vignette.slug, index, steps],
+  );
+
+  useCaseStudyVignetteProgressRegister(vignetteProgress);
 
   // Every in-focus panel anchors to grid line 1. At the last panel the color
   // bleeds to the right edge via the pin background (see render) instead of
@@ -343,6 +377,11 @@ export function VignetteChapter({
     };
 
     const onScroll = () => {
+      const pinnedNow = isPinned();
+      if (pinnedNow !== pinnedRef.current) {
+        pinnedRef.current = pinnedNow;
+        setPinned(pinnedNow);
+      }
       if (lockRef.current) return;
       const next = indexFromScroll();
       if (next !== indexRef.current) setIndex(next);
@@ -380,6 +419,8 @@ export function VignetteChapter({
       scrollToPanel(indexRef.current + next);
     };
 
+    onScroll();
+
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("wheel", onWheel, { passive: false });
     window.addEventListener("keydown", onKeyDown);
@@ -397,6 +438,7 @@ export function VignetteChapter({
       ref={sectionRef}
       className="vchapter theme-dark"
       id={`vignette-${vignette.slug}`}
+      data-cs-detail-row
       data-chrome-surface="dark"
       style={{ ["--frames" as string]: String(steps) }}
       aria-roledescription="vignette chapter"
@@ -430,17 +472,18 @@ export function VignetteChapter({
             }}
             className={`vframe vframe--title${index === 0 ? " is-active" : ""}`}
           >
-            <p className="vchapter__date text-meta">{date ?? "\u00A0"}</p>
-            <p className="vchapter__numeral">
-              {String(chapterNumber).padStart(2, "0")}
-            </p>
-            <div className="vchapter__title-block">
-              <h2 className="vchapter__title">{vignette.name}</h2>
-              <CraftTagList tags={vignette.tags} className="vchapter__tags" />
-              {vignette.status ? (
-                <p className="vchapter__status text-meta">{vignette.status}</p>
-              ) : null}
+            <header className="vframe__kicker">
+              <p className="vframe__kicker-text text-meta">{date ?? "\u00A0"}</p>
+            </header>
+            <div className="vframe__main vframe__main--title">
+              <p className="vchapter__numeral">
+                {String(chapterNumber).padStart(2, "0")}
+              </p>
+              <h2 className="vchapter__title display-lg">{vignette.name}</h2>
             </div>
+            <footer className="vframe__foot vframe__foot--tags">
+              <CraftTagList tags={vignette.tags} className="vchapter__tags" />
+            </footer>
           </article>
 
           {frames.map((frame, i) => {
@@ -470,16 +513,6 @@ export function VignetteChapter({
             );
           })}
         </div>
-
-        <div className="vchapter__progress" aria-hidden>
-          <span
-            className="vchapter__progress-fill"
-            style={{ width: `${((index + 1) / steps) * 100}%` }}
-          />
-        </div>
-        <p className="vchapter__count text-meta" aria-live="polite">
-          {String(index + 1).padStart(2, "0")} / {String(steps).padStart(2, "0")}
-        </p>
       </div>
     </section>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { ChromeNavDot } from "@/components/chrome/chrome-nav-dot";
 import { useCaseStudiesScrollContext } from "@/components/case-studies/case-studies-scroll-context";
 
 export function CaseStudiesDotsRail() {
@@ -20,19 +21,12 @@ export function CaseStudiesDotsRail() {
         <button
           key={i}
           type="button"
-          className="primary-hero-dot-btn"
+          className="chrome-nav-dot-btn"
           aria-current={i === activeStep ? "step" : undefined}
           aria-label={`Go to step ${i + 1} of ${stepCount}`}
           onClick={() => scrollToStep(i)}
         >
-          <span
-            className={
-              i === activeStep
-                ? "primary-hero-dot primary-hero-dot-active"
-                : "primary-hero-dot"
-            }
-            aria-hidden
-          />
+          <ChromeNavDot active={i === activeStep} />
         </button>
       ))}
     </nav>

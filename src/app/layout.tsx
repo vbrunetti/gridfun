@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ChromeProvider } from "@/components/chrome/chrome-provider";
 import { SiteShell } from "@/components/chrome/site-shell";
 import { CaseStudiesScrollProvider } from "@/components/case-studies/case-studies-scroll-context";
+import { CaseStudyDetailScrollProvider } from "@/components/case-studies/case-study-detail-scroll-context";
 import { HeroScrubProvider } from "@/components/sections/primary-hero/hero-scrub-context";
 import "./globals.css";
 
@@ -38,7 +39,9 @@ export default function RootLayout({
         <ChromeProvider>
           <HeroScrubProvider>
             <CaseStudiesScrollProvider>
-              <SiteShell>{children}</SiteShell>
+              <CaseStudyDetailScrollProvider>
+                <SiteShell>{children}</SiteShell>
+              </CaseStudyDetailScrollProvider>
             </CaseStudiesScrollProvider>
           </HeroScrubProvider>
         </ChromeProvider>

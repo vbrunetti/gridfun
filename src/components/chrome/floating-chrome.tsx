@@ -2,6 +2,7 @@
 
 import { useChrome } from "./chrome-provider";
 import { CaseStudiesDotsRail } from "./case-studies-dots-rail";
+import { CaseStudyDetailDotsRail } from "./case-study-detail-dots-rail";
 import { HeroDotsRail } from "./hero-dots-rail";
 import { IconMenuToggle } from "./icons";
 
@@ -31,6 +32,7 @@ export function FloatingChrome() {
         <>
           <HeroDotsRail />
           <CaseStudiesDotsRail />
+          <CaseStudyDetailDotsRail />
         </>
       ) : null}
     </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { ChromeNavDot } from "@/components/chrome/chrome-nav-dot";
 import { useHeroScrubContext } from "@/components/sections/primary-hero/hero-scrub-context";
 
 export function HeroDotsRail() {
@@ -21,21 +22,14 @@ export function HeroDotsRail() {
         <button
           key={slate.id}
           type="button"
-          className="primary-hero-dot-btn"
+          className="chrome-nav-dot-btn"
           aria-current={i === activeIndex ? "step" : undefined}
           aria-label={`Go to slide ${i + 1} of ${slateCount}${
             slate.eyebrow ? `: ${slate.eyebrow}` : ""
           }`}
           onClick={() => scrollToSlate(i)}
         >
-          <span
-            className={
-              i === activeIndex
-                ? "primary-hero-dot primary-hero-dot-active"
-                : "primary-hero-dot"
-            }
-            aria-hidden
-          />
+          <ChromeNavDot active={i === activeIndex} />
         </button>
       ))}
     </nav>

@@ -8,6 +8,7 @@ import {
   CraftTagList,
   VignetteImageScroll,
 } from "@/components/craft/vignette-media";
+import { CaseStudyDetailScroll } from "@/components/case-studies/case-study-detail-scroll";
 import { VignetteChapter } from "@/components/craft/vignette-chapter";
 import {
   caseStudies,
@@ -15,6 +16,7 @@ import {
   isVignette,
   type CraftVignette,
 } from "@/content/portfolio";
+import { buildCaseStudyDetailSteps } from "@/lib/case-study-detail-steps";
 
 /** A vignette is a "chapter" once it carries narrative beats or a theme line. */
 function isNarrativeVignette(vignette: CraftVignette): boolean {
@@ -67,9 +69,17 @@ export default async function CaseStudyPage({ params }: PageProps) {
     { key: "tools", label: "Tools", value: study.tools },
   ] as const;
 
+  const detailSteps = buildCaseStudyDetailSteps(study);
+
   return (
-    <article className="cs-detail theme-dark">
-      <section className="cs-hero keyline-b" data-chrome-surface="dark">
+    <CaseStudyDetailScroll steps={detailSteps}>
+      <div className="theme-dark">
+      <section
+        id="cs-hero"
+        data-cs-detail-row
+        className="cs-hero keyline-b"
+        data-chrome-surface="dark"
+      >
         <RuledGrid className="cs-hero__grid">
           <div className="cs-hero__facts">
             {heroFacts.map(({ key, label, value }) => (
@@ -102,9 +112,10 @@ export default async function CaseStudyPage({ params }: PageProps) {
           return (
             <section
               key={section.slug}
+              id={`vignette-${section.slug}`}
+              data-cs-detail-row
               className="cs-section cs-section--vignette keyline-b"
               data-chrome-surface="dark"
-              id={`vignette-${section.slug}`}
             >
               <RuledGrid className="cs-vignette__grid">
                 <h2 className="cs-vignette__title display-lg">
@@ -128,6 +139,8 @@ export default async function CaseStudyPage({ params }: PageProps) {
         return (
           <section
             key={section.id}
+            id={`cs-prose-${section.id}`}
+            data-cs-detail-row
             className="cs-section cs-section--prose keyline-b"
             data-chrome-surface="dark"
           >
@@ -150,6 +163,8 @@ export default async function CaseStudyPage({ params }: PageProps) {
       })}
 
       <section
+        id="cs-footer"
+        data-cs-detail-row
         className="theme-canvas py-12"
         data-chrome-surface="light"
       >
@@ -177,6 +192,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
           </SiteGridSubgrid>
         </RuledGrid>
       </section>
-    </article>
+      </div>
+    </CaseStudyDetailScroll>
   );
 }
