@@ -12,6 +12,7 @@ import { HERO_SPARK_PRESETS } from "./spark-hero-config";
 import type { SparkBlend } from "./spark-canvas";
 import { PrimaryHeroSparkLayer } from "./primary-hero-spark-layer";
 import { CtaButton } from "@/components/chrome/cta-button";
+import { useChromeFocusById } from "@/components/chrome/use-chrome-focus";
 import { RuledGrid } from "@/components/layout/ruled-grid";
 import type { HomeCoverSection } from "@/content/home-sections";
 import type { HeroSlate } from "@/content/hero-slates";
@@ -270,6 +271,11 @@ export function PrimaryHeroScrub({
     !reducedMotion,
   );
 
+  useChromeFocusById(
+    scrollSteps[activeStep]?.id ?? null,
+    !reducedMotion && scrollSteps.length > 1,
+  );
+
   useHeroSubChapterProgressRegister(subChapterProgress);
 
   useEffect(() => {
@@ -298,7 +304,8 @@ export function PrimaryHeroScrub({
   return (
     <div
       ref={trackRef}
-      className="primary-hero-track theme-light keyline-b w-full"
+      id="home-hero"
+      className="chrome-focus-target primary-hero-track theme-light keyline-b w-full"
       data-chrome-surface="light"
     >
       {!reducedMotion && slideCount > 0 ? (

@@ -94,6 +94,14 @@ export type CaseStudyHeroVideo = {
   poster?: string;
 };
 
+/** Bright index-slide field + floating transparent logo (gif preferred). */
+export type CaseStudyBrand = {
+  /** CSS color for the brand field ground. */
+  field: string;
+  /** Transparent logo asset — gif or png with alpha. */
+  logo?: string;
+};
+
 export type CaseStudy = {
   slug: string;
   name: string;
@@ -107,6 +115,8 @@ export type CaseStudy = {
   tools: string;
   /** Placeholder client logo source; falls back to a wordmark when absent. */
   clientLogo?: string;
+  /** Index slide — bright field + floating brand logo. */
+  brand: CaseStudyBrand;
   /**
    * Optional ambient hero reel — autoplay loop, no controls, full-bleed behind #cs-hero.
    * Upload MP4 to Vercel Blob (public), then e.g.
@@ -173,6 +183,10 @@ export const caseStudies: CaseStudy[] = [
       "Designing the human side of an autonomous fleet — context gain over a black box.",
     date: "2023",
     client: "Cruise",
+    brand: {
+      field: palette.cruise,
+      logo: "/portfolio/logos/cruise.gif",
+    },
     location: "San Francisco, CA",
     role: "Lead product designer",
     tools: "Figma, motion prototyping, operator research",
@@ -582,6 +596,10 @@ export const caseStudies: CaseStudy[] = [
       "Rebuilding checkout failure as a recoverable fork — not a dead end.",
     date: "2024",
     client: "Northwind",
+    brand: {
+      field: palette.neonLime,
+      logo: "/portfolio/logos/northwind.gif",
+    },
     location: "Remote · US & EU",
     role: "Lead product designer",
     tools: "Figma, React, Amplitude",
@@ -651,6 +669,10 @@ export const caseStudies: CaseStudy[] = [
       "A single triage board and a handoff ritual built for the chaos of a ward.",
     date: "2024",
     client: "Meridian Health",
+    brand: {
+      field: palette.royalBlue,
+      logo: "/portfolio/logos/meridian.gif",
+    },
     location: "Boston, MA",
     role: "Product designer",
     tools: "Figma, Miro, React Native",
@@ -697,6 +719,10 @@ export const caseStudies: CaseStudy[] = [
       "Giving discovery a direction — every interaction nudges toward the bag.",
     date: "2023",
     client: "Loft",
+    brand: {
+      field: palette.hotPink,
+      logo: "/portfolio/logos/loft.gif",
+    },
     location: "New York, NY",
     role: "Lead product designer",
     tools: "Figma, Principle, Next.js",
@@ -748,6 +774,10 @@ export const caseStudies: CaseStudy[] = [
       "A design system good enough that adoption felt like relief, not mandate.",
     date: "2025",
     client: "Atlas",
+    brand: {
+      field: palette.skyBlue,
+      logo: "/portfolio/logos/atlas.gif",
+    },
     location: "San Francisco, CA",
     role: "Design systems lead",
     tools: "Figma, Storybook, Style Dictionary",

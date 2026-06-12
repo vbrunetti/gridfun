@@ -1757,48 +1757,324 @@ a.craft-card:focus-visible {
   outline-offset: 4px;
 }
 
-/* ── Case study cover (index) ────────────────────────────── */
-.cs-cover {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(1.5rem, 3vw, 2.5rem);
+/* ── Case studies index (/case-studies) ─────────────────── */
+@media (max-width: 1023px) {
+  .cs-index-route {
+    padding-top: var(--chrome-top-offset);
+    background: var(--color-paper);
+  }
 }
 
-.cs-cover__meta {
+.cs-index-intro {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  justify-content: flex-end;
+  background: var(--color-paper);
+}
+
+.cs-index-hero-header {
+  width: 100%;
+}
+
+.cs-index-hero__grid {
+  --cs-hero-main-inset-top: clamp(1.25rem, 3vh, 2rem);
+  --cs-hero-foot: clamp(1.25rem, 3vh, 2rem);
+  row-gap: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  grid-template-rows:
+    var(--chrome-top-offset)
+    minmax(5rem, 1fr);
+  min-height: 100%;
+}
+
+.cs-index-hero__meta {
+  grid-row: 1;
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+  column-gap: var(--grid-gutter);
+  align-items: center;
+  height: var(--chrome-top-offset);
+  min-height: var(--chrome-top-offset);
+}
+
+.cs-index-hero__meta .craft-hero-meta {
+  margin: 0;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.cs-index-hero-meta--count {
+  grid-column: 1 / span 2;
+}
+
+.cs-index-hero-meta--vignettes {
+  grid-column: 3 / span 2;
+}
+
+.cs-index-hero-meta--date {
+  grid-column: 5 / span 2;
+}
+
+@media (min-width: 1024px) {
+  .cs-index-hero-meta--count {
+    grid-column: 5 / span 1;
+  }
+
+  .cs-index-hero-meta--vignettes {
+    grid-column: 7 / span 1;
+  }
+
+  .cs-index-hero-meta--date {
+    grid-column: 9 / span 1;
+  }
+}
+
+.cs-index-hero__main {
+  grid-row: 2;
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-self: stretch;
+  min-height: 0;
+  padding-top: var(--cs-hero-main-inset-top);
+  padding-bottom: var(--cs-hero-foot);
+}
+
+.cs-index-hero__main-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+  column-gap: var(--grid-gutter);
+  align-items: end;
+  width: 100%;
+  min-width: 0;
+}
+
+.cs-index-hero__title {
+  grid-column: 1 / span 4;
+  width: 100%;
   margin: 0;
 }
 
-.cs-cover__meta-row {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.cs-cover__meta-row dt {
+.cs-index-hero__deck {
+  grid-column: 5 / -1;
   margin: 0;
+  align-self: end;
 }
 
-.cs-cover__meta-row dd {
-  margin: 0;
+@media (max-width: 767px) {
+  .cs-index-hero__title {
+    grid-column: 1 / -1;
+  }
+
+  .cs-index-hero__deck {
+    grid-column: 1 / -1;
+    margin-top: 1rem;
+  }
 }
 
-.cs-cover__client {
+/* Index slide — brand field (cols 1–6) + type column (cols 7–12) */
+.cs-index-panel {
+  position: relative;
+  padding: 0;
+  background: var(--color-paper);
+}
+
+.cs-index-brand-field {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  justify-content: center;
+  overflow: hidden;
+  container-type: inline-size;
+  background: var(--cs-brand-field, var(--color-neon-lime));
 }
 
-.cs-cover__client-name {
-  font-size: 1.0625rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+.cs-index-brand-field__glow {
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(
+    circle at 50% 45%,
+    color-mix(in srgb, var(--color-white) 28%, transparent) 0%,
+    transparent 62%
+  );
+  pointer-events: none;
 }
 
-.cs-cover__link {
+.cs-index-brand-field__logo {
+  position: relative;
+  z-index: 1;
+  width: clamp(7rem, 42cqi, 18rem);
+  max-width: 72%;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.cs-index-brand-field__wordmark {
+  position: relative;
+  z-index: 1;
+  max-width: 80%;
+  font-size: clamp(2rem, 10cqi, 4.5rem);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  text-align: center;
+  color: color-mix(in srgb, var(--color-black) 72%, transparent);
+}
+
+.cs-index-panel__grid {
+  --cs-hero-main-inset-top: clamp(1rem, 2.5vh, 1.5rem);
+  --cs-hero-foot: clamp(1.25rem, 3vh, 2rem);
+  --cs-index-copy-pad: clamp(1.5rem, 3vw, 2.5rem);
+  row-gap: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  grid-template-rows:
+    var(--chrome-top-offset)
+    minmax(0, 42dvh)
+    minmax(0, 1fr);
+}
+
+@media (min-width: 1024px) {
+  .cs-index-panel__grid {
+    grid-template-rows:
+      var(--chrome-top-offset)
+      minmax(0, 1fr);
+  }
+}
+
+.cs-index-panel__field {
+  position: relative;
+  z-index: 0;
+  grid-row: 2;
+  grid-column: 1 / -1;
+  min-height: 0;
+  align-self: stretch;
+  --cs-brand-bleed: var(--grid-margin);
+  margin-inline-start: calc(-1 * var(--cs-brand-bleed));
+  width: calc(100% + var(--cs-brand-bleed));
+}
+
+@media (min-width: 1024px) {
+  .cs-index-panel__field {
+    --cs-index-center-gap: max(
+      0px,
+      (100vw - var(--rail-width) - var(--grid-max)) / 2
+    );
+    --cs-brand-bleed: calc(var(--grid-margin) + var(--cs-index-center-gap));
+    grid-row: 1 / -1;
+    grid-column: 1 / 7;
+  }
+}
+
+.cs-index-panel__meta {
+  position: relative;
+  z-index: 1;
+  grid-row: 1;
+  align-items: center;
+  align-self: stretch;
+  height: var(--chrome-top-offset);
+  min-height: var(--chrome-top-offset);
+  row-gap: 0;
+}
+
+@media (min-width: 1024px) {
+  .cs-index-panel__meta {
+    grid-column: 7 / -1;
+    padding-inline-start: var(--cs-index-copy-pad);
+  }
+}
+
+.cs-index-panel__meta .craft-hero-meta {
+  margin: 0;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.cs-index-panel__meta-index {
+  grid-column: 1 / span 1;
+}
+
+.cs-index-panel__meta-date {
+  grid-column: 2 / span 2;
+}
+
+.cs-index-panel__meta-client {
+  grid-column: 4 / span 2;
+}
+
+.cs-index-panel__meta-vignettes {
+  grid-column: 6 / span 1;
+}
+
+@media (min-width: 1024px) {
+  .cs-index-panel__meta-index {
+    grid-column: 1 / span 1;
+  }
+
+  .cs-index-panel__meta-date {
+    grid-column: 2 / span 2;
+  }
+
+  .cs-index-panel__meta-client {
+    grid-column: 4 / span 2;
+  }
+
+  .cs-index-panel__meta-vignettes {
+    grid-column: 6 / span 1;
+  }
+}
+
+.cs-index-panel__main {
+  position: relative;
+  z-index: 1;
+  grid-row: 3;
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 0;
+  padding-top: var(--cs-hero-main-inset-top);
+  padding-bottom: var(--cs-hero-foot);
+}
+
+@media (min-width: 1024px) {
+  .cs-index-panel__main {
+    grid-row: 2;
+    grid-column: 7 / -1;
+    padding-inline-start: var(--cs-index-copy-pad);
+  }
+}
+
+.cs-index-panel__title-block {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 2.5vh, 1.5rem);
+  max-width: 38rem;
+}
+
+.cs-index-panel__title {
+  margin: 0;
+}
+
+.cs-index-panel__subhead {
+  margin: 0;
+}
+
+.cs-index-panel__tags {
+  margin-top: 0.25rem;
+}
+
+.cs-index-panel__link {
   align-self: flex-start;
+  margin-top: 0.25rem;
 }
 
 /* ── Client logos ────────────────────────────────────────── */
@@ -1824,22 +2100,43 @@ a.craft-card:focus-visible {
   color: var(--color-paper);
 }
 
-/* ── Case study detail — Swiss editorial grid ────────────── */
+/* ── Chrome focus dimming (dot-nav scroll experiences) ───── */
 
-/* One in-focus section at a time; vignette panels dim internally (.vframe). */
-.cs-detail .cs-focus-section {
+/* One in-focus target at a time; siblings idle at 45%. Hover peeks idle targets. */
+.chrome-focus-target,
+.cs-focus-section {
   opacity: 0.45;
   transition: opacity 0.4s ease;
 }
 
-.cs-detail .cs-focus-section.is-focused {
+.chrome-focus-target.is-focused,
+.cs-focus-section.is-focused {
   opacity: 1;
 }
 
-/* Hovering a dimmed section previews it at full brightness. */
-.cs-detail .cs-focus-section:not(.is-focused):hover {
+.chrome-focus-target:not(.is-focused):hover,
+.cs-focus-section:not(.is-focused):hover {
   opacity: 1;
 }
+
+/* Floating chrome hover (menu + circle nav) — dim page content for orientation. */
+body:has(.floating-chrome[data-chrome-state="default"]:hover) .chrome-focus-target,
+body:has(.floating-chrome[data-chrome-state="default"]:hover)
+  .chrome-focus-target:not(.is-focused):hover,
+body:has(.floating-chrome[data-chrome-state="default"]:hover) .cs-focus-section,
+body:has(.floating-chrome[data-chrome-state="default"]:hover)
+  .cs-focus-section:not(.is-focused):hover {
+  opacity: 0.2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chrome-focus-target,
+  .cs-focus-section {
+    transition: none;
+  }
+}
+
+/* ── Case study detail — Swiss editorial grid ────────────── */
 
 .cs-detail .cs-focus-section:not(.is-focused):hover .vframe {
   opacity: 1;
@@ -1861,28 +2158,20 @@ a.craft-card:focus-visible {
   opacity: 1;
 }
 
-/* Circle nav hover — dim every section (including in-focus) to ~20%. */
-body:has(.chrome-hero-dots-rail:hover) .cs-detail .cs-focus-section,
-body:has(.chrome-hero-dots-rail:hover)
+/* Avoid stacking vignette panel dim on top of section dim when chrome is hovered. */
+body:has(.floating-chrome[data-chrome-state="default"]:hover)
   .cs-detail
-  .cs-focus-section:not(.is-focused):hover {
-  opacity: 0.2;
-}
-
-/* Avoid stacking vignette panel dim on top of section dim. */
-body:has(.chrome-hero-dots-rail:hover) .cs-detail .cs-focus-section .vframe,
-body:has(.chrome-hero-dots-rail:hover)
+  .cs-focus-section
+  .vframe,
+body:has(.floating-chrome[data-chrome-state="default"]:hover)
   .cs-detail
   .cs-focus-section
   .vframe.is-active,
-body:has(.chrome-hero-dots-rail:hover) .cs-detail .cs-focus-section .vchapter__trail {
+body:has(.floating-chrome[data-chrome-state="default"]:hover)
+  .cs-detail
+  .cs-focus-section
+  .vchapter__trail {
   opacity: 1;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cs-detail .cs-focus-section {
-    transition: none;
-  }
 }
 
 /* Dimmed sections — hide system cursor; render a 200×200 plus follower. */

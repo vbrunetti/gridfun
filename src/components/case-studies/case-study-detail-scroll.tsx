@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useChromeFocusById } from "@/components/chrome/use-chrome-focus";
 import {
   useCaseStudyDetailScrollRegister,
   type CaseStudyDetailStep,
@@ -351,19 +352,7 @@ export function CaseStudyDetailScroll({
     };
   }, [scrollToSnapIndex, snapToNearest]);
 
-  // One in-focus section at a time — vignette chapters dim panels internally.
-  useEffect(() => {
-    const activeId = steps[activeStep]?.id;
-    const sections = document.querySelectorAll<HTMLElement>(".cs-focus-section");
-
-    sections.forEach((el) => {
-      el.classList.toggle("is-focused", Boolean(activeId && el.id === activeId));
-    });
-
-    return () => {
-      sections.forEach((el) => el.classList.remove("is-focused"));
-    };
-  }, [activeStep, steps]);
+  useChromeFocusById(steps[activeStep]?.id, steps.length > 1);
 
   // Dimmed sections + vignette panels: plus cursor, hover preview, click to jump.
   useEffect(() => {

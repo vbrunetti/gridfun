@@ -186,7 +186,18 @@ export const typographyRamp: readonly TypographyRampEntry[] = [
     letterSpacing: "normal",
     sample:
       "Designing the human side of an autonomous fleet — context gain over a black box.",
-    scope: "/case-studies/[slug] hero",
+    scope: "/case-studies/[slug] hero · /case-studies index",
+  },
+  {
+    className: "craft-hero-meta",
+    label: "Index meta (mono caps)",
+    size: "0.625rem (10px)",
+    weight: "500",
+    lineHeight: "inherit",
+    letterSpacing: "0.14em · uppercase",
+    fontFamily: "Geist Mono",
+    sample: "01 · 2023 · CRUISE",
+    scope: "/case-studies index panels",
   },
   {
     className: "vchapter__numeral",

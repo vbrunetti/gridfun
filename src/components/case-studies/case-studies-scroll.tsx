@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useChromeFocusSteps } from "@/components/chrome/use-chrome-focus";
 import { useCaseStudiesScrollRegister } from "@/components/case-studies/case-studies-scroll-context";
 
 const WHEEL_DELTA_MIN = 6;
@@ -129,6 +130,8 @@ export function CaseStudiesScroll({ children }: CaseStudiesScrollProps) {
     scrollToStep,
     dotsVisible,
   );
+
+  useChromeFocusSteps(rootRef, activeStep, stepCount > 1);
 
   useEffect(() => {
     const root = rootRef.current;

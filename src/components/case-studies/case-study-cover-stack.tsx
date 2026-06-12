@@ -1,44 +1,57 @@
 import Link from "next/link";
 import { RuledGrid } from "@/components/layout/ruled-grid";
-import { ClientLogo } from "@/components/craft/vignette-media";
-import { caseStudies, caseStudyTags } from "@/content/portfolio";
-
-const panelThemes = [
-  {
-    section: "theme-dark keyline-b keyline-b--dark",
-    chromeSurface: "dark" as const,
-  },
-  {
-    section: "theme-light keyline-b",
-    chromeSurface: "light" as const,
-  },
-  {
-    section: "theme-canvas keyline-b keyline-b--canvas",
-    chromeSurface: "light" as const,
-  },
-] as const;
+import { SiteGridSubgrid } from "@/components/layout/site-grid";
+import { CaseStudyBrandField } from "@/components/case-studies/case-study-brand-field";
+import { CraftTagList } from "@/components/craft/vignette-media";
+import {
+  caseStudies,
+  caseStudyTags,
+  caseStudyVignettes,
+} from "@/content/portfolio";
 
 export function CaseStudyCoverStack() {
   return (
     <div className="sticky-cover-stack" aria-label="Case studies">
       {caseStudies.map((study, index) => {
-        const theme = panelThemes[index % panelThemes.length];
         const tags = caseStudyTags(study);
+        const vignetteCount = caseStudyVignettes(study).length;
+        const indexLabel = String(index + 1).padStart(2, "0");
 
         return (
           <section
             key={study.slug}
+            id={`cs-index-${study.slug}`}
             data-cs-step="panel"
-            className={`work-snap-section sticky-cover-panel flex min-h-0 items-center ${theme.section}`}
-            data-chrome-surface={theme.chromeSurface}
+            data-chrome-focus-step={index + 1}
+            className="chrome-focus-target work-snap-section sticky-cover-panel cs-index-panel theme-light"
+            data-chrome-surface="light"
           >
-            <RuledGrid className="w-full py-16">
-              <div className="col-full cs-cover">
-                <div className="cs-cover__head">
-                  <p className="text-meta">
-                    Case study {String(index + 1).padStart(2, "0")} · {study.date}
-                  </p>
-                  <h2 className="display-lg mt-4">
+            <RuledGrid className="cs-index-panel__grid">
+              <CaseStudyBrandField
+                brand={study.brand}
+                client={study.client}
+                clientLogo={study.clientLogo}
+                className="cs-index-panel__field"
+              />
+
+              <SiteGridSubgrid className="cs-index-panel__meta">
+                <p className="text-meta craft-hero-meta cs-index-panel__meta-index">
+                  {indexLabel}
+                </p>
+                <p className="text-meta craft-hero-meta cs-index-panel__meta-date">
+                  {study.date}
+                </p>
+                <p className="text-meta craft-hero-meta cs-index-panel__meta-client">
+                  {study.client}
+                </p>
+                <p className="text-meta craft-hero-meta cs-index-panel__meta-vignettes">
+                  {vignetteCount} VIGNETTE{vignetteCount === 1 ? "" : "S"}
+                </p>
+              </SiteGridSubgrid>
+
+              <div className="cs-index-panel__main">
+                <div className="cs-index-panel__title-block">
+                  <h2 className="cs-index-panel__title display-lg">
                     <Link
                       href={`/case-studies/${study.slug}`}
                       className="transition-opacity hover:opacity-70"
@@ -46,42 +59,21 @@ export function CaseStudyCoverStack() {
                       {study.name}
                     </Link>
                   </h2>
-                </div>
-
-                <dl className="cs-cover__meta">
-                  <div className="cs-cover__meta-row">
-                    <dt className="text-meta">Client</dt>
-                    <dd className="cs-cover__client">
-                      <ClientLogo
-                        client={study.client}
-                        logoSrc={study.clientLogo}
-                      />
-                      <span className="cs-cover__client-name">{study.client}</span>
-                    </dd>
-                  </div>
+                  <p className="cs-hero__subhead cs-index-panel__subhead">
+                    {study.subhead}
+                  </p>
 
                   {tags.length > 0 ? (
-                    <div className="cs-cover__meta-row">
-                      <dt className="text-meta">Craft</dt>
-                      <dd>
-                        <ul className="craft-tag-list">
-                          {tags.map((tag) => (
-                            <li key={tag} className="craft-tag-pill">
-                              {tag}
-                            </li>
-                          ))}
-                        </ul>
-                      </dd>
-                    </div>
+                    <CraftTagList tags={tags} className="cs-index-panel__tags" />
                   ) : null}
-                </dl>
 
-                <Link
-                  href={`/case-studies/${study.slug}`}
-                  className="text-meta cs-cover__link border-b border-current pb-0.5 transition-opacity hover:opacity-70"
-                >
-                  View case study →
-                </Link>
+                  <Link
+                    href={`/case-studies/${study.slug}`}
+                    className="text-meta cs-index-panel__link border-b border-current pb-0.5 transition-opacity hover:opacity-70"
+                  >
+                    View case study →
+                  </Link>
+                </div>
               </div>
             </RuledGrid>
           </section>

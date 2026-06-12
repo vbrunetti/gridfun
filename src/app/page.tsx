@@ -14,7 +14,7 @@ export default function Home() {
       />
       <section
         id="home-secondary"
-        className="theme-dark home-secondary-panel keyline-b keyline-b--dark keyline-b--viewport"
+        className="chrome-focus-target theme-dark home-secondary-panel keyline-b keyline-b--dark keyline-b--viewport"
         data-chrome-surface="dark"
       >
         <RuledGrid className="home-secondary-stage w-full">

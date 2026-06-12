@@ -14,6 +14,7 @@ export const palette = {
   skyBlue: "#5BC4FF",
   mediumBlue: "#2962FF",
   royalBlue: "#0033FF",
+  cruise: "#FF4D37",
   /** @deprecated Use offWhite — kept for existing token names */
   paper: "#EFEFEF",
   /** @deprecated Use lightGray */
