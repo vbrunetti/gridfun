@@ -9,10 +9,10 @@ import {
   useRef,
   useState,
 } from "react";
+import { GhostButton } from "@/components/chrome/cta-button";
 import { CraftMasonry } from "@/components/craft/craft-masonry";
 import { VignetteKeyImage, craftCardRatio } from "@/components/craft/vignette-media";
 import { RuledGrid } from "@/components/layout/ruled-grid";
-import { SiteGridSubgrid } from "@/components/layout/site-grid";
 import {
   allCraftTags,
   craftActiveTagsFromParam,
@@ -50,9 +50,36 @@ function CraftFilterToggle({
   );
 }
 
+function CraftFiltersAllToggle({
+  activeTags,
+  onToggleAll,
+  tags,
+  variant,
+}: {
+  activeTags: Set<string>;
+  onToggleAll: () => void;
+  tags: string[];
+  variant: "hero" | "compact";
+}) {
+  const allOn =
+    tags.length > 0 && tags.every((tag) => activeTags.has(tag));
+
+  return (
+    <GhostButton
+      onClick={onToggleAll}
+      icon={allOn ? "x" : "check"}
+      chipSize={variant}
+      aria-label={allOn ? "Turn all craft tags off" : "Turn all craft tags on"}
+    >
+      {allOn ? "Turn all off" : "Turn all on"}
+    </GhostButton>
+  );
+}
+
 function CraftFilters({
   activeTags,
   onToggle,
+  onToggleAll,
   tags,
   variant,
   className = "",
@@ -60,6 +87,7 @@ function CraftFilters({
 }: {
   activeTags: Set<string>;
   onToggle: (tag: string) => void;
+  onToggleAll: () => void;
   tags: string[];
   variant: "hero" | "compact";
   className?: string;
@@ -70,6 +98,7 @@ function CraftFilters({
       <CraftFiltersPager
         activeTags={activeTags}
         onToggle={onToggle}
+        onToggleAll={onToggleAll}
         tags={tags}
         className={className}
         visible={visible}
@@ -92,6 +121,12 @@ function CraftFilters({
           variant="hero"
         />
       ))}
+      <CraftFiltersAllToggle
+        activeTags={activeTags}
+        onToggleAll={onToggleAll}
+        tags={tags}
+        variant="hero"
+      />
     </div>
   );
 }
@@ -100,12 +135,14 @@ function CraftFilters({
 function CraftFiltersPager({
   activeTags,
   onToggle,
+  onToggleAll,
   tags,
   className = "",
   visible = true,
 }: {
   activeTags: Set<string>;
   onToggle: (tag: string) => void;
+  onToggleAll: () => void;
   tags: string[];
   className?: string;
   /** Sticky header visibility — remeasure when the bar appears. */
@@ -227,6 +264,13 @@ function CraftFiltersPager({
         </div>
       </div>
 
+      <CraftFiltersAllToggle
+        activeTags={activeTags}
+        onToggleAll={onToggleAll}
+        tags={tags}
+        variant="compact"
+      />
+
       <button
         type="button"
         className="craft-filters-pager__btn craft-filters-pager__btn--next"
@@ -309,6 +353,13 @@ export function CraftIndex({ initialTag }: { initialTag?: string } = {}) {
     });
   }
 
+  function toggleAllTags() {
+    setActiveTags((prev) => {
+      const allOn = allTags.every((tag) => prev.has(tag));
+      return allOn ? new Set<string>() : new Set(allTags);
+    });
+  }
+
   return (
     <div className="craft-page">
       <header className="craft-hero-header keyline-b">
@@ -324,16 +375,19 @@ export function CraftIndex({ initialTag }: { initialTag?: string } = {}) {
               2023–2025
             </p>
           </div>
-          <SiteGridSubgrid className="craft-hero__main lg:items-start">
-            <h1 className="display-xl grid-span-6 lg:grid-span-4">Craft</h1>
-            <CraftFilters
-              variant="hero"
-              tags={allTags}
-              activeTags={activeTags}
-              onToggle={toggleTag}
-              className="col-1-to-end lg:col-5-to-end mt-2 lg:mt-0"
-            />
-          </SiteGridSubgrid>
+          <div className="craft-hero__main">
+            <div className="craft-hero__main-grid">
+              <h1 className="craft-hero__title display-xl">Craft</h1>
+              <CraftFilters
+                variant="hero"
+                tags={allTags}
+                activeTags={activeTags}
+                onToggle={toggleTag}
+                onToggleAll={toggleAllTags}
+                className="craft-hero__filters"
+              />
+            </div>
+          </div>
         </RuledGrid>
       </header>
 
@@ -355,6 +409,7 @@ export function CraftIndex({ initialTag }: { initialTag?: string } = {}) {
               tags={allTags}
               activeTags={activeTags}
               onToggle={toggleTag}
+              onToggleAll={toggleAllTags}
               visible={compactHeader}
             />
           </div>

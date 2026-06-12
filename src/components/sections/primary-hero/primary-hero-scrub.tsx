@@ -8,11 +8,11 @@ import {
   useState,
 } from "react";
 import { presetsForChapterCount } from "./particle-presets";
-import { HERO_SPARK_COLOR, HERO_SPARK_PRESETS, HERO_SPARK_SHAPE_SCALE } from "./spark-hero-config";
-import { SparkCanvas, type SparkBlend } from "./spark-canvas";
+import { HERO_SPARK_PRESETS } from "./spark-hero-config";
+import type { SparkBlend } from "./spark-canvas";
+import { PrimaryHeroSparkLayer } from "./primary-hero-spark-layer";
 import { CtaButton } from "@/components/chrome/cta-button";
 import { RuledGrid } from "@/components/layout/ruled-grid";
-import { SiteGridSubgrid } from "@/components/layout/site-grid";
 import type { HomeCoverSection } from "@/content/home-sections";
 import type { HeroSlate } from "@/content/hero-slates";
 import {
@@ -320,61 +320,62 @@ export function PrimaryHeroScrub({
       ) : null}
 
       <div className="primary-hero-sticky">
-        <RuledGrid className="primary-hero-stage h-full">
-          <SiteGridSubgrid className="primary-hero-stage-row h-full items-center">
-            <div className="primary-hero-copy grid-span-6 lg:grid-span-5">
-              <HeroChapterCopy
-                slates={slates}
-                blend={
-                  reducedMotion
-                    ? { from: 0, to: 0, t: 0 }
-                    : chapterBlend
-                }
-              />
+        <RuledGrid className="primary-hero-stage primary-hero-stage--split-scene h-full">
+          <PrimaryHeroSparkLayer
+            presets={sparkPresets}
+            blend={sparkBlend}
+            paused={canvasPaused}
+          />
 
-              {reducedMotion ? (
-                <div className="mt-8 flex flex-wrap items-center gap-6">
-                  <CtaButton href="/case-studies">View case studies</CtaButton>
-                  <CtaButton href="/about" variant="ghost">
-                    About
-                  </CtaButton>
-                </div>
-              ) : null}
-            </div>
-
-            <div className="primary-hero-spark-layer grid-span-6 lg:col-start-7 lg:grid-span-6">
-              <SparkCanvas
-                presets={sparkPresets}
-                blend={sparkBlend}
-                paused={canvasPaused}
-                showBoundary={false}
-                shapeScale={HERO_SPARK_SHAPE_SCALE}
-                {...HERO_SPARK_COLOR}
-              />
-            </div>
-          </SiteGridSubgrid>
+          <div className="primary-hero-copy col-1-to-end lg:grid-span-8">
+            <HeroChapterCopy
+              slates={slates}
+              blend={
+                reducedMotion
+                  ? { from: 0, to: 0, t: 0 }
+                  : chapterBlend
+              }
+              afterSubhead={
+                reducedMotion ? (
+                  <div className="primary-hero__ctas">
+                    <CtaButton href="/case-studies">View case studies</CtaButton>
+                    <CtaButton href="/about" variant="ghost">
+                      About
+                    </CtaButton>
+                  </div>
+                ) : undefined
+              }
+            />
+          </div>
         </RuledGrid>
       </div>
 
       {showChapterCtas ? (
         <div className="hero-chapter-cta-layer">
-          <RuledGrid className="primary-hero-stage h-full">
-            <SiteGridSubgrid className="primary-hero-stage-row h-full items-center">
-              <div className="primary-hero-copy grid-span-6 lg:grid-span-5">
+          <RuledGrid className="primary-hero-stage primary-hero-stage--split-scene h-full">
+            <div className="primary-hero-copy primary-hero-copy--cta col-1-to-end lg:grid-span-8">
+              <div className="home-beat">
                 <div className="invisible" aria-hidden>
-                  <HeroChapterCopy
-                    slates={slates}
-                    blend={{ from: 0, to: 0, t: 0 }}
-                  />
+                  {slates[0]!.eyebrow ? (
+                    <p className="home-beat__eyebrow text-meta">
+                      {slates[0]!.eyebrow}
+                    </p>
+                  ) : null}
+                  <p className="display-xl home-beat__headline">
+                    {slates[0]!.headline}
+                  </p>
+                  {slates[0]!.supporting ? (
+                    <p className="home-beat__subhead">{slates[0]!.supporting}</p>
+                  ) : null}
                 </div>
-                <div className="mt-8 flex flex-wrap items-center gap-6">
+                <div className="primary-hero__ctas">
                   <CtaButton href="/case-studies">View case studies</CtaButton>
                   <CtaButton href="/about" variant="ghost">
                     About
                   </CtaButton>
                 </div>
               </div>
-            </SiteGridSubgrid>
+            </div>
           </RuledGrid>
         </div>
       ) : null}

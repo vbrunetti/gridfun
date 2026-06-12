@@ -43,5 +43,5 @@ export const HERO_SPARK_PRESETS = presetsForHeroChapters(
 );
 export { HERO_CHAPTER_SHAPES };
 
-/** Scales particle formation on the home hero — wide viewports need >1. */
-export const HERO_SPARK_SHAPE_SCALE = 2.2;
+/** Fills the hero spark frame — tuned for zone-capped square (cols 7–12). */
+export const HERO_SPARK_SHAPE_SCALE = 2.85;

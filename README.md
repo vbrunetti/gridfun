@@ -24,6 +24,8 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Design docs
 
 - **[Phase 1 — Chrome](./docs/phase-1-chrome.md)** — inspiration synthesis, tokens, IA, and build order (shell before content).
+- **[Case study layout](./docs/case-study-layout.md)** — narrative page anatomy, vignette filmstrip, panel grid, reading behaviors, and propagation checklist.
+- **[Home hero](./docs/home-hero.md)** — split-scene beat block, particle companion, scroll chapters, and dot nav.
 
 ## Project structure
 

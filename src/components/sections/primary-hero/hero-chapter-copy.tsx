@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { HeroSlate } from "@/content/hero-slates";
 
 export type ChapterBlend = {
@@ -12,19 +13,28 @@ type HeroChapterCopyProps = {
   blend: ChapterBlend;
   /** Pixels to travel during crossfade (scroll-driven, not CSS transition) */
   shiftPx?: number;
+  /** Rendered after subhead inside the beat block (e.g. chapter-0 CTAs). */
+  afterSubhead?: ReactNode;
 };
 
-function SlateBlock({ slate }: { slate: HeroSlate }) {
+function BeatBlock({
+  slate,
+  afterSubhead,
+}: {
+  slate: HeroSlate;
+  afterSubhead?: ReactNode;
+}) {
   return (
-    <>
-      {slate.eyebrow ? <p className="text-meta">{slate.eyebrow}</p> : null}
-      <p className="display-xl mt-4 max-w-3xl">{slate.headline}</p>
-      {slate.supporting ? (
-        <p className="mt-6 max-w-lg leading-relaxed text-secondary">
-          {slate.supporting}
-        </p>
+    <div className="home-beat">
+      {slate.eyebrow ? (
+        <p className="home-beat__eyebrow text-meta">{slate.eyebrow}</p>
       ) : null}
-    </>
+      <p className="display-xl home-beat__headline">{slate.headline}</p>
+      {slate.supporting ? (
+        <p className="home-beat__subhead">{slate.supporting}</p>
+      ) : null}
+      {afterSubhead}
+    </div>
   );
 }
 
@@ -44,6 +54,7 @@ export function HeroChapterCopy({
   slates,
   blend,
   shiftPx = getHeroChapterShiftPx(),
+  afterSubhead,
 }: HeroChapterCopyProps) {
   const fromSlate = slates[blend.from] ?? slates[0]!;
   const toSlate = slates[blend.to] ?? fromSlate;
@@ -69,7 +80,7 @@ export function HeroChapterCopy({
             zIndex: fadeT < 0.5 ? 2 : 1,
           }}
         >
-          <SlateBlock slate={fromSlate} />
+          <BeatBlock slate={fromSlate} afterSubhead={afterSubhead} />
         </div>
         {crossfading ? (
           <div
@@ -80,7 +91,7 @@ export function HeroChapterCopy({
               zIndex: fadeT >= 0.5 ? 2 : 1,
             }}
           >
-            <SlateBlock slate={toSlate} />
+            <BeatBlock slate={toSlate} />
           </div>
         ) : null}
       </div>

@@ -1,4 +1,5 @@
 import { RuledGrid } from "@/components/layout/ruled-grid";
+import { HomeSecondaryArrowCta } from "@/components/sections/home-secondary-arrow-cta";
 import { PrimaryHero } from "@/components/sections/primary-hero";
 import { homeCoverSections } from "@/content/home-sections";
 import { heroSlates } from "@/content/hero-slates";
@@ -13,19 +14,24 @@ export default function Home() {
       />
       <section
         id="home-secondary"
-        className="theme-dark home-secondary-panel keyline-b keyline-b--dark keyline-b--viewport flex items-center"
+        className="theme-dark home-secondary-panel keyline-b keyline-b--dark keyline-b--viewport"
         data-chrome-surface="dark"
       >
-        <RuledGrid className="w-full py-16">
-          <div className="col-span-content">
-            <p className="text-meta">Home secondary</p>
-            <h2 className="display-lg mt-4 max-w-2xl">
-              Scrolls over the hero — hero stays pinned underneath.
-            </h2>
-            <p className="mt-4 max-w-lg text-secondary">
-              DES-style cover transition. Placeholder for the next band of
-              content.
-            </p>
+        <RuledGrid className="home-secondary-stage w-full">
+          <div className="home-secondary-copy">
+            <div className="home-beat">
+              <p className="home-beat__eyebrow text-meta">Home secondary</p>
+              <h2 className="display-xl home-beat__headline">
+                Scrolls over the hero — hero stays pinned underneath.
+              </h2>
+              <p className="home-beat__subhead">
+                DES-style cover transition. Placeholder for the next band of
+                content.
+              </p>
+            </div>
+          </div>
+          <div className="home-secondary-cta">
+            <HomeSecondaryArrowCta />
           </div>
         </RuledGrid>
       </section>
