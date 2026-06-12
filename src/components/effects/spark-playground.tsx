@@ -255,7 +255,7 @@ export function SparkPlayground() {
       <RuledGrid className="mt-8">
         <SiteGridSubgrid className="lg:items-start">
           <div className="grid-span-6 space-y-4 lg:grid-span-8 lg:sticky lg:top-4 lg:self-start">
-          <div className="relative min-h-[50dvh] overflow-hidden border border-[var(--rule-light)] bg-[var(--surface-white)]">
+          <div className="relative min-h-[50dvh] overflow-visible border border-[var(--rule-light)] bg-[var(--surface-white)]">
             <div className="primary-hero-spark-layer">
               <SparkCanvas
                 presets={presets}

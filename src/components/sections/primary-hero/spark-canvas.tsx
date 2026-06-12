@@ -60,6 +60,8 @@ type SparkCanvasProps = {
   colorCycleSpeed?: number;
   /** Multiplier for shape boundary size (home hero uses >1 to fill wide viewports). */
   shapeScale?: number;
+  /** Extra draw margin as a fraction of frame min dimension (glow extends past the frame). */
+  canvasBleed?: number;
 };
 
 type SparkParticle = {
@@ -200,6 +202,7 @@ export function SparkCanvas({
   compositeMode = "lighter",
   colorCycleSpeed = 0.08,
   shapeScale = 1,
+  canvasBleed = 0,
 }: SparkCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<SparkParticle[]>([]);
@@ -212,9 +215,17 @@ export function SparkCanvas({
   const compositeModeRef = useRef(compositeMode);
   const colorCycleSpeedRef = useRef(colorCycleSpeed);
   const shapeScaleRef = useRef(shapeScale);
+  const canvasBleedRef = useRef(canvasBleed);
   const cycleTimeRef = useRef(0);
   const rafRef = useRef(0);
-  const sizeRef = useRef({ width: 0, height: 0, dpr: 1 });
+  const sizeRef = useRef({
+    frameWidth: 0,
+    frameHeight: 0,
+    canvasWidth: 0,
+    canvasHeight: 0,
+    bleed: 0,
+    dpr: 1,
+  });
   const lastTimeRef = useRef(0);
 
   blendRef.current = blend;
@@ -226,6 +237,7 @@ export function SparkCanvas({
   compositeModeRef.current = compositeMode;
   colorCycleSpeedRef.current = colorCycleSpeed;
   shapeScaleRef.current = shapeScale;
+  canvasBleedRef.current = canvasBleed;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -238,13 +250,27 @@ export function SparkCanvas({
       const parent = canvas.parentElement;
       if (!parent) return;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const width = parent.clientWidth;
-      const height = parent.clientHeight;
-      sizeRef.current = { width, height, dpr };
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
+      const frameWidth = parent.clientWidth;
+      const frameHeight = parent.clientHeight;
+      const bleed = Math.round(
+        Math.min(frameWidth, frameHeight) * canvasBleedRef.current,
+      );
+      const canvasWidth = frameWidth + bleed * 2;
+      const canvasHeight = frameHeight + bleed * 2;
+      sizeRef.current = {
+        frameWidth,
+        frameHeight,
+        canvasWidth,
+        canvasHeight,
+        bleed,
+        dpr,
+      };
+      canvas.width = canvasWidth * dpr;
+      canvas.height = canvasHeight * dpr;
+      canvas.style.left = `${-bleed}px`;
+      canvas.style.top = `${-bleed}px`;
+      canvas.style.width = `${canvasWidth}px`;
+      canvas.style.height = `${canvasHeight}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       particlesRef.current = [];
       lastTimeRef.current = 0;
@@ -259,23 +285,24 @@ export function SparkCanvas({
       rafRef.current = requestAnimationFrame(step);
       if (pausedRef.current) return;
 
-      const { width, height } = sizeRef.current;
-      if (width === 0 || height === 0) return;
+      const { frameWidth, frameHeight, canvasWidth, canvasHeight, bleed } =
+        sizeRef.current;
+      if (frameWidth === 0 || frameHeight === 0) return;
 
       const prev = lastTimeRef.current || now;
       const dt = Math.min((now - prev) / 1000, 0.05);
       lastTimeRef.current = now;
       cycleTimeRef.current += dt;
 
-      const cx = width / 2;
-      const cy = height / 2;
+      const cx = bleed + frameWidth / 2;
+      const cy = bleed + frameHeight / 2;
       const currentBlend = blendRef.current;
       const params = resolveParams(
         presetsRef.current,
         currentBlend,
         directRef.current,
-        width,
-        height,
+        frameWidth,
+        frameHeight,
         shapeScaleRef.current,
       );
       const mode = colorModeRef.current;
@@ -298,7 +325,7 @@ export function SparkCanvas({
         particles = particles.slice(0, targetCount);
       }
 
-      ctx.clearRect(0, 0, width, height);
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
       if (showBoundaryRef.current) {
         const profile = params.shapeProfile;
@@ -435,7 +462,7 @@ export function SparkCanvas({
   return (
     <canvas
       ref={canvasRef}
-      className="pointer-events-none absolute inset-0 h-full w-full"
+      className="pointer-events-none absolute"
       aria-hidden
     />
   );

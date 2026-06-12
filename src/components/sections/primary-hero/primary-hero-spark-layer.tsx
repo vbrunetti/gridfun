@@ -149,6 +149,7 @@ export function PrimaryHeroSparkLayer({
         paused={paused}
         showBoundary={false}
         shapeScale={HERO_SPARK_SHAPE_SCALE}
+        canvasBleed={0.14}
         {...HERO_SPARK_COLOR}
       />
     </div>
