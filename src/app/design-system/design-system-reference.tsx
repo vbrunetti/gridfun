@@ -9,6 +9,9 @@ import { palette } from "@/lib/colors";
 import { DEMO_COLUMN_COUNT } from "@/lib/grid";
 import {
   brandColors,
+  caseStudyDetailPatterns,
+  caseStudyHeroFacts,
+  caseStudyTypography,
   fonts,
   gridSpans,
   remSpacingRamp,
@@ -17,6 +20,8 @@ import {
   surfaces,
   themes,
   typographyRamp,
+  vignettePanelSurfaces,
+  vignettePanelWidths,
   type TypographyRampEntry,
 } from "@/lib/design-tokens";
 import { GRID_COLUMNS } from "@/lib/site-location";
@@ -33,6 +38,7 @@ const paletteHex: Record<string, string> = {
   "--color-sky-blue": palette.skyBlue,
   "--color-medium-blue": palette.mediumBlue,
   "--color-royal-blue": palette.royalBlue,
+  "--color-cruise": "#ff4d37",
 };
 
 const NAV = [
@@ -42,8 +48,13 @@ const NAV = [
   ["#surfaces", "Surfaces"],
   ["#grid", "Grid"],
   ["#themes", "Themes"],
+  ["#case-study", "Case study"],
   ["#components", "Components"],
 ] as const;
+
+const coreTypography = typographyRamp.filter(
+  (entry) => !caseStudyTypography.includes(entry),
+);
 
 function DsSectionHeader({
   id,
@@ -72,7 +83,13 @@ function DsSectionHeader({
   );
 }
 
-function TypeSpecimenRow({ style }: { style: TypographyRampEntry }) {
+function TypeSpecimenRow({
+  style,
+  surfaceClass = "",
+}: {
+  style: TypographyRampEntry;
+  surfaceClass?: string;
+}) {
   const sample =
     style.sample ??
     (style.label === "Rail label"
@@ -84,7 +101,9 @@ function TypeSpecimenRow({ style }: { style: TypographyRampEntry }) {
   const isFilterChip = style.className.includes("craft-filter-chip");
 
   return (
-    <SiteGridSubgrid className="keyline-b keyline-b--light py-6">
+    <SiteGridSubgrid
+      className={`keyline-b keyline-b--light py-6 ${surfaceClass}`.trim()}
+    >
       <div className="grid-span-6 min-w-0 lg:grid-span-8">
         <p className="text-meta normal-case tracking-normal">{style.label}</p>
         {style.scope ? (
@@ -171,10 +190,14 @@ export function DesignSystemReference() {
         <h1 className="display-xl mt-4">Token reference &amp; ramps</h1>
         <p className="mt-6 leading-relaxed text-secondary">
           Living inventory of CSS custom properties, utility classes, and layout
-          conventions. Source of truth:{" "}
+          conventions — including the case study detail page, vignette filmstrip
+          panels, and reading behaviors added for{" "}
+          <code className="font-mono text-xs text-primary">/case-studies/[slug]</code>
+          . Source of truth:{" "}
           <code className="font-mono text-xs text-primary">src/app/globals.css</code>
           . Breakpoint for grid/desktop chrome:{" "}
-          <strong className="text-primary">1024px (lg)</strong>.
+          <strong className="text-primary">1024px (lg)</strong>; vignette
+          scroll-jack: <strong className="text-primary">768px (md)</strong>.
         </p>
       </SiteGridCell>
 
@@ -197,7 +220,7 @@ export function DesignSystemReference() {
         description="All typography classes from globals.css, including /craft (ghost index, card title, filter chips). Default body is Geist Sans 16px; roles use .text-primary / .text-secondary / .text-tertiary below."
       />
 
-      {typographyRamp.map((style) => (
+      {coreTypography.map((style) => (
         <TypeSpecimenRow key={`${style.label}-${style.className}`} style={style} />
       ))}
 
@@ -388,8 +411,126 @@ export function DesignSystemReference() {
       </SiteGridSubgrid>
 
       <DsSectionHeader
+        id="case-study"
+        meta="07 · Case study detail"
+        title="Vignette chapters & reading"
+        description="Narrative vignettes on case study detail pages are horizontal filmstrips of abutted panels (.vframe). Each chapter opens with a title panel, then content frames from portfolio.ts. Desktop pins the strip and pages one panel per scroll notch; mobile stacks panels vertically."
+      />
+
+      <SiteGridCell span="content">
+        <p className="text-meta">Page regions</p>
+      </SiteGridCell>
+      <GridSpecTable
+        headers={["Region", "Root class", "Notes"]}
+        rows={[
+          [".cs-detail", "article", "Scroll controller + peek cursor"],
+          ["Hero masthead", ".cs-hero", "Facts on chrome axis · title/subhead bottom-pinned"],
+          ["Prose block", ".cs-section--prose", "Heading cols 1–4 · body cols 5–12 on lg"],
+          ["Vignette chapter", ".vchapter", "Sticky pin · height = panel count × 100svh"],
+          ["Simple vignette", ".cs-section--vignette", "Non-narrative gallery layout"],
+        ]}
+        columns={2}
+      />
+
+      <SiteGridCell span="content">
+        <p className="text-meta">Hero fact columns (desktop)</p>
+      </SiteGridCell>
+      <GridSpecTable
+        headers={["Fact", "Grid cols"]}
+        rows={caseStudyHeroFacts.map((f) => [f.key, f.cols])}
+        columns={2}
+      />
+
+      <SiteGridCell span="content">
+        <p className="text-meta">Panel anatomy — shared vertical rhythm</p>
+        <p className="mt-2 text-sm text-secondary">
+          Every panel uses the same three-band grid: kicker (chrome height) · main
+          (content) · foot (caption or tags). Interior inset aligns across title,
+          media, and field panels via{" "}
+          <code className="font-mono text-xs">--panel-main-inset-top</code>.
+        </p>
+      </SiteGridCell>
+      <SiteGridSubgrid className="theme-dark">
+        <div className="grid-span-6 grid min-h-[14rem] grid-rows-[var(--chrome-top-offset,4.5rem)_1fr_var(--panel-foot,6rem)] border border-[var(--rule-light)] lg:grid-span-4">
+          <div className="flex items-center border-b border-[var(--rule-light)] px-4 text-meta normal-case tracking-normal">
+            Kicker · .vframe__kicker
+          </div>
+          <div className="flex items-start px-4 pt-4 text-sm">Main · .vframe__main</div>
+          <div className="flex items-end border-t border-[var(--rule-light)] px-4 pb-4 text-xs text-secondary">
+            Foot · .vframe__foot
+          </div>
+        </div>
+        <div className="grid-span-6 text-sm text-secondary lg:grid-span-8">
+          <p>
+            Panels butt together with a single right + bottom keyline seam. The
+            outer left and top edges stay open. Widths snap to master grid
+            columns via JS measurement of{" "}
+            <code className="font-mono text-xs">.vchapter__ruler</code>.
+          </p>
+        </div>
+      </SiteGridSubgrid>
+
+      <SiteGridCell span="content">
+        <p className="text-meta">Panel widths (12-col desktop)</p>
+      </SiteGridCell>
+      <GridSpecTable
+        headers={["Panel kind", "Cols", "Class"]}
+        rows={vignettePanelWidths.map((p) => [p.kind, p.cols, p.className])}
+        columns={3}
+      />
+
+      <SiteGridCell span="content" className="theme-dark py-6">
+        <p className="text-meta">Panel surfaces</p>
+        <p className="mt-2 text-sm text-secondary">
+          Set via <code className="font-mono text-xs">data-panel-bg</code> and{" "}
+          <code className="font-mono text-xs">--panel-bg</code>. Secondary/tertiary
+          accent two media frames per chapter; brand marks a colorful last beat.
+        </p>
+      </SiteGridCell>
+      <SiteGridSubgrid className="theme-dark pb-6">
+        {vignettePanelSurfaces.map(({ id, token, label }) => (
+          <div
+            key={id}
+            className="grid-span-6 min-h-[5rem] border border-[var(--rule-light)] p-4 lg:grid-span-3"
+            style={{ background: `var(${token})` }}
+          >
+            <p className="text-meta normal-case tracking-normal">{label}</p>
+            <p className="mt-2 font-mono text-xs text-tertiary">{token}</p>
+            <p className="mt-1 font-mono text-xs text-tertiary">
+              data-panel-bg=&quot;{id}&quot;
+            </p>
+          </div>
+        ))}
+      </SiteGridSubgrid>
+
+      <SiteGridCell span="content">
+        <p className="text-meta">Reading &amp; interaction patterns</p>
+      </SiteGridCell>
+      <GridSpecTable
+        headers={["Pattern", "Selector", "Behavior"]}
+        rows={caseStudyDetailPatterns.map((p) => [
+          p.pattern,
+          p.className,
+          p.behavior,
+        ])}
+        columns={3}
+      />
+
+      <SiteGridCell span="content" className="theme-dark pt-6">
+        <p className="text-meta">Case study &amp; vignette typography</p>
+      </SiteGridCell>
+
+      {caseStudyTypography.map((style) => (
+        <TypeSpecimenRow
+          key={`cs-${style.label}`}
+          style={style}
+          surfaceClass="theme-dark"
+        />
+      ))}
+
+      <DsSectionHeader
         id="components"
-        meta="07 · Components"
+        meta="08 · Components"
         title="Chrome & patterns"
       />
       <SiteGridCell span="content">

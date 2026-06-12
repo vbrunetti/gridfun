@@ -455,7 +455,11 @@ export function VignetteChapter({
               <h2 className="vchapter__title">{vignette.name}</h2>
             </div>
             <footer className="vframe__foot vframe__foot--tags">
-              <CraftTagList tags={vignette.tags} className="vchapter__tags" />
+              <CraftTagList
+                tags={vignette.tags}
+                className="vchapter__tags"
+                variant="filter-link"
+              />
             </footer>
           </article>
 

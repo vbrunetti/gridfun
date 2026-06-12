@@ -1347,6 +1347,10 @@ body[data-chrome-surface="dark"] .floating-chrome .rail-label-vertical {
   outline-offset: 2px;
 }
 
+a.craft-filter-chip {
+  text-decoration: none;
+}
+
 /*
  * Masonry: subgrid of the master site grid — each lane spans an equal
  * share of tracks (2×6, 3×4, or 4×3 on desktop).

@@ -1,4 +1,4 @@
-/** Reference metadata for /test design system page — mirrors globals.css */
+/** Reference metadata for /design-system page — mirrors globals.css */
 
 export const brandColors = [
   { token: "--color-white", label: "White" },
@@ -12,6 +12,7 @@ export const brandColors = [
   { token: "--color-sky-blue", label: "Sky blue" },
   { token: "--color-medium-blue", label: "Medium blue" },
   { token: "--color-royal-blue", label: "Royal blue" },
+  { token: "--color-cruise", label: "Cruise brand" },
 ] as const;
 
 export const semanticColors = [
@@ -122,7 +123,7 @@ export const typographyRamp: readonly TypographyRampEntry[] = [
     weight: "600",
     lineHeight: "inherit",
     letterSpacing: "0.14em · uppercase · vertical-rl",
-    sample: "GRID · 12 · TEST",
+    sample: "GRID · 12 · DESIGN SYSTEM",
   },
   {
     className: "craft-ghost-index",
@@ -166,7 +167,79 @@ export const typographyRamp: readonly TypographyRampEntry[] = [
     sample: "DESIGN SYSTEMS",
     scope: "/craft sticky header",
   },
-];
+  {
+    className: "cs-hero__title display-xl",
+    label: "Case study hero title",
+    size: "inherits display-xl",
+    weight: "700",
+    lineHeight: "1.02",
+    letterSpacing: "-0.035em",
+    sample: "Tele-Operations Terminal",
+    scope: "/case-studies/[slug] hero",
+  },
+  {
+    className: "cs-hero__subhead",
+    label: "Case study hero subhead",
+    size: "clamp(1.0625rem, 1.5vw, 1.25rem)",
+    weight: "400",
+    lineHeight: "1.55",
+    letterSpacing: "normal",
+    sample:
+      "Designing the human side of an autonomous fleet — context gain over a black box.",
+    scope: "/case-studies/[slug] hero",
+  },
+  {
+    className: "vchapter__numeral",
+    label: "Vignette chapter numeral",
+    size: "clamp(3.5rem, 9vw, 7.5rem)",
+    weight: "700",
+    lineHeight: "0.86",
+    letterSpacing: "-0.04em",
+    sample: "01",
+    scope: "Vignette title panel",
+  },
+  {
+    className: "vchapter__title",
+    label: "Vignette chapter title",
+    size: "clamp(1.75rem, 2.65vw, 2.35rem)",
+    weight: "700",
+    lineHeight: "1.05",
+    letterSpacing: "-0.032em",
+    sample: "Semantic Color + Shape Language",
+    scope: "Vignette title panel",
+  },
+  {
+    className: "vframe__beat",
+    label: "Vignette beat prose",
+    size: "clamp(1.6rem, 2.4vw, 2.85rem)",
+    weight: "700",
+    lineHeight: "1.12",
+    letterSpacing: "-0.025em",
+    sample: "Operators gained context about the scene faster and more accurately.",
+    scope: "Vignette field panel",
+  },
+  {
+    className: "vframe__caption",
+    label: "Vignette media caption",
+    size: "0.9375rem (15px)",
+    weight: "400",
+    lineHeight: "1.45",
+    letterSpacing: "normal",
+    sample: "Pedestrians, cyclists, vehicles, and static objects read at a glance.",
+    scope: "Vignette media foot band",
+  },
+] as const;
+
+function isCaseStudyTypography(entry: TypographyRampEntry): boolean {
+  return (
+    Boolean(entry.scope?.includes("case-studies")) ||
+    Boolean(entry.scope?.includes("Vignette")) ||
+    entry.className.startsWith("vchapter") ||
+    entry.className.startsWith("vframe")
+  );
+}
+
+export const caseStudyTypography = typographyRamp.filter(isCaseStudyTypography);
 
 export const spacingTokens = [
   {
@@ -209,6 +282,93 @@ export const spacingTokens = [
     desktop: "0 (rail layout)",
   },
   { token: "--media-column", label: "Media / card width cap", mobile: "min(100%, 22rem)", desktop: "same" },
+  {
+    token: "--panel-kicker",
+    label: "Vignette panel kicker band",
+    mobile: "var(--chrome-top-offset)",
+    desktop: "same",
+  },
+  {
+    token: "--panel-main-inset-top",
+    label: "Vignette panel main inset",
+    mobile: "clamp(1.25rem, 3vh, 2rem)",
+    desktop: "same",
+  },
+  {
+    token: "--panel-foot",
+    label: "Vignette panel foot band",
+    mobile: "clamp(5.25rem, 14vh, 8.5rem)",
+    desktop: "same",
+  },
+  {
+    token: "--panel-pad",
+    label: "Vignette panel inline pad",
+    mobile: "clamp(1rem, 2vw, 1.5rem)",
+    desktop: "same",
+  },
+  {
+    token: "--cs-hero-foot",
+    label: "Case study hero foot inset",
+    mobile: "clamp(2rem, 5vh, 3.5rem)",
+    desktop: "same",
+  },
+] as const;
+
+export const vignettePanelWidths = [
+  { kind: "Title (chapter opener)", cols: "4 / 12", className: ".vframe--title" },
+  { kind: "Field beat · portrait 9×16", cols: "6 / 12", className: ".vframe--field · .vframe--9x16" },
+  { kind: "Square 1×1", cols: "8 / 12", className: ".vframe--1x1" },
+  { kind: "Landscape 16×9", cols: "12 / 12", className: ".vframe--16x9" },
+] as const;
+
+export const vignettePanelSurfaces = [
+  { id: "default", token: "--panel-surface", label: "Default ground" },
+  { id: "secondary", token: "--panel-surface-secondary", label: "Secondary lift" },
+  { id: "tertiary", token: "--panel-surface-tertiary", label: "Tertiary lift" },
+  { id: "brand", token: "--color-cruise", label: "Brand (Cruise orange)" },
+] as const;
+
+export const caseStudyDetailPatterns = [
+  {
+    pattern: "Section focus",
+    className: ".cs-focus-section",
+    behavior: "One section at full opacity; others dim to 45%. Hover previews at 100%.",
+  },
+  {
+    pattern: "Panel focus",
+    className: ".vframe.is-active",
+    behavior: "Inside a vignette chapter, one panel at 100%; siblings at 45%. Hover peeks idle panels.",
+  },
+  {
+    pattern: "Trail panel",
+    className: ".vchapter__trail",
+    behavior:
+      "Phantom sibling after the last colorful panel — fills viewport to the right, mirrors last-panel dimming. Not in scroll or dot nav.",
+  },
+  {
+    pattern: "Scroll snap",
+    className: ".cs-detail",
+    behavior:
+      "Desktop: one wheel/key step per hero, prose block, vignette panel, or footer. Mobile: natural scroll.",
+  },
+  {
+    pattern: "Peek cursor",
+    className: ".cs-peek-cursor",
+    behavior: "200×200 plus on dimmed sections/panels; click jumps like dot nav.",
+  },
+  {
+    pattern: "Optional hero reel",
+    className: ".cs-hero__video",
+    behavior:
+      "Optional heroVideo on a case study — looping MP4 at 30% opacity, rail to browser edge (see portfolio.ts).",
+  },
+] as const;
+
+export const caseStudyHeroFacts = [
+  { key: "Client", cols: "1–2" },
+  { key: "Date", cols: "3–4" },
+  { key: "Role", cols: "5–8" },
+  { key: "Tools", cols: "9–12" },
 ] as const;
 
 export const remSpacingRamp = [

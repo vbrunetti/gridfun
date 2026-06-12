@@ -16,7 +16,7 @@ const PAGE_COLUMNS: Record<string, Omit<SiteLocation, "subLabel">> = {
   "/about": { pageLabel: "ABOUT", gridColumn: 8 },
   "/contact": { pageLabel: "CONTACT", gridColumn: 10 },
   "/effects": { pageLabel: "EFFECTS", gridColumn: 11 },
-  "/test": { pageLabel: "TEST", gridColumn: 12 },
+  "/design-system": { pageLabel: "DESIGN SYSTEM", gridColumn: 12 },
 };
 
 export function resolveSiteLocation(pathname: string): SiteLocation {
@@ -26,6 +26,10 @@ export function resolveSiteLocation(pathname: string): SiteLocation {
 
   if (pathname.startsWith("/effects")) {
     return PAGE_COLUMNS["/effects"];
+  }
+
+  if (pathname.startsWith("/design-system")) {
+    return PAGE_COLUMNS["/design-system"];
   }
 
   const caseStudyMatch = pathname.match(/^\/case-studies\/([^/]+)\/?$/);

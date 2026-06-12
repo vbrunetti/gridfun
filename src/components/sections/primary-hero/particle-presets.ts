@@ -168,7 +168,7 @@ export function resolvePreset(
   return blendPresets(preset, preset, 0, width, height);
 }
 
-/** Starting-point presets — tune in /test/particles. */
+/** Starting-point presets — tune in /effects/spark-particles. */
 export const DEFAULT_CHAPTER_PRESETS: ParticlePreset[] = [
   {
     label: "Ch 1 · Square",

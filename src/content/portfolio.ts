@@ -864,6 +864,20 @@ export function vignetteMatchesActiveTags(
   return vignette.tags.some((tag) => activeTags.has(tag));
 }
 
+/** Craft index URL with a single tag pre-selected. */
+export function craftTagFilterHref(tag: string): string {
+  return `/craft?tag=${encodeURIComponent(tag)}`;
+}
+
+/** Initial active tags for /craft — one tag from ?tag= or all tags by default. */
+export function craftActiveTagsFromParam(tagParam?: string | null): Set<string> {
+  const allTags = allCraftTags();
+  if (tagParam && allTags.includes(tagParam)) {
+    return new Set([tagParam]);
+  }
+  return new Set(allTags);
+}
+
 /** Stable two-digit index (01…) from master vignette order. */
 export function vignetteIndexLabel(slug: string): string {
   const all = getAllVignettes();

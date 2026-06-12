@@ -1,6 +1,8 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { CSSProperties } from "react";
 import type { CraftVignette, ImageRatio } from "@/content/portfolio";
+import { craftTagFilterHref } from "@/content/portfolio";
 import { palette } from "@/lib/colors";
 import {
   vignetteKeyImageSrc,
@@ -76,11 +78,33 @@ export function VignetteKeyImage({
 export function CraftTagList({
   tags,
   className = "",
+  variant = "pill",
 }: {
   tags: string[];
   className?: string;
+  /** filter-link — compact craft filter chips linking to /craft?tag=… */
+  variant?: "pill" | "filter-link";
 }) {
   if (tags.length === 0) return null;
+
+  if (variant === "filter-link") {
+    return (
+      <ul className={`craft-tag-list ${className}`.trim()}>
+        {tags.map((tag) => (
+          <li key={tag}>
+            <Link
+              href={craftTagFilterHref(tag)}
+              className="craft-filter-chip craft-filter-chip--compact craft-filter-chip--on"
+            >
+              <span className="craft-filter-chip__dot" aria-hidden />
+              {tag}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
   return (
     <ul className={`craft-tag-list ${className}`.trim()}>
       {tags.map((tag) => (

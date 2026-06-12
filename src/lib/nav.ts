@@ -24,7 +24,7 @@ export const menuNav: MenuNavItem[] = [
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
   { href: "/effects", label: "Effects" },
-  { href: "/test", label: "Test" },
+  { href: "/design-system", label: "Design System" },
 ];
 
 export const socialLinks = {

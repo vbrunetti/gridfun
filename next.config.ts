@@ -15,6 +15,12 @@ const nextConfig: NextConfig = {
         destination: "/case-studies/:slug",
         permanent: true,
       },
+      { source: "/test", destination: "/design-system", permanent: true },
+      {
+        source: "/test/:path*",
+        destination: "/design-system/:path*",
+        permanent: true,
+      },
     ];
   },
 };

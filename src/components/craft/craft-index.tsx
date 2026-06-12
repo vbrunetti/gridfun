@@ -15,6 +15,7 @@ import { RuledGrid } from "@/components/layout/ruled-grid";
 import { SiteGridSubgrid } from "@/components/layout/site-grid";
 import {
   allCraftTags,
+  craftActiveTagsFromParam,
   getAllVignettes,
   vignetteIndexLabel,
   vignetteMatchesActiveTags,
@@ -261,15 +262,19 @@ function VignetteCard({ entry }: { entry: VignetteWithStudy }) {
   );
 }
 
-export function CraftIndex() {
+export function CraftIndex({ initialTag }: { initialTag?: string } = {}) {
   const allVignettes = useMemo(() => getAllVignettes(), []);
   const allTags = useMemo(() => allCraftTags(), []);
 
-  const [activeTags, setActiveTags] = useState<Set<string>>(
-    () => new Set(allTags),
+  const [activeTags, setActiveTags] = useState<Set<string>>(() =>
+    craftActiveTagsFromParam(initialTag),
   );
   const [compactHeader, setCompactHeader] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setActiveTags(craftActiveTagsFromParam(initialTag));
+  }, [initialTag]);
 
   const visibleVignettes = useMemo(
     () =>
