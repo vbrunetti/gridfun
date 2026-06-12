@@ -77,7 +77,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
       <section
         id="cs-hero"
         data-cs-detail-row
-        className="cs-hero keyline-b"
+        className="cs-focus-section cs-hero keyline-b is-focused"
         data-chrome-surface="dark"
       >
         <RuledGrid className="cs-hero__grid">
@@ -114,7 +114,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
               key={section.slug}
               id={`vignette-${section.slug}`}
               data-cs-detail-row
-              className="cs-section cs-section--vignette keyline-b"
+              className="cs-focus-section cs-section cs-section--vignette keyline-b"
               data-chrome-surface="dark"
             >
               <RuledGrid className="cs-vignette__grid">
@@ -141,7 +141,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
             key={section.id}
             id={`cs-prose-${section.id}`}
             data-cs-detail-row
-            className="cs-section cs-section--prose keyline-b"
+            className="cs-focus-section cs-section cs-section--prose keyline-b"
             data-chrome-surface="dark"
           >
             <RuledGrid>
@@ -165,7 +165,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
       <section
         id="cs-footer"
         data-cs-detail-row
-        className="theme-canvas py-12"
+        className="cs-focus-section theme-canvas py-12"
         data-chrome-surface="light"
       >
         <RuledGrid>

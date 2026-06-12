@@ -14,7 +14,7 @@ export function CaseStudiesDotsRail() {
 
   return (
     <nav
-      className="chrome-hero-dots-rail"
+      className="chrome-hero-dots-rail chrome-hero-dots-rail--study"
       aria-label={`Case studies progress, step ${activeStep + 1} of ${stepCount}`}
     >
       {Array.from({ length: stepCount }, (_, i) => (

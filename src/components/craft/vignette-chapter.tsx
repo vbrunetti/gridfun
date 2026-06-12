@@ -17,8 +17,6 @@ import { useCaseStudyVignetteProgressRegister } from "@/components/case-studies/
 import { CraftTagList } from "@/components/craft/vignette-media";
 
 /** One wheel notch / key press = one panel; ignore micro-deltas. */
-const WHEEL_DELTA_MIN = 6;
-/** How long a programmatic step-scroll holds before the next notch registers. */
 const STEP_LOCK_MS = 640;
 /** Below this the chapter stacks vertically (no scroll-jack). */
 const DESKTOP_QUERY = "(min-width: 768px)";
@@ -387,24 +385,6 @@ export function VignetteChapter({
       if (next !== indexRef.current) setIndex(next);
     };
 
-    const onWheel = (event: WheelEvent) => {
-      if (!desktop.matches || !isPinned()) return;
-      if (Math.abs(event.deltaY) < WHEEL_DELTA_MIN) return;
-
-      const direction = event.deltaY > 0 ? 1 : -1;
-      const current = indexRef.current;
-      if (
-        (direction < 0 && current === 0) ||
-        (direction > 0 && current === steps - 1)
-      ) {
-        return;
-      }
-
-      event.preventDefault();
-      if (lockRef.current) return;
-      scrollToPanel(current + direction);
-    };
-
     const onKeyDown = (event: KeyboardEvent) => {
       if (!desktop.matches || !isPinned()) return;
       const next =
@@ -422,11 +402,9 @@ export function VignetteChapter({
     onScroll();
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("wheel", onWheel, { passive: false });
     window.addEventListener("keydown", onKeyDown);
     return () => {
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("wheel", onWheel);
       window.removeEventListener("keydown", onKeyDown);
     };
   }, [steps]);
@@ -436,7 +414,7 @@ export function VignetteChapter({
   return (
     <section
       ref={sectionRef}
-      className="vchapter theme-dark"
+      className="cs-focus-section vchapter theme-dark"
       id={`vignette-${vignette.slug}`}
       data-cs-detail-row
       data-chrome-surface="dark"

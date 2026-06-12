@@ -728,11 +728,15 @@ html:has(.cs-index-scroll) {
     color 0.2s ease;
 }
 
-/* Case-study detail — many rows; fill the chrome column and scroll quietly. */
+/* Case-study detail — many rows; centered in the column, scroll when needed. */
 .chrome-hero-dots-rail--study {
-  top: calc(var(--chrome-top-offset) + 0.35rem);
-  bottom: calc(var(--chrome-pad) + 0.35rem);
-  transform: translateX(-50%);
+  top: 50%;
+  bottom: auto;
+  max-height: calc(
+    100dvh - var(--chrome-top-offset) - var(--chrome-pad) * 2 - 0.7rem
+  );
+  transform: translate(-50%, -50%);
+  justify-content: safe center;
   gap: 0.625rem;
   padding-block: 0.75rem;
   overflow-y: auto;
@@ -1511,6 +1515,23 @@ a.craft-card:focus-visible {
 }
 
 /* ── Case study detail — Swiss editorial grid ────────────── */
+
+/* One in-focus section at a time; vignette panels dim internally (.vframe). */
+.cs-detail .cs-focus-section {
+  opacity: 0.45;
+  transition: opacity 0.4s ease;
+}
+
+.cs-detail .cs-focus-section.is-focused {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cs-detail .cs-focus-section {
+    transition: none;
+  }
+}
+
 .cs-section {
   scroll-margin-top: var(--chrome-top-offset, 0px);
 }
