@@ -107,7 +107,11 @@ export type CaseStudy = {
   tools: string;
   /** Placeholder client logo source; falls back to a wordmark when absent. */
   clientLogo?: string;
-  /** Optional ambient hero reel — autoplay loop, no controls. */
+  /**
+   * Optional ambient hero reel — autoplay loop, no controls, full-bleed behind #cs-hero.
+   * Upload MP4 to Vercel Blob (public), then e.g.
+   * `heroVideo: { src: "https://….public.blob.vercel-storage.com/hero.mp4", opacity: 0.3 }`
+   */
   heroVideo?: CaseStudyHeroVideo;
   /** Ordered mix of prose sections and craft vignettes. */
   sections: CaseStudySection[];
@@ -172,10 +176,6 @@ export const caseStudies: CaseStudy[] = [
     location: "San Francisco, CA",
     role: "Lead product designer",
     tools: "Figma, motion prototyping, operator research",
-    heroVideo: {
-      src: "https://ahloioqavmvf7bxa.public.blob.vercel-storage.com/cruise-teleops-hero.mp4",
-      opacity: 0.3,
-    },
     sections: [
       cruiseProse(
         "cruise-intro",
