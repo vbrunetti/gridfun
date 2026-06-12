@@ -2159,6 +2159,7 @@ body:has(.chrome-hero-dots-rail:hover)
   transition: background-color 0.45s ease;
   /* Panel vertical rhythm — kicker · main · foot (shared across panel types). */
   --panel-kicker: var(--chrome-top-offset);
+  --panel-main-inset-top: clamp(1.25rem, 3vh, 2rem);
   --panel-foot: clamp(5.25rem, 14vh, 8.5rem);
   --panel-foot-pad: clamp(0.85rem, 2vh, 1.35rem);
   --panel-pad: clamp(1rem, 2vw, 1.5rem);
@@ -2188,6 +2189,7 @@ body:has(.chrome-hero-dots-rail:hover)
 
 .vchapter__numeral {
   margin: 0;
+  flex: none;
   font-size: clamp(3.5rem, 9vw, 7.5rem);
   font-weight: 700;
   line-height: 0.86;
@@ -2195,8 +2197,16 @@ body:has(.chrome-hero-dots-rail:hover)
   color: var(--text-primary);
 }
 
+/* Chapter opener — lands above tags; distinct from beat panels. */
 .vchapter__title {
   margin: 0;
+  margin-top: auto;
+  max-width: 14ch;
+  font-size: clamp(1.75rem, 2.65vw, 2.35rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.032em;
+  color: var(--text-primary);
 }
 
 .vchapter__tags {
@@ -2252,22 +2262,10 @@ body:has(.chrome-hero-dots-rail:hover)
 .vframe__main {
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
   min-height: 0;
   overflow: hidden;
-}
-
-.vframe__main--title {
-  justify-content: flex-start;
-  gap: clamp(1rem, 2.5vh, 1.75rem);
-  padding-top: clamp(0.75rem, 3vh, 2rem);
-}
-
-.vframe__main--field {
-  justify-content: center;
-}
-
-.vframe__main--media {
-  justify-content: stretch;
+  padding-top: var(--panel-main-inset-top);
 }
 
 /* Foot band — captions and tags share the same bottom edge. */
@@ -2338,16 +2336,16 @@ body:has(.chrome-hero-dots-rail:hover)
 
 .vframe__media {
   object-fit: contain;
-  object-position: center;
+  object-position: top center;
 }
 
 /* Video + placeholder share the same contain sizing as stills. */
 .vframe__media--video,
 .vframe__media--placeholder {
   position: absolute;
-  top: 50%;
+  top: 0;
   left: 50%;
-  translate: -50% -50%;
+  translate: -50% 0;
   aspect-ratio: var(--media-ar-w, 16) / var(--media-ar-h, 9);
   width: min(100cqw, calc(100cqh * var(--media-ar-w, 16) / var(--media-ar-h, 9)));
   height: auto;

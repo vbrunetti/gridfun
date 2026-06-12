@@ -458,7 +458,7 @@ export function VignetteChapter({
               <p className="vchapter__numeral">
                 {String(chapterNumber).padStart(2, "0")}
               </p>
-              <h2 className="vchapter__title display-lg">{vignette.name}</h2>
+              <h2 className="vchapter__title">{vignette.name}</h2>
             </div>
             <footer className="vframe__foot vframe__foot--tags">
               <CraftTagList tags={vignette.tags} className="vchapter__tags" />
