@@ -86,6 +86,14 @@ export type ProseSection = {
 
 export type CaseStudySection = ProseSection | CraftVignette;
 
+/** Optional looping MP4 behind the case study hero (Vercel Blob or CDN). */
+export type CaseStudyHeroVideo = {
+  src: string;
+  /** Layer opacity, 0–1. Default 0.3 in the hero component. */
+  opacity?: number;
+  poster?: string;
+};
+
 export type CaseStudy = {
   slug: string;
   name: string;
@@ -99,6 +107,8 @@ export type CaseStudy = {
   tools: string;
   /** Placeholder client logo source; falls back to a wordmark when absent. */
   clientLogo?: string;
+  /** Optional ambient hero reel — autoplay loop, no controls. */
+  heroVideo?: CaseStudyHeroVideo;
   /** Ordered mix of prose sections and craft vignettes. */
   sections: CaseStudySection[];
 };
@@ -162,6 +172,10 @@ export const caseStudies: CaseStudy[] = [
     location: "San Francisco, CA",
     role: "Lead product designer",
     tools: "Figma, motion prototyping, operator research",
+    heroVideo: {
+      src: "https://ahloioqavmvf7bxa.public.blob.vercel-storage.com/cruise-teleops-hero.mp4",
+      opacity: 0.3,
+    },
     sections: [
       cruiseProse(
         "cruise-intro",

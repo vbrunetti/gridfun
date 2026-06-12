@@ -9,6 +9,7 @@ import {
   VignetteImageScroll,
 } from "@/components/craft/vignette-media";
 import { CaseStudyDetailScroll } from "@/components/case-studies/case-study-detail-scroll";
+import { CaseStudyHeroVideo } from "@/components/case-studies/case-study-hero-video";
 import { VignetteChapter } from "@/components/craft/vignette-chapter";
 import {
   caseStudies,
@@ -80,6 +81,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
         className="cs-focus-section cs-hero keyline-b is-focused"
         data-chrome-surface="dark"
       >
+        {study.heroVideo ? <CaseStudyHeroVideo {...study.heroVideo} /> : null}
         <RuledGrid className="cs-hero__grid">
           <div className="cs-hero__facts">
             {heroFacts.map(({ key, label, value }) => (
@@ -90,9 +92,13 @@ export default async function CaseStudyPage({ params }: PageProps) {
             ))}
           </div>
 
-          <div className="cs-hero__title-block">
-            <h1 className="cs-hero__title display-xl">{study.name}</h1>
-            <p className="cs-hero__subhead">{study.subhead}</p>
+          <div className="cs-hero__main">
+            <div className="cs-hero__title-block">
+              <div className="cs-hero__title-copy">
+                <h1 className="cs-hero__title display-xl">{study.name}</h1>
+                <p className="cs-hero__subhead">{study.subhead}</p>
+              </div>
+            </div>
           </div>
         </RuledGrid>
       </section>

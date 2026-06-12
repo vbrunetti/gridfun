@@ -1657,40 +1657,65 @@ body:has(.chrome-hero-dots-rail:hover)
   }
 }
 
-/* Masthead — meta on the logo/menu axis; title centered in the space below. */
+/* Masthead — facts on chrome axis; title + subhead pinned above keyline. */
+.cs-hero {
+  position: relative;
+  overflow: hidden;
+}
+
 @media (max-width: 1023px) {
   .cs-hero {
     margin-top: calc(-1 * var(--chrome-top-offset));
   }
 }
 
+/* Hero reel — rail to browser edge, viewport top to section keyline. */
+.cs-hero__video {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: calc(
+    -1 * max(0px, (100vw - var(--keyline-rail) - 100%) / 2)
+  );
+  z-index: 0;
+  pointer-events: none;
+  opacity: var(--cs-hero-video-opacity, 0.3);
+}
+
+.cs-hero__video video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
 .cs-hero__grid {
+  position: relative;
+  z-index: 1;
+  --cs-hero-main-inset-top: clamp(1.25rem, 3vh, 2rem);
+  --cs-hero-foot: clamp(2rem, 5vh, 3.5rem);
   row-gap: 0;
   padding-top: 0;
   padding-bottom: 0;
   grid-template-rows:
     var(--chrome-top-offset)
-    minmax(10rem, 1fr)
-    clamp(2.5rem, 9vh, 6rem);
+    minmax(8rem, 1fr);
   min-height: calc(
-    var(--chrome-top-offset) + clamp(10rem, 28vh, 16rem) + clamp(2.5rem, 9vh, 6rem)
+    var(--chrome-top-offset) + clamp(8rem, 22vh, 14rem) + var(--cs-hero-foot)
   );
 }
 
 @media (min-width: 1024px) {
   .cs-hero__grid {
-    grid-template-rows:
-      var(--chrome-top-offset)
-      minmax(12rem, 1fr)
-      clamp(3.5rem, 11vh, 7.5rem);
     min-height: calc(
-      var(--chrome-top-offset) + clamp(12rem, 32vh, 20rem) +
-        clamp(3.5rem, 11vh, 7.5rem)
+      var(--chrome-top-offset) + clamp(9rem, 24vh, 16rem) + var(--cs-hero-foot)
     );
   }
 }
 
-/* Kicker/content pairs on the logo + menu axis. */
+/* Kicker — client · date · role · tools on the logo + menu axis. */
 .cs-hero__facts {
   grid-row: 1;
   grid-column: 1 / -1;
@@ -1720,7 +1745,7 @@ body:has(.chrome-hero-dots-rail:hover)
 }
 
 .cs-hero__fact--role {
-  grid-column: 5 / 7;
+  grid-column: 5 / 9;
 }
 
 .cs-hero__fact--tools {
@@ -1736,39 +1761,80 @@ body:has(.chrome-hero-dots-rail:hover)
   line-height: 1.45;
   color: var(--text-secondary);
   font-size: clamp(0.875rem, 1.2vw, 1rem);
+}
+
+.cs-hero__fact--client .cs-hero__fact-value,
+.cs-hero__fact--date .cs-hero__fact-value {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+.cs-hero__fact--role .cs-hero__fact-value,
 .cs-hero__fact--tools .cs-hero__fact-value {
   white-space: normal;
 }
 
-.cs-hero__title-block {
-  grid-row: 2 / -1;
+/* Main — title band bottom-pinned above the hero keyline. */
+.cs-hero__main {
+  grid-row: 2;
   grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
+  align-self: stretch;
+  min-height: 0;
+}
+
+.cs-hero__title-block {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.cs-hero__title-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  width: 100%;
+  min-height: 0;
+  padding-top: var(--cs-hero-main-inset-top);
+  padding-bottom: var(--cs-hero-foot);
   gap: clamp(0.85rem, 2vh, 1.25rem);
-  align-self: center;
-  justify-content: center;
-  padding-top: clamp(2.5rem, 6vh, 5rem);
-  /* Optical balance — slightly more air below than above the title block. */
-  transform: translateY(calc(-1 * clamp(0.75rem, 2vh, 1.25rem)));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cs-hero__video {
+    display: none;
+  }
+}
+
+.cs-hero__title {
+  width: 100%;
+  margin: 0;
+}
+
+.cs-hero__subhead {
+  margin: 0;
+  max-width: 42ch;
+  font-size: clamp(1.0625rem, 1.5vw, 1.25rem);
+  line-height: 1.55;
+  color: var(--text-secondary);
 }
 
 @media (max-width: 1023px) {
   .cs-hero__grid {
     grid-template-rows:
       auto
-      minmax(10rem, 1fr)
-      clamp(2.5rem, 9vh, 6rem);
+      minmax(8rem, 1fr);
   }
 
   .cs-hero__facts {
     grid-template-columns: repeat(6, minmax(0, 1fr));
-    grid-template-rows: auto auto;
+    grid-template-rows: auto auto auto;
     height: auto;
     min-height: var(--chrome-top-offset);
     padding-block: 0.65rem;
@@ -1786,31 +1852,13 @@ body:has(.chrome-hero-dots-rail:hover)
   }
 
   .cs-hero__fact--role {
-    grid-column: 1 / span 2;
+    grid-column: 1 / -1;
     grid-row: 2;
   }
 
   .cs-hero__fact--tools {
-    grid-column: 3 / -1;
-    grid-row: 2;
-  }
-}
-
-.cs-hero__title {
-  margin: 0;
-}
-
-.cs-hero__subhead {
-  margin: 0 0 clamp(1.5rem, 4vh, 3rem);
-  max-width: 42ch;
-  font-size: clamp(1.0625rem, 1.5vw, 1.25rem);
-  line-height: 1.55;
-  color: var(--text-secondary);
-}
-
-@media (min-width: 1024px) {
-  .cs-hero__title-block {
-    grid-column: 5 / -1;
+    grid-column: 1 / -1;
+    grid-row: 3;
   }
 }
 
