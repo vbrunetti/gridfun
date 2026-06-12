@@ -428,6 +428,11 @@ body {
   grid-column: 1 / 6;
 }
 
+/* Home hero narrative — left edge on col 1; viz sits in cols 7–12 */
+.site-grid > .col-span-hero-narrative {
+  grid-column: 1 / -1;
+}
+
 @media (min-width: 1024px) {
   .site-grid > .col-span-content {
     grid-column: 2 / -2;
@@ -439,6 +444,10 @@ body {
 
   .site-grid > .col-span-hero-edge {
     grid-column: 1 / 10;
+  }
+
+  .site-grid > .col-span-hero-narrative {
+    grid-column: 1 / 6;
   }
 
   .site-grid > .col-span-narrow {
@@ -638,26 +647,53 @@ html:has(.cs-index-scroll) {
   pointer-events: none;
 }
 
-/* Spark viz — full hero chapter band */
-.primary-hero-spark-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  overflow: hidden;
-  pointer-events: none;
+/* Shared stage — narrative + spark viz on master grid tracks (via subgrid) */
+.primary-hero-stage {
+  height: 100%;
+  min-height: 0;
 }
 
-.primary-hero-copy {
-  position: absolute;
-  inset: 0;
-  z-index: 10;
+.primary-hero-stage-row {
+  min-height: 0;
+}
+
+.primary-hero-stage-row > .primary-hero-copy,
+.primary-hero-stage-row > .primary-hero-spark-layer {
+  grid-row: 1;
+  min-width: 0;
+}
+
+.primary-hero-stage-row > .primary-hero-copy {
+  z-index: 1;
   display: flex;
   align-items: center;
   pointer-events: none;
 }
 
-.primary-hero-copy > * {
-  width: 100%;
+.primary-hero-stage-row > .primary-hero-spark-layer {
+  position: relative;
+  z-index: 0;
+  align-self: center;
+  justify-self: end;
+  width: min(100%, 20rem);
+  height: clamp(12rem, 40vh, 24rem);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+@media (min-width: 1024px) {
+  .primary-hero-stage-row > .primary-hero-spark-layer {
+    justify-self: stretch;
+    width: auto;
+    height: 100%;
+    max-height: none;
+  }
+}
+
+/* Spark viz — particle field layer */
+.primary-hero-spark-layer {
+  overflow: hidden;
+  pointer-events: none;
 }
 
 /* Reduced-motion hero has no scroll layer — links stay clickable in copy */

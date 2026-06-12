@@ -14,7 +14,9 @@ type GridFrame = {
 
 /** Match the content box of the first page grid (tracks, not padding box). */
 function measureSiteGridFrame(): GridFrame | null {
-  const grid = document.querySelector("#main-content .site-grid");
+  const grid =
+    document.querySelector("#main-content .primary-hero-stage.site-grid") ??
+    document.querySelector("#main-content .site-grid");
   if (!grid) return null;
 
   const rect = grid.getBoundingClientRect();
@@ -48,7 +50,9 @@ export function SkeletonOverlay() {
 
     sync();
 
-    const grid = document.querySelector("#main-content .site-grid");
+    const grid =
+      document.querySelector("#main-content .primary-hero-stage.site-grid") ??
+      document.querySelector("#main-content .site-grid");
     const observer = grid ? new ResizeObserver(sync) : null;
     if (grid && observer) observer.observe(grid);
 

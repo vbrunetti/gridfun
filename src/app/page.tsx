@@ -1,12 +1,18 @@
 import { RuledGrid } from "@/components/layout/ruled-grid";
 import { PrimaryHero } from "@/components/sections/primary-hero";
+import { homeCoverSections } from "@/content/home-sections";
 import { heroSlates } from "@/content/hero-slates";
 
 export default function Home() {
   return (
     <div className="home-hero-cover-flow">
-      <PrimaryHero slates={heroSlates} scrollRelease={false} secondaryCover />
+      <PrimaryHero
+        slates={heroSlates}
+        scrollRelease={false}
+        coverSections={homeCoverSections}
+      />
       <section
+        id="home-secondary"
         className="theme-dark home-secondary-panel keyline-b keyline-b--dark keyline-b--viewport flex items-center"
         data-chrome-surface="dark"
       >

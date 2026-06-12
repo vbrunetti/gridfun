@@ -7,28 +7,55 @@ import {
   useMemo,
   useRef,
   useState,
+  type Dispatch,
   type ReactNode,
+  type SetStateAction,
 } from "react";
-import type { HeroSlate } from "@/content/hero-slates";
+
+export type HomeScrollStepKind = "hero" | "section";
+
+export type HomeScrollStep = {
+  id: string;
+  kind: HomeScrollStepKind;
+  label: string;
+  /** Hero step only — number of scroll sub-chapters in the radial ring. */
+  subChapterCount?: number;
+};
+
+/** 0–1 progress through the hero's sub-chapters (feeds the hero dot's radial ring). */
+export type HeroSubChapterProgress = {
+  progress: number;
+};
 
 export type HeroScrubState = {
-  slates: HeroSlate[];
-  activeIndex: number;
-  scrollToSlate: (index: number) => void;
-  /** False once scroll leaves hero chapters (e.g. cover section on home). */
-  dotsVisible: boolean;
+  steps: HomeScrollStep[];
+  activeStep: number;
+  scrollToStep: (index: number) => void;
+  visible: boolean;
+  subChapterProgress: HeroSubChapterProgress | null;
 };
 
 type HeroScrubContextValue = {
   state: HeroScrubState | null;
-  setState: (state: HeroScrubState | null) => void;
+  setState: Dispatch<SetStateAction<HeroScrubState | null>>;
+  setSubChapterProgress: (progress: HeroSubChapterProgress | null) => void;
 };
 
 const HeroScrubContext = createContext<HeroScrubContextValue | null>(null);
 
 export function HeroScrubProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<HeroScrubState | null>(null);
-  const value = useMemo(() => ({ state, setState }), [state]);
+  const [scrollState, setScrollState] = useState<HeroScrubState | null>(null);
+  const [subChapterProgress, setSubChapterProgress] =
+    useState<HeroSubChapterProgress | null>(null);
+
+  const value = useMemo(
+    () => ({
+      state: scrollState ? { ...scrollState, subChapterProgress } : null,
+      setState: setScrollState,
+      setSubChapterProgress,
+    }),
+    [scrollState, subChapterProgress],
+  );
 
   return (
     <HeroScrubContext.Provider value={value}>{children}</HeroScrubContext.Provider>
@@ -43,17 +70,20 @@ export function useHeroScrubContext() {
   return context;
 }
 
-/** Registers hero scrub controls for chrome-layer dots (FloatingChrome). */
+/** Registers home scroll controls for the right-rail dots (FloatingChrome). */
 export function useHeroScrubRegister(
   enabled: boolean,
-  slates: HeroSlate[],
-  activeIndex: number,
-  scrollToSlate: (index: number) => void,
-  dotsVisible: boolean,
+  steps: HomeScrollStep[],
+  activeStep: number,
+  scrollToStep: (index: number) => void,
+  visible: boolean,
 ) {
   const { setState } = useHeroScrubContext();
-  const scrollRef = useRef(scrollToSlate);
-  scrollRef.current = scrollToSlate;
+  const scrollRef = useRef(scrollToStep);
+  scrollRef.current = scrollToStep;
+
+  const activeRef = useRef(activeStep);
+  activeRef.current = activeStep;
 
   useEffect(() => {
     if (!enabled) {
@@ -62,12 +92,34 @@ export function useHeroScrubRegister(
     }
 
     setState({
-      slates,
-      activeIndex,
-      scrollToSlate: (index) => scrollRef.current(index),
-      dotsVisible,
+      steps,
+      activeStep: activeRef.current,
+      scrollToStep: (index) => scrollRef.current(index),
+      visible,
+      subChapterProgress: null,
     });
 
     return () => setState(null);
-  }, [enabled, slates, activeIndex, dotsVisible, setState]);
+  }, [enabled, steps, visible, setState]);
+
+  useEffect(() => {
+    if (!enabled) return;
+    setState((prev) =>
+      prev && prev.activeStep !== activeStep
+        ? { ...prev, activeStep }
+        : prev,
+    );
+  }, [enabled, activeStep, setState]);
+}
+
+/** Radial ring on the active hero dot while scrolling through sub-chapters. */
+export function useHeroSubChapterProgressRegister(
+  progress: HeroSubChapterProgress | null,
+) {
+  const { setSubChapterProgress } = useHeroScrubContext();
+
+  useEffect(() => {
+    setSubChapterProgress(progress);
+    return () => setSubChapterProgress(null);
+  }, [progress, setSubChapterProgress]);
 }

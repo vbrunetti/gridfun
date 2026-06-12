@@ -12,21 +12,28 @@ import { HERO_SPARK_COLOR, HERO_SPARK_PRESETS, HERO_SPARK_SHAPE_SCALE } from "./
 import { SparkCanvas, type SparkBlend } from "./spark-canvas";
 import { CtaButton } from "@/components/chrome/cta-button";
 import { RuledGrid } from "@/components/layout/ruled-grid";
+import { SiteGridSubgrid } from "@/components/layout/site-grid";
+import type { HomeCoverSection } from "@/content/home-sections";
 import type { HeroSlate } from "@/content/hero-slates";
 import {
   HeroChapterCopy,
   type ChapterBlend,
 } from "./hero-chapter-copy";
-import { useHeroScrubRegister } from "./hero-scrub-context";
+import {
+  useHeroScrubRegister,
+  useHeroSubChapterProgressRegister,
+  type HeroSubChapterProgress,
+  type HomeScrollStep,
+} from "./hero-scrub-context";
 
 type PrimaryHeroScrubProps = {
   slates: HeroSlate[];
   /** Viewport-heights of scroll per slate (snap segment). */
   segmentVh?: number;
-  /** Tail spacer after last slate; off when secondary cover is in the track. */
+  /** Tail spacer after last slate; off when cover sections are in the track. */
   scrollRelease?: boolean;
-  /** Home secondary cover slide — panel is a sibling in .home-hero-cover-flow. */
-  secondaryCover?: boolean;
+  /** Cover-flow sections after chapters — each gets a scroll slide and rail dot. */
+  coverSections?: HomeCoverSection[];
 };
 
 function clamp(value: number, min: number, max: number) {
@@ -45,25 +52,53 @@ function getHomeCoverPeekPx() {
   return 4.5 * rootFont;
 }
 
+function buildHomeScrollSteps(
+  slateCount: number,
+  coverSections: HomeCoverSection[],
+): HomeScrollStep[] {
+  const hero: HomeScrollStep = {
+    id: "home-hero",
+    kind: "hero",
+    label: "Home",
+    subChapterCount: slateCount,
+  };
+
+  const sections: HomeScrollStep[] = coverSections.map((section) => ({
+    id: section.id,
+    kind: "section",
+    label: section.label,
+  }));
+
+  return [hero, ...sections];
+}
+
 export function PrimaryHeroScrub({
   slates,
   scrollRelease = true,
-  secondaryCover,
+  coverSections = [],
 }: PrimaryHeroScrubProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeStep, setActiveStep] = useState(0);
   const [chapterBlend, setChapterBlend] = useState<ChapterBlend>({
     from: 0,
     to: 0,
     t: 0,
   });
-  const [dotsVisible, setDotsVisible] = useState(true);
+  const [subChapterProgress, setSubChapterProgress] =
+    useState<HeroSubChapterProgress | null>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [canvasPaused, setCanvasPaused] = useState(false);
   const rafScrollRef = useRef<number>(0);
 
   const slateCount = slates.length;
+  const sectionCount = coverSections.length;
+  const hasCoverFlow = sectionCount > 0;
+
+  const scrollSteps = useMemo(
+    () => buildHomeScrollSteps(slateCount, coverSections),
+    [slateCount, coverSections],
+  );
 
   const sparkPresets = useMemo(() => {
     if (slateCount === HERO_SPARK_PRESETS.length) return HERO_SPARK_PRESETS;
@@ -98,9 +133,9 @@ export function PrimaryHeroScrub({
     ) as HTMLElement | null;
 
     if (!container || reducedMotion) {
-      setActiveIndex(0);
+      setActiveStep(0);
       setChapterBlend({ from: 0, to: 0, t: 0 });
-      setDotsVisible(false);
+      setSubChapterProgress(null);
       flow?.style.removeProperty("--home-secondary-translate");
       flow?.classList.remove("home-secondary-covering", "home-secondary-settled");
       return;
@@ -111,28 +146,27 @@ export function PrimaryHeroScrub({
     if (slideHeight <= 0 || slateCount <= 0) return;
 
     const scrollTop = container.scrollTop;
-    const chapterSlideCount = slateCount;
+    const rawSlide = scrollTop / slideHeight;
 
-    const chapterScrollMax = Math.max((chapterSlideCount - 1) * slideHeight, 0);
-    const coverStart = Math.max((chapterSlideCount - 1) * slideHeight, 0);
-    const coverEnd = chapterSlideCount * slideHeight;
-    const rawChapter = clamp(scrollTop / slideHeight, 0, chapterSlideCount - 1);
+    const coverStart = Math.max((slateCount - 1) * slideHeight, 0);
+    const coverEnd = (slateCount + sectionCount) * slideHeight;
+    const inCoverPhase = hasCoverFlow && scrollTop >= coverStart - 1;
+    const coverProgress = inCoverPhase
+      ? clamp((scrollTop - coverStart) / slideHeight, 0, sectionCount)
+      : 0;
+    const coverSettled = scrollTop >= coverEnd - 4;
+
+    const stepIndex =
+      rawSlide >= slateCount
+        ? 1 + clamp(Math.floor(rawSlide - slateCount), 0, sectionCount - 1)
+        : 0;
+    setActiveStep(stepIndex);
+
+    const rawChapter = clamp(rawSlide, 0, slateCount - 1);
     const from = clamp(Math.floor(rawChapter), 0, slateCount - 1);
     const to = clamp(from + 1, 0, slateCount - 1);
     const t = slateCount <= 1 ? 0 : rawChapter - from;
 
-    const inCoverPhase =
-      secondaryCover && scrollTop >= coverStart - 1;
-    const coverProgress = inCoverPhase
-      ? clamp((scrollTop - coverStart) / slideHeight, 0, 1)
-      : 0;
-    const coverSettled = scrollTop >= coverEnd - 4;
-
-    setActiveIndex(
-      inCoverPhase
-        ? slateCount - 1
-        : clamp(Math.round(rawChapter), 0, slateCount - 1),
-    );
     setChapterBlend(
       inCoverPhase || slateCount <= 1
         ? {
@@ -143,9 +177,15 @@ export function PrimaryHeroScrub({
         : { from, to: Math.min(to, slateCount - 1), t },
     );
 
-    setDotsVisible(!coverSettled && scrollTop <= chapterScrollMax + 24);
+    if (rawSlide < slateCount && slateCount > 0) {
+      setSubChapterProgress({
+        progress: clamp((rawSlide + 1) / slateCount, 0, 1),
+      });
+    } else {
+      setSubChapterProgress(null);
+    }
 
-    if (secondaryCover && flow) {
+    if (hasCoverFlow && flow) {
       const peekPx = getHomeCoverPeekPx();
       const eased = clamp(coverProgress * 1.25, 0, 1);
       const fullyCovered = coverSettled || coverProgress >= 0.85;
@@ -169,7 +209,7 @@ export function PrimaryHeroScrub({
         flow.classList.remove("home-secondary-covering", "home-secondary-settled");
       }
     }
-  }, [reducedMotion, secondaryCover, slateCount]);
+  }, [hasCoverFlow, reducedMotion, scrollSteps, sectionCount, slateCount]);
 
   useEffect(() => {
     if (reducedMotion) return;
@@ -196,29 +236,41 @@ export function PrimaryHeroScrub({
     };
   }, [reducedMotion, updateFromScroll]);
 
-  const scrollToSlate = useCallback(
+  const scrollToStep = useCallback(
     (index: number) => {
       const container = containerRef.current;
       if (!container || reducedMotion) return;
 
-      const clamped = clamp(index, 0, slateCount - 1);
+      const step = scrollSteps[index];
+      if (!step) return;
+
+      let slideIndex = 0;
+      if (step.kind === "hero") {
+        slideIndex = 0;
+      } else {
+        const sectionIdx = coverSections.findIndex((s) => s.id === step.id);
+        slideIndex = slateCount + Math.max(sectionIdx, 0);
+      }
+
       const slideHeight =
         trackRef.current?.clientHeight ?? container.clientHeight;
       container.scrollTo({
-        top: clamped * slideHeight,
+        top: slideIndex * slideHeight,
         behavior: "smooth",
       });
     },
-    [reducedMotion, slateCount],
+    [coverSections, reducedMotion, scrollSteps, slateCount],
   );
 
   useHeroScrubRegister(
-    !reducedMotion && slateCount > 1 && Boolean(secondaryCover),
-    slates,
-    activeIndex,
-    scrollToSlate,
-    dotsVisible,
+    !reducedMotion && scrollSteps.length > 1,
+    scrollSteps,
+    activeStep,
+    scrollToStep,
+    !reducedMotion,
   );
+
+  useHeroSubChapterProgressRegister(subChapterProgress);
 
   useEffect(() => {
     const track = trackRef.current;
@@ -235,7 +287,13 @@ export function PrimaryHeroScrub({
   const slideCount =
     reducedMotion || slateCount <= 1
       ? 0
-      : slateCount + (secondaryCover ? 1 : scrollRelease ? 1 : 0);
+      : slateCount + sectionCount + (!hasCoverFlow && scrollRelease ? 1 : 0);
+
+  const showChapterCtas =
+    !reducedMotion &&
+    chapterBlend.from === 0 &&
+    chapterBlend.to === 0 &&
+    chapterBlend.t === 0;
 
   return (
     <div
@@ -248,35 +306,28 @@ export function PrimaryHeroScrub({
           {slates.map((slate) => (
             <div key={slate.id} className="hero-chapter-slide" aria-hidden />
           ))}
-          {secondaryCover ? (
-            <div className="hero-chapter-slide hero-cover-slide" aria-hidden />
-          ) : null}
-          {!secondaryCover && scrollRelease ? (
+          {coverSections.map((section) => (
+            <div
+              key={section.id}
+              className="hero-chapter-slide hero-cover-slide"
+              aria-hidden
+            />
+          ))}
+          {!hasCoverFlow && scrollRelease ? (
             <div className="hero-chapter-slide hero-scroll-release-slide" aria-hidden />
           ) : null}
         </div>
       ) : null}
 
-      <div className="primary-hero-spark-layer">
-        <SparkCanvas
-          presets={sparkPresets}
-          blend={sparkBlend}
-          paused={canvasPaused}
-          showBoundary={false}
-          shapeScale={HERO_SPARK_SHAPE_SCALE}
-          {...HERO_SPARK_COLOR}
-        />
-      </div>
-
       <div className="primary-hero-sticky">
-        <div className="primary-hero-copy">
-          <RuledGrid className="w-full">
-            <div className="col-span-hero">
+        <RuledGrid className="primary-hero-stage h-full">
+          <SiteGridSubgrid className="primary-hero-stage-row h-full items-center">
+            <div className="primary-hero-copy grid-span-6 lg:grid-span-5">
               <HeroChapterCopy
                 slates={slates}
                 blend={
                   reducedMotion
-                    ? { from: activeIndex, to: activeIndex, t: 0 }
+                    ? { from: 0, to: 0, t: 0 }
                     : chapterBlend
                 }
               />
@@ -290,27 +341,40 @@ export function PrimaryHeroScrub({
                 </div>
               ) : null}
             </div>
-          </RuledGrid>
-        </div>
+
+            <div className="primary-hero-spark-layer grid-span-6 lg:col-start-7 lg:grid-span-6">
+              <SparkCanvas
+                presets={sparkPresets}
+                blend={sparkBlend}
+                paused={canvasPaused}
+                showBoundary={false}
+                shapeScale={HERO_SPARK_SHAPE_SCALE}
+                {...HERO_SPARK_COLOR}
+              />
+            </div>
+          </SiteGridSubgrid>
+        </RuledGrid>
       </div>
 
-      {activeIndex === 0 && !reducedMotion ? (
+      {showChapterCtas ? (
         <div className="hero-chapter-cta-layer">
-          <RuledGrid className="w-full">
-            <div className="col-span-hero">
-              <div className="invisible" aria-hidden>
-                <HeroChapterCopy
-                  slates={slates}
-                  blend={{ from: 0, to: 0, t: 0 }}
-                />
+          <RuledGrid className="primary-hero-stage h-full">
+            <SiteGridSubgrid className="primary-hero-stage-row h-full items-center">
+              <div className="primary-hero-copy grid-span-6 lg:grid-span-5">
+                <div className="invisible" aria-hidden>
+                  <HeroChapterCopy
+                    slates={slates}
+                    blend={{ from: 0, to: 0, t: 0 }}
+                  />
+                </div>
+                <div className="mt-8 flex flex-wrap items-center gap-6">
+                  <CtaButton href="/case-studies">View case studies</CtaButton>
+                  <CtaButton href="/about" variant="ghost">
+                    About
+                  </CtaButton>
+                </div>
               </div>
-              <div className="mt-8 flex flex-wrap items-center gap-6">
-                <CtaButton href="/case-studies">View case studies</CtaButton>
-                <CtaButton href="/about" variant="ghost">
-                  About
-                </CtaButton>
-              </div>
-            </div>
+            </SiteGridSubgrid>
           </RuledGrid>
         </div>
       ) : null}
