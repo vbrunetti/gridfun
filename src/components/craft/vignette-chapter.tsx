@@ -264,9 +264,8 @@ export function VignetteChapter({
 
   useCaseStudyVignetteProgressRegister(vignetteProgress);
 
-  // Every in-focus panel anchors to grid line 1. At the last panel the color
-  // bleeds to the right edge via the pin background (see render) instead of
-  // flushing the strip, so the grid-1 anchor is preserved end to end.
+  // Every in-focus panel anchors to grid line 1. Colorful last panels may add a
+  // non-nav trail sibling that fills the viewport to the right of the strip.
   const updateTranslate = useCallback((activeIndex: number) => {
     const panel = panelRefs.current[activeIndex];
     if (!panel) return;
@@ -411,6 +410,10 @@ export function VignetteChapter({
 
   if (total === 0) return null;
 
+  const lastFrameBg =
+    total > 0 ? framePanelBgs[total - 1]! : ("default" as PanelBg);
+  const hasColorfulLastPanel = lastFrameBg !== "default";
+
   return (
     <section
       ref={sectionRef}
@@ -422,16 +425,7 @@ export function VignetteChapter({
       aria-roledescription="vignette chapter"
       aria-label={vignette.name}
     >
-      <div
-        className="vchapter__pin"
-        ref={stageRef}
-        style={{
-          backgroundColor:
-            index === steps - 1 && isCruisePrototype
-              ? "var(--color-cruise)"
-              : undefined,
-        }}
-      >
+      <div className="vchapter__pin" ref={stageRef}>
         {/* Invisible ruler — mirrors the master grid so panels snap to it. */}
         <div className="vchapter__ruler site-grid" aria-hidden ref={rulerRef}>
           {Array.from({ length: 12 }).map((_, i) => (
@@ -467,6 +461,7 @@ export function VignetteChapter({
 
           {frames.map((frame, i) => {
             const idx = i + 1;
+            const panelBg = framePanelBgs[i]!;
             return (
               <article
                 key={i}
@@ -477,9 +472,9 @@ export function VignetteChapter({
                   frame.colorField ? " vframe--field" : ""
                 }${idx === index ? " is-active" : ""}`}
                 data-vframe-index={idx}
-                data-panel-bg={framePanelBgs[i]}
+                data-panel-bg={panelBg}
                 style={{
-                  ["--panel-bg" as string]: panelBgVar(framePanelBgs[i]!),
+                  ["--panel-bg" as string]: panelBgVar(panelBg),
                 }}
                 aria-hidden={idx !== index}
               >
@@ -492,6 +487,15 @@ export function VignetteChapter({
               </article>
             );
           })}
+          {hasColorfulLastPanel ? (
+            <div
+              className={`vchapter__trail${
+                index === steps - 1 ? " is-active" : ""
+              }`}
+              aria-hidden
+              style={{ background: panelBgVar(lastFrameBg) }}
+            />
+          ) : null}
         </div>
       </div>
     </section>

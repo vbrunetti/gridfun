@@ -1566,8 +1566,19 @@ a.craft-card:focus-visible {
   opacity: 1;
 }
 
+.cs-detail .cs-focus-section:not(.is-focused):hover .vchapter__trail {
+  opacity: 1;
+}
+
 /* Inactive vignette panels peek to full brightness on hover. */
 .cs-detail .cs-focus-section.is-focused .vframe:not(.is-active):hover {
+  opacity: 1;
+}
+
+.cs-detail
+  .cs-focus-section.is-focused
+  .vframe:not(.is-active):hover
+  + .vchapter__trail {
   opacity: 1;
 }
 
@@ -1584,7 +1595,8 @@ body:has(.chrome-hero-dots-rail:hover) .cs-detail .cs-focus-section .vframe,
 body:has(.chrome-hero-dots-rail:hover)
   .cs-detail
   .cs-focus-section
-  .vframe.is-active {
+  .vframe.is-active,
+body:has(.chrome-hero-dots-rail:hover) .cs-detail .cs-focus-section .vchapter__trail {
   opacity: 1;
 }
 
@@ -2213,6 +2225,27 @@ body:has(.chrome-hero-dots-rail:hover)
   --panel-pad: clamp(1rem, 2vw, 1.5rem);
 }
 
+/* Phantom panel — not in scroll/nav; extends the last panel color to viewport. */
+@media (min-width: 768px) {
+  .vchapter__trail {
+    flex: none;
+    align-self: stretch;
+    width: 100vw;
+    pointer-events: none;
+    opacity: 0.45;
+    transition: opacity 0.4s ease;
+  }
+
+  .vchapter__trail.is-active {
+    opacity: 1;
+  }
+}
+
+.vchapter__ruler,
+.vchapter__track {
+  position: relative;
+}
+
 /* Zero-height mirror of the master grid — JS measures it to snap panel widths
    to real grid columns and anchor the in-focus panel to grid line 1. */
 .vchapter__ruler {
@@ -2337,7 +2370,8 @@ body:has(.chrome-hero-dots-rail:hover)
 
 /* Open the outer-most right edge (last panel). The first panel has no left
    border by design, so its outer-left edge is already open. */
-.vchapter__track > .vframe:last-child {
+.vchapter__track > .vframe:last-child,
+.vchapter__track > .vframe:has(+ .vchapter__trail) {
   border-right: 0;
 }
 
