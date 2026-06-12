@@ -770,11 +770,23 @@ body[data-chrome-surface="light"] .chrome-hero-dots-rail--study {
   border: 0;
   background: transparent;
   line-height: 0;
-  transition: opacity 0.15s ease;
 }
 
-.chrome-nav-dot-btn:hover {
-  opacity: 0.8;
+.chrome-nav-dot-btn:hover .chrome-nav-dot-wrap {
+  transform: scale(1.28);
+}
+
+.chrome-nav-dot-btn:hover .chrome-nav-dot {
+  border-width: 2px;
+  border-color: var(--color-white);
+  background: transparent;
+  opacity: 1;
+}
+
+.chrome-nav-dot-btn:hover .chrome-nav-dot-ring circle {
+  stroke: var(--color-white);
+  stroke-width: 2;
+  opacity: 1;
 }
 
 .chrome-nav-dot-btn:focus-visible {
@@ -788,6 +800,7 @@ body[data-chrome-surface="light"] .chrome-hero-dots-rail--study {
   place-items: center;
   width: 1.375rem;
   height: 1.375rem;
+  transition: transform 0.2s ease;
 }
 
 .chrome-nav-dot-ring {
@@ -796,6 +809,13 @@ body[data-chrome-surface="light"] .chrome-hero-dots-rail--study {
   width: 100%;
   height: 100%;
   pointer-events: none;
+}
+
+.chrome-nav-dot-ring circle {
+  transition:
+    stroke 0.2s ease,
+    stroke-width 0.2s ease,
+    opacity 0.2s ease;
 }
 
 .chrome-nav-dot {
@@ -809,6 +829,7 @@ body[data-chrome-surface="light"] .chrome-hero-dots-rail--study {
   transition:
     background-color 0.2s ease,
     border-color 0.2s ease,
+    border-width 0.2s ease,
     transform 0.2s ease,
     opacity 0.2s ease,
     color 0.2s ease;
@@ -818,6 +839,16 @@ body[data-chrome-surface="light"] .chrome-hero-dots-rail--study {
   border-color: currentColor;
   background: currentColor;
   transform: scale(1.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chrome-nav-dot-wrap {
+    transition: none;
+  }
+
+  .chrome-nav-dot-btn:hover .chrome-nav-dot-wrap {
+    transform: none;
+  }
 }
 
 /* Legacy aliases — design-system reference + older markup */
@@ -1526,10 +1557,84 @@ a.craft-card:focus-visible {
   opacity: 1;
 }
 
+/* Hovering a dimmed section previews it at full brightness. */
+.cs-detail .cs-focus-section:not(.is-focused):hover {
+  opacity: 1;
+}
+
+.cs-detail .cs-focus-section:not(.is-focused):hover .vframe {
+  opacity: 1;
+}
+
+/* Inactive vignette panels peek to full brightness on hover. */
+.cs-detail .cs-focus-section.is-focused .vframe:not(.is-active):hover {
+  opacity: 1;
+}
+
+/* Circle nav hover — dim every section (including in-focus) to ~20%. */
+body:has(.chrome-hero-dots-rail:hover) .cs-detail .cs-focus-section,
+body:has(.chrome-hero-dots-rail:hover)
+  .cs-detail
+  .cs-focus-section:not(.is-focused):hover {
+  opacity: 0.2;
+}
+
+/* Avoid stacking vignette panel dim on top of section dim. */
+body:has(.chrome-hero-dots-rail:hover) .cs-detail .cs-focus-section .vframe,
+body:has(.chrome-hero-dots-rail:hover)
+  .cs-detail
+  .cs-focus-section
+  .vframe.is-active {
+  opacity: 1;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cs-detail .cs-focus-section {
     transition: none;
   }
+}
+
+/* Dimmed sections — hide system cursor; render a 200×200 plus follower. */
+.cs-detail.is-peek-cursor,
+.cs-detail.is-peek-cursor * {
+  cursor: none !important;
+}
+
+.cs-peek-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 90;
+  width: 200px;
+  height: 200px;
+  margin: -100px 0 0 -100px;
+  pointer-events: none;
+  color: var(--color-paper);
+}
+
+.cs-peek-cursor[data-surface="light"] {
+  color: var(--color-ink);
+}
+
+.cs-peek-cursor::before,
+.cs-peek-cursor::after {
+  content: "";
+  position: absolute;
+  background: currentColor;
+}
+
+.cs-peek-cursor::before {
+  top: 0;
+  left: calc(50% - 1px);
+  width: 2px;
+  height: 200px;
+}
+
+.cs-peek-cursor::after {
+  top: calc(50% - 1px);
+  left: 0;
+  width: 200px;
+  height: 2px;
 }
 
 .cs-section {

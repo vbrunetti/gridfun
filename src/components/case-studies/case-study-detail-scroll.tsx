@@ -21,6 +21,13 @@ type SnapPoint = {
   stepId: string;
 };
 
+type PeekTarget = {
+  surface: "light" | "dark";
+} & (
+  | { type: "section"; sectionId: string }
+  | { type: "panel"; sectionId: string; panelIndex: number }
+);
+
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
@@ -89,6 +96,21 @@ function computeDetailSnapPoints(steps: CaseStudyDetailStep[]): SnapPoint[] {
   return points;
 }
 
+function snapIndexForVignettePanel(
+  points: SnapPoint[],
+  sectionId: string,
+  panelIndex: number,
+): number {
+  let panel = 0;
+  for (let i = 0; i < points.length; i++) {
+    if (points[i]!.stepId === sectionId) {
+      if (panel === panelIndex) return i;
+      panel++;
+    }
+  }
+  return -1;
+}
+
 /** Last step whose row top has crossed the chrome anchor — 1:1 with the dots. */
 function activeStepIndex(steps: CaseStudyDetailStep[]): number {
   const anchor = chromeAnchorY() + 8;
@@ -124,7 +146,11 @@ export function CaseStudyDetailScroll({
   const lockRef = useRef(false);
   const snapRef = useRef(0);
   const snapPointsRef = useRef<SnapPoint[]>([]);
+  const scrollToStepRef = useRef<(index: number) => void>(() => {});
+  const scrollToSnapIndexRef = useRef<(index: number) => void>(() => {});
   const [activeStep, setActiveStep] = useState(0);
+  const [peekTarget, setPeekTarget] = useState<PeekTarget | null>(null);
+  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
 
   const syncActiveStep = useCallback(() => {
     setActiveStep(activeStepIndex(steps));
@@ -199,6 +225,9 @@ export function CaseStudyDetailScroll({
       syncActiveStep();
     }
   }, [scrollToSnapIndex, syncActiveStep]);
+
+  scrollToStepRef.current = scrollToStep;
+  scrollToSnapIndexRef.current = scrollToSnapIndex;
 
   useCaseStudyDetailScrollRegister(true, steps, activeStep, scrollToStep, true);
 
@@ -336,9 +365,132 @@ export function CaseStudyDetailScroll({
     };
   }, [activeStep, steps]);
 
+  // Dimmed sections + vignette panels: plus cursor, hover preview, click to jump.
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    const canPeek = () =>
+      window.matchMedia(`${DESKTOP_QUERY} and (pointer: fine)`).matches;
+
+    const suppressesPeekCursor = (target: EventTarget | null) =>
+      (target as HTMLElement | null)?.closest(
+        ".floating-chrome, a, button, input, textarea, select, [contenteditable='true']",
+      );
+
+    const resolvePeekTarget = (target: EventTarget | null): PeekTarget | null => {
+      const el = target as HTMLElement | null;
+      if (!el || !root.contains(el)) return null;
+
+      const panel = el.closest<HTMLElement>(".vframe");
+      if (panel) {
+        const section = panel.closest<HTMLElement>(
+          ".cs-focus-section.vchapter.is-focused",
+        );
+        if (section && !panel.classList.contains("is-active")) {
+          const panelIndex = Number.parseInt(
+            panel.dataset.vframeIndex ?? "",
+            10,
+          );
+          if (Number.isFinite(panelIndex)) {
+            return {
+              type: "panel",
+              sectionId: section.id,
+              panelIndex,
+              surface: "dark",
+            };
+          }
+        }
+      }
+
+      const section = el.closest<HTMLElement>(".cs-focus-section");
+      if (section && !section.classList.contains("is-focused")) {
+        return {
+          type: "section",
+          sectionId: section.id,
+          surface: section.dataset.chromeSurface === "light" ? "light" : "dark",
+        };
+      }
+
+      return null;
+    };
+
+    const clearPeek = () => {
+      setPeekTarget(null);
+      root.classList.remove("is-peek-cursor");
+    };
+
+    const onPointerMove = (event: PointerEvent) => {
+      if (!canPeek()) {
+        clearPeek();
+        return;
+      }
+
+      if (suppressesPeekCursor(event.target)) {
+        clearPeek();
+        return;
+      }
+
+      const target = resolvePeekTarget(event.target);
+      if (!target) {
+        clearPeek();
+        return;
+      }
+
+      setPeekTarget(target);
+      setCursorPos({ x: event.clientX, y: event.clientY });
+      root.classList.add("is-peek-cursor");
+    };
+
+    const onClick = (event: MouseEvent) => {
+      if (!canPeek()) return;
+
+      const target = resolvePeekTarget(event.target);
+      if (!target || suppressesPeekCursor(event.target)) return;
+
+      event.preventDefault();
+
+      if (target.type === "panel") {
+        const snapIndex = snapIndexForVignettePanel(
+          snapPointsRef.current,
+          target.sectionId,
+          target.panelIndex,
+        );
+        if (snapIndex >= 0) {
+          scrollToSnapIndexRef.current(snapIndex);
+        }
+        return;
+      }
+
+      const stepIndex = steps.findIndex((step) => step.id === target.sectionId);
+      if (stepIndex >= 0) {
+        scrollToStepRef.current(stepIndex);
+      }
+    };
+
+    document.addEventListener("pointermove", onPointerMove, { passive: true });
+    root.addEventListener("click", onClick);
+
+    return () => {
+      document.removeEventListener("pointermove", onPointerMove);
+      root.removeEventListener("click", onClick);
+      root.classList.remove("is-peek-cursor");
+    };
+  }, [steps]);
+
   return (
     <article ref={rootRef} className="cs-detail">
       {children}
+      {peekTarget ? (
+        <div
+          className="cs-peek-cursor"
+          data-surface={peekTarget.surface}
+          style={{
+            transform: `translate3d(${cursorPos.x}px, ${cursorPos.y}px, 0)`,
+          }}
+          aria-hidden
+        />
+      ) : null}
     </article>
   );
 }

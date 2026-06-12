@@ -449,6 +449,7 @@ export function VignetteChapter({
               panelRefs.current[0] = node;
             }}
             className={`vframe vframe--title${index === 0 ? " is-active" : ""}`}
+            data-vframe-index={0}
           >
             <header className="vframe__kicker">
               <p className="vframe__kicker-text text-meta">{date ?? "\u00A0"}</p>
@@ -475,6 +476,7 @@ export function VignetteChapter({
                 className={`vframe vframe--${frame.ratio}${
                   frame.colorField ? " vframe--field" : ""
                 }${idx === index ? " is-active" : ""}`}
+                data-vframe-index={idx}
                 data-panel-bg={framePanelBgs[i]}
                 style={{
                   ["--panel-bg" as string]: panelBgVar(framePanelBgs[i]!),
