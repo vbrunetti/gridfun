@@ -17,7 +17,6 @@ import {
   allCraftTags,
   craftActiveTagsFromParam,
   getAllVignettes,
-  vignetteIndexLabel,
   vignetteMatchesActiveTags,
   type VignetteWithStudy,
 } from "@/content/portfolio";
@@ -286,13 +285,9 @@ function CraftFiltersPager({
 
 function VignetteCard({ entry }: { entry: VignetteWithStudy }) {
   const { vignette, caseStudy } = entry;
-  const indexLabel = vignetteIndexLabel(vignette.slug);
 
   return (
     <Link href={`/craft/${vignette.slug}`} className="craft-card">
-      <p className="craft-ghost-index display-ghost" aria-hidden>
-        {indexLabel}
-      </p>
       <VignetteKeyImage
         vignette={vignette}
         className="craft-portrait"

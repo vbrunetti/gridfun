@@ -1161,7 +1161,8 @@ html:has(.cs-detail) {
 }
 
 /* Footer is canvas/light — keep dots legible over the lime field. */
-body[data-chrome-surface="light"] .chrome-hero-dots-rail--study {
+body[data-chrome-surface="light"] .chrome-hero-dots-rail--study,
+body[data-chrome-surface="canvas"] .chrome-hero-dots-rail--study {
   filter: drop-shadow(0 0 1px color-mix(in srgb, var(--color-ink) 12%, transparent));
 }
 
@@ -1172,6 +1173,9 @@ body:has(.cs-detail) .floating-chrome .chrome-hero-dots-rail--detail {
 }
 
 body:has(.cs-detail)[data-chrome-surface="light"]
+  .floating-chrome
+  .chrome-hero-dots-rail--detail,
+body:has(.cs-detail)[data-chrome-surface="canvas"]
   .floating-chrome
   .chrome-hero-dots-rail--detail {
   color: var(--color-ink);
@@ -1337,6 +1341,11 @@ body.cs-detail-nav-hover .floating-chrome .chrome-nav-dot-ring {
 .floating-chrome[data-chrome-state="menu"],
 body[data-chrome-surface="dark"] .floating-chrome {
   color: var(--color-paper);
+}
+
+body[data-chrome-surface="light"] .floating-chrome,
+body[data-chrome-surface="canvas"] .floating-chrome {
+  color: var(--color-ink);
 }
 
 .floating-chrome .rail-label-vertical {
@@ -1890,17 +1899,6 @@ a.craft-filter-chip {
   display: flex;
   flex-direction: column;
   container-type: inline-size;
-}
-
-/* Ornament 1 — ghost index above portrait, no overlap */
-.craft-ghost-index {
-  display: block;
-  width: 100%;
-  margin: 0;
-  padding: 0 0 0.5rem;
-  text-align: left;
-  pointer-events: none;
-  user-select: none;
 }
 
 .craft-portrait {
@@ -2474,7 +2472,8 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
   grid-column: 5 / 9;
 }
 
-.cs-hero__fact--tools {
+.cs-hero__fact--tools,
+.cs-hero__fact--study {
   grid-column: 9 / -1;
 }
 
@@ -2496,7 +2495,8 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
 }
 
 .cs-hero__fact--role .cs-hero__fact-value,
-.cs-hero__fact--tools .cs-hero__fact-value {
+.cs-hero__fact--tools .cs-hero__fact-value,
+.cs-hero__fact--study .cs-hero__fact-value {
   white-space: normal;
 }
 
@@ -2574,7 +2574,8 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
     grid-row: 2;
   }
 
-  .cs-hero__fact--tools {
+  .cs-hero__fact--tools,
+  .cs-hero__fact--study {
     grid-column: 1 / -1;
     grid-row: 3;
   }

@@ -172,7 +172,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
         id="cs-footer"
         data-cs-detail-row
         className="cs-focus-section theme-canvas py-12"
-        data-chrome-surface="light"
+        data-chrome-surface="canvas"
       >
         <RuledGrid>
           <SiteGridSubgrid className="items-center">

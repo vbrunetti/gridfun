@@ -16,6 +16,10 @@ import {
   VCHAPTER_PANEL_EVENT,
   type VchapterPanelEventDetail,
 } from "@/components/craft/vignette-chapter";
+import {
+  CHROME_SURFACE_ATTR,
+  type ChromeSurface,
+} from "@/lib/chrome-surface";
 
 const PEEK_DESKTOP_QUERY = "(min-width: 768px)";
 const ANCHOR_DESKTOP_QUERY = "(min-width: 1024px)";
@@ -229,6 +233,19 @@ export function CaseStudyDetailScroll({
     hoverStep !== null ? steps[hoverStep]?.id : null,
     steps.length > 1,
   );
+
+  // Dot + menu chrome color tracks the active row (not intersection ratios).
+  useEffect(() => {
+    const step = steps[activeStep];
+    const el = step ? document.getElementById(step.id) : null;
+    const surface =
+      (el?.getAttribute(CHROME_SURFACE_ATTR) as ChromeSurface | null) ?? "dark";
+    document.body.dataset.chromeSurface = surface;
+
+    return () => {
+      delete document.body.dataset.chromeSurface;
+    };
+  }, [activeStep, steps]);
 
   // Dimmed sections + vignette panels: plus cursor, hover preview, click to jump.
   useEffect(() => {

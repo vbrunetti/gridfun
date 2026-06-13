@@ -49,7 +49,11 @@ export function CaseStudyCoverStack() {
 
                 {tags.length > 0 ? (
                   <footer className="cs-index-panel__foot">
-                    <CraftTagList tags={tags} className="cs-index-panel__tags" />
+                    <CraftTagList
+                      tags={tags}
+                      className="cs-index-panel__tags"
+                      variant="filter-link"
+                    />
                   </footer>
                 ) : null}
               </div>

@@ -1,18 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CaseStudyDetailScroll } from "@/components/case-studies/case-study-detail-scroll";
+import { CtaButton } from "@/components/chrome/cta-button";
+import { VignetteChapter } from "@/components/craft/vignette-chapter";
 import { RuledGrid } from "@/components/layout/ruled-grid";
 import { SiteGridSubgrid } from "@/components/layout/site-grid";
 import {
-  CraftTagList,
-  VignetteImageScroll,
-  VignetteKeyImage,
-} from "@/components/craft/vignette-media";
-import {
   getAllVignettes,
   getVignette,
-  isVignette,
+  vignetteIndexLabel,
 } from "@/content/portfolio";
+import { buildCraftDetailSteps } from "@/lib/craft-detail-steps";
 
 type PageProps = {
   params: Promise<{ vignette: string }>;
@@ -39,75 +38,110 @@ export default async function VignettePage({ params }: PageProps) {
   }
 
   const { vignette, caseStudy } = found;
-  const siblings = caseStudy.sections.filter(isVignette);
+  const allVignettes = getAllVignettes();
+  const index = allVignettes.findIndex(({ vignette: v }) => v.slug === slug);
+  const next = allVignettes[index + 1];
+  const chapterNumber = Number.parseInt(vignetteIndexLabel(slug), 10) || 1;
+  const detailSteps = buildCraftDetailSteps(vignette);
+
+  const heroFacts = [
+    { key: "client", label: "Client", value: caseStudy.client },
+    { key: "date", label: "Date", value: caseStudy.date },
+    { key: "role", label: "Role", value: caseStudy.role },
+    {
+      key: "study",
+      label: "Case study",
+      value: caseStudy.name,
+      href: `/case-studies/${caseStudy.slug}`,
+    },
+  ] as const;
 
   return (
-    <article
-      className="vignette-detail theme-light"
-      data-chrome-surface="light"
-    >
-      <section className="keyline-b">
-        <RuledGrid className="py-[var(--grid-row-gap)]">
-          <div className="col-span-content">
-            <p className="text-meta">
-              <Link
-                href={`/case-studies/${caseStudy.slug}`}
-                className="transition-opacity hover:opacity-70"
-              >
-                {caseStudy.client} · {caseStudy.name}
-              </Link>
-            </p>
-            <h1 className="display-xl mt-4">{vignette.name}</h1>
-            <CraftTagList tags={vignette.tags} className="mt-5" />
-          </div>
-          <div className="col-span-narrow vignette-detail__key">
-            <VignetteKeyImage vignette={vignette} priority />
-          </div>
-        </RuledGrid>
-      </section>
-
-      <section className="cs-section cs-section--vignette keyline-b">
-        <VignetteImageScroll vignette={vignette} />
-      </section>
-
-      <section className="theme-canvas py-12" data-chrome-surface="light">
-        <RuledGrid>
-          <SiteGridSubgrid className="items-start gap-y-8">
-            <div className="grid-span-6 lg:grid-span-5">
-              <p className="text-meta">From the case study</p>
-              <Link
-                href={`/case-studies/${caseStudy.slug}`}
-                className="display-md mt-3 inline-block transition-opacity hover:opacity-70"
-              >
-                {caseStudy.name} →
-              </Link>
-              <p className="text-meta mt-3">
-                {caseStudy.client} · {caseStudy.date}
-              </p>
+    <CaseStudyDetailScroll steps={detailSteps}>
+      <div className="theme-dark">
+        <section
+          id="craft-hero"
+          data-cs-detail-row
+          className="cs-focus-section cs-hero keyline-b is-focused"
+          data-chrome-surface="dark"
+        >
+          <RuledGrid className="cs-hero__grid">
+            <div className="cs-hero__facts">
+              {heroFacts.map((fact) => (
+                <div
+                  key={fact.key}
+                  className={`cs-hero__fact cs-hero__fact--${fact.key}`}
+                >
+                  <p className="cs-hero__fact-kicker text-meta">{fact.label}</p>
+                  {"href" in fact ? (
+                    <p className="body-sm cs-hero__fact-value">
+                      <Link
+                        href={fact.href}
+                        className="transition-opacity hover:opacity-70"
+                      >
+                        {fact.value}
+                      </Link>
+                    </p>
+                  ) : (
+                    <p className="body-sm cs-hero__fact-value">{fact.value}</p>
+                  )}
+                </div>
+              ))}
             </div>
 
-            {siblings.length > 1 ? (
-              <div className="grid-span-6 lg:col-start-7 lg:grid-span-6">
-                <p className="text-meta">More from this case study</p>
-                <ul className="vignette-sibling-list mt-3">
-                  {siblings
-                    .filter((sibling) => sibling.slug !== vignette.slug)
-                    .map((sibling) => (
-                      <li key={sibling.slug}>
-                        <Link
-                          href={`/craft/${sibling.slug}`}
-                          className="heading-lg vignette-sibling-link transition-opacity hover:opacity-70"
-                        >
-                          {sibling.name} →
-                        </Link>
-                      </li>
-                    ))}
-                </ul>
+            <div className="cs-hero__main">
+              <div className="cs-hero__title-block">
+                <div className="cs-hero__title-copy">
+                  <h1 className="cs-hero__title display-xl">{vignette.name}</h1>
+                  {vignette.themeLine ? (
+                    <p className="body-lg cs-hero__subhead text-secondary">
+                      {vignette.themeLine}
+                    </p>
+                  ) : null}
+                </div>
               </div>
-            ) : null}
-          </SiteGridSubgrid>
-        </RuledGrid>
-      </section>
-    </article>
+            </div>
+          </RuledGrid>
+        </section>
+
+        <VignetteChapter
+          vignette={vignette}
+          chapterNumber={chapterNumber}
+          date={caseStudy.date}
+          showTitlePanel={false}
+        />
+
+        <section
+          id="craft-footer"
+          data-cs-detail-row
+          className="cs-focus-section theme-canvas py-12"
+          data-chrome-surface="canvas"
+        >
+          <RuledGrid>
+            <SiteGridSubgrid className="items-center">
+              {next ? (
+                <>
+                  <p className="text-meta grid-span-6 lg:col-start-2 lg:grid-span-4">
+                    Next vignette
+                  </p>
+                  <Link
+                    href={`/craft/${next.vignette.slug}`}
+                    className="display-lg grid-span-6 transition-opacity hover:opacity-70 lg:grid-span-8 lg:text-right"
+                  >
+                    {next.vignette.name} →
+                  </Link>
+                </>
+              ) : (
+                <div className="col-span-content">
+                  <CtaButton href="/craft" variant="ghost">
+                    All craft
+                  </CtaButton>
+                </div>
+              )}
+            </SiteGridSubgrid>
+          </RuledGrid>
+        </section>
+      </div>
+    </CaseStudyDetailScroll>
   );
 }

@@ -21,6 +21,10 @@ export function ChromeThemeWatcher() {
     const ratios = new Map<Element, number>();
 
     const apply = () => {
+      if (document.querySelector(".cs-detail")) {
+        return;
+      }
+
       const surfaces = [
         ...document.querySelectorAll<Element>(`[${CHROME_SURFACE_ATTR}]`),
       ].filter((el) => !el.closest(IGNORE));

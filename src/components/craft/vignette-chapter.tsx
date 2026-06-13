@@ -132,7 +132,7 @@ function FrameContent({
           ) : null}
         </header>
         <div className="vframe__main vframe__main--field">
-          {frame.body ? <p className="display-md vframe__beat">{frame.body}</p> : null}
+          {frame.body ? <p className="display-sm vframe__beat">{frame.body}</p> : null}
         </div>
         <footer className="vframe__foot" aria-hidden />
       </>
@@ -203,14 +203,18 @@ export function VignetteChapter({
   vignette,
   chapterNumber,
   date,
+  showTitlePanel = true,
 }: {
   vignette: CraftVignette;
   chapterNumber: number;
   date?: string;
+  /** Opener panel (numeral + title + tags). Off when the page hero already covers it. */
+  showTitlePanel?: boolean;
 }) {
   const frames = vignette.images;
   const total = frames.length;
-  const steps = total + 1;
+  const titlePanelOffset = showTitlePanel ? 1 : 0;
+  const steps = total + titlePanelOffset;
   const isCruisePrototype = vignette.slug === CRUISE_VIGNETTE_SLUG;
 
   const mediaAccentPanels = useMemo(
@@ -235,8 +239,11 @@ export function VignetteChapter({
   );
 
   const panelKinds = useMemo<PanelKind[]>(
-    () => ["title", ...frames.map((f) => (f.colorField ? "field" : f.ratio))],
-    [frames],
+    () =>
+      showTitlePanel
+        ? ["title", ...frames.map((f) => (f.colorField ? "field" : f.ratio))]
+        : frames.map((f) => (f.colorField ? "field" : f.ratio)),
+    [frames, showTitlePanel],
   );
 
   const sectionRef = useRef<HTMLElement>(null);
@@ -516,6 +523,7 @@ export function VignetteChapter({
           style={{ transform: `translate3d(${translate}px, 0, 0)` }}
           aria-label={`${vignette.name} panels`}
         >
+          {showTitlePanel ? (
           <article
             ref={(node) => {
               panelRefs.current[0] = node;
@@ -540,9 +548,10 @@ export function VignetteChapter({
               />
             </footer>
           </article>
+          ) : null}
 
           {frames.map((frame, i) => {
-            const idx = i + 1;
+            const idx = i + titlePanelOffset;
             const panelBg = framePanelBgs[i]!;
             return (
               <article
