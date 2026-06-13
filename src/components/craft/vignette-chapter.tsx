@@ -16,20 +16,36 @@ import { VimeoPlayer } from "@/components/media/vimeo-embed";
 import { useCaseStudyVignetteProgressRegister } from "@/components/case-studies/case-study-detail-scroll-context";
 import { CraftTagList } from "@/components/craft/vignette-media";
 
-/** One wheel notch / key press = one panel; ignore micro-deltas. */
-const STEP_LOCK_MS = 640;
-/** Below this the chapter stacks vertically (no scroll-jack). */
+/** Below this the chapter stacks vertically (no horizontal strip). */
 const DESKTOP_QUERY = "(min-width: 768px)";
+/** Snap to nearest panel after wheel goes idle. */
+const SNAP_IDLE_MS = 90;
+/** Ignore vertical-scroll momentum briefly as focus lands on this chapter. */
+const FOCUS_ENTRY_MS = 100;
+
+export const VCHAPTER_PANEL_EVENT = "vchapter:panel";
+
+export type VchapterPanelEventDetail = {
+  panelIndex: number;
+  smooth?: boolean;
+};
+
+function wheelDeltaY(event: WheelEvent): number {
+  if (event.deltaMode === WheelEvent.DOM_DELTA_LINE) {
+    return event.deltaY * 16;
+  }
+  if (event.deltaMode === WheelEvent.DOM_DELTA_PAGE) {
+    return event.deltaY * 48;
+  }
+  return event.deltaY;
+}
 
 type PanelKind = "title" | "field" | ImageRatio;
 
-/** Fraction of the master grid a panel occupies (title 4 · text/portrait 6 ·
- *  square 8 · landscape 12 of 12). Scales to a 6-col grid as 2/3/4/6. */
 function gridFraction(kind: PanelKind): number {
   if (kind === "title") return 4 / 12;
   if (kind === "16x9") return 12 / 12;
   if (kind === "1x1") return 8 / 12;
-  // field + portrait
   return 6 / 12;
 }
 
@@ -58,14 +74,12 @@ type PanelBg = "default" | "secondary" | "tertiary" | "brand";
 
 const CRUISE_VIGNETTE_SLUG = "semantic-color-shape";
 
-/** Deterministic seed — stable “random” picks across refreshes. */
 function hashSlug(s: string): number {
   let h = 0;
   for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
   return Math.abs(h);
 }
 
-/** Pick two distinct media-frame indices for secondary / tertiary surfaces. */
 function pickMediaAccentPanels(
   frames: VignetteImage[],
   seed: string,
@@ -109,7 +123,6 @@ function FrameContent({
 }) {
   const aspect = ratioAspect(frame.ratio);
 
-  // Text-only panel — kicker / beat / foot share the panel grid with media + title.
   if (frame.colorField) {
     return (
       <>
@@ -183,12 +196,8 @@ function FrameContent({
 }
 
 /**
- * A vignette rendered as a horizontal "chapter": a title panel followed by a
- * filmstrip of full-height panels. Panels abut with no gaps and their widths
- * snap to the master grid (title 4 · text/portrait 6 · square 8 · landscape 12
- * columns, measured off a live .site-grid ruler). The in-focus panel anchors
- * to grid line 1; neighbors bleed/peek off the right and the last panel flushes
- * to the right edge. While pinned, each wheel notch / arrow key pages one panel.
+ * Horizontal filmstrip chapter — translateX track on a pinned row.
+ * Vertical wheel maps 1:1 to horizontal drag; nearest panel snaps on idle.
  */
 export function VignetteChapter({
   vignette,
@@ -201,7 +210,6 @@ export function VignetteChapter({
 }) {
   const frames = vignette.images;
   const total = frames.length;
-  // Panel 0 is the title card; frames follow.
   const steps = total + 1;
   const isCruisePrototype = vignette.slug === CRUISE_VIGNETTE_SLUG;
 
@@ -239,12 +247,13 @@ export function VignetteChapter({
 
   const [index, setIndex] = useState(0);
   const [translate, setTranslate] = useState(0);
-  const [pinned, setPinned] = useState(false);
+  const [chapterActive, setChapterActive] = useState(false);
 
   const indexRef = useRef(0);
   const insetRef = useRef(0);
-  const lockRef = useRef(false);
-  const pinnedRef = useRef(false);
+  const offsetRef = useRef(0);
+  const snapTimerRef = useRef(0);
+  const entryLockUntilRef = useRef(0);
 
   useEffect(() => {
     indexRef.current = index;
@@ -252,28 +261,93 @@ export function VignetteChapter({
 
   const vignetteProgress = useMemo(
     () =>
-      pinned
+      chapterActive
         ? {
             vignetteSlug: vignette.slug,
             panelIndex: index,
             panelCount: steps,
           }
         : null,
-    [pinned, vignette.slug, index, steps],
+    [chapterActive, vignette.slug, index, steps],
   );
 
   useCaseStudyVignetteProgressRegister(vignetteProgress);
 
-  // Every in-focus panel anchors to grid line 1. Colorful last panels may add a
-  // non-nav trail sibling that fills the viewport to the right of the strip.
-  const updateTranslate = useCallback((activeIndex: number) => {
-    const panel = panelRefs.current[activeIndex];
-    if (!panel) return;
-    const inset = insetRef.current;
-    setTranslate(Math.min(inset, inset - panel.offsetLeft));
+  const panelOffsets = useCallback(() => {
+    return panelRefs.current
+      .filter((node): node is HTMLElement => Boolean(node))
+      .map((panel) => panel.offsetLeft);
   }, []);
 
-  // Measure the real grid (ruler) and size each panel to N grid columns.
+  const maxOffset = useCallback(() => {
+    const offsets = panelOffsets();
+    return offsets[offsets.length - 1] ?? 0;
+  }, [panelOffsets]);
+
+  const indexAtOffset = useCallback(
+    (offset: number) => {
+      const offsets = panelOffsets();
+      if (offsets.length === 0) return 0;
+
+      let best = 0;
+      let minDistance = Infinity;
+      offsets.forEach((snap, i) => {
+        const distance = Math.abs(offset - snap);
+        if (distance < minDistance) {
+          minDistance = distance;
+          best = i;
+        }
+      });
+      return best;
+    },
+    [panelOffsets],
+  );
+
+  const setTrackTransition = useCallback((animate: boolean) => {
+    const track = trackRef.current;
+    if (!track) return;
+    track.style.transition = animate && !prefersReducedMotion()
+      ? "transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1)"
+      : "none";
+  }, []);
+
+  const applyOffset = useCallback(
+    (nextOffset: number, animate: boolean) => {
+      const max = maxOffset();
+      const clamped = Math.max(0, Math.min(max, nextOffset));
+      offsetRef.current = clamped;
+      setTrackTransition(animate);
+      setTranslate(insetRef.current - clamped);
+
+      const nextIndex = indexAtOffset(clamped);
+      if (nextIndex !== indexRef.current) {
+        indexRef.current = nextIndex;
+        setIndex(nextIndex);
+      }
+    },
+    [indexAtOffset, maxOffset, setTrackTransition],
+  );
+
+  const scheduleSnap = useCallback(() => {
+    window.clearTimeout(snapTimerRef.current);
+    snapTimerRef.current = window.setTimeout(() => {
+      const offsets = panelOffsets();
+      const idx = indexAtOffset(offsetRef.current);
+      applyOffset(offsets[idx] ?? 0, true);
+    }, SNAP_IDLE_MS);
+  }, [applyOffset, indexAtOffset, panelOffsets]);
+
+  const goToPanel = useCallback(
+    (next: number, animate: boolean) => {
+      const clamped = Math.max(0, Math.min(steps - 1, next));
+      const panel = panelRefs.current[clamped];
+      if (!panel) return;
+      window.clearTimeout(snapTimerRef.current);
+      applyOffset(panel.offsetLeft, animate);
+    },
+    [applyOffset, steps],
+  );
+
   const applyLayout = useCallback(() => {
     const stage = stageRef.current;
     const ruler = rulerRef.current;
@@ -284,6 +358,8 @@ export function VignetteChapter({
       panelRefs.current.forEach((node) => {
         if (node) node.style.width = "";
       });
+      insetRef.current = 0;
+      offsetRef.current = 0;
       setTranslate(0);
       return;
     }
@@ -304,10 +380,10 @@ export function VignetteChapter({
 
     const lefts = cells.map((c) => c.getBoundingClientRect().left - pinLeft);
     const rights = cells.map((c) => c.getBoundingClientRect().right - pinLeft);
-    insetRef.current = lefts[0];
+    insetRef.current = lefts[0] ?? 0;
 
     const widthForCols = (n: number) =>
-      rights[Math.min(Math.max(n, 1), cols) - 1] - lefts[0];
+      rights[Math.min(Math.max(n, 1), cols) - 1]! - lefts[0]!;
 
     panelKinds.forEach((kind, i) => {
       const node = panelRefs.current[i];
@@ -316,97 +392,100 @@ export function VignetteChapter({
       node.style.width = `${widthForCols(n)}px`;
     });
 
-    updateTranslate(indexRef.current);
-  }, [panelKinds, updateTranslate]);
-
-  useLayoutEffect(() => {
-    updateTranslate(index);
-  }, [index, updateTranslate]);
+    applyOffset(offsetRef.current, false);
+  }, [applyOffset, panelKinds]);
 
   useLayoutEffect(() => {
     const stage = stageRef.current;
     if (!stage) return;
-    // ResizeObserver fires once on observe — that drives the initial measure.
+
     const observer = new ResizeObserver(() => applyLayout());
     observer.observe(stage);
     window.addEventListener("resize", applyLayout);
+    applyLayout();
+
     return () => {
       observer.disconnect();
       window.removeEventListener("resize", applyLayout);
     };
   }, [applyLayout]);
 
-  // Derive the active panel from scroll position; intercept wheel/keys for
-  // crisp one-notch-per-panel stepping while the chapter is pinned.
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
 
     const desktop = window.matchMedia(DESKTOP_QUERY);
-    const stepPx = () => window.innerHeight;
-    const sectionTop = () =>
-      section.getBoundingClientRect().top + window.scrollY;
+    let wasFocused = section.classList.contains("is-focused");
 
-    const indexFromScroll = () => {
-      const raw = Math.round((window.scrollY - sectionTop()) / stepPx());
-      return Math.max(0, Math.min(steps - 1, raw));
-    };
-
-    const isPinned = () => {
-      const rect = section.getBoundingClientRect();
-      return rect.top <= 1 && rect.bottom - window.innerHeight >= -1;
-    };
-
-    const scrollToPanel = (next: number) => {
-      const clamped = Math.max(0, Math.min(steps - 1, next));
-      lockRef.current = true;
-      setIndex(clamped);
-      window.scrollTo({
-        top: sectionTop() + clamped * stepPx(),
-        behavior: prefersReducedMotion() ? "auto" : "smooth",
-      });
-      window.setTimeout(
-        () => {
-          lockRef.current = false;
-        },
-        prefersReducedMotion() ? 48 : STEP_LOCK_MS,
-      );
-    };
-
-    const onScroll = () => {
-      const pinnedNow = isPinned();
-      if (pinnedNow !== pinnedRef.current) {
-        pinnedRef.current = pinnedNow;
-        setPinned(pinnedNow);
+    const syncFocused = () => {
+      const focused = section.classList.contains("is-focused");
+      if (focused && !wasFocused) {
+        entryLockUntilRef.current = performance.now() + FOCUS_ENTRY_MS;
       }
-      if (lockRef.current) return;
-      const next = indexFromScroll();
-      if (next !== indexRef.current) setIndex(next);
+      wasFocused = focused;
+      setChapterActive(focused);
+    };
+
+    const atEdge = (deltaY: number) => {
+      const offset = offsetRef.current;
+      const max = maxOffset();
+      if (deltaY < 0 && offset <= 0) return true;
+      if (deltaY > 0 && offset >= max - 1) return true;
+      return false;
+    };
+
+    const onWheel = (event: WheelEvent) => {
+      if (!desktop.matches || !section.classList.contains("is-focused")) return;
+
+      const deltaY = wheelDeltaY(event);
+      if (Math.abs(deltaY) < 0.5) return;
+      if (atEdge(deltaY)) return;
+
+      event.preventDefault();
+      if (performance.now() < entryLockUntilRef.current) return;
+
+      applyOffset(offsetRef.current + deltaY, false);
+      scheduleSnap();
     };
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (!desktop.matches || !isPinned()) return;
-      const next =
+      if (!desktop.matches || !section.classList.contains("is-focused")) return;
+      const delta =
         event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
-      if (next === 0) return;
+      if (delta === 0) return;
       const target = event.target as HTMLElement | null;
       if (target?.closest("input, textarea, select, [contenteditable='true']")) {
         return;
       }
       event.preventDefault();
-      if (lockRef.current) return;
-      scrollToPanel(indexRef.current + next);
+      goToPanel(indexRef.current + delta, true);
     };
 
-    onScroll();
+    const onPanelJump = (event: Event) => {
+      const detail = (event as CustomEvent<VchapterPanelEventDetail>).detail;
+      if (!detail || !Number.isFinite(detail.panelIndex)) return;
+      goToPanel(detail.panelIndex, detail.smooth ?? true);
+    };
 
-    window.addEventListener("scroll", onScroll, { passive: true });
+    const focusObserver = new MutationObserver(syncFocused);
+    focusObserver.observe(section, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    syncFocused();
+    section.addEventListener(VCHAPTER_PANEL_EVENT, onPanelJump);
+    document.addEventListener("wheel", onWheel, { passive: false, capture: true });
     window.addEventListener("keydown", onKeyDown);
+
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      focusObserver.disconnect();
+      section.removeEventListener(VCHAPTER_PANEL_EVENT, onPanelJump);
+      document.removeEventListener("wheel", onWheel, { capture: true });
       window.removeEventListener("keydown", onKeyDown);
+      window.clearTimeout(snapTimerRef.current);
     };
-  }, [steps]);
+  }, [applyOffset, goToPanel, maxOffset, scheduleSnap]);
 
   if (total === 0) return null;
 
@@ -421,12 +500,10 @@ export function VignetteChapter({
       id={`vignette-${vignette.slug}`}
       data-cs-detail-row
       data-chrome-surface="dark"
-      style={{ ["--frames" as string]: String(steps) }}
       aria-roledescription="vignette chapter"
       aria-label={vignette.name}
     >
       <div className="vchapter__pin" ref={stageRef}>
-        {/* Invisible ruler — mirrors the master grid so panels snap to it. */}
         <div className="vchapter__ruler site-grid" aria-hidden ref={rulerRef}>
           {Array.from({ length: 12 }).map((_, i) => (
             <i key={i} data-col />
@@ -437,6 +514,7 @@ export function VignetteChapter({
           ref={trackRef}
           className="vchapter__track"
           style={{ transform: `translate3d(${translate}px, 0, 0)` }}
+          aria-label={`${vignette.name} panels`}
         >
           <article
             ref={(node) => {

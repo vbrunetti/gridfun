@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { copyrightLine, socialLinks } from "@/lib/nav";
+import { copyrightLine, socialLinks } from "@/content/site";
 import { IconGitHub, IconLinkedIn } from "./icons";
 import { GridLocationIndicator } from "./grid-location-indicator";
 import { useChrome } from "./chrome-provider";
@@ -54,7 +54,7 @@ export function LeftRail() {
       </div>
 
       <div className="absolute right-0 bottom-0 left-0 flex flex-col items-center gap-0 pb-[var(--chrome-pad)]">
-        <p className="rail-label-vertical">{copyrightLine}</p>
+        <p className="rail-label-vertical">{copyrightLine()}</p>
 
         <SocialIconButton
           href={socialLinks.linkedin.href}

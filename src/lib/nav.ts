@@ -1,35 +1,14 @@
-export const siteName = "Portfolio";
-
-export type NavLink = {
-  href: string;
-  label: string;
-};
-
-export type NavSection = {
-  href: string;
-  label: string;
-  children: NavLink[];
-};
-
-export type MenuNavItem = NavLink | NavSection;
-
-export function isNavSection(item: MenuNavItem): item is NavSection {
-  return "children" in item;
-}
-
-export const menuNav: MenuNavItem[] = [
-  { href: "/", label: "Home" },
-  { href: "/case-studies", label: "Case Studies" },
-  { href: "/craft", label: "Craft" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
-  { href: "/effects", label: "Effects" },
-  { href: "/design-system", label: "Design System" },
-];
-
-export const socialLinks = {
-  linkedin: { href: "https://linkedin.com", label: "LinkedIn" },
-  github: { href: "https://github.com", label: "GitHub" },
-} as const;
-
-export const copyrightLine = `© ${new Date().getFullYear()}`;
+/**
+ * @deprecated Import from `@/content/site` instead.
+ * Re-exports kept for any stale imports during migration.
+ */
+export {
+  copyrightLine,
+  isNavSection,
+  menuNav,
+  siteName,
+  socialLinks,
+  type MenuNavItem,
+  type NavLink,
+  type NavSection,
+} from "@/content/site";

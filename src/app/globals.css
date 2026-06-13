@@ -65,7 +65,7 @@ html {
   --chrome-rail-gap: 1.5rem; /* space between hero dots + grid label on shared axis */
   --chrome-right-width: calc(var(--chrome-hit) + var(--chrome-pad) * 2);
   --chrome-right-inset: calc(var(--chrome-right-width) + var(--chrome-rail-gap));
-  --home-cover-peek: 4.5rem; /* home secondary visible above fold during hero chapters */
+  --home-secondary-band-height: 100dvh;
   --hero-chapter-shift: 4.5rem; /* vertical travel during hero chapter crossfade */
 
   --section-dark-bg: var(--color-black);
@@ -471,90 +471,179 @@ body {
   z-index: 1;
 }
 
-/* Sticky cover sections (DES) */
-/* Home: fixed viewport column — hero chapters scroll in .hero-chapters-container (native snap). */
-.home-hero-cover-flow {
-  position: relative;
-  height: calc(100dvh - var(--chrome-top-offset));
+/* Home — document scroll-snap panels (see home-scroll.tsx) */
+html:has(.home-scroll:not(.home-scroll--static)) {
+  scroll-snap-type: y mandatory;
+  scroll-padding-top: var(--chrome-top-offset);
+  overscroll-behavior-y: none;
+}
+
+@media (min-width: 1024px) {
+  html:has(.home-scroll:not(.home-scroll--static)) {
+    scroll-padding-top: 0;
+    scroll-padding-right: var(--chrome-right-inset);
+  }
+}
+
+.home-scroll-panel {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
   overflow: hidden;
-  --home-beat-gap: clamp(0.75rem, 2vh, 1.25rem);
-  --home-secondary-top: calc(100dvh - var(--home-cover-peek));
-  --hero-chapter-slide-height: calc(
-    100dvh - var(--chrome-top-offset) - var(--home-cover-peek)
-  );
 }
 
-.home-hero-cover-flow > section {
-  height: 100%;
-  min-height: 0;
+.home-scroll:not(.home-scroll--static) {
+  --home-cover-peek: 20dvh; /* secondary visible above fold during hero chapters */
+  --home-peek-translate: calc(100dvh - var(--home-cover-peek));
+  --home-hero-band-height: calc(100dvh - var(--home-cover-peek));
 }
 
-@media (min-width: 1024px) {
-  .home-hero-cover-flow {
-    height: 100dvh;
-    --hero-chapter-slide-height: calc(100dvh - var(--home-cover-peek));
+@media (max-width: 1023px) {
+  .home-scroll:not(.home-scroll--static) {
+    /* Align hero band bottom with fixed secondary peek (main has chrome top padding) */
+    --home-hero-band-height: calc(
+      100dvh - var(--home-cover-peek) - var(--chrome-top-offset)
+    );
   }
 }
 
-.home-hero-cover-flow .primary-hero-track {
+.hero-chapter-panel.home-scroll-panel {
+  height: var(--home-hero-band-height);
+  min-height: var(--home-hero-band-height);
+  max-height: var(--home-hero-band-height);
+}
+
+/* Last hero chapter — scroll-linked secondary handoff, no snap back to chapter top */
+.hero-chapter-panel.home-scroll-panel--handoff {
+  scroll-snap-align: none;
+  scroll-snap-stop: normal;
+}
+
+.home-cover-sentinel.home-scroll-panel {
+  height: var(--home-secondary-band-height);
+  min-height: var(--home-secondary-band-height);
+  max-height: var(--home-secondary-band-height);
+}
+
+/* Sticky spark — pinned in the hero band while copy panels scroll */
+.home-spark-pin {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  width: 100%;
+  height: var(--home-hero-band-height);
+  margin-bottom: calc(-1 * var(--home-hero-band-height));
+  pointer-events: none;
+  overflow: visible;
+  isolation: isolate;
+}
+
+.home-spark-pin__stage {
+  height: 100%;
+}
+
+.hero-chapter-panel {
   position: relative;
-  z-index: 0;
-  height: calc(100dvh - var(--chrome-top-offset) - var(--home-cover-peek));
-  min-height: calc(100dvh - var(--chrome-top-offset) - var(--home-cover-peek));
-  border-bottom-width: 0;
-  overflow: visible;
+  z-index: 3;
 }
 
-@media (min-width: 1024px) {
-  .home-hero-cover-flow .primary-hero-track {
-    height: calc(100dvh - var(--home-cover-peek));
-    min-height: calc(100dvh - var(--home-cover-peek));
+/* Sticky spark sits behind scrolling panels — keep chapter shells transparent */
+.hero-chapter-panel.theme-light {
+  background: transparent;
+}
+
+.hero-chapter-panel .primary-hero-stage,
+.hero-chapter-panel .primary-hero-copy {
+  background: transparent;
+}
+
+.hero-chapter-panel .primary-hero-copy {
+  position: relative;
+  z-index: 1;
+}
+
+.home-cover-sentinel {
+  background: transparent;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.home-scroll:not(.home-scroll--static)) {
+    scroll-snap-type: y proximity;
+  }
+
+  .home-scroll-panel {
+    scroll-snap-stop: normal;
   }
 }
 
-/* Hero type + viz — centered in the hero band (above peek) */
-.home-hero-cover-flow .primary-hero-sticky {
-  z-index: 1;
-  height: 100%;
-  min-height: 100%;
-  overflow: visible;
+.home-scroll--static .home-scroll-panel {
+  height: auto;
+  min-height: calc(100dvh - var(--chrome-top-offset));
+  max-height: none;
 }
 
-/* Secondary panel — always full viewport, translated by JS based on scroll progress.
-   Always pointer-events: none so wheel/touch reach the scroll container behind it.
-   Interactive elements opt back in. Stays under rail (z=50) + chrome (z=80). */
-.home-hero-cover-flow .home-secondary-panel {
+.home-scroll--static [data-home-panel]:not([data-home-panel="0"]) {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .home-scroll--static .home-scroll-panel {
+    min-height: 100dvh;
+  }
+}
+
+.home-scroll {
+  --home-beat-gap: clamp(0.75rem, 2vh, 1.25rem);
+}
+
+/* Fixed secondary — peeks at bottom during hero, full viewport when settled */
+.home-secondary-panel {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
-  height: 100dvh;
+  height: var(--home-secondary-band-height);
+  min-height: var(--home-secondary-band-height);
   z-index: 3;
   margin: 0;
   box-sizing: border-box;
-  transform: translateY(var(--home-secondary-translate, calc(100dvh - var(--home-cover-peek))));
+  transform: translateY(var(--home-secondary-translate, var(--home-peek-translate)));
   will-change: transform;
   pointer-events: none;
 }
 
-/* Align grid with #main-content (hero) — panel is fixed outside the rail inset wrapper */
 @media (min-width: 1024px) {
-  .home-hero-cover-flow .home-secondary-panel {
+  .home-secondary-panel {
     left: var(--rail-width);
     width: calc(100vw - var(--rail-width));
   }
 }
 
-.home-hero-cover-flow .home-secondary-panel :where(a, button, input, select, textarea, [role="button"]) {
+.home-secondary-panel :where(a, button, input, select, textarea, [role="button"]) {
   pointer-events: auto;
 }
 
-.home-hero-cover-flow.home-secondary-settled {
+.home-scroll.home-secondary-settled {
   --home-secondary-translate: 0px;
 }
 
-/* Home secondary — same beat typography + narrative column as hero */
-.home-secondary-stage {
+.home-scroll.home-secondary-settled .home-secondary-panel {
+  z-index: 5;
+  pointer-events: auto;
+}
+
+/* Home — no focus dimming between hero / secondary panels */
+.home-scroll .chrome-focus-target {
+  opacity: 1;
+}
+
+body:has(.floating-chrome[data-chrome-state="default"]:hover)
+  .home-scroll
+  .chrome-focus-target {
+  opacity: 1;
+}
+
+.home-secondary-panel .home-secondary-stage {
   height: 100%;
   min-height: 0;
 }
@@ -671,8 +760,9 @@ body {
   --keyline-color: var(--section-dark-rule);
 }
 
-/* Case studies index — discrete step scroll (see case-studies-scroll.tsx) */
+/* Case studies index — native scroll-snap (see case-studies-scroll.tsx) */
 html:has(.cs-index-scroll) {
+  scroll-snap-type: y mandatory;
   scroll-padding-top: var(--chrome-top-offset);
   overscroll-behavior-y: none;
 }
@@ -686,6 +776,8 @@ html:has(.cs-index-scroll) {
 
 .work-scroll-snap .work-snap-section,
 .cs-index-scroll .work-snap-section {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
   height: 100dvh;
   min-height: 100dvh;
   max-height: 100dvh;
@@ -697,6 +789,47 @@ html:has(.cs-index-scroll) {
   height: 50dvh;
   min-height: 50dvh;
   max-height: 50dvh;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.cs-index-scroll) {
+    scroll-snap-type: y proximity;
+  }
+
+  .cs-index-scroll .work-snap-section {
+    scroll-snap-stop: normal;
+  }
+}
+
+/* Case study detail — native scroll-snap (see case-study-detail-scroll.tsx) */
+html:has(.cs-detail) {
+  scroll-snap-type: y mandatory;
+  scroll-padding-top: var(--chrome-top-offset);
+  overscroll-behavior-y: none;
+}
+
+@media (min-width: 1024px) {
+  html:has(.cs-detail) {
+    scroll-padding-top: 0;
+    scroll-padding-right: var(--chrome-right-inset);
+  }
+}
+
+@media (min-width: 768px) {
+  .cs-detail [data-cs-detail-row] {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.cs-detail) {
+    scroll-snap-type: y proximity;
+  }
+
+  .cs-detail [data-cs-detail-row] {
+    scroll-snap-stop: normal;
+  }
 }
 
 .text-meta {
@@ -713,24 +846,6 @@ html:has(.cs-index-scroll) {
   line-height: 1.02;
   letter-spacing: -0.035em;
   color: var(--text-primary);
-}
-
-/* Primary hero — native scroll-snap chapters (feed-style; no JS gesture layer) */
-.primary-hero-track {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  height: 100dvh;
-  min-height: 100dvh;
-  overflow: hidden;
-}
-
-.primary-hero-sticky {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  overflow: visible;
-  pointer-events: none;
 }
 
 /* Shared stage — split-scene beat (copy) + grid-anchored spark companion */
@@ -762,7 +877,6 @@ html:has(.cs-index-scroll) {
   min-width: 0;
   padding-block: max(var(--chrome-top-offset), 1rem)
     clamp(1rem, 3vh, 2rem);
-  pointer-events: none;
 }
 
 @media (min-width: 1024px) {
@@ -770,19 +884,6 @@ html:has(.cs-index-scroll) {
     grid-column: 1 / span 8;
     padding-block: clamp(1.25rem, 4vh, 2.5rem);
   }
-}
-
-.primary-hero-chapters {
-  display: grid;
-  width: 100%;
-  min-width: 0;
-}
-
-.primary-hero-chapter-layer {
-  grid-area: 1 / 1;
-  width: 100%;
-  min-width: 0;
-  will-change: transform, opacity;
 }
 
 /* Shared home beat typography — hero chapters + cover sections */
@@ -816,23 +917,6 @@ html:has(.cs-index-scroll) {
   color: var(--text-secondary);
 }
 
-.primary-hero__ctas {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 1.5rem;
-  margin-top: 0.25rem;
-  pointer-events: auto;
-}
-
-.primary-hero-copy--cta {
-  pointer-events: none;
-}
-
-.primary-hero-copy--cta .primary-hero__ctas {
-  pointer-events: auto;
-}
-
 /* Spark — square in cols 7–12 (lg) / 4–6 (mobile); right edge on col 12 / 6 */
 .primary-hero-spark-layer {
   position: absolute;
@@ -849,55 +933,6 @@ html:has(.cs-index-scroll) {
 
 .primary-hero-spark-layer canvas {
   display: block;
-}
-
-/* Reduced-motion hero has no scroll layer — links stay clickable in copy */
-.primary-hero-track:not(:has(.hero-chapters-container)) .primary-hero-copy a,
-.primary-hero-track:not(:has(.hero-chapters-container)) .primary-hero-copy button {
-  pointer-events: auto;
-}
-
-/* Scroll region — always absolute inset within hero track. Container stays the same
-   size at all phases so scroll-snap math is stable (coverEnd = max scrollTop). */
-.hero-chapters-container {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  overflow-y: scroll;
-  scroll-snap-type: y mandatory;
-  overscroll-behavior-y: contain;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.hero-chapters-container::-webkit-scrollbar {
-  display: none;
-}
-
-.hero-chapter-slide {
-  position: relative;
-  height: var(--hero-chapter-slide-height, 100%);
-  min-height: var(--hero-chapter-slide-height, 100%);
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
-  flex-shrink: 0;
-  overflow: hidden;
-  isolation: isolate;
-}
-
-/* CTAs float above scroll layer on chapter 0 only — buttons stay clickable */
-.hero-chapter-cta-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  display: flex;
-  align-items: center;
-  pointer-events: none;
-}
-
-.hero-chapter-cta-layer a,
-.hero-chapter-cta-layer button {
-  pointer-events: auto;
 }
 
 /* Hero scroll dots — right chrome column; color follows chrome surface */
@@ -2767,13 +2802,16 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
 }
 
 /* ── Vignette chapter — full-bleed filmstrip of abutted, grid-width panels ──
-   A title panel leads, then the frames. Panels bleed full-width and butt
-   together with no gaps; their widths follow the 12-col master grid (title 4 ·
-   text/portrait 6 · square 8 · landscape 12). While pinned, each scroll notch
-   pages one panel; color comes from the panels themselves. */
+   A title panel leads, then the frames. Desktop: pinned row, translateX track,
+   vertical wheel maps to horizontal drag with snap-on-idle. Mobile: stacked. */
 .vchapter {
   position: relative;
-  height: calc(var(--frames, 1) * 100svh);
+}
+
+@media (min-width: 768px) {
+  .vchapter {
+    height: 100svh;
+  }
 }
 
 .vchapter__pin {
@@ -2867,7 +2905,6 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
   align-items: stretch;
   height: 100%;
   will-change: transform;
-  transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 /* Panels butt together (no gaps). Single keylines only — a right seam + a

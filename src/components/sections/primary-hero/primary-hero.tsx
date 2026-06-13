@@ -1,30 +1,64 @@
-import type { HomeCoverSection } from "@/content/home-sections";
-import type { HeroSlate } from "@/content/hero-slates";
-import { PrimaryHeroScrub } from "./primary-hero-scrub";
+import type { HeroSlate, HomeCoverSection } from "@/content/site";
+import { presetsForChapterCount } from "./particle-presets";
+import { HERO_SPARK_PRESETS } from "./spark-hero-config";
+import { HomeCoverSentinel, HeroChapterPanel } from "./hero-chapter-panel";
+import { HomeScroll } from "./home-scroll";
+import { HomeSecondaryFixed } from "./home-secondary-fixed";
+import { HomeSparkPin } from "./home-spark-pin";
+
+type HomeSecondaryContent = {
+  eyebrow: string;
+  headline: string;
+  subhead: string;
+};
 
 type PrimaryHeroProps = {
   slates: HeroSlate[];
-  segmentVh?: number;
-  /** Extra scroll past last slate; disable when cover sections are in the track. */
-  scrollRelease?: boolean;
-  /** Cover-flow sections after chapters — each gets a scroll slide and rail dot. */
   coverSections?: HomeCoverSection[];
+  secondary?: HomeSecondaryContent;
 };
 
 export function PrimaryHero({
   slates,
-  segmentVh = 70,
-  scrollRelease = true,
-  coverSections,
+  coverSections = [],
+  secondary,
 }: PrimaryHeroProps) {
+  const slateCount = slates.length;
+  const sparkPresets =
+    slateCount === HERO_SPARK_PRESETS.length
+      ? HERO_SPARK_PRESETS
+      : presetsForChapterCount(Math.max(slateCount, 1));
+
+  if (slateCount === 0) return null;
+
   return (
-    <section aria-label="Introduction" className="w-full">
-      <PrimaryHeroScrub
-        slates={slates}
-        segmentVh={segmentVh}
-        scrollRelease={scrollRelease}
-        coverSections={coverSections}
-      />
-    </section>
+    <HomeScroll
+      slateCount={slateCount}
+      coverSections={coverSections}
+      hasSecondary={Boolean(secondary)}
+    >
+      <HomeSparkPin presets={sparkPresets} />
+
+      {slates.map((slate, index) => (
+        <HeroChapterPanel
+          key={slate.id}
+          slate={slate}
+          chapterIndex={index}
+          isHandoffChapter={Boolean(secondary) && index === slateCount - 1}
+        />
+      ))}
+
+      {secondary ? (
+        <>
+          <HomeCoverSentinel panelIndex={slateCount} />
+          <HomeSecondaryFixed
+            eyebrow={secondary.eyebrow}
+            headline={secondary.headline}
+            subhead={secondary.subhead}
+            label={coverSections[0]?.label ?? "Selected work"}
+          />
+        </>
+      ) : null}
+    </HomeScroll>
   );
 }

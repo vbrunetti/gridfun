@@ -9,6 +9,8 @@ import { palette, portraitAccents } from "@/lib/colors";
  *          ├─ ProseSection   — original writing (heading + body)
  *          └─ CraftVignette  — key image + tags + images with captions
  *
+ * Site-wide copy (meta, nav, home, about, contact) lives in `site.ts`.
+ *
  * A vignette belongs to exactly one case study. Craft tags are free-form
  * strings; the Craft page filter set is derived from the union of all tags
  * actually used across vignettes.
@@ -175,7 +177,304 @@ function cruiseProse(
   return { type: "prose", id, heading, body };
 }
 
+/* ── Google content helpers (beats + glue prose) ───────────────── */
+const googleAccent = "royalBlue" as const satisfies AccentKey;
+
+function googleBeat(
+  label: string,
+  body: string,
+  ratio: ImageRatio = "16x9",
+): VignetteImage {
+  return { ratio, accent: googleAccent, colorField: true, label, body };
+}
+
+function googleMedia(
+  label: string,
+  caption: string,
+  ratio: ImageRatio = "16x9",
+  src?: string,
+): VignetteImage {
+  return { ratio, accent: googleAccent, label, caption, ...(src ? { src } : {}) };
+}
+
+function googleVignette(
+  slug: string,
+  name: string,
+  tags: string[],
+  themeLine: string,
+  images: VignetteImage[],
+  keyImageRatio: ImageRatio = "16x9",
+  status?: string,
+): CraftVignette {
+  return {
+    type: "vignette",
+    slug,
+    name,
+    keyImageRatio,
+    keyImageAccent: googleAccent,
+    tags,
+    themeLine,
+    ...(status ? { status } : {}),
+    images,
+  };
+}
+
+function googleProse(id: string, heading: string, body: string): ProseSection {
+  return { type: "prose", id, heading, body };
+}
+
+/* ── Pearson content helpers (beats + glue prose) ──────────────── */
+const pearsonAccent = "hotPink" as const satisfies AccentKey;
+
+function pearsonBeat(
+  label: string,
+  body: string,
+  ratio: ImageRatio = "16x9",
+): VignetteImage {
+  return { ratio, accent: pearsonAccent, colorField: true, label, body };
+}
+
+function pearsonMedia(
+  label: string,
+  caption: string,
+  ratio: ImageRatio = "16x9",
+  src?: string,
+): VignetteImage {
+  return { ratio, accent: pearsonAccent, label, caption, ...(src ? { src } : {}) };
+}
+
+function pearsonVignette(
+  slug: string,
+  name: string,
+  tags: string[],
+  themeLine: string,
+  images: VignetteImage[],
+  keyImageRatio: ImageRatio = "16x9",
+  status?: string,
+): CraftVignette {
+  return {
+    type: "vignette",
+    slug,
+    name,
+    keyImageRatio,
+    keyImageAccent: pearsonAccent,
+    tags,
+    themeLine,
+    ...(status ? { status } : {}),
+    images,
+  };
+}
+
+function pearsonProse(id: string, heading: string, body: string): ProseSection {
+  return { type: "prose", id, heading, body };
+}
+
 export const caseStudies: CaseStudy[] = [
+  {
+    slug: "pearson",
+    name: "The Nebula Design System",
+    subhead:
+      "Building an AI-native design system from tokens to a natural-language prototyping pipeline.",
+    date: "2025–present",
+    client: "Pearson",
+    brand: {
+      field: "#7C3AED",
+      logo: "/portfolio/logos/pearson.gif",
+    },
+    location: "Remote",
+    role: "Visual Design Director",
+    tools: "Figma, Storybook, React, Cursor, Figma MCP",
+    clientLogo: "/portfolio/logos/pearson.svg",
+    sections: [
+      pearsonProse(
+        "pearson-intro",
+        "The land and expand",
+        "I was hired as Visual Design Director — a title I don't fully believe in. The split most large companies draw between \"UX designer\" and \"visual designer\" (UX does wireframes, hands off to visual) produces weaker outcomes than a full-stack model where designers own a problem end to end. I took the role anyway, on the strength of a manager I'd worked with before and recognized as a visionary, herself new to Pearson and building a new culture.\n\nFrom day one the stance was explicit: the title didn't matter; building a team of builders did — a team that would own the design system outright, own the quality bar, and set the standard for modern UI across Pearson Higher Ed. Credibility was built incrementally, not claimed. Land a small proof point, use it to expand scope, use scope to develop people, use developed people to deliver the next proof point. Land and expand — applied to the mandate and the team at once.",
+      ),
+      pearsonVignette(
+        "nebula-design-system",
+        "Nebula — Design System + AI-Native Prototyping Kit",
+        ["Design systems", "AI-native design", "Leadership"],
+        "Design systems as infrastructure / AI-native design workflows / executive buy-in",
+        [
+          pearsonBeat(
+            "Starting point",
+            "No design system existed. My belief: a design system is infrastructure — as fundamental as electricity. The org ran old-school UX (wireframes) handed to separate visual designers, with no systematized component library.",
+          ),
+          pearsonBeat(
+            "Conceptual direction + buy-in",
+            "Began with conceptual work — not coloring in wireframes, but deciding visual direction: density, elevation, glass, how a recent rebrand's colors and illustrations become a coherent system. Built a presentation and sold the direction to a C-level executive — redefining the role from \"makes things pretty\" to running a studio function.",
+            "1x1",
+          ),
+          pearsonMedia(
+            "Proving the pipeline",
+            "Q1: brought in creative technologists with a deliberately small OKR — get something, anything, from Figma into Storybook end to end, navigating real enterprise permissions friction. Q2: built it out at scale on Pearson Learning Studio — atoms through complex AI organisms, reaching ~80% desktop coverage.",
+            "16x9",
+          ),
+          pearsonBeat(
+            "Shipping as real infrastructure",
+            "The component library shipped as an installable npm package. Engineers consume it via props — they don't re-engineer components, they implement what's delivered. That was the unlock moving Nebula from \"Figma files\" to code living in production.",
+            "9x16",
+          ),
+          pearsonBeat(
+            "Solving Cursor hallucination",
+            "Could designers prototype in natural language via Cursor, pulling from the real Nebula package? Not without help — even pointed at the package, Cursor generated generic \"Tailwind slop\" rather than mapping intent to existing components, with no efficient way to search the package.",
+            "1x1",
+          ),
+          pearsonMedia(
+            "The unlock — two markdowns as guardrails",
+            "A design-philosophy markdown encoding Nebula's theory (density, color, nesting, elevation) and a component-mapping markdown telling Cursor to check the map before generating. Together with the React library, these became a custom Cursor skill — a slash command that spins up a new, on-system prototype, alive from the first second.",
+            "16x9",
+          ),
+          pearsonBeat(
+            "The demo",
+            "A new prototype launches already reactive — adaptive navigation, light/dark toggle, a working grid, sample components — pulling live from the latest Nebula repo. 100% demoable: blank desktop to a fully realized, on-brand interface in seconds, using nothing but natural language.",
+          ),
+        ],
+        "16x9",
+      ),
+      pearsonVignette(
+        "nebula-tokens",
+        "Nebula — Tokens (Craft Series, Part 1)",
+        ["Design systems", "Visual design"],
+        "Token theory / typographic baseline grids / extending a narrow brand into a full system",
+        [
+          pearsonBeat(
+            "Not a blank canvas",
+            "Two starting points shaped the work. My Google background gave a material-centric model for token theory and atomic composition. And Pearson already had an abandoned, poorly-constructed design system — wonky accessibility, inconsistent spacing — a useful \"here's what not to do\" reference.",
+          ),
+          pearsonBeat(
+            "Building the baseline grid",
+            "Started with the typographic baseline grid — the foundation everything aligns to. Generated a type ramp with an open-source type-scale tool, then ran spikes to ensure the grid aligned across small/medium/large variants of buttons, chips, and form fields simultaneously.",
+            "1x1",
+          ),
+          pearsonBeat(
+            "Pragmatic font choices",
+            "Plus Jakarta Sans (the corporate font) doesn't hold up for body copy at small sizes. So: Plus Jakarta Sans for headlines and impact, Noto Sans for body readability, Roboto Mono for code. Spend the brand's visual equity where it's felt; use proven defaults where the job is just to work.",
+            "9x16",
+          ),
+          pearsonMedia(
+            "Color — narrow brand into a full system",
+            "Pearson's palette is narrow — pink and purple, \"cotton candy.\" A system needs more: semantic colors (error/success/warning), full primary chroma ramps, and a tertiary palette for data viz and chips. Ran brand and semantic keys through a Figma ramp generator; every ramp passed contrast and usability testing.",
+            "16x9",
+          ),
+          pearsonBeat(
+            "Spacing and geometry",
+            "Spacing and corner-radius tokens on a base-8 grid — a carryover from Material fluency, chosen because it's mathematically clean and scales predictably across component sizes.",
+          ),
+        ],
+        "16x9",
+      ),
+      pearsonVignette(
+        "learning-loop-organisms",
+        "Nebula — Opinionated Organisms: The Learning Loop (Part 2)",
+        ["Design systems", "Visual design", "Strategy"],
+        "Opinionated organisms / composition over primitives / adoption by design",
+        [
+          pearsonBeat(
+            "The lesson from failure",
+            "The abandoned system hadn't just been poorly built — it had been poorly adopted. Where teams used it, they used it badly: components dropped on screens with no hierarchy, no sense of how to nest into coherent structures. Like dumping Legos on a table with no instruction manual.",
+          ),
+          pearsonBeat(
+            "The decision",
+            "Don't just deliver primitives and hope. Build the standard atomic layer — buttons, fields, progress, cards, lists, tabs — but go further: deliver highly opinionated higher-order organisms, encoded directly in the React library, not just documented as patterns.",
+            "1x1",
+          ),
+          pearsonMedia(
+            "The Learning Loop",
+            "A core Pearson pedagogical pattern: a student works through a unit via a repeating loop — intro, readings, assessment, interleaved Socratic questioning, and a progress/celebration moment. Nebula delivers the whole sequence as a family of pre-built organisms: front-door, reading, assessment, progress/celebration, and wrap-up cards.",
+            "16x9",
+          ),
+          pearsonBeat(
+            "Configurable within rails",
+            "Each organism is composed of system atoms and molecules, but composition, hierarchy, and visual rhythm are fixed by design — configurable within rails, but the rails are real. Even a team with no visual-design expertise produces something considered, because the considered version is what they're given.",
+            "9x16",
+          ),
+          pearsonBeat(
+            "Rollout status",
+            "Piloted on Pearson Learning Studio; now beginning rollout across two more product lines — MXL and Pearson+. The live test of durability: do these opinionated patterns hold across contexts, or need to flex more than anticipated? Actively being answered.",
+          ),
+        ],
+        "16x9",
+        "Piloted on Learning Studio; rolling out to MXL and Pearson+.",
+      ),
+      pearsonProse(
+        "pearson-system-to-ai",
+        "From system to AI surface",
+        "Tokens and organisms made Pearson's interfaces coherent. The next question was harder: how does AI live inside them — not as a feature bolted onto a page, but as a pattern every page archetype can plug into, at any intensity?",
+      ),
+      pearsonVignette(
+        "ai-pattern-language",
+        "Nebula — AI Design Pattern Language",
+        ["AI-native design", "Information architecture", "Visual design"],
+        "AI-native design systems / navigation architecture as values statement / brand-rooted visual language",
+        [
+          pearsonBeat(
+            "The foundational challenge",
+            "Design a navigation and layout schema that could gracefully incorporate AI affordances — at any intensity, of any type — from any page archetype across Pearson's higher-ed platforms: dashboards, learning canvases, e-texts, assignments, quizzes. A system every page could plug into.",
+          ),
+          pearsonBeat(
+            "Three-tier AI taxonomy",
+            "Embedded — small, contextual inline markers; hover or click for a deeper dive. Assistive — a persistent docked chat rail for ongoing back-and-forth. Generative — a full conversational surface where the interaction is the interface.",
+            "1x1",
+          ),
+          pearsonMedia(
+            "One placement, a whole architecture",
+            "A conversation with an AI assistant is primal — it matters to the user, in the moment, more than almost anything on screen. Putting it in a dismissible right panel signals the opposite. The judgment that chat belongs on the left, treated as primary, cascaded: launch affordance left, navigation consolidates left, the L-shaped frame collapses into a single left rail.",
+            "16x9",
+          ),
+          pearsonBeat(
+            "The resulting pattern",
+            "A navigation rail with expanded and collapsed states. When the chatbot is active, navigation collapses into a dropdown and the chatbot takes the space — borrowing a mobile \"job done\" grammar so users persist their AI conversation while keeping full navigability.",
+            "9x16",
+          ),
+          pearsonBeat(
+            "Brand-rooted visual language",
+            "Bolder than ChatGPT, more owned than borrowing Gemini wholesale. Synthesized stars (sparkle = AI) with Pearson's existing wave/ripple motifs into a vibrant gradient that reads AI-forward but still feels like Pearson's AI. Named \"AI Assistant\" — one name that works for both students and instructors.",
+            "1x1",
+          ),
+          pearsonBeat(
+            "The AI brand system",
+            "A generic sparkle for simple callouts; an ownable AI Assistant logo across products; a rainbow gradient border that animates while the assistant is \"thinking\"; and small AI chips for inline enhancements. Used individually or combined — flexible, but a consistent \"AI lives here\" grammar across the family.",
+          ),
+        ],
+        "16x9",
+        "E-text squiggly-underline embedded tier in active design.",
+      ),
+      pearsonVignette(
+        "learning-canvas",
+        "The Learning Canvas — Page Layout + Card-Based Generative AI",
+        ["AI-native design", "Interaction design", "Information architecture"],
+        "Page archetype design / honest craft tension / interaction design as ongoing inquiry",
+        [
+          pearsonBeat(
+            "The page archetype",
+            "The Learning Loop doesn't exist in isolation — it lives on the Learning Canvas, a core page archetype. Three zones, left to right: chapters/table of contents (the navigational spine), the content stream (where the loop lives), and score and controls (a radial progress indicator plus next/previous).",
+          ),
+          pearsonBeat(
+            "The transition problem",
+            "The AI Assistant lives in a left sidebar. But on the Learning Canvas, generative AI content needs to appear in the center content stream. Running both at once felt like two products stitched together; jumping from sidebar conversation to embedded content was jarring.",
+            "1x1",
+          ),
+          pearsonMedia(
+            "The solution — and the tradeoff",
+            "Added a chat input bar at the bottom of the content stream, like Gemini or Claude. But instead of an infinite growing feed, content is chunked into cards — a stack metaphor where each piece, textbook or AI-generated, is its own discrete card.",
+            "16x9",
+          ),
+          pearsonBeat(
+            "Why cards, not a feed",
+            "Student testing showed that in long feeds, students lost track of where they were — scrolling back to find earlier content was hard. Cards solved wayfinding: each piece is a bounded, returnable unit. A secondary effect: the card stack felt tactile and lightly game-like, fitting for a college-age audience.",
+            "9x16",
+          ),
+          pearsonBeat(
+            "The honest, unresolved tension",
+            "When a student asks the AI a question within a card, the answer is bound to that card — but the next card might be a follow-up to that question. A single continuous feed might read more naturally as a conversation; cards' wayfinding and tactile benefits came at the cost of a slightly awkward branching structure. A live design tension, not a solved one.",
+          ),
+        ],
+        "16x9",
+      ),
+    ],
+  },
   {
     slug: "cruise-teleops",
     name: "Tele-Operations Terminal",
@@ -273,7 +572,7 @@ export const caseStudies: CaseStudy[] = [
       cruiseVignette(
         "event-timeline-panel",
         "Event Timeline + \"What Is the Vehicle Dealing With\" Panel",
-        ["Information architecture", "Human factors", "Workflow"],
+        ["Information architecture", "Human factors", "Workflow & ops"],
         "Context gain / situational awareness / operator handoff / cold start",
         [
           cruiseBeat(
@@ -309,7 +608,7 @@ export const caseStudies: CaseStudy[] = [
       cruiseVignette(
         "camera-array-redesign",
         "The Camera Array Redesign That Didn't Work",
-        ["Research", "Human factors", "Motion prototyping"],
+        ["Research", "Human factors", "Motion"],
         "Craft humility / safety-critical constraints / when HF research beats design intuition",
         [
           cruiseBeat(
@@ -340,7 +639,7 @@ export const caseStudies: CaseStudy[] = [
       cruiseVignette(
         "predictable-ui-regions",
         "Predictable UI Regions (Bentable Box Model)",
-        ["Information architecture", "Layout", "Cognitive load"],
+        ["Information architecture", "Human factors"],
         "IA clarity / cognitive load reduction / layout as cognitive aid",
         [
           cruiseBeat(
@@ -371,7 +670,7 @@ export const caseStudies: CaseStudy[] = [
       cruiseVignette(
         "av-positioning-control-ring",
         "AV Positioning Control Ring",
-        ["Interaction design", "Command validation", "Physics"],
+        ["Interaction design", "Systems thinking"],
         "Interaction craft / command validation / physics-informed design",
         [
           cruiseBeat(
@@ -397,7 +696,7 @@ export const caseStudies: CaseStudy[] = [
       cruiseVignette(
         "control-handoff-visualization",
         "Control Handoff Visualization",
-        ["State design", "Motion", "Operations"],
+        ["Motion", "Interaction design", "Workflow & ops"],
         "State legibility / handoff smoothness / animation as communication",
         [
           cruiseBeat(
@@ -429,7 +728,7 @@ export const caseStudies: CaseStudy[] = [
       cruiseVignette(
         "workflow-sidebar-rail",
         "Workflow Streamlining + Sidebar Card Rail",
-        ["Workflow", "Coordination", "Automation"],
+        ["Workflow & ops", "Systems thinking"],
         "Coordination design / workflow consolidation / automation-first",
         [
           cruiseBeat(
@@ -460,7 +759,7 @@ export const caseStudies: CaseStudy[] = [
       cruiseVignette(
         "av-state-module",
         "AV State Module",
-        ["Visual design", "Status design", "Controls"],
+        ["Visual design", "Interaction design"],
         "Context gain / picture over words / eye-scan reduction",
         [
           cruiseBeat(
@@ -491,7 +790,7 @@ export const caseStudies: CaseStudy[] = [
       cruiseVignette(
         "telephony-service",
         "Telephony Service",
-        ["Communication design", "Org design", "Audio UX"],
+        ["Communication design", "Systems thinking"],
         "Org insight / role convergence / communication design",
         [
           cruiseBeat(
@@ -527,7 +826,7 @@ export const caseStudies: CaseStudy[] = [
       cruiseVignette(
         "new-maneuver-types",
         "New Maneuver Types (Speculative)",
-        ["Human-AI control", "Systems thinking", "Speculative design"],
+        ["AI-native design", "Systems thinking", "Interaction design"],
         "Human-AI control / determinism as trust signal / speculative systems thinking",
         [
           cruiseBeat(
@@ -559,7 +858,7 @@ export const caseStudies: CaseStudy[] = [
       cruiseVignette(
         "maneuver-controls-ui",
         "Maneuver Controls UI",
-        ["Interaction design", "Speed of access", "User research"],
+        ["Interaction design", "Research", "Human factors"],
         "Consumer patterns in safety-critical context / speed of access",
         [
           cruiseBeat(
@@ -590,245 +889,211 @@ export const caseStudies: CaseStudy[] = [
     ],
   },
   {
-    slug: "northwind-payments",
-    name: "Payments that recover themselves",
+    slug: "google",
+    name: "Store, Search, and Support",
     subhead:
-      "Rebuilding checkout failure as a recoverable fork — not a dead end.",
-    date: "2024",
-    client: "Northwind",
+      "Enterprise surfaces across three teams — the retail floor, the search page, and the contact center.",
+    date: "2020–2023",
+    client: "Google",
     brand: {
-      field: palette.neonLime,
-      logo: "/portfolio/logos/northwind.gif",
+      field: "#4285F4",
+      logo: "/portfolio/logos/google.gif",
     },
-    location: "Remote · US & EU",
-    role: "Lead product designer",
-    tools: "Figma, React, Amplitude",
-    clientLogo: "/portfolio/logos/northwind.svg",
+    location: "Mountain View, CA",
+    role: "Senior product designer",
+    tools: "Figma, prototyping, contextual research",
+    clientLogo: "/portfolio/logos/google.svg",
     sections: [
-      {
-        type: "prose",
-        id: "northwind-intro",
-        heading: "The brief",
-        body: "Northwind's checkout leaked revenue at the worst possible moment — the tap to pay. Cards bounced, sessions timed out, and customers were dropped onto a dead end with no way back.\n\nWe rebuilt the final stretch of the funnel as a recoverable flow: every failure became a fork rather than a wall, and the interface learned to hold the customer's place until the payment cleared.",
-      },
-      {
-        type: "vignette",
-        slug: "checkout-recovery",
-        name: "Checkout recovery flow",
-        keyImageRatio: "9x16",
-        keyImageAccent: portraitAccents[0],
-        tags: ["User research", "Interaction", "Web"],
-        images: [
-          {
-            ratio: "16x9",
-            accent: "neonLime",
-            caption:
-              "The failure state, reframed. Instead of a dead end, a declined card now opens a calm recovery sheet with the next best action pre-selected.",
-          },
-          { ratio: "9x16", accent: "offWhite", caption: "Retry, switch method, or save for later — three doors, no shame." },
-          {
-            ratio: "16x9",
-            accent: "lightGray",
-            vimeo: "1199955340",
-            caption:
-              "Recovery flow walkthrough — the sheet opens in context while the cart stays visible.",
-          },
-          {
-            ratio: "9x16",
-            accent: "charcoal",
-            caption:
-              "Completed-purchase rate lifted 24% in the first month after launch.",
-          },
+      googleProse(
+        "google-intro",
+        "Three teams, one question",
+        "After the single, custom-built world of an autonomous vehicle, Google was the opposite kind of problem: enterprise products at planetary scale, spread across three teams that barely touched each other — the physical retail Store, Shopping Ads on the search page, and the Contact Center tools support agents lean on.\n\nWhat connected them wasn't a product area. It was a habit: find the information a system already has, and surface it to the person who needs it — a runner on the store floor, a shopper mid-decision, an agent on a hard call.",
+      ),
+      googleVignette(
+        "google-store-clover-pos",
+        "Google Store — Clover POS App",
+        ["Systems thinking", "Mobile"],
+        "Role orchestration / systems design / knowing when not to redesign",
+        [
+          googleBeat(
+            "The scope",
+            "A full Android app redesign running on Clover Flex handhelds for Google's physical retail stores. The app carried the entire retail workflow: inventory lookup, runner requests from back-of-house, SKU scanning, sales, promotions, returns, phone trade-ins, and BOPIS.",
+          ),
+          googleBeat(
+            "The systems layer",
+            "It wasn't just a point-of-sale tool — it was the coordination surface for several store roles at once: sales associates on the floor, runners in the back, back-of-house operations, and the repair team. One app, multiple roles, orchestrated workflows.",
+            "1x1",
+          ),
+          googleMedia(
+            "The senior move",
+            "Rather than design everything from scratch, partnered with the Google Store web team to repurpose existing assets — product configuration flows, PDP patterns, cart logic. Where contexts diverged (native vs. responsive, sales rep vs. public), modified; where they didn't, reused. Knowing when to build vs. borrow — and having the relationships to make borrowing work.",
+            "16x9",
+          ),
+          googleMedia(
+            "Walkthrough",
+            "Full Figma prototype tap-through demonstrating the complete app flow across roles.",
+            "9x16",
+          ),
         ],
-      },
-      {
-        type: "prose",
-        id: "northwind-mid",
-        heading: "Why a sheet, not a page",
-        body: "A full-page error throws away context. A sheet keeps the cart, the total, and the customer's intent visible the entire time — so recovering feels like continuing, not starting over.",
-      },
-      {
-        type: "vignette",
-        slug: "express-pay-sheet",
-        name: "Express pay sheet",
-        keyImageRatio: "16x9",
-        keyImageAccent: portraitAccents[1],
-        tags: ["Interaction", "Motion", "Mobile"],
-        images: [
-          { ratio: "9x16", accent: "hotPink", caption: "One-thumb reach: the primary action never leaves the bottom third." },
-          { ratio: "16x9", accent: "offWhite" },
-          { ratio: "9x16", accent: "skyBlue", caption: "Motion confirms success before the network does — perceived speed beats actual speed." },
+      ),
+      googleProse(
+        "google-store-to-ads",
+        "From the floor to the feed",
+        "The Store app was about orchestrating people around a transaction in a physical room. Shopping Ads was the same instinct pointed at the opposite environment: millions of anonymous shoppers, no staff, no room — just a query and the few seconds before attention moves on.",
+      ),
+      googleVignette(
+        "funnel-aware-ad-formats",
+        "Google Shopping Ads — Funnel-Aware Ad Formats",
+        ["Strategy", "Data viz", "Web"],
+        "Funnel-stage design / query intelligence / privacy-safe personalization",
+        [
+          googleBeat(
+            "The insight",
+            "Every shopping ad looked identical — the same rectangular tile whether someone was idly browsing or ready to buy. The opportunity: serve a different ad format depending on where the user was in their shopping journey.",
+          ),
+          googleBeat(
+            "The privacy constraint",
+            "Google had extensive user signals — browsing history, cookies, profile. The team deliberately chose not to use them. Funnel stage would be inferred from the query itself and nothing else. Both a privacy-respecting choice and a technical one — increasingly relevant in a post-cookie world.",
+            "1x1",
+          ),
+          googleBeat(
+            "Three stages from the query",
+            "Browsy — exploratory, no brand or model (\"fall fashion trends for men\"). Researchy — comparison with a category but no committed brand (\"best washing machines of 2023\"). Converty — specific brand, model, sometimes location (\"Air Jordan size 10 near me\").",
+            "9x16",
+          ),
+          googleMedia(
+            "Three formats",
+            "Browsy: image-forward, details on hover. Researchy: tabular, specs forward, with authoritative third-party content (Wirecutter, YouTube) interspersed — a research surface, not just a product card. Converty: inventory and urgency — colorways, sizes, delivery windows, pickup proximity.",
+            "16x9",
+          ),
+          googleBeat(
+            "The political landscape",
+            "Google's whole-page approach created a double bind: the organic search team worried differentiated formats broke page cohesion, while the organic shopping team worried formats too similar to theirs confused ad vs. organic.",
+            "1x1",
+          ),
+          googleBeat(
+            "Threading the needle",
+            "Adopted the organic shopping team's visual language for the tiles themselves — same proportions, same signal patterns. Differentiation came from the carousel container and explicit \"Shopping Ads\" labeling, not from making each tile scream. Users could tell they were looking at ads without the tiles needing to.",
+          ),
         ],
-      },
+        "16x9",
+        "Richer advertiser-brand hover bumpers proposed but unshipped.",
+      ),
+      googleProse(
+        "google-ads-to-cc",
+        "After the click, the call",
+        "Shopping Ads ends at the buy. The Contact Center begins where buying breaks — the support call, the agent, the customer who needs a human. Three projects here, one belief: an agent is only as good as the context they're handed.",
+      ),
+      googleVignette(
+        "software-telephone-redesign",
+        "Google Contact Center — Software Telephone",
+        ["AI-native design", "Communication design", "Web"],
+        "Agent empowerment / context surfacing / AI-assisted service",
+        [
+          googleMedia(
+            "The before state",
+            "A basic phone dialer. A dial pad, call controls, and little else — customer history, prior interactions, knowledge base, and notes all lived in separate tabs and systems. (Animated GIFs of the original dialer exist.)",
+          ),
+          googleBeat(
+            "The vision",
+            "Transform the software telephone from a dialer into a fully contextualized agent workspace — everything needed to handle a customer intelligently, in one place, without tab-switching or hunting.",
+            "1x1",
+          ),
+          googleBeat(
+            "Five capability layers",
+            "Customer history surfaced on connect. AI-suggested KB solutions in real time. A live transcript for noisy environments and non-native speakers. Bot-conversation context, so agents knew what had already been tried. Omnichannel messaging — send links and articles mid-call without breaking voice.",
+            "9x16",
+          ),
+          googleBeat(
+            "The quality layer",
+            "SLA timers during the call. An After Session Work screen with CRM-transfer confirmation and a CSAT histogram. A between-calls leaderboard and reflection surface. And a concept — real-time sentiment tracking — letting an agent see a call going south and course-correct before losing the customer.",
+            "1x1",
+          ),
+          googleBeat(
+            "Outcome",
+            "Shipped in phases: messaging as a standalone platform, the dialer with customer history and KB suggestions. The grand unified vision — every capability in one compact footprint — never fully shipped before I moved on.",
+          ),
+        ],
+        "16x9",
+        "Shipped in phases; the fully unified workspace never shipped.",
+      ),
+      googleVignette(
+        "contact-center-chat-platform",
+        "Google Contact Center — Chat Platform",
+        ["Systems thinking", "Communication design", "Web"],
+        "Stability-first product philosophy / omnichannel vision / platform thinking",
+        [
+          googleBeat(
+            "Why it was built separately",
+            "The software telephone handled a high volume of calls. At that scale, one destabilizing change cascades into a service problem. The philosophy was: don't rock the boat. So messaging was built as a standalone app rather than bolted onto the phone and risking something critical.",
+          ),
+          googleBeat(
+            "The infrastructure partnership",
+            "Partnered with the Google Business Messaging team to use their platform as the technical foundation, rather than building messaging infrastructure from scratch. The design sat on a proven layer.",
+            "1x1",
+          ),
+          googleMedia(
+            "The design",
+            "A full-featured chat interface: contact list on the left rail, SLA timers and queue indicators throughout, an active-conversation rail, and Quick Responses — common phrases bound to keystrokes so agents didn't retype them.",
+            "16x9",
+          ),
+          googleBeat(
+            "The unshipped vision",
+            "The intended end state: a unified surface — one app that flips between phone mode and chat mode seamlessly, an agent moving from a voice call to a chat without changing tools. That fusion never happened before I left, but the integration vision design exists.",
+            "9x16",
+          ),
+          googleBeat(
+            "Outcome",
+            "The standalone chat platform shipped and went into production, built in collaboration with another designer.",
+          ),
+        ],
+        "16x9",
+        "Standalone chat shipped; unified phone-and-chat surface unbuilt.",
+      ),
+      googleProse(
+        "google-code-yellow-setup",
+        "When the most powerful team complains",
+        "Inside Google, the ads org carries unusual weight — and when its support quality slipped, the complaint didn't stay local. It climbed to the CEO. What landed on the Contact Center team as a code yellow was, on inspection, a diagnosis that didn't match the evidence.",
+      ),
+      googleVignette(
+        "contact-center-code-yellow",
+        "Google Contact Center — Code Yellow",
+        ["Research", "Service design", "Leadership"],
+        "Research reframing the problem / org-wide systemic impact / diagnosis before solution",
+        [
+          googleBeat(
+            "The trigger",
+            "The ads team escalated complaints about poor call quality in their support operations. The complaint reached Sundar Pichai. A code yellow was issued against the contact center tools team. Exit criteria: agents rating call quality 4.5+ on a 5-point scale, validated by automated checks.",
+          ),
+          googleBeat(
+            "The problem with the problem",
+            "Internal telemetry came back fine. Automated MOS scores, routing analysis — a few minor international-routing optimizations, but nothing explaining the volume of complaints. Tested internally, the software telephone performed well. The handed-down diagnosis didn't match the evidence.",
+            "1x1",
+          ),
+          googleMedia(
+            "Going to the field",
+            "Rather than optimize against bad assumptions, the team went where agents actually worked — India, Japan, the Philippines — for ethnographic research and contextual observation. What they found was not a software problem.",
+            "16x9",
+          ),
+          googleBeat(
+            "What the field showed",
+            "The offices were acoustically brutal — glass and concrete measuring, on a decibel meter, like the side of a highway. Headphones were outdated; in India, agents took foam ear pads home for hygiene, leaving colleagues pressing bare plastic to their ears. And \"the call was bad\" was a catch-all for supervisors, customers, and frustration — not audio.",
+            "9x16",
+          ),
+          googleBeat(
+            "The instrumentation fix",
+            "To separate real audio signal from everything else, the team added a post-call micro-survey to the After Session Work screen — a quick 1–5 rating of that specific call's audio, cross-referenced with automated MOS testing. When both flagged a call, the signal was reliable. Agents became precision instruments.",
+            "1x1",
+          ),
+          googleBeat(
+            "The outcome",
+            "Once environmental, hardware, training, and language issues were stripped away, the telephone's actual audio met or exceeded industry standard, and the team exited the code yellow. The findings rippled outward: facilities rewrote the call-center playbook (acoustic paneling, dividers), IT upgraded headsets and shipped supervisor audio splitters, and operational standards were unified across owned and vendor sites. The ads team was right that something was wrong — and wrong about what it was.",
+          ),
+        ],
+        "16x9",
+      ),
     ],
-  },
-  {
-    slug: "meridian-care",
-    name: "Triage at the speed of a shift",
-    subhead:
-      "A single triage board and a handoff ritual built for the chaos of a ward.",
-    date: "2024",
-    client: "Meridian Health",
-    brand: {
-      field: palette.royalBlue,
-      logo: "/portfolio/logos/meridian.gif",
-    },
-    location: "Boston, MA",
-    role: "Product designer",
-    tools: "Figma, Miro, React Native",
-    clientLogo: "/portfolio/logos/meridian.svg",
-    sections: [
-      {
-        type: "prose",
-        id: "meridian-intro",
-        heading: "Context",
-        body: "Nurses on Meridian's floors were triaging from memory, sticky notes, and three different screens. The cost wasn't just time — it was the cognitive load of holding a whole ward in your head.\n\nWe designed a single triage board that surfaces the right patient at the right moment, and a handoff ritual that survives the chaos of a shift change.",
-      },
-      {
-        type: "vignette",
-        slug: "nurse-triage-board",
-        name: "Nurse triage board",
-        keyImageRatio: "9x16",
-        keyImageAccent: portraitAccents[2],
-        tags: ["Service design", "User research", "Mobile"],
-        images: [
-          { ratio: "9x16", accent: "royalBlue", caption: "Priority sorts itself. The board re-ranks patients as vitals and wait times change." },
-          { ratio: "16x9", accent: "offWhite", caption: "Color is information, never decoration — every hue maps to an acuity level." },
-          { ratio: "9x16", accent: "lightGray" },
-        ],
-      },
-      {
-        type: "vignette",
-        slug: "shift-handoff",
-        name: "Shift handoff",
-        keyImageRatio: "16x9",
-        keyImageAccent: portraitAccents[3],
-        tags: ["Service design", "Accessibility", "Web"],
-        images: [
-          { ratio: "16x9", accent: "skyBlue", caption: "The handoff is a story, not a spreadsheet — outgoing nurses leave a narrative, not a data dump." },
-          { ratio: "9x16", accent: "offWhite" },
-          { ratio: "16x9", accent: "charcoal", caption: "Triage time fell by 18 minutes per shift." },
-        ],
-      },
-    ],
-  },
-  {
-    slug: "loft-discovery",
-    name: "From browse to bag",
-    subhead:
-      "Giving discovery a direction — every interaction nudges toward the bag.",
-    date: "2023",
-    client: "Loft",
-    brand: {
-      field: palette.hotPink,
-      logo: "/portfolio/logos/loft.gif",
-    },
-    location: "New York, NY",
-    role: "Lead product designer",
-    tools: "Figma, Principle, Next.js",
-    clientLogo: "/portfolio/logos/loft.svg",
-    sections: [
-      {
-        type: "prose",
-        id: "loft-intro",
-        heading: "The opportunity",
-        body: "Loft's customers loved to browse and rarely bought. The discovery surface was beautiful and aimless — endless scroll with no sense of momentum toward a purchase.\n\nWe gave browsing a direction: every interaction nudges quietly toward the bag, without ever feeling like a sales pitch.",
-      },
-      {
-        type: "vignette",
-        slug: "discovery-rail",
-        name: "Discovery rail",
-        keyImageRatio: "16x9",
-        keyImageAccent: portraitAccents[5],
-        tags: ["Visual design", "Interaction", "Web"],
-        images: [
-          { ratio: "16x9", accent: "mediumBlue", caption: "Editorial-grade imagery, shopping-grade intent. The rail reads like a magazine and behaves like a store." },
-          { ratio: "9x16", accent: "offWhite" },
-          { ratio: "16x9", accent: "lightGray", caption: "" },
-        ],
-      },
-      {
-        type: "prose",
-        id: "loft-mid",
-        heading: "Momentum as a metric",
-        body: "We stopped optimizing for time-on-site and started optimizing for forward motion — each tap should leave the customer measurably closer to a decision.",
-      },
-      {
-        type: "vignette",
-        slug: "bag-and-checkout",
-        name: "Bag & checkout",
-        keyImageRatio: "9x16",
-        keyImageAccent: portraitAccents[6],
-        tags: ["Interaction", "Prototyping", "Web"],
-        images: [
-          { ratio: "9x16", accent: "mediumGray", caption: "The bag is always one gesture away, and always honest about totals." },
-          { ratio: "16x9", accent: "offWhite", caption: "Browse-to-bag rate improved 19% on discovery surfaces." },
-        ],
-      },
-    ],
-  },
-  {
-    slug: "atlas-design-system",
-    name: "One system, six teams",
-    subhead:
-      "A design system good enough that adoption felt like relief, not mandate.",
-    date: "2025",
-    client: "Atlas",
-    brand: {
-      field: palette.skyBlue,
-      logo: "/portfolio/logos/atlas.gif",
-    },
-    location: "San Francisco, CA",
-    role: "Design systems lead",
-    tools: "Figma, Storybook, Style Dictionary",
-    clientLogo: "/portfolio/logos/atlas.svg",
-    sections: [
-      {
-        type: "prose",
-        id: "atlas-intro",
-        heading: "Why now",
-        body: "Atlas had six product squads and six subtly different blues. A design system wasn't a luxury — it was the only way to ship coherently at the pace the business demanded.\n\nThe work was equal parts craft and politics: build something good enough that adoption felt like a relief, not a mandate.",
-      },
-      {
-        type: "vignette",
-        slug: "token-pipeline",
-        name: "Token pipeline",
-        keyImageRatio: "16x9",
-        keyImageAccent: portraitAccents[0],
-        tags: ["Design systems", "Visual design", "Web"],
-        images: [
-          { ratio: "16x9", accent: "neonLime", caption: "One source of truth, every platform downstream. Tokens flow from design to code automatically." },
-          { ratio: "9x16", accent: "offWhite" },
-          { ratio: "16x9", accent: "lightGray", caption: "A single token rollout unified brand color across four legacy apps." },
-        ],
-      },
-      {
-        type: "vignette",
-        slug: "component-docs",
-        name: "Living component docs",
-        keyImageRatio: "9x16",
-        keyImageAccent: portraitAccents[1],
-        tags: ["Design systems", "Accessibility", "Web"],
-        images: [
-          { ratio: "9x16", accent: "hotPink", caption: "Docs that ship with the code, so they can never drift out of date." },
-          { ratio: "16x9", accent: "offWhite", caption: "Every component arrives with its accessibility contract written down." },
-        ],
-      },
-      {
-        type: "vignette",
-        slug: "adoption-dashboard",
-        name: "Adoption dashboard",
-        keyImageRatio: "16x9",
-        keyImageAccent: portraitAccents[2],
-        tags: ["Data viz", "Leadership", "Web"],
-        images: [
-          { ratio: "16x9", accent: "royalBlue", caption: "Adoption made visible. Leaders could see, squad by squad, how much of each surface was on-system." },
-          { ratio: "9x16", accent: "offWhite" },
-          { ratio: "16x9", accent: "charcoal", caption: "Shipped to all six product squads in 90 days." },
-        ],
-      },
-    ],
-  },
+  }
 ];
 
 /* ------------------------------------------------------------------ *

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { site } from "@/content/site";
 import { ChromeProvider } from "@/components/chrome/chrome-provider";
 import { SiteShell } from "@/components/chrome/site-shell";
 import { CaseStudiesScrollProvider } from "@/components/case-studies/case-studies-scroll-context";
@@ -19,10 +20,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Portfolio",
-    template: "%s · Portfolio",
+    default: site.meta.title,
+    template: site.meta.titleTemplate,
   },
-  description: "UX design portfolio",
+  description: site.meta.description,
 };
 
 export default function RootLayout({

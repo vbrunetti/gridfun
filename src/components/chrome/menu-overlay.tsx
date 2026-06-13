@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SiteGrid, SiteGridCell } from "@/components/layout/site-grid";
-import { isNavSection, menuNav } from "@/lib/nav";
+import { isNavSection, menuNav } from "@/content/site";
 import { useChrome } from "./chrome-provider";
 
 function isActive(pathname: string, href: string) {
