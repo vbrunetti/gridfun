@@ -18,7 +18,7 @@ export default function ContactPage() {
           <SiteGridSubgrid className="lg:items-end">
             <h1 className="display-xl grid-span-6 lg:grid-span-5">{contact.headline}</h1>
             <div className="grid-span-6 border-[var(--rule-strong)] lg:grid-span-7 lg:border-l lg:pl-8">
-              <p className="text-sm leading-relaxed text-secondary">
+              <p className="body-sm text-secondary">
                 {contact.address.map((line) => (
                   <span key={line}>
                     {line}
@@ -38,11 +38,11 @@ export default function ContactPage() {
       <RuledGrid>
         {contact.people.map((person) => (
           <SiteGridSubgrid key={person.email} className="keyline-b py-6">
-            <p className="grid-span-6 font-medium text-primary lg:grid-span-4">{person.name}</p>
+            <p className="heading-lg grid-span-6 text-primary lg:grid-span-4">{person.name}</p>
             <p className="text-meta grid-span-6 text-secondary lg:grid-span-4">{person.role}</p>
             <a
               href={`mailto:${person.email}`}
-              className="grid-span-6 text-sm text-secondary underline underline-offset-4 transition-opacity hover:opacity-60 lg:grid-span-4 lg:text-right"
+              className="body-sm grid-span-6 text-secondary underline underline-offset-4 transition-opacity hover:opacity-60 lg:grid-span-4 lg:text-right"
             >
               {person.email}
             </a>

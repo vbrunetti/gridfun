@@ -42,7 +42,8 @@ export function MenuOverlay() {
                           <Link
                             href={item.href}
                             onClick={closeMenu}
-                            className={`block py-3 text-4xl font-semibold tracking-tight transition-opacity hover:opacity-70 md:text-6xl ${
+                            aria-current={sectionActive ? "page" : undefined}
+                            className={`display-lg block py-3 transition-opacity hover:opacity-70 ${
                               sectionActive
                                 ? "text-[var(--accent)]"
                                 : "text-primary"
@@ -58,7 +59,8 @@ export function MenuOverlay() {
                                   <Link
                                     href={child.href}
                                     onClick={closeMenu}
-                                    className={`block py-2 text-xl font-medium tracking-tight transition-opacity hover:opacity-70 md:text-3xl ${
+                                    aria-current={childActive ? "page" : undefined}
+                                    className={`heading-lg block py-2 transition-opacity hover:opacity-70 ${
                                       childActive
                                         ? "text-[var(--accent)]"
                                         : "text-secondary"
@@ -81,7 +83,8 @@ export function MenuOverlay() {
                         <Link
                           href={item.href}
                           onClick={closeMenu}
-                          className={`block py-3 text-4xl font-semibold tracking-tight transition-opacity hover:opacity-70 md:text-6xl ${
+                          aria-current={active ? "page" : undefined}
+                          className={`display-lg block py-3 transition-opacity hover:opacity-70 ${
                             active ? "text-[var(--accent)]" : "text-primary"
                           }`}
                         >

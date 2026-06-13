@@ -7,8 +7,7 @@ export const metadata: Metadata = {
   title: "About",
 };
 
-const sectionHeadingClass =
-  "mt-3 text-2xl font-semibold tracking-tight text-primary sm:text-3xl";
+const sectionHeadingClass = "display-sm mt-3";
 
 export default function AboutPage() {
   const { about } = site;
@@ -23,7 +22,7 @@ export default function AboutPage() {
           <h1 className="display-xl mt-4 max-w-[18ch]">{about.headline}</h1>
         </div>
         <div className="col-span-narrow">
-          <p className="mt-8 text-lg leading-relaxed text-secondary">{about.intro}</p>
+          <p className="body-lg mt-8 text-secondary">{about.intro}</p>
         </div>
       </RuledGrid>
 
@@ -32,7 +31,7 @@ export default function AboutPage() {
         <div className="col-span-content">
           <p className="text-meta">{superpower.kicker}</p>
           <h2 className={`${sectionHeadingClass} max-w-[24ch]`}>{superpower.heading}</h2>
-          <p className="mt-6 max-w-[60ch] leading-relaxed text-secondary">{superpower.body}</p>
+          <p className="body-md mt-6 max-w-[60ch] text-secondary">{superpower.body}</p>
           <ul className="mt-10 grid gap-x-8 gap-y-8 sm:grid-cols-2">
             {superpower.examples.map((example) => (
               <li key={example.company} className="keyline-t pt-4">
@@ -46,7 +45,7 @@ export default function AboutPage() {
                 ) : (
                   <span className="font-medium text-primary">{example.company}</span>
                 )}
-                <p className="mt-2 leading-relaxed text-secondary">{example.detail}</p>
+                <p className="body-md mt-2 text-secondary">{example.detail}</p>
               </li>
             ))}
           </ul>
@@ -58,7 +57,7 @@ export default function AboutPage() {
         <div className="col-span-content">
           <p className="text-meta">{octopus.kicker}</p>
           <h2 className={sectionHeadingClass}>{octopus.heading}</h2>
-          <p className="mt-6 max-w-[60ch] leading-relaxed text-secondary">{octopus.body}</p>
+          <p className="body-md mt-6 max-w-[60ch] text-secondary">{octopus.body}</p>
         </div>
       </RuledGrid>
 
@@ -67,10 +66,10 @@ export default function AboutPage() {
         <div className="col-span-content">
           <p className="text-meta">{philosophy.kicker}</p>
           <h2 className={sectionHeadingClass}>{philosophy.heading}</h2>
-          <p className="mt-6 max-w-[60ch] leading-relaxed text-secondary">{philosophy.body}</p>
+          <p className="body-md mt-6 max-w-[60ch] text-secondary">{philosophy.body}</p>
           <ul className="mt-8 grid gap-x-8 gap-y-3 sm:grid-cols-2 lg:grid-cols-4">
             {philosophy.values.map((value) => (
-              <li key={value} className="keyline-t pt-3 text-sm font-medium text-primary">
+              <li key={value} className="keyline-t body-sm pt-3 font-medium text-primary">
                 {value}
               </li>
             ))}
@@ -85,10 +84,10 @@ export default function AboutPage() {
           <div className="mt-8 grid gap-x-10 gap-y-10 lg:grid-cols-3">
             {testimonials.items.map((item) => (
               <figure key={item.author} className="keyline-t pt-5">
-                <blockquote className="leading-relaxed text-secondary">
+                <blockquote className="body-md text-secondary">
                   {item.quote}
                 </blockquote>
-                <figcaption className="mt-4 text-sm font-medium text-primary">
+                <figcaption className="body-sm mt-4 font-medium text-primary">
                   {item.author}
                 </figcaption>
               </figure>
@@ -116,17 +115,17 @@ export default function AboutPage() {
                 className="keyline-t grid gap-x-8 gap-y-4 py-8 lg:grid-cols-12"
               >
                 <header className="lg:col-span-4">
-                  <h3 className="text-lg font-semibold text-primary">{role.title}</h3>
-                  <p className="mt-1 text-sm text-primary">{role.org}</p>
+                  <h3 className="heading-lg">{role.title}</h3>
+                  <p className="body-sm mt-1 text-primary">{role.org}</p>
                   <p className="text-meta mt-2 text-secondary">{role.period}</p>
                 </header>
                 <div className="lg:col-span-8">
-                  <p className="max-w-[60ch] leading-relaxed text-secondary">{role.summary}</p>
+                  <p className="body-md max-w-[60ch] text-secondary">{role.summary}</p>
                   <ul className="mt-4 flex flex-col gap-2">
                     {role.achievements.map((achievement) => (
                       <li
                         key={achievement}
-                        className="max-w-[64ch] pl-4 text-sm leading-relaxed text-secondary before:-ml-4 before:inline-block before:w-4 before:text-secondary before:content-['—']"
+                        className="body-sm max-w-[64ch] pl-4 text-secondary before:-ml-4 before:inline-block before:w-4 before:text-secondary before:content-['—']"
                       >
                         {achievement}
                       </li>
@@ -152,9 +151,9 @@ export default function AboutPage() {
         <div className="col-span-content">
           <p className="text-meta">{education.kicker}</p>
           <div className="mt-6 flex flex-col gap-1">
-            <h3 className="text-lg font-semibold text-primary">{education.school}</h3>
-            <p className="text-secondary">{education.program}</p>
-            <p className="mt-1 text-secondary">
+            <h3 className="heading-lg">{education.school}</h3>
+            <p className="body-md text-secondary">{education.program}</p>
+            <p className="body-md mt-1 text-secondary">
               {education.degree}
               <span className="text-meta ml-3 text-secondary">{education.period}</span>
             </p>

@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useChromeFocusById } from "@/components/chrome/use-chrome-focus";
+import { useChromeFocusById, useChromeFocusPreviewById } from "@/components/chrome/use-chrome-focus";
 import {
   useCaseStudyDetailScrollRegister,
   type CaseStudyDetailStep,
@@ -17,7 +17,10 @@ import {
   type VchapterPanelEventDetail,
 } from "@/components/craft/vignette-chapter";
 
-const DESKTOP_QUERY = "(min-width: 768px)";
+const PEEK_DESKTOP_QUERY = "(min-width: 768px)";
+const ANCHOR_DESKTOP_QUERY = "(min-width: 1024px)";
+const SNAP_NUDGE_MS = 100;
+const SNAP_NUDGE_THRESHOLD_PX = 56;
 
 type PeekTarget = {
   surface: "light" | "dark";
@@ -27,6 +30,9 @@ type PeekTarget = {
 );
 
 function chromeAnchorY(): number {
+  const desktop = window.matchMedia(ANCHOR_DESKTOP_QUERY).matches;
+  if (desktop) return 8;
+
   const raw = getComputedStyle(document.documentElement).getPropertyValue(
     "--chrome-top-offset",
   );
@@ -34,22 +40,44 @@ function chromeAnchorY(): number {
   return Number.isFinite(parsed) ? parsed : 64;
 }
 
-/** Last step whose row top has crossed the chrome anchor — 1:1 with the dots. */
+/** Scroll Y where a row's snap-start aligns with the document snap port. */
+function rowSnapScrollY(el: HTMLElement): number {
+  const marginTop =
+    parseFloat(getComputedStyle(el).scrollMarginTop) || 0;
+  const paddingTop =
+    parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) ||
+    0;
+  const docTop = el.getBoundingClientRect().top + window.scrollY;
+  return docTop - marginTop - paddingTop;
+}
+
+function snapScrollTargets(steps: CaseStudyDetailStep[]): number[] {
+  return steps.map((step) => {
+    const el = document.getElementById(step.id);
+    return el ? rowSnapScrollY(el) : 0;
+  });
+}
+
+/** Active row from snap positions — matches CSS scroll-snap, not bounding-box overlap. */
 function activeStepIndex(steps: CaseStudyDetailStep[]): number {
   const anchor = chromeAnchorY() + 8;
+  const anchorAbs = window.scrollY + anchor;
   const maxScroll =
     document.documentElement.scrollHeight - window.innerHeight;
+
   if (window.scrollY >= maxScroll - 4) {
     return steps.length - 1;
   }
 
-  let best = 0;
-  for (let i = 0; i < steps.length; i++) {
-    const el = document.getElementById(steps[i]!.id);
-    if (!el) continue;
-    if (el.getBoundingClientRect().top <= anchor) best = i;
+  const snapYs: number[] = snapScrollTargets(steps);
+
+  for (let i = steps.length - 1; i >= 0; i--) {
+    const snapY = snapYs[i]!;
+    const nextSnapY = snapYs[i + 1] ?? Number.POSITIVE_INFINITY;
+    if (anchorAbs >= snapY && anchorAbs < nextSnapY) return i;
   }
-  return best;
+
+  return 0;
 }
 
 /** Dot-nav jumps: vignette filmstrips further down the page start at panel 1. */
@@ -88,7 +116,9 @@ export function CaseStudyDetailScroll({
 }: CaseStudyDetailScrollProps) {
   const rootRef = useRef<HTMLElement>(null);
   const rafRef = useRef(0);
+  const snapTimerRef = useRef(0);
   const [activeStep, setActiveStep] = useState(0);
+  const [hoverStep, setHoverStep] = useState<number | null>(null);
   const [peekTarget, setPeekTarget] = useState<PeekTarget | null>(null);
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
 
@@ -123,10 +153,49 @@ export function CaseStudyDetailScroll({
     [],
   );
 
-  useCaseStudyDetailScrollRegister(true, steps, activeStep, scrollToStep, true);
+  useCaseStudyDetailScrollRegister(
+    true,
+    steps,
+    activeStep,
+    scrollToStep,
+    true,
+    hoverStep,
+    setHoverStep,
+  );
 
   useEffect(() => {
     syncActiveStep();
+
+    const nudgeToNearestSnap = () => {
+      if (
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+        !window.matchMedia(PEEK_DESKTOP_QUERY).matches
+      ) {
+        return;
+      }
+
+      const targets = snapScrollTargets(steps);
+      if (targets.length < 2) return;
+
+      const scrollY = window.scrollY;
+
+      for (let i = 0; i < targets.length - 1; i++) {
+        const start = targets[i]!;
+        const end = targets[i + 1]!;
+        if (scrollY <= start + 4 || scrollY >= end - 4) continue;
+
+        const targetIndex = scrollY < (start + end) / 2 ? i : i + 1;
+        const targetY = targets[targetIndex]!;
+        const dist = Math.abs(scrollY - targetY);
+
+        if (dist > 4 && dist < SNAP_NUDGE_THRESHOLD_PX) {
+          document
+            .getElementById(steps[targetIndex]!.id)
+            ?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        return;
+      }
+    };
 
     const onScroll = () => {
       if (rafRef.current) return;
@@ -134,6 +203,12 @@ export function CaseStudyDetailScroll({
         rafRef.current = 0;
         syncActiveStep();
       });
+
+      window.clearTimeout(snapTimerRef.current);
+      snapTimerRef.current = window.setTimeout(
+        nudgeToNearestSnap,
+        SNAP_NUDGE_MS,
+      );
     };
 
     const onResize = () => syncActiveStep();
@@ -145,10 +220,15 @@ export function CaseStudyDetailScroll({
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      window.clearTimeout(snapTimerRef.current);
     };
-  }, [syncActiveStep]);
+  }, [syncActiveStep, steps]);
 
   useChromeFocusById(steps[activeStep]?.id, steps.length > 1);
+  useChromeFocusPreviewById(
+    hoverStep !== null ? steps[hoverStep]?.id : null,
+    steps.length > 1,
+  );
 
   // Dimmed sections + vignette panels: plus cursor, hover preview, click to jump.
   useEffect(() => {
@@ -156,7 +236,7 @@ export function CaseStudyDetailScroll({
     if (!root) return;
 
     const canPeek = () =>
-      window.matchMedia(`${DESKTOP_QUERY} and (pointer: fine)`).matches;
+      window.matchMedia(`${PEEK_DESKTOP_QUERY} and (pointer: fine)`).matches;
 
     const suppressesPeekCursor = (target: EventTarget | null) =>
       (target as HTMLElement | null)?.closest(

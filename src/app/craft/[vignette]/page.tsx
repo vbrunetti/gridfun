@@ -96,7 +96,7 @@ export default async function VignettePage({ params }: PageProps) {
                       <li key={sibling.slug}>
                         <Link
                           href={`/craft/${sibling.slug}`}
-                          className="vignette-sibling-link transition-opacity hover:opacity-70"
+                          className="heading-lg vignette-sibling-link transition-opacity hover:opacity-70"
                         >
                           {sibling.name} →
                         </Link>

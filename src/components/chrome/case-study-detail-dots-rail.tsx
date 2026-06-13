@@ -4,6 +4,9 @@ import { useEffect, useRef } from "react";
 import { ChromeNavDot } from "@/components/chrome/chrome-nav-dot";
 import { useCaseStudyDetailScrollContext } from "@/components/case-studies/case-study-detail-scroll-context";
 
+/** Body class — floating-chrome uses pointer-events:none so :hover never hits it. */
+export const CS_DETAIL_NAV_HOVER_CLASS = "cs-detail-nav-hover";
+
 /** Scroll within the rail only — never call scrollIntoView (it can move the page). */
 function scrollDotIntoNav(nav: HTMLElement, dot: HTMLElement, pad = 10) {
   const dotTop = dot.offsetTop;
@@ -24,6 +27,10 @@ export function CaseStudyDetailDotsRail() {
   const dotRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
+    return () => document.body.classList.remove(CS_DETAIL_NAV_HOVER_CLASS);
+  }, []);
+
+  useEffect(() => {
     if (!state) return;
     const nav = navRef.current;
     const dot = dotRefs.current[state.activeStep];
@@ -35,13 +42,19 @@ export function CaseStudyDetailDotsRail() {
     return null;
   }
 
-  const { steps, activeStep, scrollToStep, vignetteProgress } = state;
+  const { steps, activeStep, scrollToStep, vignetteProgress, setHoverStep } =
+    state;
 
   return (
     <nav
       ref={navRef}
-      className="chrome-hero-dots-rail chrome-hero-dots-rail--study"
+      className="chrome-hero-dots-rail chrome-hero-dots-rail--study chrome-hero-dots-rail--detail"
       aria-label={`Case study progress, section ${activeStep + 1} of ${steps.length}`}
+      onMouseEnter={() => document.body.classList.add(CS_DETAIL_NAV_HOVER_CLASS)}
+      onMouseLeave={() => {
+        document.body.classList.remove(CS_DETAIL_NAV_HOVER_CLASS);
+        setHoverStep(null);
+      }}
     >
       {steps.map((step, i) => {
         const active = i === activeStep;
@@ -66,6 +79,7 @@ export function CaseStudyDetailDotsRail() {
             className="chrome-nav-dot-btn"
             aria-current={active ? "step" : undefined}
             aria-label={`Go to ${step.label}`}
+            onMouseEnter={() => setHoverStep(i)}
             onClick={() => scrollToStep(i)}
           >
             <ChromeNavDot active={active} progress={progress} />

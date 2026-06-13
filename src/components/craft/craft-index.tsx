@@ -290,7 +290,7 @@ function VignetteCard({ entry }: { entry: VignetteWithStudy }) {
 
   return (
     <Link href={`/craft/${vignette.slug}`} className="craft-card">
-      <p className="craft-ghost-index" aria-hidden>
+      <p className="craft-ghost-index display-ghost" aria-hidden>
         {indexLabel}
       </p>
       <VignetteKeyImage
@@ -365,13 +365,13 @@ export function CraftIndex({ initialTag }: { initialTag?: string } = {}) {
       <header className="craft-hero-header keyline-b">
         <RuledGrid className="craft-hero__grid">
           <div className="craft-hero__meta">
-            <p className="text-meta craft-hero-meta craft-hero-meta--vignettes">
+            <p className="text-label-sm text-mono-label craft-hero-meta craft-hero-meta--vignettes">
               {visibleVignettes.length} VIGNETTES
             </p>
-            <p className="text-meta craft-hero-meta craft-hero-meta--tags">
+            <p className="text-label-sm text-mono-label craft-hero-meta craft-hero-meta--tags">
               {allTags.length} TAGS
             </p>
-            <p className="text-meta craft-hero-meta craft-hero-meta--date">
+            <p className="text-label-sm text-mono-label craft-hero-meta craft-hero-meta--date">
               2023–2025
             </p>
           </div>
@@ -401,7 +401,7 @@ export function CraftIndex({ initialTag }: { initialTag?: string } = {}) {
       >
         <div className="craft-sticky-header__inner">
           <div className="craft-sticky-header__title">
-            <p className="display-lg craft-page-title">Craft</p>
+            <p className="display-md">Craft</p>
           </div>
           <div className="craft-sticky-header__filters">
             <CraftFilters

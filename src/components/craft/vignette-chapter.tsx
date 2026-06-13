@@ -132,7 +132,7 @@ function FrameContent({
           ) : null}
         </header>
         <div className="vframe__main vframe__main--field">
-          {frame.body ? <p className="vframe__beat">{frame.body}</p> : null}
+          {frame.body ? <p className="display-md vframe__beat">{frame.body}</p> : null}
         </div>
         <footer className="vframe__foot" aria-hidden />
       </>
@@ -189,7 +189,7 @@ function FrameContent({
         </div>
       </div>
       <footer className="vframe__foot">
-        {caption ? <p className="vframe__caption">{caption}</p> : null}
+        {caption ? <p className="text-caption vframe__caption text-secondary">{caption}</p> : null}
       </footer>
     </>
   );
@@ -527,10 +527,10 @@ export function VignetteChapter({
               <p className="vframe__kicker-text text-meta">{date ?? "\u00A0"}</p>
             </header>
             <div className="vframe__main vframe__main--title">
-              <p className="vchapter__numeral">
+              <p className="display-numeral vchapter__numeral">
                 {String(chapterNumber).padStart(2, "0")}
               </p>
-              <h2 className="vchapter__title">{vignette.name}</h2>
+              <h2 className="display-md vchapter__title">{vignette.name}</h2>
             </div>
             <footer className="vframe__foot vframe__foot--tags">
               <CraftTagList

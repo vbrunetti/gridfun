@@ -33,6 +33,8 @@ export type CaseStudyDetailScrollState = {
   scrollToStep: (index: number) => void;
   visible: boolean;
   vignetteProgress: VignettePanelProgress | null;
+  hoverStep: number | null;
+  setHoverStep: (step: number | null) => void;
 };
 
 type CaseStudyDetailScrollContextValue = {
@@ -89,10 +91,14 @@ export function useCaseStudyDetailScrollRegister(
   activeStep: number,
   scrollToStep: (index: number) => void,
   visible: boolean,
+  hoverStep: number | null,
+  setHoverStep: (step: number | null) => void,
 ) {
   const { setState } = useCaseStudyDetailScrollContext();
   const scrollRef = useRef(scrollToStep);
   scrollRef.current = scrollToStep;
+  const setHoverRef = useRef(setHoverStep);
+  setHoverRef.current = setHoverStep;
 
   const activeRef = useRef(activeStep);
   activeRef.current = activeStep;
@@ -110,20 +116,24 @@ export function useCaseStudyDetailScrollRegister(
       scrollToStep: (index) => scrollRef.current(index),
       visible,
       vignetteProgress: null,
+      hoverStep: null,
+      setHoverStep: (step) => setHoverRef.current(step),
     });
 
     return () => setState(null);
   }, [enabled, steps, visible, setState]);
 
-  // Active row updates without unregistering the rail.
+  // Active row + hover preview — update without unregistering the rail.
   useEffect(() => {
     if (!enabled) return;
-    setState((prev) =>
-      prev && prev.activeStep !== activeStep
-        ? { ...prev, activeStep }
-        : prev,
-    );
-  }, [enabled, activeStep, setState]);
+    setState((prev) => {
+      if (!prev) return prev;
+      if (prev.activeStep === activeStep && prev.hoverStep === hoverStep) {
+        return prev;
+      }
+      return { ...prev, activeStep, hoverStep };
+    });
+  }, [enabled, activeStep, hoverStep, setState]);
 }
 
 /** Registers in-vignette panel progress for the active dot's radial ring. */

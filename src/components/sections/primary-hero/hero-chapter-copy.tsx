@@ -16,7 +16,7 @@ export function HeroSlateCopy({ slate, isFirstChapter = false }: HeroSlateCopyPr
       ) : null}
       <HeadlineTag className="display-xl home-beat__headline">{slate.headline}</HeadlineTag>
       {slate.supporting ? (
-        <p className="home-beat__subhead">{slate.supporting}</p>
+        <p className="home-beat__subhead body-lg text-secondary">{slate.supporting}</p>
       ) : null}
     </div>
   );

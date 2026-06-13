@@ -311,7 +311,7 @@ export function VignetteImageScroll({
       ) : null}
 
       <p
-        className={`vignette-gallery__caption${
+        className={`text-caption vignette-gallery__caption${
           activeCaption ? "" : " is-empty"
         }`}
       >

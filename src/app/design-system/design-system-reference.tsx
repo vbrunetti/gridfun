@@ -14,12 +14,14 @@ import {
   caseStudyTypography,
   fonts,
   gridSpans,
+  ornamentalTypography,
   remSpacingRamp,
   semanticColors,
   spacingTokens,
   surfaces,
   themes,
   typographyRamp,
+  typographyUsageMap,
   vignettePanelSurfaces,
   vignettePanelWidths,
   type TypographyRampEntry,
@@ -52,9 +54,7 @@ const NAV = [
   ["#components", "Components"],
 ] as const;
 
-const coreTypography = typographyRamp.filter(
-  (entry) => !caseStudyTypography.includes(entry),
-);
+const coreTypography = typographyRamp;
 
 function DsSectionHeader({
   id,
@@ -206,7 +206,7 @@ export function DesignSystemReference() {
           <a
             key={href}
             href={href}
-            className="grid-span-2 text-sm text-secondary underline-offset-4 transition-opacity hover:opacity-70"
+            className="body-sm grid-span-2 text-secondary underline-offset-4 transition-opacity hover:opacity-70"
           >
             {label}
           </a>
@@ -217,7 +217,7 @@ export function DesignSystemReference() {
         id="type"
         meta="01 · Typography"
         title="Type ramp"
-        description="All typography classes from globals.css, including /craft (ghost index, card title, filter chips). Default body is Geist Sans 16px; roles use .text-primary / .text-secondary / .text-tertiary below."
+        description="Unified type ramp from Display XL (4.75rem ceiling) through label sizes. All routes use these classes — no route-specific type overrides. Default body is Geist Sans; roles use .text-primary / .text-secondary / .text-tertiary."
       />
 
       {coreTypography.map((style) => (
@@ -225,9 +225,29 @@ export function DesignSystemReference() {
       ))}
 
       <SiteGridCell span="content">
-        <p className="text-sm text-secondary">
-          Craft card dates: <code className="font-mono text-xs">.text-meta</code> (same as
-          Meta above).
+        <p className="text-meta">Usage map</p>
+      </SiteGridCell>
+      <GridSpecTable
+        headers={["Role", "Class", "Routes"]}
+        rows={typographyUsageMap.map((row) => [row.role, `.${row.className}`, row.routes])}
+        columns={3}
+      />
+
+      <SiteGridCell span="content">
+        <p className="text-meta">Ornamental scale</p>
+        <p className="body-sm mt-2 text-secondary">
+          Ghost indices and chapter numerals sit outside the reading hierarchy ceiling.
+        </p>
+      </SiteGridCell>
+
+      {ornamentalTypography.map((style) => (
+        <TypeSpecimenRow key={`ornament-${style.label}`} style={style} />
+      ))}
+
+      <SiteGridCell span="content">
+        <p className="body-sm text-secondary">
+          Craft card titles use <code className="font-mono text-label-xs">.craft-card-title</code> — a
+          container-query wrapper around <code className="font-mono text-label-xs">.heading-md</code>.
         </p>
       </SiteGridCell>
 
@@ -235,18 +255,18 @@ export function DesignSystemReference() {
         <p className="text-meta">Text roles (light surface)</p>
       </SiteGridCell>
       <SiteGridSubgrid>
-        <p className="grid-span-6 text-primary text-lg">Primary · ink 100%</p>
-        <p className="grid-span-6 text-secondary text-lg">Secondary · ink 80%</p>
-        <p className="grid-span-6 text-tertiary text-lg">Tertiary · ink 60%</p>
+        <p className="body-lg grid-span-6 text-primary">Primary · ink 100%</p>
+        <p className="body-lg grid-span-6 text-secondary">Secondary · ink 80%</p>
+        <p className="body-lg grid-span-6 text-tertiary">Tertiary · ink 60%</p>
       </SiteGridSubgrid>
 
       <SiteGridCell span="content" className="theme-dark py-6">
         <p className="text-meta">Text roles (theme-dark)</p>
       </SiteGridCell>
       <SiteGridSubgrid className="theme-dark pb-6">
-        <p className="grid-span-6 text-primary text-lg">Primary · paper 100%</p>
-        <p className="grid-span-6 text-secondary text-lg">Secondary · paper 80%</p>
-        <p className="grid-span-6 text-tertiary text-lg">Tertiary · paper 60%</p>
+        <p className="body-lg grid-span-6 text-primary">Primary · paper 100%</p>
+        <p className="body-lg grid-span-6 text-secondary">Secondary · paper 80%</p>
+        <p className="body-lg grid-span-6 text-tertiary">Tertiary · paper 60%</p>
       </SiteGridSubgrid>
 
       <SiteGridCell span="content">
@@ -455,8 +475,8 @@ export function DesignSystemReference() {
           <div className="flex items-center border-b border-[var(--rule-light)] px-4 text-meta normal-case tracking-normal">
             Kicker · .vframe__kicker
           </div>
-          <div className="flex items-start px-4 pt-4 text-sm">Main · .vframe__main</div>
-          <div className="flex items-end border-t border-[var(--rule-light)] px-4 pb-4 text-xs text-secondary">
+          <div className="flex items-start px-4 pt-4 body-sm">Main · .vframe__main</div>
+          <div className="text-caption flex items-end border-t border-[var(--rule-light)] px-4 pb-4 text-secondary">
             Foot · .vframe__foot
           </div>
         </div>

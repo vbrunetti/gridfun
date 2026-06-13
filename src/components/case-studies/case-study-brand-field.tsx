@@ -1,30 +1,66 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import type { CaseStudyBrand } from "@/content/portfolio";
 
 type CaseStudyBrandFieldProps = {
   brand: CaseStudyBrand;
-  client: string;
   clientLogo?: string;
   className?: string;
 };
 
-/**
- * Bright brand-color ground with a centered transparent logo (gif/png).
- * Falls back to the inline client logo or a lettermark when the asset is missing.
- */
+function BrandLogoPlaceholder() {
+  return (
+    <svg
+      className="cs-index-brand-field__placeholder"
+      viewBox="0 0 100 100"
+      aria-hidden
+    >
+      <circle cx="50" cy="50" r="50" fill="white" fillOpacity="0.5" />
+    </svg>
+  );
+}
+
+/** Bright brand-color ground with a centered transparent logo (gif/png). */
 export function CaseStudyBrandField({
   brand,
-  client,
   clientLogo,
   className = "",
 }: CaseStudyBrandFieldProps) {
   const candidates = [brand.logo, clientLogo].filter(
     (src): src is string => Boolean(src),
   );
-  const [activeIndex, setActiveIndex] = useState(0);
-  const src = activeIndex < candidates.length ? candidates[activeIndex] : null;
+  const [tryIndex, setTryIndex] = useState(0);
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
+
+  const trySrc = tryIndex < candidates.length ? candidates[tryIndex]! : null;
+
+  useEffect(() => {
+    setTryIndex(0);
+    setLoadedSrc(null);
+  }, [brand.logo, clientLogo]);
+
+  useEffect(() => {
+    if (!trySrc) {
+      setLoadedSrc(null);
+      return;
+    }
+
+    let cancelled = false;
+    const probe = new Image();
+
+    probe.onload = () => {
+      if (!cancelled) setLoadedSrc(trySrc);
+    };
+    probe.onerror = () => {
+      if (!cancelled) setTryIndex((index) => index + 1);
+    };
+    probe.src = trySrc;
+
+    return () => {
+      cancelled = true;
+    };
+  }, [trySrc]);
 
   return (
     <div
@@ -33,16 +69,15 @@ export function CaseStudyBrandField({
       aria-hidden
     >
       <div className="cs-index-brand-field__glow" />
-      {src ? (
-        // eslint-disable-next-line @next/next/no-img-element -- gif transparency + onError fallback
+      {loadedSrc ? (
+        // eslint-disable-next-line @next/next/no-img-element -- gif transparency
         <img
-          src={src}
+          src={loadedSrc}
           alt=""
           className="cs-index-brand-field__logo"
-          onError={() => setActiveIndex((index) => index + 1)}
         />
       ) : (
-        <span className="cs-index-brand-field__wordmark">{client}</span>
+        <BrandLogoPlaceholder />
       )}
     </div>
   );

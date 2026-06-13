@@ -15,6 +15,8 @@ export type CaseStudiesScrollState = {
   activeStep: number;
   scrollToStep: (index: number) => void;
   visible: boolean;
+  hoverStep: number | null;
+  setHoverStep: (step: number | null) => void;
 };
 
 type CaseStudiesScrollContextValue = {
@@ -53,10 +55,14 @@ export function useCaseStudiesScrollRegister(
   activeStep: number,
   scrollToStep: (index: number) => void,
   visible: boolean,
+  hoverStep: number | null,
+  setHoverStep: (step: number | null) => void,
 ) {
   const { setState } = useCaseStudiesScrollContext();
   const scrollRef = useRef(scrollToStep);
   scrollRef.current = scrollToStep;
+  const setHoverRef = useRef(setHoverStep);
+  setHoverRef.current = setHoverStep;
 
   useEffect(() => {
     if (!enabled) {
@@ -69,8 +75,10 @@ export function useCaseStudiesScrollRegister(
       activeStep,
       scrollToStep: (index) => scrollRef.current(index),
       visible,
+      hoverStep,
+      setHoverStep: (step) => setHoverRef.current(step),
     });
 
     return () => setState(null);
-  }, [enabled, stepCount, activeStep, visible, setState]);
+  }, [enabled, stepCount, activeStep, visible, hoverStep, setState]);
 }

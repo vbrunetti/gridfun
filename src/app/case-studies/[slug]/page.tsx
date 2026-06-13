@@ -87,7 +87,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
             {heroFacts.map(({ key, label, value }) => (
               <div key={key} className={`cs-hero__fact cs-hero__fact--${key}`}>
                 <p className="cs-hero__fact-kicker text-meta">{label}</p>
-                <p className="cs-hero__fact-value">{value}</p>
+                <p className="body-sm cs-hero__fact-value">{value}</p>
               </div>
             ))}
           </div>
@@ -96,7 +96,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
             <div className="cs-hero__title-block">
               <div className="cs-hero__title-copy">
                 <h1 className="cs-hero__title display-xl">{study.name}</h1>
-                <p className="cs-hero__subhead">{study.subhead}</p>
+                <p className="body-lg cs-hero__subhead text-secondary">{study.subhead}</p>
               </div>
             </div>
           </div>
@@ -158,7 +158,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
               ) : null}
               <div className="cs-prose__body">
                 {section.body.split("\n\n").map((paragraph, i) => (
-                  <p key={i} className="cs-prose__paragraph">
+                  <p key={i} className="body-md cs-prose__paragraph text-secondary">
                     {paragraph}
                   </p>
                 ))}

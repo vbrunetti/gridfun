@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useChromeFocusSteps } from "@/components/chrome/use-chrome-focus";
+import { useChromeFocusPreview, useChromeFocusSteps } from "@/components/chrome/use-chrome-focus";
 import { useCaseStudiesScrollRegister } from "@/components/case-studies/case-studies-scroll-context";
 
 function chromeAnchorY(): number {
@@ -30,6 +30,7 @@ export function CaseStudiesScroll({ children }: CaseStudiesScrollProps) {
   const rootRef = useRef<HTMLElement>(null);
   const rafRef = useRef(0);
   const [activeStep, setActiveStep] = useState(0);
+  const [hoverStep, setHoverStep] = useState<number | null>(null);
   const [stepCount, setStepCount] = useState(1);
   const [dotsVisible, setDotsVisible] = useState(false);
 
@@ -78,9 +79,12 @@ export function CaseStudiesScroll({ children }: CaseStudiesScrollProps) {
     activeStep,
     scrollToStep,
     dotsVisible,
+    hoverStep,
+    setHoverStep,
   );
 
   useChromeFocusSteps(rootRef, activeStep, stepCount > 1);
+  useChromeFocusPreview(rootRef, hoverStep, stepCount > 1);
 
   useEffect(() => {
     const root = rootRef.current;
