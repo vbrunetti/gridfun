@@ -93,7 +93,7 @@ export function GridSpecTable({
   return (
     <>
       <SiteGridSubgrid
-        className={`keyline-t keyline-b--light bg-[var(--color-flesh)]/30 ${rowBorder}`}
+        className={`keyline-t keyline-b--light ds-spec-table-head ${rowBorder}`}
       >
         {headers.map((header) => (
           <div

@@ -21,7 +21,7 @@ export function PortfolioFigure({
 }: PortfolioFigureProps) {
   return (
     <figure className={className}>
-      <div className="relative w-full overflow-hidden border border-[var(--rule-light)] bg-[var(--color-flesh)]/40">
+      <div className="media-frame-ground relative w-full overflow-hidden">
         <Image
           src={src}
           alt={alt}

@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CtaButton } from "@/components/chrome/cta-button";
 import { RuledGrid } from "@/components/layout/ruled-grid";
-import { SiteGridSubgrid } from "@/components/layout/site-grid";
 import {
   CraftTagList,
   VignetteImageScroll,
 } from "@/components/craft/vignette-media";
 import { CaseStudyDetailScroll } from "@/components/case-studies/case-study-detail-scroll";
+import { DetailNavFooter } from "@/components/case-studies/detail-nav-footer";
 import { CaseStudyHeroVideo } from "@/components/case-studies/case-study-hero-video";
 import { VignetteChapter } from "@/components/craft/vignette-chapter";
 import {
@@ -74,7 +73,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
 
   return (
     <CaseStudyDetailScroll steps={detailSteps}>
-      <div className="theme-dark">
+      <div className="theme-dark" data-chrome-surface="dark">
       <section
         id="cs-hero"
         data-cs-detail-row
@@ -175,27 +174,18 @@ export default async function CaseStudyPage({ params }: PageProps) {
         data-chrome-surface="canvas"
       >
         <RuledGrid>
-          <SiteGridSubgrid className="items-center">
-            {next ? (
-              <>
-                <p className="text-meta grid-span-6 lg:col-start-2 lg:grid-span-4">
-                  Next case study
-                </p>
-                <Link
-                  href={`/case-studies/${next.slug}`}
-                  className="display-lg grid-span-6 transition-opacity hover:opacity-70 lg:grid-span-8 lg:text-right"
-                >
-                  {next.name} →
-                </Link>
-              </>
-            ) : (
-              <div className="col-span-content">
-                <CtaButton href="/case-studies" variant="ghost">
-                  All case studies
-                </CtaButton>
-              </div>
-            )}
-          </SiteGridSubgrid>
+          <DetailNavFooter
+            next={
+              next
+                ? {
+                    href: `/case-studies/${next.slug}`,
+                    label: next.name,
+                    kicker: "Next case study",
+                  }
+                : undefined
+            }
+            fallback={{ href: "/case-studies", label: "All case studies" }}
+          />
         </RuledGrid>
       </section>
       </div>

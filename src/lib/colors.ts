@@ -14,7 +14,7 @@ export const palette = {
   skyBlue: "#5BC4FF",
   mediumBlue: "#2962FF",
   royalBlue: "#0033FF",
-  cruise: "#FF4D37",
+  cruise: "#FE4A35",
   /** @deprecated Use offWhite — kept for existing token names */
   paper: "#EFEFEF",
   /** @deprecated Use lightGray */
@@ -36,6 +36,15 @@ export const palette = {
   /** @deprecated Use neonLime */
   goldenYellow: "#D8FF00",
 } as const;
+
+export {
+  clientBrandColorEntries,
+  clientBrandColorGroups,
+  clientBrandColorHex,
+  clientBrandColorVar,
+  clientBrandColors,
+  type ClientBrandColorId,
+} from "@/lib/client-brand-colors";
 
 /** Craft / impact portrait fills — rotate neons; grays for quieter tiles. */
 export const portraitAccents = [

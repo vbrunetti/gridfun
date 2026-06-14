@@ -12,12 +12,14 @@ import {
   caseStudyDetailPatterns,
   caseStudyHeroFacts,
   caseStudyTypography,
+  clientBrandColorGroups,
   fonts,
   gridSpans,
   ornamentalTypography,
   remSpacingRamp,
   semanticColors,
   spacingTokens,
+  surfaceGroups,
   surfaces,
   themes,
   typographyRamp,
@@ -25,6 +27,7 @@ import {
   vignettePanelSurfaces,
   vignettePanelWidths,
   type TypographyRampEntry,
+  type SurfaceSpec,
 } from "@/lib/design-tokens";
 import { GRID_COLUMNS } from "@/lib/site-location";
 
@@ -36,11 +39,6 @@ const paletteHex: Record<string, string> = {
   "--color-charcoal": palette.charcoal,
   "--color-black": palette.black,
   "--color-neon-lime": palette.neonLime,
-  "--color-hot-pink": palette.hotPink,
-  "--color-sky-blue": palette.skyBlue,
-  "--color-medium-blue": palette.mediumBlue,
-  "--color-royal-blue": palette.royalBlue,
-  "--color-cruise": "#ff4d37",
 };
 
 const NAV = [
@@ -55,6 +53,23 @@ const NAV = [
 ] as const;
 
 const coreTypography = typographyRamp;
+
+function SurfaceSpecimen({ surface }: { surface: SurfaceSpec }) {
+  return (
+    <div
+      className={`grid-span-6 min-h-[8.5rem] border border-[var(--rule-light)] p-4 lg:grid-span-4 ${surface.className}`}
+    >
+      <p className="text-meta normal-case tracking-normal">{surface.label}</p>
+      <code className="mt-1 block font-mono text-xs text-tertiary">
+        .{surface.className}
+      </code>
+      <p className="mt-0.5 font-mono text-xs text-tertiary">{surface.token}</p>
+      <p className="mt-3 text-sm text-primary">Primary · {surface.textOn} text</p>
+      <p className="text-sm text-secondary">Secondary text</p>
+      <p className="text-xs text-tertiary">Tertiary text</p>
+    </div>
+  );
+}
 
 function DsSectionHeader({
   id,
@@ -344,6 +359,28 @@ export function DesignSystemReference() {
           />
         ))}
       </SiteGridSubgrid>
+
+      <SiteGridCell span="content">
+        <p className="text-meta">Client brand colors</p>
+        <p className="mt-2 text-sm text-secondary">
+          Site-wide tokens — CSS vars, Tailwind utilities, inline styles, vignette{" "}
+          <code className="font-mono text-xs">panelBg</code>, case-study brand fields.
+          E.g. <code className="font-mono text-xs">var(--color-cruise-primary)</code>,{" "}
+          <code className="font-mono text-xs">bg-google-tertiary</code>,{" "}
+          <code className="font-mono text-xs">clientBrandColorVar(&quot;cruise-primary&quot;)</code>.
+        </p>
+      </SiteGridCell>
+      {clientBrandColorGroups.map(({ client, colors }) => (
+        <SiteGridSubgrid key={client}>
+          <SiteGridCell span="content">
+            <p className="text-meta">{client}</p>
+          </SiteGridCell>
+          {colors.map(({ token, label, hex }) => (
+            <TokenSwatch key={token} token={token} label={label} hex={hex} />
+          ))}
+        </SiteGridSubgrid>
+      ))}
+
       <SiteGridCell span="content">
         <p className="text-meta">Semantic tokens</p>
       </SiteGridCell>
@@ -357,20 +394,20 @@ export function DesignSystemReference() {
         id="surfaces"
         meta="04 · Surfaces"
         title="Section surfaces"
-        description="Page sections pick a theme class or surface token for background."
+        description="Apply a theme class on any section wrapper. Text tokens flip automatically — ink on light grounds, paper on dark/saturated grounds. Google quaternary uses ink on yellow."
       />
-      <SiteGridSubgrid>
-        {surfaces.map(({ token, className, label }) => (
-          <div
-            key={token}
-            className={`grid-span-6 min-h-[5rem] border border-[var(--rule-light)] p-4 ${className}`}
-          >
-            <p className="text-meta normal-case tracking-normal">{label}</p>
-            <p className="mt-2 font-mono text-xs opacity-80">{token}</p>
-            <p className="mt-1 text-sm">Sample text</p>
-          </div>
-        ))}
-      </SiteGridSubgrid>
+      {surfaceGroups.map(({ id, label }) => (
+        <SiteGridSubgrid key={id}>
+          <SiteGridCell span="content">
+            <p className="text-meta">{label}</p>
+          </SiteGridCell>
+          {surfaces
+            .filter((surface) => surface.group === id)
+            .map((surface) => (
+              <SurfaceSpecimen key={surface.className} surface={surface} />
+            ))}
+        </SiteGridSubgrid>
+      ))}
 
       <DsSectionHeader
         id="grid"
@@ -502,22 +539,22 @@ export function DesignSystemReference() {
       <SiteGridCell span="content" className="theme-dark py-6">
         <p className="text-meta">Panel surfaces</p>
         <p className="mt-2 text-sm text-secondary">
-          Set via <code className="font-mono text-xs">data-panel-bg</code> and{" "}
-          <code className="font-mono text-xs">--panel-bg</code>. Secondary/tertiary
-          accent two media frames per chapter; brand marks a colorful last beat.
+          Set <code className="font-mono text-xs">panelBg</code> in{" "}
+          <code className="font-mono text-xs">portfolio.ts</code>, or use any client brand
+          token elsewhere via CSS var / Tailwind. Trail inherits the last frame.
         </p>
       </SiteGridCell>
       <SiteGridSubgrid className="theme-dark pb-6">
-        {vignettePanelSurfaces.map(({ id, token, label }) => (
+        {vignettePanelSurfaces.map((surface) => (
           <div
-            key={id}
+            key={surface.id}
             className="grid-span-6 min-h-[5rem] border border-[var(--rule-light)] p-4 lg:grid-span-3"
-            style={{ background: `var(${token})` }}
+            style={{ background: `var(${surface.token})` }}
           >
-            <p className="text-meta normal-case tracking-normal">{label}</p>
-            <p className="mt-2 font-mono text-xs text-tertiary">{token}</p>
+            <p className="text-meta normal-case tracking-normal">{surface.label}</p>
+            <p className="mt-2 font-mono text-xs text-tertiary">{surface.token}</p>
             <p className="mt-1 font-mono text-xs text-tertiary">
-              data-panel-bg=&quot;{id}&quot;
+              panelBg=&quot;{surface.id}&quot;
             </p>
           </div>
         ))}

@@ -19,6 +19,7 @@ import {
 import {
   CHROME_SURFACE_ATTR,
   type ChromeSurface,
+  peekCursorSurface,
 } from "@/lib/chrome-surface";
 
 const PEEK_DESKTOP_QUERY = "(min-width: 768px)";
@@ -279,7 +280,7 @@ export function CaseStudyDetailScroll({
               type: "panel",
               sectionId: section.id,
               panelIndex,
-              surface: "dark",
+              surface: peekCursorSurface(section.dataset.chromeSurface),
             };
           }
         }
@@ -290,7 +291,7 @@ export function CaseStudyDetailScroll({
         return {
           type: "section",
           sectionId: section.id,
-          surface: section.dataset.chromeSurface === "light" ? "light" : "dark",
+          surface: peekCursorSurface(section.dataset.chromeSurface),
         };
       }
 

@@ -1,9 +1,8 @@
 "use client";
 
-import { RuledGrid } from "@/components/layout/ruled-grid";
 import type { ParticlePreset } from "./particle-presets";
 import { useHomeScrollVisual } from "./home-scroll-visual-context";
-import { PrimaryHeroSparkLayer } from "./primary-hero-spark-layer";
+import { PrimaryHeroSparkStage } from "./primary-hero-spark-stage";
 
 type HomeSparkPinProps = {
   presets: ParticlePreset[];
@@ -15,13 +14,12 @@ export function HomeSparkPin({ presets }: HomeSparkPinProps) {
 
   return (
     <div className="home-spark-pin" aria-hidden>
-      <RuledGrid className="primary-hero-stage primary-hero-stage--split-scene home-spark-pin__stage h-full">
-        <PrimaryHeroSparkLayer
-          presets={presets}
-          blend={sparkBlend}
-          paused={sparkPaused}
-        />
-      </RuledGrid>
+      <PrimaryHeroSparkStage
+        className="home-spark-pin__stage"
+        presets={presets}
+        blend={sparkBlend}
+        paused={sparkPaused}
+      />
     </div>
   );
 }

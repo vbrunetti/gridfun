@@ -100,53 +100,60 @@ export const site = {
     heroSlates: [
       {
         id: "slate-1",
-        eyebrow: "Product · UX",
-        headline: "Designing the human side of complex systems.",
+        eyebrow: "Hello — I'm Victor",
+        headline: "Change is constant. Growth is inevitable.",
         supporting:
-          "Tele-operations, design systems, and AI-native tools — built around a single idea: context gain.",
+          "My whole career has been a study in change — two decades of watching our craft reinvent itself, and learning to love every shift.",
       },
       {
         id: "slate-2",
-        eyebrow: "Design systems",
-        headline: "A design system is infrastructure — as fundamental as electricity.",
+        eyebrow: "Where it started",
+        headline: "I began in Flash — designing, coding, and animating the early web.",
         supporting:
-          "Nebula at Pearson: tokens, opinionated organisms, and a natural-language prototyping pipeline.",
+          "One person, three disciplines, a blank timeline. The web was a canvas and the tools were wide open.",
       },
       {
         id: "slate-3",
-        eyebrow: "AI-native",
-        headline: "When the conversation is the interface.",
+        eyebrow: "The web grows up",
+        headline: "Then websites became web applications.",
         supporting:
-          "A pattern language for embedded, assistive, and generative AI across a product family.",
+          "Static pages turned into software. Interaction design stopped being decoration and became the product.",
       },
       {
         id: "slate-4",
-        eyebrow: "Human-in-the-loop",
-        headline: "Surfacing what the machine already knows.",
+        eyebrow: "Mobile-first",
+        headline: "The screen shrank, and everything had to be rethought.",
         supporting:
-          "The Cruise tele-operations terminal — context gain over a black box, with seconds to act.",
+          "Touch, constraints, context. Designing for the device in everyone's pocket rewrote the rules again.",
       },
       {
         id: "slate-5",
-        eyebrow: "Research",
-        headline: "Go see for yourself.",
+        eyebrow: "New tools, again",
+        headline: "Photoshop to Sketch to Figma — and design moved into code.",
         supporting:
-          "The mountain you're pointed at is often a collection of smaller, more solvable hills.",
+          "Every few years, a new tool and a new way to prototype. The craft kept reinventing how it gets made.",
       },
       {
         id: "slate-6",
-        eyebrow: "Work",
-        headline: "Cruise, Google, Pearson.",
+        eyebrow: "Systems",
+        headline: "Then we learned to build design as infrastructure.",
         supporting:
-          "Browse the case studies and craft index, or get in touch.",
+          "Design systems turned one-off screens into shared, scalable foundations — design maturing the way engineering did.",
+      },
+      {
+        id: "slate-7",
+        eyebrow: "AI-native",
+        headline: "Now I'm bringing AI into every part of my practice.",
+        supporting:
+          "Designing with it, prototyping through it, and shaping the interfaces where people will meet it.",
       },
     ] satisfies HeroSlate[],
-    coverSections: [{ id: "home-secondary", label: "Selected work" }] satisfies HomeCoverSection[],
+    coverSections: [{ id: "home-secondary", label: "What's next" }] satisfies HomeCoverSection[],
     secondary: {
-      eyebrow: "Selected work",
-      headline: "From driverless fleets to AI-native learning.",
+      eyebrow: "What's next",
+      headline: "I've seen enough change to be excited for the next chapter.",
       subhead:
-        "Three chapters — Cruise, Google, Pearson — each about making a complex system legible to the person using it.",
+        "I don't just adapt to what's coming — I look forward to it. Start with the work: Cruise, Google, Pearson.",
       cta: {
         href: "/case-studies",
         label: "View case studies",

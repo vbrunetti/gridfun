@@ -2,7 +2,12 @@
 
 import { useEffect, useRef } from "react";
 import { HERO_SPARK_COLOR, HERO_SPARK_SHAPE_SCALE } from "./spark-hero-config";
-import { SparkCanvas, type SparkBlend } from "./spark-canvas";
+import {
+  SparkCanvas,
+  type SparkBlend,
+  type SparkColorMode,
+  type SparkCompositeMode,
+} from "./spark-canvas";
 import type { ParticlePreset } from "./particle-presets";
 
 const DESKTOP_QUERY = "(min-width: 1024px)";
@@ -63,16 +68,26 @@ function columnRightEdge(
   return paddingStart + col * colWidth + (col - 1) * columnGap;
 }
 
-type PrimaryHeroSparkLayerProps = {
+export type PrimaryHeroSparkLayerProps = {
   presets: ParticlePreset[];
   blend: SparkBlend;
   paused?: boolean;
+  showBoundary?: boolean;
+  shapeScale?: number;
+  colorMode?: SparkColorMode;
+  compositeMode?: SparkCompositeMode;
+  colorCycleSpeed?: number;
 };
 
 export function PrimaryHeroSparkLayer({
   presets,
   blend,
   paused = false,
+  showBoundary = false,
+  shapeScale = HERO_SPARK_SHAPE_SCALE,
+  colorMode = HERO_SPARK_COLOR.colorMode,
+  compositeMode = HERO_SPARK_COLOR.compositeMode,
+  colorCycleSpeed = HERO_SPARK_COLOR.colorCycleSpeed,
 }: PrimaryHeroSparkLayerProps) {
   const slotRef = useRef<HTMLDivElement>(null);
 
@@ -82,6 +97,9 @@ export function PrimaryHeroSparkLayer({
 
     const stage = slot.closest<HTMLElement>(".primary-hero-stage--split-scene");
     if (!stage) return;
+
+    /** Column metrics come from the master grid; stage may be a subgrid cell. */
+    const metricGrid = stage.closest<HTMLElement>(".site-grid") ?? stage;
 
     const sync = () => {
       const stageHeight = stage.clientHeight;
@@ -94,13 +112,13 @@ export function PrimaryHeroSparkLayer({
         ? DESKTOP_SPARK_ZONE_START_COL
         : MOBILE_SPARK_ZONE_START_COL;
 
-      const styles = getComputedStyle(stage);
+      const styles = getComputedStyle(metricGrid);
       const paddingStart = Number.parseFloat(styles.paddingLeft) || 0;
       const paddingEnd = Number.parseFloat(styles.paddingRight) || 0;
       const columnGap = Number.parseFloat(styles.columnGap) || 0;
 
       const zoneLeft = columnLeftEdge(
-        stage.clientWidth,
+        metricGrid.clientWidth,
         paddingStart,
         paddingEnd,
         columnGap,
@@ -108,7 +126,7 @@ export function PrimaryHeroSparkLayer({
         zoneStartCol,
       );
       const zoneRight = columnRightEdge(
-        stage.clientWidth,
+        metricGrid.clientWidth,
         paddingStart,
         paddingEnd,
         columnGap,
@@ -120,11 +138,19 @@ export function PrimaryHeroSparkLayer({
       const sparkSize = desktop
         ? zoneWidth
         : Math.min(stageHeight * MOBILE_SPARK_HEIGHT_RATIO, zoneWidth);
-      const sparkLeft = zoneRight - sparkSize;
+      const sparkLeftOnGrid = zoneRight - sparkSize;
+      const stageOffset =
+        stage === metricGrid
+          ? 0
+          : stage.getBoundingClientRect().left -
+            metricGrid.getBoundingClientRect().left;
 
       stage.style.setProperty("--hero-spark-h", `${sparkSize}px`);
       stage.style.setProperty("--hero-spark-w", `${sparkSize}px`);
-      stage.style.setProperty("--hero-spark-left", `${sparkLeft}px`);
+      stage.style.setProperty(
+        "--hero-spark-left",
+        `${sparkLeftOnGrid - stageOffset}px`,
+      );
     };
 
     sync();
@@ -147,10 +173,12 @@ export function PrimaryHeroSparkLayer({
         presets={presets}
         blend={blend}
         paused={paused}
-        showBoundary={false}
-        shapeScale={HERO_SPARK_SHAPE_SCALE}
+        showBoundary={showBoundary}
+        shapeScale={shapeScale}
+        colorMode={colorMode}
+        compositeMode={compositeMode}
+        colorCycleSpeed={colorCycleSpeed}
         canvasBleed={0.14}
-        {...HERO_SPARK_COLOR}
       />
     </div>
   );

@@ -23,11 +23,12 @@ export function MenuOverlay() {
     <div
       id="site-menu"
       className="theme-dark fixed inset-0 z-[70] lg:pl-[var(--rail-width)]"
+      data-chrome-surface="dark"
       role="dialog"
       aria-modal="true"
       aria-label="Site menu"
     >
-      <div className="flex h-full flex-col border-l border-[var(--section-dark-rule)]">
+      <div className="flex h-full flex-col border-l border-rule-light">
         <div className="flex flex-1 items-center overflow-y-auto py-12 pt-[var(--chrome-top-offset)] lg:pt-12">
           <SiteGrid className="w-full">
             <SiteGridCell span="main">
@@ -44,9 +45,7 @@ export function MenuOverlay() {
                             onClick={closeMenu}
                             aria-current={sectionActive ? "page" : undefined}
                             className={`display-lg block py-3 transition-opacity hover:opacity-70 ${
-                              sectionActive
-                                ? "text-[var(--accent)]"
-                                : "text-primary"
+                              sectionActive ? "text-accent" : "text-primary"
                             }`}
                           >
                             {item.label}
@@ -61,9 +60,7 @@ export function MenuOverlay() {
                                     onClick={closeMenu}
                                     aria-current={childActive ? "page" : undefined}
                                     className={`heading-lg block py-2 transition-opacity hover:opacity-70 ${
-                                      childActive
-                                        ? "text-[var(--accent)]"
-                                        : "text-secondary"
+                                      childActive ? "text-accent" : "text-secondary"
                                     }`}
                                   >
                                     {child.label}
@@ -85,7 +82,7 @@ export function MenuOverlay() {
                           onClick={closeMenu}
                           aria-current={active ? "page" : undefined}
                           className={`display-lg block py-3 transition-opacity hover:opacity-70 ${
-                            active ? "text-[var(--accent)]" : "text-primary"
+                            active ? "text-accent" : "text-primary"
                           }`}
                         >
                           {item.label}

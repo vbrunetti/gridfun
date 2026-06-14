@@ -3,7 +3,6 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import type { CraftVignette, ImageRatio } from "@/content/portfolio";
 import { craftTagFilterHref } from "@/content/portfolio";
-import { palette } from "@/lib/colors";
 import {
   vignetteKeyImageSrc,
   type PortfolioImageRatio,
@@ -142,7 +141,6 @@ export function ClientLogo({
     <span
       className={`client-logo client-logo--wordmark ${className}`.trim()}
       aria-hidden
-      style={{ backgroundColor: palette.charcoal }}
     >
       {client.slice(0, 1)}
     </span>

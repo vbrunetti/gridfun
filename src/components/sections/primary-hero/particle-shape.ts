@@ -11,7 +11,8 @@ export type ParticleShape =
   | "cross"
   | "trefoil"
   | "clover"
-  | "chevron";
+  | "chevron"
+  | "portrait";
 
 /** Home hero — one shape per scroll chapter (trefoil family). */
 export const HERO_CHAPTER_SHAPES: ParticleShape[] = [
@@ -21,6 +22,8 @@ export const HERO_CHAPTER_SHAPES: ParticleShape[] = [
   "cross",
   "ring",
   "chevron",
+  "star",
+  "diamond",
 ];
 
 /** Default hero chapter sequence — maximally distinct silhouettes. */
@@ -36,16 +39,17 @@ export const TREFOIL_FAMILY_SHAPES: ParticleShape[] = [
   "chevron",
 ];
 
-/** All shapes available in the tuner. */
+/** All shapes available in the tuner (deduped). */
 export const PARTICLE_SHAPES: ParticleShape[] = [
-  ...HERO_CHAPTER_SHAPES,
-  "diamond",
-  "pentagram",
-  "spiral",
-  "octagon",
-  "ring",
-  "cross",
-  "clover",
+  ...new Set<ParticleShape>([
+    ...HERO_CHAPTER_SHAPES,
+    "square",
+    "circle",
+    "triangle",
+    "pentagram",
+    "octagon",
+    "portrait",
+  ]),
 ];
 
 const SHAPE_SAMPLES = 128;
@@ -186,6 +190,31 @@ function fillCrossPoints(
     [-arm, -arm],
     [-arm, -len],
   ];
+  fillPolygonPoints(localPoints, radii, corners);
+}
+
+/** Axis-aligned rectangle perimeter (3:4 portrait, height > width). */
+const PORTRAIT_HALF_WIDTH_RATIO = 0.42;
+const PORTRAIT_HALF_HEIGHT_RATIO = 0.88;
+
+function portraitRectRadiusAtAngle(
+  theta: number,
+  R: number,
+  rotation: number,
+) {
+  const hw = R * PORTRAIT_HALF_WIDTH_RATIO;
+  const hh = R * PORTRAIT_HALF_HEIGHT_RATIO;
+  const t = theta - rotation;
+  const c = Math.abs(Math.cos(t));
+  const s = Math.abs(Math.sin(t));
+  return (hw * hh) / Math.hypot(hh * c, hw * s);
+}
+
+function fillPolygonPoints(
+  localPoints: Float32Array,
+  radii: Float32Array,
+  corners: [number, number][],
+) {
   const n = radii.length;
   const perim = corners.length;
   for (let i = 0; i < n; i++) {
@@ -202,6 +231,29 @@ function fillCrossPoints(
     localPoints[i * 2 + 1] = y;
     radii[i] = Math.hypot(x, y);
   }
+}
+
+function fillPortraitRectPoints(
+  localPoints: Float32Array,
+  radii: Float32Array,
+  R: number,
+  rotation: number,
+) {
+  const hw = R * PORTRAIT_HALF_WIDTH_RATIO;
+  const hh = R * PORTRAIT_HALF_HEIGHT_RATIO;
+  const c = Math.cos(rotation);
+  const s = Math.sin(rotation);
+  const rotate = (x: number, y: number): [number, number] => [
+    x * c - y * s,
+    x * s + y * c,
+  ];
+  const corners: [number, number][] = [
+    [-hw, -hh],
+    [hw, -hh],
+    [hw, hh],
+    [-hw, hh],
+  ].map(([x, y]) => rotate(x, y));
+  fillPolygonPoints(localPoints, radii, corners);
 }
 
 export function shapeRadiusAtAngle(
@@ -237,6 +289,8 @@ export function shapeRadiusAtAngle(
       return R;
     case "octagon":
       return regularPolygonRadius(theta, R, 8, rotation);
+    case "portrait":
+      return portraitRectRadiusAtAngle(theta, R, rotation);
     default:
       return R;
   }
@@ -306,6 +360,8 @@ export function buildShapeProfile(
     fillCrossPoints(localPoints, radii, R);
   } else if (shape === "chevron") {
     fillChevronPoints(localPoints, radii, R, rotation);
+  } else if (shape === "portrait") {
+    fillPortraitRectPoints(localPoints, radii, R, rotation);
   } else {
     fillPolarPoints(localPoints, radii, R, rotation, (theta) =>
       shapeRadiusAtAngle(shape, theta, R, rotation),

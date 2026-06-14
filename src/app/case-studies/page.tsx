@@ -10,16 +10,16 @@ export const metadata: Metadata = {
 export default function CaseStudiesPage() {
   return (
     <div
-      className="cs-index-route theme-light min-h-[100dvh] w-full min-w-0"
-      data-chrome-surface="light"
+      className="cs-index-route theme-dark min-h-[100dvh] w-full min-w-0"
+      data-chrome-surface="dark"
     >
       <CaseStudiesScroll>
         <section
           id="cs-index-intro"
           data-cs-step="intro"
           data-chrome-focus-step="0"
-          className="chrome-focus-target work-snap-section work-snap-section--intro cs-index-intro theme-white keyline-b"
-          data-chrome-surface="light"
+          className="chrome-focus-target work-snap-section work-snap-section--intro cs-index-intro theme-dark keyline-b keyline-b--dark"
+          data-chrome-surface="dark"
         >
           <header className="cs-index-hero-header">
             <RuledGrid className="cs-index-hero__grid">

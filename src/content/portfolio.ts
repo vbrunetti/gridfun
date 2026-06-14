@@ -1,3 +1,4 @@
+import type { ClientBrandColorId } from "@/lib/client-brand-colors";
 import { palette, portraitAccents } from "@/lib/colors";
 
 /**
@@ -31,6 +32,15 @@ export type KeyImageRatio = ImageRatio;
 /** Reverse-out ground for a single frame. Defaults to a seeded pseudo-random pick. */
 export type FrameSurface = "light" | "dark";
 
+/** Filmstrip panel ground — maps to theme tokens in VignetteChapter. */
+export type PanelBg =
+  | "default"
+  | "secondary"
+  | "tertiary"
+  | ClientBrandColorId
+  /** @deprecated Use `cruise-primary` */
+  | "brand";
+
 /**
  * One frame in a vignette's horizontal chapter.
  *
@@ -38,6 +48,7 @@ export type FrameSurface = "light" | "dark";
  * or a *color-field* frame (`colorField: true`) where type carries the beat and
  * the accent is the ground. Either way it can hold a narrative beat: a `label`
  * (mono-caps kicker, e.g. "The problem") plus `body` prose tied to this frame.
+ * Optional `panelBg` sets the filmstrip ground; the trail panel inherits the last frame.
  */
 export type VignetteImage = {
   /** Portrait (9×16), landscape (16×9), or square (1×1). */
@@ -56,6 +67,8 @@ export type VignetteImage = {
   body?: string;
   /** Reverse-out ground; omit to let the chapter pick a random-feeling surface. */
   surface?: FrameSurface;
+  /** Filmstrip panel ground; omit for chapter default. Trail inherits the last frame. */
+  panelBg?: PanelBg;
   caption?: string;
 };
 
@@ -98,8 +111,8 @@ export type CaseStudyHeroVideo = {
 
 /** Bright index-slide field + floating transparent logo (gif preferred). */
 export type CaseStudyBrand = {
-  /** CSS color for the brand field ground. */
-  field: string;
+  /** Client brand color — resolved via `clientBrandColorVar()` in the brand field. */
+  field: ClientBrandColorId;
   /** Transparent logo asset — gif or png with alpha. */
   logo?: string;
 };
@@ -136,8 +149,16 @@ function cruiseBeat(
   label: string,
   body: string,
   ratio: ImageRatio = "16x9",
+  panelBg?: PanelBg,
 ): VignetteImage {
-  return { ratio, accent: cruiseAccent, colorField: true, label, body };
+  return {
+    ratio,
+    accent: cruiseAccent,
+    colorField: true,
+    label,
+    body,
+    ...(panelBg ? { panelBg } : {}),
+  };
 }
 
 function cruiseMedia(
@@ -145,8 +166,16 @@ function cruiseMedia(
   caption: string,
   ratio: ImageRatio = "16x9",
   src?: string,
+  panelBg?: PanelBg,
 ): VignetteImage {
-  return { ratio, accent: cruiseAccent, label, caption, ...(src ? { src } : {}) };
+  return {
+    ratio,
+    accent: cruiseAccent,
+    label,
+    caption,
+    ...(src ? { src } : {}),
+    ...(panelBg ? { panelBg } : {}),
+  };
 }
 
 function cruiseVignette(
@@ -184,8 +213,16 @@ function googleBeat(
   label: string,
   body: string,
   ratio: ImageRatio = "16x9",
+  panelBg?: PanelBg,
 ): VignetteImage {
-  return { ratio, accent: googleAccent, colorField: true, label, body };
+  return {
+    ratio,
+    accent: googleAccent,
+    colorField: true,
+    label,
+    body,
+    ...(panelBg ? { panelBg } : {}),
+  };
 }
 
 function googleMedia(
@@ -193,8 +230,16 @@ function googleMedia(
   caption: string,
   ratio: ImageRatio = "16x9",
   src?: string,
+  panelBg?: PanelBg,
 ): VignetteImage {
-  return { ratio, accent: googleAccent, label, caption, ...(src ? { src } : {}) };
+  return {
+    ratio,
+    accent: googleAccent,
+    label,
+    caption,
+    ...(src ? { src } : {}),
+    ...(panelBg ? { panelBg } : {}),
+  };
 }
 
 function googleVignette(
@@ -230,8 +275,16 @@ function pearsonBeat(
   label: string,
   body: string,
   ratio: ImageRatio = "16x9",
+  panelBg?: PanelBg,
 ): VignetteImage {
-  return { ratio, accent: pearsonAccent, colorField: true, label, body };
+  return {
+    ratio,
+    accent: pearsonAccent,
+    colorField: true,
+    label,
+    body,
+    ...(panelBg ? { panelBg } : {}),
+  };
 }
 
 function pearsonMedia(
@@ -239,8 +292,16 @@ function pearsonMedia(
   caption: string,
   ratio: ImageRatio = "16x9",
   src?: string,
+  panelBg?: PanelBg,
 ): VignetteImage {
-  return { ratio, accent: pearsonAccent, label, caption, ...(src ? { src } : {}) };
+  return {
+    ratio,
+    accent: pearsonAccent,
+    label,
+    caption,
+    ...(src ? { src } : {}),
+    ...(panelBg ? { panelBg } : {}),
+  };
 }
 
 function pearsonVignette(
@@ -278,7 +339,7 @@ export const caseStudies: CaseStudy[] = [
     date: "2025–present",
     client: "Pearson",
     brand: {
-      field: "#7C3AED",
+      field: "pearson-primary",
       logo: "/portfolio/logos/pearson.gif",
     },
     location: "Remote",
@@ -483,7 +544,7 @@ export const caseStudies: CaseStudy[] = [
     date: "2023",
     client: "Cruise",
     brand: {
-      field: palette.cruise,
+      field: "cruise-primary",
       logo: "/portfolio/logos/cruise.gif",
     },
     location: "San Francisco, CA",
@@ -510,6 +571,7 @@ export const caseStudies: CaseStudy[] = [
             "The legacy scene: a single orange encoding for every object type. Safe for the eyes, silent about meaning.",
             "16x9",
             "/portfolio/cruise/before-16x9.jpg",
+            "tertiary",
           ),
           cruiseBeat(
             "The insight",
@@ -521,6 +583,7 @@ export const caseStudies: CaseStudy[] = [
             "A universal color + shape language: each object class gets a distinct hue and a footprint shape mapped to its radar/lidar return.",
             "1x1",
             "/portfolio/cruise/solution-1x1.jpg",
+            "secondary",
           ),
           cruiseMedia(
             "In scene",
@@ -531,6 +594,8 @@ export const caseStudies: CaseStudy[] = [
           cruiseBeat(
             "Outcome",
             "Operators gained context about the scene faster and more accurately — the first move in a broader context-gain philosophy that shaped the rest of the terminal.",
+            "16x9",
+            "cruise-primary",
           ),
         ],
       ),
@@ -896,7 +961,7 @@ export const caseStudies: CaseStudy[] = [
     date: "2020–2023",
     client: "Google",
     brand: {
-      field: "#4285F4",
+      field: "google-primary",
       logo: "/portfolio/logos/google.gif",
     },
     location: "Mountain View, CA",

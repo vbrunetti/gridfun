@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type CSSProperties } from "react";
 import type { CaseStudyBrand } from "@/content/portfolio";
+import { clientBrandColorVar } from "@/lib/client-brand-colors";
 
 type CaseStudyBrandFieldProps = {
   brand: CaseStudyBrand;
@@ -65,7 +66,7 @@ export function CaseStudyBrandField({
   return (
     <div
       className={`cs-index-brand-field ${className}`.trim()}
-      style={{ "--cs-brand-field": brand.field } as CSSProperties}
+      style={{ "--cs-brand-field": clientBrandColorVar(brand.field) } as CSSProperties}
       aria-hidden
     >
       <div className="cs-index-brand-field__glow" />

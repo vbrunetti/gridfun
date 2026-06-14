@@ -15,7 +15,7 @@ export function VimeoEmbed({
         videoId={videoId}
         title={title}
         aspectRatio={aspectRatio}
-        className="vimeo-embed relative w-full overflow-hidden border border-[var(--rule-light)] bg-[var(--color-flesh)]/40"
+        className="vimeo-embed media-frame-ground relative w-full overflow-hidden"
       />
     </figure>
   );

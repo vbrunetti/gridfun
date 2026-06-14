@@ -1,5 +1,87 @@
 /** Reference metadata for /design-system page — mirrors globals.css */
 
+import {
+  clientBrandColorEntries,
+  clientBrandSurfaceClass,
+} from "@/lib/client-brand-colors";
+
+export { clientBrandColorGroups } from "@/lib/client-brand-colors";
+
+export type SurfaceSpec = {
+  token: string;
+  className: string;
+  label: string;
+  textOn: "ink" | "paper";
+  group: "structural" | "brand";
+  note?: string;
+};
+
+const structuralSurfaces = [
+  {
+    token: "--surface-light",
+    className: "theme-light",
+    label: "Light (paper)",
+    textOn: "ink",
+    group: "structural",
+    note: "Default page ground",
+  },
+  {
+    token: "--surface-light-dim",
+    className: "theme-light-dim",
+    label: "Light dim",
+    textOn: "ink",
+    group: "structural",
+    note: "Slightly darker than paper",
+  },
+  {
+    token: "--surface-white",
+    className: "theme-white",
+    label: "White",
+    textOn: "ink",
+    group: "structural",
+  },
+  {
+    token: "--canvas-blue",
+    className: "theme-canvas",
+    label: "Canvas (neon lime)",
+    textOn: "ink",
+    group: "structural",
+  },
+  {
+    token: "--section-dark-bg",
+    className: "theme-dark",
+    label: "Dark (black)",
+    textOn: "paper",
+    group: "structural",
+  },
+  {
+    token: "--section-dark-lift",
+    className: "theme-dark-lift",
+    label: "Dark lift",
+    textOn: "paper",
+    group: "structural",
+    note: "Slightly lighter than black",
+  },
+] as const satisfies readonly SurfaceSpec[];
+
+const brandSurfaces = clientBrandColorEntries.map((entry) => ({
+  token: entry.token,
+  className: clientBrandSurfaceClass(entry.id),
+  label: `${entry.client} ${entry.role.toLowerCase()}`,
+  textOn: entry.textOn,
+  group: "brand" as const,
+})) satisfies readonly SurfaceSpec[];
+
+export const surfaces: readonly SurfaceSpec[] = [
+  ...structuralSurfaces,
+  ...brandSurfaces,
+];
+
+export const surfaceGroups = [
+  { id: "structural", label: "Structural" },
+  { id: "brand", label: "Client brand" },
+] as const;
+
 export const brandColors = [
   { token: "--color-white", label: "White" },
   { token: "--color-off-white", label: "Off white" },
@@ -8,11 +90,6 @@ export const brandColors = [
   { token: "--color-charcoal", label: "Charcoal" },
   { token: "--color-black", label: "Black" },
   { token: "--color-neon-lime", label: "Neon lime" },
-  { token: "--color-hot-pink", label: "Hot pink" },
-  { token: "--color-sky-blue", label: "Sky blue" },
-  { token: "--color-medium-blue", label: "Medium blue" },
-  { token: "--color-royal-blue", label: "Royal blue" },
-  { token: "--color-cruise", label: "Cruise brand" },
 ] as const;
 
 export const semanticColors = [
@@ -22,17 +99,11 @@ export const semanticColors = [
   { token: "--text-secondary", label: "Text secondary (80%)" },
   { token: "--text-tertiary", label: "Text tertiary (60%)" },
   { token: "--accent", label: "Accent" },
-  { token: "--accent-secondary", label: "Accent secondary" },
   { token: "--rule-light", label: "Rule light" },
   { token: "--rule-strong", label: "Rule strong" },
   { token: "--surface-white", label: "Surface white" },
-] as const;
-
-export const surfaces = [
-  { token: "--surface-light", className: "theme-light", label: "Light (paper)" },
-  { token: "--surface-white", className: "theme-white", label: "White" },
-  { token: "--canvas-blue", className: "theme-canvas", label: "Canvas (royal blue)" },
-  { token: "--section-dark-bg", className: "theme-dark", label: "Dark (black)" },
+  { token: "--surface-light-dim", label: "Surface light dim" },
+  { token: "--section-dark-lift", label: "Section dark lift" },
 ] as const;
 
 export type TypographyRampEntry = {
@@ -314,11 +385,20 @@ export const vignettePanelWidths = [
   { kind: "Landscape 16×9", cols: "12 / 12", className: ".vframe--16x9" },
 ] as const;
 
+export const vignetteClientBrandPanels = clientBrandColorEntries.map(
+  ({ id, token, client, role, hex }) => ({
+    id,
+    token,
+    label: `${client} ${role.toLowerCase()}`,
+    hex,
+  }),
+);
+
 export const vignettePanelSurfaces = [
   { id: "default", token: "--panel-surface", label: "Default ground" },
   { id: "secondary", token: "--panel-surface-secondary", label: "Secondary lift" },
   { id: "tertiary", token: "--panel-surface-tertiary", label: "Tertiary lift" },
-  { id: "brand", token: "--color-cruise", label: "Brand (Cruise orange)" },
+  ...vignetteClientBrandPanels,
 ] as const;
 
 export const caseStudyDetailPatterns = [
@@ -388,12 +468,13 @@ export const gridSpans = [
   { className: "col-span-narrow", columns: "2–8 on lg" },
 ] as const;
 
-export const themes = [
-  { className: "theme-light", label: "Light", note: "Off-white bg · black text" },
-  { className: "theme-dark", label: "Dark", note: "Black bg · paper text · menu overlay" },
-  { className: "theme-canvas", label: "Canvas", note: "Royal blue bg · paper text" },
-  { className: "theme-white", label: "White", note: "Pure white bg · black text" },
-] as const;
+export const themes = surfaces.map(({ className, label, textOn, note }) => ({
+  className,
+  label,
+  note: note
+    ? `${note} · ${textOn} text`
+    : `${textOn === "ink" ? "Ink" : "Paper"} text`,
+}));
 
 export const fonts = [
   { token: "--font-geist-sans", usage: "Body & UI (Geist Sans)" },

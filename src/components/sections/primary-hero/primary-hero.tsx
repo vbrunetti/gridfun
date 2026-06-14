@@ -1,7 +1,11 @@
+import { Fragment } from "react";
 import type { HeroSlate, HomeCoverSection } from "@/content/site";
-import { presetsForChapterCount } from "./particle-presets";
-import { HERO_SPARK_PRESETS } from "./spark-hero-config";
-import { HomeCoverSentinel, HeroChapterPanel } from "./hero-chapter-panel";
+import { normalizeHeroChapterPresets, HERO_SPARK_PRESETS } from "./spark-hero-config";
+import {
+  HomeCoverSentinel,
+  HomeHeroChapterStop,
+  HeroChapterPanel,
+} from "./hero-chapter-panel";
 import { HomeScroll } from "./home-scroll";
 import { HomeSecondaryFixed } from "./home-secondary-fixed";
 import { HomeSparkPin } from "./home-spark-pin";
@@ -10,6 +14,11 @@ type HomeSecondaryContent = {
   eyebrow: string;
   headline: string;
   subhead: string;
+  cta: {
+    href: string;
+    label: string;
+    screenReaderLabel: string;
+  };
 };
 
 type PrimaryHeroProps = {
@@ -24,10 +33,7 @@ export function PrimaryHero({
   secondary,
 }: PrimaryHeroProps) {
   const slateCount = slates.length;
-  const sparkPresets =
-    slateCount === HERO_SPARK_PRESETS.length
-      ? HERO_SPARK_PRESETS
-      : presetsForChapterCount(Math.max(slateCount, 1));
+  const sparkPresets = normalizeHeroChapterPresets(HERO_SPARK_PRESETS, slateCount);
 
   if (slateCount === 0) return null;
 
@@ -39,14 +45,20 @@ export function PrimaryHero({
     >
       <HomeSparkPin presets={sparkPresets} />
 
-      {slates.map((slate, index) => (
-        <HeroChapterPanel
-          key={slate.id}
-          slate={slate}
-          chapterIndex={index}
-          isHandoffChapter={Boolean(secondary) && index === slateCount - 1}
-        />
-      ))}
+      {slates.map((slate, index) => {
+        const isHandoffChapter = Boolean(secondary) && index === slateCount - 1;
+
+        return (
+          <Fragment key={slate.id}>
+            {isHandoffChapter ? <HomeHeroChapterStop /> : null}
+            <HeroChapterPanel
+              slate={slate}
+              chapterIndex={index}
+              isHandoffChapter={isHandoffChapter}
+            />
+          </Fragment>
+        );
+      })}
 
       {secondary ? (
         <>
@@ -55,6 +67,7 @@ export function PrimaryHero({
             eyebrow={secondary.eyebrow}
             headline={secondary.headline}
             subhead={secondary.subhead}
+            cta={secondary.cta}
             label={coverSections[0]?.label ?? "Selected work"}
           />
         </>

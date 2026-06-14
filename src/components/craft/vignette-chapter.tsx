@@ -9,7 +9,11 @@ import {
   useRef,
   useState,
 } from "react";
-import type { CraftVignette, ImageRatio, VignetteImage } from "@/content/portfolio";
+import type { CraftVignette, ImageRatio, PanelBg, VignetteImage } from "@/content/portfolio";
+import {
+  clientBrandColorVar,
+  isClientBrandColor,
+} from "@/lib/client-brand-colors";
 import { vignetteFrameSrc } from "@/lib/portfolio-assets";
 import { parseVimeoId } from "@/lib/vimeo";
 import { VimeoPlayer } from "@/components/media/vimeo-embed";
@@ -70,43 +74,19 @@ function prefersReducedMotion(): boolean {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-type PanelBg = "default" | "secondary" | "tertiary" | "brand";
-
-const CRUISE_VIGNETTE_SLUG = "semantic-color-shape";
-
-function hashSlug(s: string): number {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
-  return Math.abs(h);
-}
-
-function pickMediaAccentPanels(
-  frames: VignetteImage[],
-  seed: string,
-): Map<number, "secondary" | "tertiary"> {
-  const mediaIndices = frames
-    .map((f, i) => (!f.colorField ? i : -1))
-    .filter((i) => i >= 0);
-  if (mediaIndices.length < 2) return new Map();
-
-  const shuffled = [...mediaIndices];
-  let seedNum = hashSlug(seed);
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    seedNum = (seedNum * 1103515245 + 12345) & 0x7fffffff;
-    const j = seedNum % (i + 1);
-    [shuffled[i], shuffled[j]] = [shuffled[j]!, shuffled[i]!];
+function panelBgVar(bg: PanelBg, colorway: "dark" | "white" = "dark"): string {
+  if (bg === "brand" || isClientBrandColor(bg)) {
+    return clientBrandColorVar(bg === "brand" ? "cruise-primary" : bg);
   }
 
-  return new Map([
-    [shuffled[0]!, "secondary"],
-    [shuffled[1]!, "tertiary"],
-  ]);
-}
+  if (colorway === "white") {
+    if (bg === "secondary") return "var(--panel-surface-secondary)";
+    if (bg === "tertiary") return "var(--panel-surface-tertiary)";
+    return "var(--panel-surface)";
+  }
 
-function panelBgVar(bg: PanelBg): string {
   if (bg === "secondary") return "var(--panel-surface-secondary)";
   if (bg === "tertiary") return "var(--panel-surface-tertiary)";
-  if (bg === "brand") return "var(--color-cruise)";
   return "var(--panel-surface)";
 }
 
@@ -204,38 +184,24 @@ export function VignetteChapter({
   chapterNumber,
   date,
   showTitlePanel = true,
+  colorway = "dark",
 }: {
   vignette: CraftVignette;
   chapterNumber: number;
   date?: string;
   /** Opener panel (numeral + title + tags). Off when the page hero already covers it. */
   showTitlePanel?: boolean;
+  /** Surface theme for the filmstrip — white on standalone craft detail. */
+  colorway?: "dark" | "white";
 }) {
   const frames = vignette.images;
   const total = frames.length;
   const titlePanelOffset = showTitlePanel ? 1 : 0;
   const steps = total + titlePanelOffset;
-  const isCruisePrototype = vignette.slug === CRUISE_VIGNETTE_SLUG;
-
-  const mediaAccentPanels = useMemo(
-    () =>
-      isCruisePrototype
-        ? pickMediaAccentPanels(frames, vignette.slug)
-        : new Map<number, "secondary" | "tertiary">(),
-    [frames, isCruisePrototype, vignette.slug],
-  );
 
   const framePanelBgs = useMemo(
-    () =>
-      frames.map((frame, i) => {
-        if (isCruisePrototype && i === total - 1) return "brand" as PanelBg;
-        if (!frame.colorField) {
-          const accent = mediaAccentPanels.get(i);
-          if (accent) return accent;
-        }
-        return "default" as PanelBg;
-      }),
-    [frames, isCruisePrototype, mediaAccentPanels, total],
+    () => frames.map((frame) => frame.panelBg ?? "default"),
+    [frames],
   );
 
   const panelKinds = useMemo<PanelKind[]>(
@@ -498,15 +464,18 @@ export function VignetteChapter({
 
   const lastFrameBg =
     total > 0 ? framePanelBgs[total - 1]! : ("default" as PanelBg);
-  const hasColorfulLastPanel = lastFrameBg !== "default";
+
+  const themeClass = colorway === "white" ? "theme-white" : "theme-dark";
+  const chromeSurface = colorway === "white" ? "light" : "dark";
 
   return (
     <section
       ref={sectionRef}
-      className="cs-focus-section vchapter theme-dark"
+      className={`cs-focus-section vchapter ${themeClass}`}
       id={`vignette-${vignette.slug}`}
       data-cs-detail-row
-      data-chrome-surface="dark"
+      data-chrome-surface={chromeSurface}
+      data-colorway={colorway}
       aria-roledescription="vignette chapter"
       aria-label={vignette.name}
     >
@@ -565,7 +534,7 @@ export function VignetteChapter({
                 data-vframe-index={idx}
                 data-panel-bg={panelBg}
                 style={{
-                  ["--panel-bg" as string]: panelBgVar(panelBg),
+                  ["--panel-bg" as string]: panelBgVar(panelBg, colorway),
                 }}
                 aria-hidden={idx !== index}
               >
@@ -578,15 +547,14 @@ export function VignetteChapter({
               </article>
             );
           })}
-          {hasColorfulLastPanel ? (
-            <div
-              className={`vchapter__trail${
-                index === steps - 1 ? " is-active" : ""
-              }`}
-              aria-hidden
-              style={{ background: panelBgVar(lastFrameBg) }}
-            />
-          ) : null}
+          <div
+            className={`vchapter__trail${
+              index === steps - 1 ? " is-active" : ""
+            }`}
+            aria-hidden
+            data-panel-bg={lastFrameBg}
+            style={{ background: panelBgVar(lastFrameBg, colorway) }}
+          />
         </div>
       </div>
     </section>

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import {
   hexToRgb,
+  palette,
   rgbaFromRgb,
   sampleSparkPaletteRgb,
   sparkPalette,
@@ -76,7 +77,7 @@ type SparkParticle = {
   colorOffset: number;
 };
 
-const INK_RGB: Rgb = hexToRgb("#1C1916");
+const INK_RGB: Rgb = hexToRgb(palette.ink);
 
 function spawnParticle(
   params: ResolvedParticleParams,

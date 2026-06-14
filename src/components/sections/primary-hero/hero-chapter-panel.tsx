@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { RuledGrid } from "@/components/layout/ruled-grid";
 import type { HeroSlate } from "@/content/site";
 import { HeroSlateCopy } from "./hero-chapter-copy";
@@ -28,6 +29,16 @@ export function HeroChapterPanel({
         </div>
       </RuledGrid>
     </section>
+  );
+}
+
+/** Snap anchor at the last hero chapter boundary — stops scroll without blocking handoff motion. */
+export function HomeHeroChapterStop() {
+  return (
+    <div
+      className="home-scroll-panel home-hero-chapter-stop"
+      aria-hidden
+    />
   );
 }
 

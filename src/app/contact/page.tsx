@@ -13,11 +13,11 @@ export default function ContactPage() {
 
   return (
     <div className="theme-light" data-chrome-surface="light">
-      <header className="keyline-b bg-[var(--surface-light)]">
+      <header className="keyline-b">
         <RuledGrid className="py-12">
           <SiteGridSubgrid className="lg:items-end">
             <h1 className="display-xl grid-span-6 lg:grid-span-5">{contact.headline}</h1>
-            <div className="grid-span-6 border-[var(--rule-strong)] lg:grid-span-7 lg:border-l lg:pl-8">
+            <div className="grid-span-6 border-rule-strong lg:grid-span-7 lg:border-l lg:pl-8">
               <p className="body-sm text-secondary">
                 {contact.address.map((line) => (
                   <span key={line}>

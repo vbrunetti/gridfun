@@ -27,7 +27,14 @@ html {
   --color-medium-blue: #2962ff;
   --color-electric-blue: #2962ff;
   --color-royal-blue: #0033ff;
-  --color-cruise: #ff4d37;
+  --color-cruise-primary: #fe4a35;
+  --color-cruise: var(--color-cruise-primary);
+  --color-pearson-primary: #0f0051;
+  --color-pearson-secondary: #572cb2;
+  --color-google-primary: #3888ff;
+  --color-google-secondary: #00ab3d;
+  --color-google-tertiary: #f62d1b;
+  --color-google-quaternary: #ffba00;
 
   /* Text on light surfaces */
   --text-primary: var(--color-ink);
@@ -73,7 +80,9 @@ html {
 
   /* Section surfaces */
   --surface-light: var(--color-paper);
+  --surface-light-dim: color-mix(in srgb, var(--color-ink) 6%, var(--color-paper));
   --surface-white: var(--color-white);
+  --section-dark-lift: color-mix(in srgb, var(--color-paper) 10%, var(--color-black));
   --canvas-blue: var(--color-neon-lime);
   --content-max: var(--grid-max);
   --media-column: min(100%, 22rem);
@@ -137,11 +146,84 @@ html {
   color: var(--text-primary);
 }
 
+/* Slightly lighter than black — paper text, same tokens as theme-dark. */
+.theme-dark-lift {
+  --text-primary: var(--color-paper);
+  --text-secondary: color-mix(in srgb, var(--color-paper) 80%, transparent);
+  --text-tertiary: color-mix(in srgb, var(--color-paper) 60%, transparent);
+  --foreground: var(--text-primary);
+  --rule-light: color-mix(in srgb, var(--color-paper) 18%, transparent);
+  --rule-strong: color-mix(in srgb, var(--color-paper) 40%, transparent);
+  --panel-surface: var(--section-dark-lift);
+
+  background: var(--section-dark-lift);
+  color: var(--text-primary);
+}
+
+/* Client brand section surfaces — paper text */
+.theme-pearson-primary,
+.theme-pearson-secondary,
+.theme-google-primary,
+.theme-google-secondary,
+.theme-google-tertiary,
+.theme-cruise-primary {
+  --text-primary: var(--color-paper);
+  --text-secondary: color-mix(in srgb, var(--color-paper) 80%, transparent);
+  --text-tertiary: color-mix(in srgb, var(--color-paper) 60%, transparent);
+  --foreground: var(--text-primary);
+  --rule-light: color-mix(in srgb, var(--color-paper) 22%, transparent);
+  --rule-strong: color-mix(in srgb, var(--color-paper) 45%, transparent);
+  color: var(--text-primary);
+}
+
+.theme-pearson-primary {
+  background: var(--color-pearson-primary);
+}
+.theme-pearson-secondary {
+  background: var(--color-pearson-secondary);
+}
+.theme-google-primary {
+  background: var(--color-google-primary);
+}
+.theme-google-secondary {
+  background: var(--color-google-secondary);
+}
+.theme-google-tertiary {
+  background: var(--color-google-tertiary);
+}
+.theme-cruise-primary {
+  background: var(--color-cruise-primary);
+}
+
+/* Google quaternary — ink text on yellow */
+.theme-google-quaternary {
+  --text-primary: var(--color-ink);
+  --text-secondary: color-mix(in srgb, var(--color-ink) 75%, transparent);
+  --text-tertiary: color-mix(
+    in srgb,
+    var(--color-charcoal) 50%,
+    var(--color-medium-gray)
+  );
+  --foreground: var(--text-primary);
+  --rule-light: color-mix(in srgb, var(--color-ink) 14%, transparent);
+  --rule-strong: var(--color-ink);
+  background: var(--color-google-quaternary);
+  color: var(--text-primary);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  /* Client brand — Tailwind bg-pearson-primary, text-google-tertiary, etc. (sync client-brand-colors.ts) */
+  --color-pearson-primary: #0f0051;
+  --color-pearson-secondary: #572cb2;
+  --color-google-primary: #3888ff;
+  --color-google-secondary: #00ab3d;
+  --color-google-tertiary: #f62d1b;
+  --color-google-quaternary: #ffba00;
+  --color-cruise-primary: #fe4a35;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -175,6 +257,18 @@ body {
 
 .text-tertiary {
   color: var(--text-tertiary);
+}
+
+.text-accent {
+  color: var(--accent);
+}
+
+.border-rule-strong {
+  border-color: var(--rule-strong);
+}
+
+.border-rule-light {
+  border-color: var(--rule-light);
 }
 
 /* Site menu — current route highlighted in accent */
@@ -404,8 +498,8 @@ body {
 .skeleton-column {
   min-height: 100%;
   box-sizing: border-box;
-  background: color-mix(in srgb, #ff00ff 15%, transparent);
-  box-shadow: inset -1px 0 0 color-mix(in srgb, #ff00ff 50%, transparent);
+  background: color-mix(in srgb, var(--rule-light) 35%, transparent);
+  box-shadow: inset -1px 0 0 var(--rule-light);
 }
 
 .skeleton-column:last-child {
@@ -438,7 +532,13 @@ body {
 }
 
 .theme-light {
-  background: var(--color-paper);
+  background: var(--surface-light);
+  color: var(--text-primary);
+}
+
+/* Slightly darker than paper — still ink text. */
+.theme-light-dim {
+  background: var(--surface-light-dim);
   color: var(--text-primary);
 }
 
@@ -455,6 +555,28 @@ body {
 }
 
 .theme-white {
+  --text-primary: var(--color-ink);
+  --text-secondary: color-mix(in srgb, var(--color-ink) 75%, transparent);
+  --text-tertiary: color-mix(
+    in srgb,
+    var(--color-charcoal) 50%,
+    var(--color-medium-gray)
+  );
+  --foreground: var(--text-primary);
+  --rule-light: color-mix(in srgb, var(--color-ink) 12%, transparent);
+  --rule-strong: var(--color-ink);
+  --panel-surface: var(--surface-white);
+  --panel-surface-secondary: color-mix(
+    in srgb,
+    var(--color-ink) 5%,
+    var(--surface-white)
+  );
+  --panel-surface-tertiary: color-mix(
+    in srgb,
+    var(--color-ink) 10%,
+    var(--surface-white)
+  );
+
   background: var(--surface-white);
   color: var(--text-primary);
 }
@@ -557,6 +679,16 @@ html:has(.home-scroll:not(.home-scroll--static)) {
 .hero-chapter-panel.home-scroll-panel--handoff {
   scroll-snap-align: none;
   scroll-snap-stop: normal;
+}
+
+/* Snap anchor before the handoff chapter — stops scroll without blocking motion through it */
+.home-hero-chapter-stop.home-scroll-panel {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  height: 1px;
+  margin-bottom: -1px;
+  overflow: visible;
+  pointer-events: none;
 }
 
 .home-cover-sentinel.home-scroll-panel {
@@ -698,7 +830,7 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
   min-height: 0;
 }
 
-.home-secondary-copy {
+.home-secondary-stage > .home-secondary-copy {
   grid-column: 1 / -1;
   grid-row: 1;
   display: grid;
@@ -713,67 +845,14 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
 }
 
 @media (min-width: 1024px) {
-  .home-secondary-copy {
-    grid-column: 1 / 8;
+  .home-secondary-stage > .home-secondary-copy {
+    grid-column: 1 / span 8;
     padding-block: clamp(1.25rem, 4vh, 2.5rem);
   }
 }
 
 .home-secondary-cta {
-  grid-column: -2 / -1;
-  grid-row: 1;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  align-self: center;
-  width: 100%;
-  min-width: 0;
-  height: 100%;
-  min-height: 0;
-  overflow: visible;
-  padding-block: max(var(--chrome-top-offset), 1rem)
-    clamp(1rem, 3vh, 2rem);
-  pointer-events: none;
-}
-
-@media (min-width: 1024px) {
-  .home-secondary-cta {
-    grid-column: 12 / -1;
-    padding-block: clamp(1.25rem, 4vh, 2.5rem);
-  }
-}
-
-.home-secondary-arrow-btn {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  width: 100%;
-  color: var(--text-primary);
-  line-height: 0;
-  transition: opacity 0.2s ease, transform 0.2s ease;
   pointer-events: auto;
-}
-
-.home-secondary-arrow-btn:hover {
-  opacity: 0.72;
-}
-
-.home-secondary-arrow-btn:focus-visible {
-  outline: 2px solid var(--text-primary);
-  outline-offset: 0.35rem;
-}
-
-.home-secondary-arrow-btn__icon {
-  display: block;
-  font-size: clamp(4.8rem, 24.8vmin, 22.4rem);
-  line-height: 0.82;
-  text-align: right;
-}
-
-@media (min-width: 1024px) {
-  .home-secondary-arrow-btn__icon {
-    font-size: clamp(5.6rem, 28.8vh, 25.6rem);
-  }
 }
 
 
@@ -1109,6 +1188,107 @@ html:has(.cs-detail) {
   transform: translateY(-50%);
   overflow: visible;
   pointer-events: none;
+}
+
+/* Effects playground — cols 1–6 config rail, cols 7–12 home-sized spark */
+.spark-playground-workspace {
+  width: 100%;
+}
+
+.spark-playground-band {
+  --home-cover-peek: 20dvh;
+  --spark-playground-band-height: calc(100dvh - var(--home-cover-peek));
+  position: relative;
+  min-height: var(--spark-playground-band-height);
+  overflow: visible;
+  border-block: 1px solid var(--rule-light);
+  background: var(--surface-white);
+}
+
+@media (max-width: 1023px) {
+  .spark-playground-band {
+    --spark-playground-band-height: calc(
+      100dvh - var(--home-cover-peek) - var(--chrome-top-offset)
+    );
+  }
+}
+
+.spark-playground-band__layout {
+  position: relative;
+  z-index: 1;
+  min-height: var(--spark-playground-band-height);
+  align-items: stretch;
+}
+
+.spark-playground-rail {
+  grid-column: 1 / -1;
+  min-width: 0;
+  max-height: var(--spark-playground-band-height);
+  overflow-y: auto;
+  background: var(--surface-white);
+  padding-block: max(var(--chrome-top-offset), 1rem)
+    clamp(1rem, 3vh, 2rem);
+  padding-inline-end: clamp(1rem, 2vw, 1.5rem);
+}
+
+.spark-playground-viz {
+  grid-column: 1 / -1;
+  position: relative;
+  min-height: min(28rem, 55dvh);
+  pointer-events: none;
+}
+
+.spark-playground-viz__caption {
+  position: absolute;
+  right: 0;
+  bottom: 0.75rem;
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  color: var(--text-tertiary);
+}
+
+@media (min-width: 1024px) {
+  .spark-playground-rail {
+    grid-column: 1 / span 6;
+    padding-block: clamp(1.25rem, 4vh, 2.5rem);
+  }
+
+  .spark-playground-viz {
+    grid-column: 7 / span 6;
+    min-height: var(--spark-playground-band-height);
+  }
+}
+
+@media (max-width: 1023px) {
+  .spark-playground-rail {
+    max-height: none;
+  }
+}
+
+.spark-playground-chapter-select {
+  appearance: none;
+  cursor: pointer;
+  border: 1px solid var(--rule-light);
+  background-color: var(--surface-white);
+  color: var(--text-primary);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.5 4.5L6 8L9.5 4.5' stroke='%23666' stroke-width='1.25' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-inline-end: 2rem;
+}
+
+.spark-playground-chapter-select:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 2px;
+}
+
+.spark-playground-chapter-select option {
+  text-transform: capitalize;
+}
+
+.spark-playground-viz-actions {
+  min-width: 0;
 }
 
 .primary-hero-spark-layer canvas {
@@ -1966,9 +2146,21 @@ a.craft-card:focus-visible {
 
 /* ── Case studies index (/case-studies) ─────────────────── */
 @media (max-width: 1023px) {
+  html:has(.cs-index-route),
+  body:has(.cs-index-route) {
+    background: var(--section-dark-bg);
+  }
+
   .cs-index-route {
     padding-top: var(--chrome-top-offset);
     background: var(--section-dark-bg);
+  }
+}
+
+/* Dark left rail labels on the case studies index */
+@media (min-width: 1024px) {
+  body:has(.cs-index-route) .chrome-rail .rail-label-vertical {
+    color: color-mix(in srgb, var(--color-paper) 70%, transparent);
   }
 }
 
@@ -1976,10 +2168,6 @@ a.craft-card:focus-visible {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-}
-
-.cs-index-intro.theme-white {
-  background: var(--surface-white);
 }
 
 .cs-index-hero-header {
@@ -2216,7 +2404,106 @@ a.craft-card:focus-visible {
   font-size: 0.85rem;
   font-weight: 700;
   text-transform: uppercase;
+  background: var(--color-charcoal);
   color: var(--color-paper);
+}
+
+/* ── Logo placeholder (until image assets ship) ── */
+.logo-mark-placeholder {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  border-width: 1px;
+  border-style: solid;
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.logo-mark-placeholder--default {
+  border-color: var(--rule-strong);
+  background: var(--background);
+  color: var(--text-primary);
+}
+
+.logo-mark-placeholder--reversed {
+  border-color: var(--background);
+  background: var(--foreground);
+  color: var(--background);
+}
+
+/* ── Chrome rail (fixed paper chrome) ── */
+.chrome-rail {
+  border-right: 1px solid var(--rule-strong);
+}
+
+.chrome-rail.theme-light {
+  background: var(--surface-light);
+}
+
+.chrome-rail.theme-dark {
+  background: var(--section-dark-bg);
+}
+
+.chrome-rail__logo-slot {
+  min-height: calc(var(--chrome-hit) + var(--chrome-pad) * 2);
+}
+
+/* ── Primary CTA — accent fill, theme-aware ink/paper contrast ── */
+.cta-button--primary {
+  border-radius: 9999px;
+  background: var(--accent);
+  padding: 0.625rem 1.25rem;
+  font-size: var(--type-body-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  transition: opacity 0.15s ease;
+}
+
+.cta-button--primary:hover {
+  opacity: 0.9;
+}
+
+.cta-button__icon {
+  display: inline-flex;
+  height: 1.5rem;
+  width: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--text-primary) 12%, transparent);
+  font-size: 0.75rem;
+  color: var(--text-primary);
+}
+
+/* ── Media / vimeo placeholder ground ── */
+.media-frame-ground {
+  border: 1px solid var(--rule-light);
+  background: color-mix(in srgb, var(--color-light-gray) 40%, transparent);
+}
+
+/* ── Design-system spec table header band ── */
+.ds-spec-table-head {
+  background: var(--surface-light-dim);
+}
+
+/* ── Dev / effects UI chips ── */
+.ui-chip {
+  border: 1px solid var(--rule-light);
+  color: var(--text-secondary);
+}
+
+.ui-chip--active {
+  border-color: var(--foreground);
+  background: var(--foreground);
+  color: var(--background);
+}
+
+.text-error {
+  color: var(--color-hot-pink);
 }
 
 /* ── Chrome focus dimming (dot-nav scroll experiences) ───── */
@@ -2906,6 +3193,23 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
   position: relative;
 }
 
+/* Standalone craft detail — white filmstrip; never wash to gray via section dimming. */
+.vchapter.theme-white.cs-focus-section {
+  opacity: 1;
+}
+
+.vchapter.theme-white .vchapter__pin,
+.vchapter.theme-white .vframe.vframe--title {
+  background: var(--panel-surface);
+  color: var(--text-primary);
+}
+
+.vchapter.theme-white .vframe {
+  background: var(--panel-bg, var(--panel-surface));
+  color: var(--text-primary);
+  --vrule: var(--rule-light);
+}
+
 @media (min-width: 768px) {
   .vchapter {
     height: 100svh;
@@ -3085,9 +3389,16 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
   width: calc(100cqw * 6 / 12);
 }
 
-/* Cruise brand panel — paper text on orange. */
-.vframe[data-panel-bg="brand"] {
+/* Client brand panels — paper text on saturated grounds. */
+.vframe[data-panel-bg="brand"],
+.vframe[data-panel-bg^="pearson-"],
+.vframe[data-panel-bg^="google-"]:not([data-panel-bg="google-quaternary"]),
+.vframe[data-panel-bg^="cruise-"] {
   color: var(--color-paper);
+}
+
+.vframe[data-panel-bg="google-quaternary"] {
+  color: var(--color-ink);
 }
 
 /* ── Prose beat — lives in the main band ── */
@@ -3194,5 +3505,80 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
 
   .vframe__media-box {
     min-height: 40vh;
+  }
+}
+
+/* ── Detail nav footer — craft vignette + case study ── */
+.cs-detail-footer {
+  --cs-detail-footer-gap: 0.5rem;
+  row-gap: var(--cs-detail-footer-gap);
+  align-items: start;
+}
+
+.cs-detail-footer__kicker,
+.cs-detail-footer__title {
+  margin: 0;
+  min-width: 0;
+}
+
+.cs-detail-footer__kicker--prev,
+.cs-detail-footer__title--prev,
+.cs-detail-footer__kicker--next,
+.cs-detail-footer__title--next,
+.cs-detail-footer__kicker--solo,
+.cs-detail-footer__title--solo,
+.cs-detail-footer__fallback {
+  grid-column: 1 / -1;
+}
+
+.cs-detail-footer__fallback {
+  justify-self: start;
+}
+
+@media (min-width: 1024px) {
+  .cs-detail-footer__kicker--prev {
+    grid-column: 1 / span 6;
+    grid-row: 1;
+  }
+
+  .cs-detail-footer__title--prev {
+    grid-column: 1 / span 6;
+    grid-row: 2;
+  }
+
+  .cs-detail-footer__kicker--next {
+    grid-column: 7 / span 6;
+    grid-row: 1;
+    text-align: right;
+  }
+
+  .cs-detail-footer__title--next {
+    grid-column: 7 / span 6;
+    grid-row: 2;
+    text-align: right;
+  }
+
+  .cs-detail-footer__kicker--solo {
+    grid-column: 1 / span 4;
+    grid-row: 1;
+  }
+
+  .cs-detail-footer__title--solo {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    text-align: right;
+  }
+
+  .cs-detail-footer__fallback--end {
+    grid-column: 7 / span 6;
+    grid-row: 1 / span 2;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    align-self: stretch;
+  }
+
+  .cs-detail-footer__fallback:not(.cs-detail-footer__fallback--end) {
+    grid-column: 1 / -1;
   }
 }

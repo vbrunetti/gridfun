@@ -12,10 +12,8 @@ type LogoMarkProps = {
  * Square logo — add `/public/logo-light.png` and `/public/logo-dark.png`.
  */
 const placeholderClasses: Record<LogoMarkVariant, string> = {
-  default:
-    "border-[var(--rule-strong)] bg-[var(--color-paper)] text-[var(--color-ink)]",
-  reversed:
-    "border-[var(--color-paper)] bg-[var(--color-paper)] text-[var(--color-ink)]",
+  default: "logo-mark-placeholder logo-mark-placeholder--default",
+  reversed: "logo-mark-placeholder logo-mark-placeholder--reversed",
 };
 
 export function LogoMark({ onNavigate, variant = "default" }: LogoMarkProps) {
@@ -39,7 +37,7 @@ export function LogoMark({ onNavigate, variant = "default" }: LogoMarkProps) {
         />
       ) : (
         <div
-          className={`flex h-full w-full items-center justify-center border transition-colors duration-150 text-[0.5rem] font-bold tracking-widest ${placeholderClasses[variant]}`}
+          className={`logo-mark-placeholder ${placeholderClasses[variant]}`}
           aria-hidden
         >
           LOGO

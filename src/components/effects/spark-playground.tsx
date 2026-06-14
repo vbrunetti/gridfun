@@ -1,99 +1,64 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { SparkPlaygroundControls } from "@/components/effects/spark-playground-controls";
+import { RuledGrid } from "@/components/layout/ruled-grid";
+import { SiteGridSubgrid } from "@/components/layout/site-grid";
+import { PrimaryHeroSparkLayer } from "@/components/sections/primary-hero/primary-hero-spark-layer";
 import {
   DEFAULT_CHAPTER_PRESETS,
-  PRESET_PARAM_GROUPS,
-  PRESET_PARAM_META,
-  TREFOIL_FAMILY_SHAPES,
   type ParticlePreset,
   type ParticleShape,
 } from "@/components/sections/primary-hero/particle-presets";
 import {
-  HERO_SPARK_PRESETS,
+  HERO_SPARK_COLOR,
   HERO_SPARK_SHAPE_SCALE,
   HERO_SPARK_SNAPSHOT,
-  presetsForHeroChapters,
+  HOME_HERO_CHAPTER_COUNT,
+  normalizeHeroChapterPresets,
 } from "@/components/sections/primary-hero/spark-hero-config";
-import {
-  SparkCanvas,
-  type SparkBlend,
-} from "@/components/sections/primary-hero/spark-canvas";
+import { heroSlates } from "@/content/site";
 import { createDefaultSparkHeroSnapshot } from "@/lib/spark-hero-snapshot";
-import {
-  readSparkTunerDraft,
-  snapshotFromTunerState,
-  writeSparkTunerDraft,
-} from "@/lib/spark-tuner-storage";
-import { RuledGrid } from "@/components/layout/ruled-grid";
-import { SiteGridSubgrid } from "@/components/layout/site-grid";
+import { snapshotFromTunerState } from "@/lib/spark-tuner-storage";
+import type { SparkBlend } from "@/components/sections/primary-hero/spark-canvas";
 
 function clonePresets(presets: ParticlePreset[]) {
-  return presets.map((p) => ({ ...p }));
+  return presets.map((preset) => ({ ...preset }));
 }
 
 function applySnapshot(snapshot: typeof HERO_SPARK_SNAPSHOT) {
   return {
-    presets: clonePresets(snapshot.presets),
-    showBoundary: snapshot.showBoundary ?? true,
+    presets: normalizeHeroChapterPresets(snapshot.presets),
+    showBoundary: snapshot.showBoundary ?? false,
   };
 }
 
+function homeSnapshotState() {
+  return applySnapshot(HERO_SPARK_SNAPSHOT);
+}
+
+function defaultPresetsForChapter(chapterIndex: number) {
+  return normalizeHeroChapterPresets(DEFAULT_CHAPTER_PRESETS)[chapterIndex]!;
+}
+
 export function SparkPlayground() {
-  const [ready, setReady] = useState(false);
-  const [presets, setPresets] = useState(() => clonePresets(HERO_SPARK_PRESETS));
+  const homeState = homeSnapshotState();
+  const [presets, setPresets] = useState(() => clonePresets(homeState.presets));
   const [activeChapter, setActiveChapter] = useState(0);
   const [shapeScale, setShapeScale] = useState(HERO_SPARK_SHAPE_SCALE);
-  const [showBoundary, setShowBoundary] = useState(
-    HERO_SPARK_SNAPSHOT.showBoundary ?? true,
-  );
+  const [showBoundary, setShowBoundary] = useState(homeState.showBoundary);
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [draftSource, setDraftSource] = useState<"draft" | "saved" | "defaults">(
-    "saved",
+
+  const chapterLabels = useMemo(
+    () =>
+      heroSlates.map(
+        (slate, index) => slate.eyebrow ?? slate.headline ?? `Chapter ${index + 1}`,
+      ),
+    [],
   );
-
-  useEffect(() => {
-    const draft = readSparkTunerDraft();
-    if (draft) {
-      const next = applySnapshot({
-        ...draft,
-        presets: clonePresets(
-          draft.presets.length > 0
-            ? draft.presets
-            : presetsForHeroChapters(HERO_SPARK_SNAPSHOT.presets),
-        ),
-      });
-      setPresets(next.presets);
-      setShowBoundary(next.showBoundary);
-      setDraftSource("draft");
-    } else {
-      const next = applySnapshot({
-        ...HERO_SPARK_SNAPSHOT,
-        presets: HERO_SPARK_PRESETS,
-      });
-      setPresets(next.presets);
-      setShowBoundary(next.showBoundary);
-      setShapeScale(HERO_SPARK_SHAPE_SCALE);
-      setDraftSource("saved");
-    }
-    setReady(true);
-  }, []);
-
-  useEffect(() => {
-    if (!ready) return;
-    writeSparkTunerDraft(
-      snapshotFromTunerState({
-        presets,
-        colorMode: "ink",
-        compositeMode: "source-over",
-        colorCycleSpeed: HERO_SPARK_SNAPSHOT.color.colorCycleSpeed,
-        showBoundary,
-      }),
-    );
-  }, [ready, presets, showBoundary]);
 
   const blend: SparkBlend = useMemo(
     () => ({ from: activeChapter, to: activeChapter, t: 0 }),
@@ -103,10 +68,15 @@ export function SparkPlayground() {
   const activePreset = presets[activeChapter]!;
 
   const updatePreset = useCallback(
-    (key: keyof ParticlePreset, value: string | number) => {
+    (
+      chapterIndex: number,
+      key: keyof ParticlePreset,
+      value: string | number,
+    ) => {
       setPresets((prev) => {
         const next = clonePresets(prev);
-        const preset = { ...next[activeChapter]! };
+        const preset = { ...next[chapterIndex]! };
+
         if (key === "shape") {
           preset.shape = value as ParticleShape;
         } else if (key === "label") {
@@ -114,54 +84,48 @@ export function SparkPlayground() {
         } else if (typeof preset[key] === "number") {
           preset[key] = Number(value) as never;
         }
-        next[activeChapter] = preset;
+
+        next[chapterIndex] = preset;
         return next;
       });
+      setActiveChapter(chapterIndex);
     },
-    [activeChapter],
+    [],
   );
 
-  const resetChapter = () => {
+  const resetChapter = useCallback((chapterIndex: number) => {
     setPresets((prev) => {
       const next = clonePresets(prev);
-      next[activeChapter] = {
-        ...DEFAULT_CHAPTER_PRESETS[activeChapter]!,
-      };
+      next[chapterIndex] = { ...defaultPresetsForChapter(chapterIndex) };
       return next;
     });
-  };
+    setActiveChapter(chapterIndex);
+  }, []);
 
   const resetAll = () => {
     const defaults = createDefaultSparkHeroSnapshot();
-    const next = applySnapshot({
-      ...defaults,
-      presets: presetsForHeroChapters(defaults.presets),
-    });
+    const next = applySnapshot(defaults);
     setPresets(next.presets);
     setActiveChapter(0);
     setShapeScale(HERO_SPARK_SHAPE_SCALE);
     setShowBoundary(next.showBoundary);
-    setDraftSource("defaults");
   };
 
-  const loadSavedHomeConfig = () => {
-    const next = applySnapshot({
-      ...HERO_SPARK_SNAPSHOT,
-      presets: HERO_SPARK_PRESETS,
-    });
-    setPresets(next.presets);
+  const reloadHomeConfig = () => {
+    const next = homeSnapshotState();
+    setPresets(clonePresets(next.presets));
     setShowBoundary(next.showBoundary);
     setShapeScale(HERO_SPARK_SHAPE_SCALE);
-    setDraftSource("saved");
+    setActiveChapter(0);
   };
 
   const copySnapshot = async () => {
     const json = JSON.stringify(
       snapshotFromTunerState({
         presets,
-        colorMode: "ink",
-        compositeMode: "source-over",
-        colorCycleSpeed: HERO_SPARK_SNAPSHOT.color.colorCycleSpeed,
+        colorMode: HERO_SPARK_COLOR.colorMode,
+        compositeMode: HERO_SPARK_COLOR.compositeMode,
+        colorCycleSpeed: HERO_SPARK_COLOR.colorCycleSpeed,
         showBoundary,
       }),
       null,
@@ -175,10 +139,10 @@ export function SparkPlayground() {
   const saveAsHomeConfig = async () => {
     setSaveError(null);
     const snapshot = snapshotFromTunerState({
-      presets: presetsForHeroChapters([presets[activeChapter]!]),
-      colorMode: "ink",
-      compositeMode: "source-over",
-      colorCycleSpeed: HERO_SPARK_SNAPSHOT.color.colorCycleSpeed,
+      presets: normalizeHeroChapterPresets(presets),
+      colorMode: HERO_SPARK_COLOR.colorMode,
+      compositeMode: HERO_SPARK_COLOR.compositeMode,
+      colorCycleSpeed: HERO_SPARK_COLOR.colorCycleSpeed,
       showBoundary: false,
     });
 
@@ -195,7 +159,6 @@ export function SparkPlayground() {
         throw new Error(payload?.error ?? "Save failed");
       }
       setSaved(true);
-      setDraftSource("saved");
       window.setTimeout(() => setSaved(false), 2500);
     } catch (error) {
       setSaveError(
@@ -203,14 +166,6 @@ export function SparkPlayground() {
       );
     }
   };
-
-  if (!ready) {
-    return (
-      <RuledGrid className="py-24 text-sm text-secondary">
-        Loading playground…
-      </RuledGrid>
-    );
-  }
 
   return (
     <div className="pb-24">
@@ -221,248 +176,96 @@ export function SparkPlayground() {
               <p className="text-meta">Effects · Home hero</p>
               <h1 className="display-lg mt-3">Spark playground</h1>
               <p className="mt-4 max-w-2xl leading-relaxed text-secondary">
-                Tune the homepage hero spark layer — six scroll chapters, ink
-                particles, and shape scale. Your session auto-saves in this
-                browser. Use{" "}
+                Loaded from{" "}
+                <code className="font-mono text-xs text-primary">
+                  src/content/spark-hero-snapshot.json
+                </code>
+                . Tune all {HOME_HERO_CHAPTER_COUNT} homepage hero chapters, then
+                use{" "}
                 <strong className="font-medium text-primary">
                   Save as home config
                 </strong>{" "}
-                to write the snapshot used on{" "}
+                to write presets to{" "}
                 <Link href="/" className="border-b border-current text-primary">
                   the home page
                 </Link>
                 .
               </p>
-              {draftSource === "draft" ? (
-                <p className="mt-3 text-sm text-secondary">
-                  Restored your last browser session. If this isn&apos;t what
-                  you want, try{" "}
-                  <button
-                    type="button"
-                    onClick={loadSavedHomeConfig}
-                    className="border-b border-current text-primary"
-                  >
-                    load saved home config
-                  </button>
-                  .
-                </p>
-              ) : null}
+              <p className="mt-3 text-sm text-secondary">
+                <button
+                  type="button"
+                  onClick={reloadHomeConfig}
+                  className="border-b border-current text-primary"
+                >
+                  Reload home config
+                </button>{" "}
+                discards unsaved edits and re-reads the JSON file (restart dev
+                server after editing the file by hand).
+              </p>
             </div>
           </SiteGridSubgrid>
         </RuledGrid>
       </header>
 
-      <RuledGrid className="mt-8">
-        <SiteGridSubgrid className="lg:items-start">
-          <div className="grid-span-6 space-y-4 lg:grid-span-8 lg:sticky lg:top-4 lg:self-start">
-          <div className="relative min-h-[50dvh] overflow-visible border border-[var(--rule-light)] bg-[var(--surface-white)]">
-            <div className="primary-hero-spark-layer">
-              <SparkCanvas
-                presets={presets}
-                blend={blend}
-                showBoundary={showBoundary}
-                shapeScale={shapeScale}
-                colorMode="ink"
-                compositeMode="source-over"
-              />
-            </div>
-            <div className="pointer-events-none absolute inset-0 border border-dashed border-[var(--rule-light)]" />
-            <p className="pointer-events-none absolute bottom-3 left-3 text-xs text-tertiary">
-              {activePreset.label} · scale {shapeScale.toFixed(1)}×
-            </p>
-          </div>
+      <section className="spark-playground-workspace mt-8">
+        <RuledGrid className="spark-playground-band primary-hero-stage primary-hero-stage--split-scene">
+          <PrimaryHeroSparkLayer
+            presets={presets}
+            blend={blend}
+            showBoundary={showBoundary}
+            shapeScale={shapeScale}
+            colorMode={HERO_SPARK_COLOR.colorMode}
+            compositeMode={HERO_SPARK_COLOR.compositeMode}
+            colorCycleSpeed={HERO_SPARK_COLOR.colorCycleSpeed}
+          />
 
-          <div className="space-y-2">
-            <div className="flex flex-wrap gap-2">
+          <SiteGridSubgrid className="spark-playground-band__layout">
+            <aside className="spark-playground-rail">
+              <SparkPlaygroundControls
+                presets={presets}
+                chapterLabels={chapterLabels}
+                activeChapter={activeChapter}
+                shapeScale={shapeScale}
+                showBoundary={showBoundary}
+                copied={copied}
+                onSelectChapter={setActiveChapter}
+                onUpdatePreset={updatePreset}
+                onResetChapter={resetChapter}
+                onShapeScaleChange={setShapeScale}
+                onShowBoundaryChange={setShowBoundary}
+                onResetAll={resetAll}
+                onCopySnapshot={copySnapshot}
+              />
+            </aside>
+
+            <div className="spark-playground-viz" aria-hidden>
+              <p className="spark-playground-viz__caption">
+                Ch {activeChapter + 1} · {activePreset.label} · scale{" "}
+                {shapeScale.toFixed(1)}×
+              </p>
+            </div>
+          </SiteGridSubgrid>
+        </RuledGrid>
+
+        <RuledGrid className="spark-playground-save-row">
+          <SiteGridSubgrid>
+            <div className="spark-playground-viz-actions col-full py-4 lg:col-start-7 lg:grid-span-6">
               <button
                 type="button"
                 onClick={saveAsHomeConfig}
-                className="rounded-sm border border-[var(--color-ink)] bg-[var(--color-ink)] px-3 py-1.5 text-xs text-[var(--color-paper)]"
+                className="ui-chip ui-chip--active rounded-sm px-4 py-2 text-sm"
               >
                 {saved ? "Saved to home!" : "Save as home config"}
               </button>
-              <button
-                type="button"
-                onClick={resetChapter}
-                className="rounded-sm border border-[var(--rule-light)] px-3 py-1.5 text-xs text-secondary hover:border-[var(--rule-strong)]"
-              >
-                Reset chapter
-              </button>
-              <button
-                type="button"
-                onClick={resetAll}
-                className="rounded-sm border border-[var(--rule-light)] px-3 py-1.5 text-xs text-secondary hover:border-[var(--rule-strong)]"
-              >
-                Reset all
-              </button>
-              <button
-                type="button"
-                onClick={copySnapshot}
-                className="rounded-sm border border-[var(--rule-light)] px-3 py-1.5 text-xs text-secondary hover:border-[var(--rule-strong)]"
-              >
-                {copied ? "Copied!" : "Copy snapshot JSON"}
-              </button>
+              {saveError ? (
+                <p className="text-error mt-2 text-xs">
+                  {saveError}
+                </p>
+              ) : null}
             </div>
-            {saveError ? (
-              <p className="text-xs text-[var(--color-crimson)]">{saveError}</p>
-            ) : null}
-          </div>
-        </div>
-
-        <aside className="grid-span-6 space-y-6 lg:grid-span-4">
-          <div className="border border-[var(--rule-light)] p-4">
-            <p className="text-meta">Chapter</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {presets.map((p, i) => (
-                <button
-                  key={p.label}
-                  type="button"
-                  onClick={() => setActiveChapter(i)}
-                  className={`rounded-sm border px-2.5 py-1 text-xs transition-colors ${
-                    activeChapter === i
-                      ? "border-[var(--color-ink)] bg-[var(--color-ink)] text-[var(--color-paper)]"
-                      : "border-[var(--rule-light)] text-secondary"
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            </div>
-
-            <label className="mt-4 flex items-center gap-2 text-xs text-secondary">
-              <input
-                type="checkbox"
-                checked={showBoundary}
-                onChange={(e) => setShowBoundary(e.target.checked)}
-              />
-              Show shape boundary
-            </label>
-          </div>
-
-          <div className="border border-[var(--rule-light)] p-4">
-            <p className="text-meta">Home viewport</p>
-            <label className="mt-3 block text-xs text-secondary">
-              Shape scale {shapeScale.toFixed(2)}× (home uses{" "}
-              {HERO_SPARK_SHAPE_SCALE}×)
-              <input
-                type="range"
-                min={0.8}
-                max={3.5}
-                step={0.05}
-                value={shapeScale}
-                onChange={(e) =>
-                  setShapeScale(Number.parseFloat(e.target.value))
-                }
-                className="mt-1 w-full"
-              />
-            </label>
-          </div>
-
-          <div className="border border-[var(--rule-light)] p-4">
-            <p className="text-meta">Shape</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {TREFOIL_FAMILY_SHAPES.map((shape) => (
-                <button
-                  key={shape}
-                  type="button"
-                  onClick={() => updatePreset("shape", shape)}
-                  className={`rounded-sm border px-3 py-1.5 text-xs capitalize ${
-                    activePreset.shape === shape
-                      ? "border-[var(--color-ink)] bg-[var(--color-ink)] text-[var(--color-paper)]"
-                      : "border-[var(--rule-light)] text-secondary"
-                  }`}
-                >
-                  {shape}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {PRESET_PARAM_GROUPS.map((group) => (
-            <section
-              key={group.label}
-              className="border border-[var(--rule-light)] p-4"
-            >
-              <p className="text-meta">{group.label}</p>
-              <div className="mt-4 grid gap-4">
-                {group.keys.map((key) => {
-                  const meta = PRESET_PARAM_META[key];
-                  const value = activePreset[key];
-                  if (typeof value !== "number") return null;
-                  return (
-                    <label key={key} className="block text-xs text-secondary">
-                      <span className="flex items-baseline justify-between gap-2">
-                        <span className="font-mono text-[11px] text-primary">
-                          {key}
-                        </span>
-                        <span className="tabular-nums">{value}</span>
-                      </span>
-                      {meta.hint ? (
-                        <span className="mt-0.5 block text-[10px] text-tertiary">
-                          {meta.hint}
-                        </span>
-                      ) : null}
-                      <input
-                        type="range"
-                        min={meta.min}
-                        max={meta.max}
-                        step={meta.step}
-                        value={value}
-                        onChange={(e) =>
-                          updatePreset(key, Number.parseFloat(e.target.value))
-                        }
-                        className="mt-1.5 w-full"
-                      />
-                    </label>
-                  );
-                })}
-              </div>
-            </section>
-          ))}
-
-          <section className="border border-[var(--rule-light)] p-4">
-            <p className="text-meta">Preset reference</p>
-            <div className="mt-4 overflow-x-auto">
-              <table className="w-full min-w-[28rem] text-left text-xs">
-                <thead>
-                  <tr className="border-b border-[var(--rule-light)] text-tertiary">
-                    <th className="py-2 pr-3">Ch</th>
-                    <th className="py-2 pr-3">Shape</th>
-                    <th className="py-2 pr-3">Count</th>
-                    <th className="py-2 pr-3">Life (s)</th>
-                    <th className="py-2 pr-3">Speed</th>
-                    <th className="py-2 pr-3">Turb</th>
-                    <th className="py-2 pr-3">Alpha</th>
-                    <th className="py-2">Scale</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {presets.map((p, i) => (
-                    <tr
-                      key={p.label}
-                      className={`border-b border-[var(--rule-light)] ${
-                        activeChapter === i ? "bg-[var(--color-paper)]" : ""
-                      }`}
-                    >
-                      <td className="py-2 pr-3">{i + 1}</td>
-                      <td className="py-2 pr-3 capitalize">{p.shape}</td>
-                      <td className="py-2 pr-3 tabular-nums">{p.count}</td>
-                      <td className="py-2 pr-3 tabular-nums">
-                        {p.lifespanMin}–{p.lifespanMax}
-                      </td>
-                      <td className="py-2 pr-3 tabular-nums">{p.speed}</td>
-                      <td className="py-2 pr-3 tabular-nums">{p.turbulence}</td>
-                      <td className="py-2 pr-3 tabular-nums">{p.alpha}</td>
-                      <td className="py-2 tabular-nums">{p.boundaryScale}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        </aside>
-        </SiteGridSubgrid>
-      </RuledGrid>
+          </SiteGridSubgrid>
+        </RuledGrid>
+      </section>
     </div>
   );
 }

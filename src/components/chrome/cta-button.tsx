@@ -85,13 +85,10 @@ export function CtaButton({
   return (
     <Link
       href={href}
-      className="inline-flex items-center gap-3 rounded-full bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-[var(--color-ink)] transition-opacity hover:opacity-90"
+      className="cta-button cta-button--primary inline-flex shrink-0 items-center gap-3 whitespace-nowrap"
     >
       {children}
-      <span
-        className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-ink)]/12 text-xs text-[var(--color-ink)]"
-        aria-hidden
-      >
+      <span className="cta-button__icon" aria-hidden>
         →
       </span>
     </Link>

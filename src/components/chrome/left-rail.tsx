@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { copyrightLine, socialLinks } from "@/content/site";
 import { IconGitHub, IconLinkedIn } from "./icons";
 import { GridLocationIndicator } from "./grid-location-indicator";
@@ -30,21 +31,20 @@ function SocialIconButton({
 }
 
 export function LeftRail() {
+  const pathname = usePathname();
   const { menuOpen } = useChrome();
+  const railTheme = pathname === "/case-studies" ? "theme-dark" : "theme-light";
 
   return (
     <aside
-      className="lock-screen-left relative border-r border-[var(--rule-strong)] bg-[var(--color-paper)]"
+      className={`chrome-rail lock-screen-left ${railTheme} relative`}
       aria-label="Site chrome"
     >
       {/* Spacer matches ChromeLogo fixed slot; darkens behind logo when menu is open */}
       <div
-        className={`hidden shrink-0 py-[var(--chrome-pad)] lg:block ${
-          menuOpen ? "bg-[var(--color-ink)]" : "bg-[var(--color-paper)]"
+        className={`chrome-rail__logo-slot hidden shrink-0 py-[var(--chrome-pad)] lg:block ${
+          menuOpen ? "theme-dark" : railTheme
         }`}
-        style={{
-          minHeight: "calc(var(--chrome-hit) + var(--chrome-pad) * 2)",
-        }}
         aria-hidden
       />
 
