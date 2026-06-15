@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { ChromeNavDot } from "@/components/chrome/chrome-nav-dot";
+import { ChromeDotsRail } from "@/components/chrome/chrome-dots-rail";
 import { useCaseStudiesScrollContext } from "@/components/case-studies/case-studies-scroll-context";
 
 /** Body class — floating-chrome uses pointer-events:none so :hover never hits it. */
@@ -20,29 +20,23 @@ export function CaseStudiesDotsRail() {
 
   const { stepCount, activeStep, scrollToStep, setHoverStep } = state;
 
+  const steps = Array.from({ length: stepCount }, (_, i) => ({
+    id: `cs-index-${i}`,
+    label: `step ${i + 1} of ${stepCount}`,
+  }));
+
   return (
-    <nav
-      className="chrome-hero-dots-rail chrome-hero-dots-rail--study"
-      aria-label={`Case studies progress, step ${activeStep + 1} of ${stepCount}`}
+    <ChromeDotsRail
+      steps={steps}
+      activeStep={activeStep}
+      scrollToStep={scrollToStep}
+      ariaLabel={`Case studies progress, step ${activeStep + 1} of ${stepCount}`}
       onMouseEnter={() => document.body.classList.add(CS_INDEX_NAV_HOVER_CLASS)}
       onMouseLeave={() => {
         document.body.classList.remove(CS_INDEX_NAV_HOVER_CLASS);
         setHoverStep(null);
       }}
-    >
-      {Array.from({ length: stepCount }, (_, i) => (
-        <button
-          key={i}
-          type="button"
-          className="chrome-nav-dot-btn"
-          aria-current={i === activeStep ? "step" : undefined}
-          aria-label={`Go to step ${i + 1} of ${stepCount}`}
-          onMouseEnter={() => setHoverStep(i)}
-          onClick={() => scrollToStep(i)}
-        >
-          <ChromeNavDot active={i === activeStep} />
-        </button>
-      ))}
-    </nav>
+      onDotMouseEnter={setHoverStep}
+    />
   );
 }

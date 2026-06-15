@@ -592,12 +592,29 @@ export function DesignSystemReference() {
       />
       <SiteGridCell span="content">
         <p className="text-meta">CTA button</p>
+        <p className="mt-2 text-sm text-secondary">
+          Primary uses <code className="font-mono text-xs">--accent</code> fill with{" "}
+          <code className="font-mono text-xs">--accent-foreground</code> (ink) — not
+          parent <code className="font-mono text-xs">--text-primary</code>.
+        </p>
       </SiteGridCell>
-      <SiteGridSubgrid className="items-center">
-        <div className="grid-span-6 min-w-0">
+      <SiteGridSubgrid className="items-stretch">
+        <div className="theme-light grid-span-6 min-w-0 border border-[var(--rule-light)] p-4">
+          <p className="text-meta mb-4">Primary · on light</p>
           <CtaButton href="/contact">Primary CTA</CtaButton>
         </div>
-        <div className="grid-span-6 min-w-0">
+        <div className="theme-dark grid-span-6 min-w-0 border border-[var(--rule-light)] p-4">
+          <p className="text-meta mb-4">Primary · on dark</p>
+          <CtaButton href="/contact">Primary CTA</CtaButton>
+        </div>
+        <div className="theme-light grid-span-6 min-w-0 border border-[var(--rule-light)] p-4">
+          <p className="text-meta mb-4">Ghost · on light</p>
+          <CtaButton href="/case-studies" variant="ghost">
+            Ghost link
+          </CtaButton>
+        </div>
+        <div className="theme-dark grid-span-6 min-w-0 border border-[var(--rule-light)] p-4">
+          <p className="text-meta mb-4">Ghost · on dark</p>
           <CtaButton href="/case-studies" variant="ghost">
             Ghost link
           </CtaButton>

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { PRESET_REFERENCE_MIN_DIM } from "./particle-presets";
 import { HERO_SPARK_COLOR, HERO_SPARK_SHAPE_SCALE } from "./spark-hero-config";
 import {
   SparkCanvas,
@@ -11,8 +12,12 @@ import {
 import type { ParticlePreset } from "./particle-presets";
 
 const DESKTOP_QUERY = "(min-width: 1024px)";
-/** Mobile — cap square frame by stage height when the zone is taller than wide. */
+/** Home mobile — large square centered in the hero band (ambient bg). */
+const MOBILE_HOME_SPARK_FILL = 0.96;
+const MOBILE_HOME_SPARK_SHAPE_SCALE = 2.55;
+/** Playground / non-home mobile — cap square frame by stage height in grid zone. */
 const MOBILE_SPARK_HEIGHT_RATIO = 0.75;
+const MOBILE_SPARK_SHAPE_SCALE = 1.15;
 /** Spark zone width on desktop (cols 7–12 = half the 12-col grid). */
 const DESKTOP_SPARK_ZONE_COLS = 6;
 const DESKTOP_SPARK_ZONE_START_COL = 12 - DESKTOP_SPARK_ZONE_COLS + 1;
@@ -90,6 +95,7 @@ export function PrimaryHeroSparkLayer({
   colorCycleSpeed = HERO_SPARK_COLOR.colorCycleSpeed,
 }: PrimaryHeroSparkLayerProps) {
   const slotRef = useRef<HTMLDivElement>(null);
+  const [frameShapeScale, setFrameShapeScale] = useState(shapeScale);
 
   useEffect(() => {
     const slot = slotRef.current;
@@ -106,6 +112,25 @@ export function PrimaryHeroSparkLayer({
       if (stageHeight <= 0) return;
 
       const desktop = window.matchMedia(DESKTOP_QUERY).matches;
+      const isHomeSpark = stage.closest(".home-spark-pin") !== null;
+
+      if (!desktop && isHomeSpark) {
+        const stageWidth = stage.clientWidth;
+        const sparkSize =
+          Math.max(stageWidth, stageHeight) * MOBILE_HOME_SPARK_FILL;
+
+        stage.style.setProperty("--hero-spark-h", `${sparkSize}px`);
+        stage.style.setProperty("--hero-spark-w", `${sparkSize}px`);
+        stage.style.removeProperty("--hero-spark-left");
+
+        setFrameShapeScale((prev) =>
+          Math.abs(prev - MOBILE_HOME_SPARK_SHAPE_SCALE) < 0.02
+            ? prev
+            : MOBILE_HOME_SPARK_SHAPE_SCALE,
+        );
+        return;
+      }
+
       const columnCount = desktop ? 12 : 6;
       const anchorCol = columnCount;
       const zoneStartCol = desktop
@@ -151,6 +176,19 @@ export function PrimaryHeroSparkLayer({
         "--hero-spark-left",
         `${sparkLeftOnGrid - stageOffset}px`,
       );
+
+      const sizeT = Math.min(
+        1,
+        Math.max(0, sparkSize / PRESET_REFERENCE_MIN_DIM),
+      );
+      const responsiveShapeScale =
+        MOBILE_SPARK_SHAPE_SCALE +
+        (shapeScale - MOBILE_SPARK_SHAPE_SCALE) * sizeT;
+      setFrameShapeScale((prev) =>
+        Math.abs(prev - responsiveShapeScale) < 0.02
+          ? prev
+          : responsiveShapeScale,
+      );
     };
 
     sync();
@@ -165,7 +203,7 @@ export function PrimaryHeroSparkLayer({
       stage.style.removeProperty("--hero-spark-w");
       stage.style.removeProperty("--hero-spark-left");
     };
-  }, []);
+  }, [shapeScale]);
 
   return (
     <div ref={slotRef} className="primary-hero-spark-layer" aria-hidden>
@@ -174,7 +212,7 @@ export function PrimaryHeroSparkLayer({
         blend={blend}
         paused={paused}
         showBoundary={showBoundary}
-        shapeScale={shapeScale}
+        shapeScale={frameShapeScale}
         colorMode={colorMode}
         compositeMode={compositeMode}
         colorCycleSpeed={colorCycleSpeed}

@@ -60,15 +60,10 @@ export const PRESET_REFERENCE_MIN_DIM = 800;
 /** Link stroke width at PRESET_REFERENCE_MIN_DIM. */
 export const PRESET_REFERENCE_LINK_LINE_WIDTH = 0.5;
 
-/**
- * Small-viewport tuning — blends pure scaling toward a floor so phones stay
- * visible without the solid-blob look. Tuned for ~150 nodes at 390px width.
- */
-const CANVAS_SCALE_FLOOR = 0.76;
-const COUNT_FLOOR_BLEND = 0.7;
-const LINK_FLOOR_BLEND = 0.42;
 /** Smallest dot/link scale on phones — keeps marks visible without going sub-pixel. */
 const MIN_SIZE_SCALE = 0.93;
+/** Minimum linear viewport scale for link reach on very small frames. */
+const MIN_LINK_REACH_SCALE = 0.42;
 
 function rawCanvasMinDimScale(width: number, height: number) {
   const minDim = Math.min(width, height);
@@ -76,23 +71,28 @@ function rawCanvasMinDimScale(width: number, height: number) {
   return minDim / PRESET_REFERENCE_MIN_DIM;
 }
 
-function blendTowardFloor(raw: number, floor: number, blend: number) {
-  const floored = Math.max(raw, floor);
-  return raw * (1 - blend) + floored * blend;
+/**
+ * Area scale for particle count — (minDim / ref)² keeps density even across
+ * viewport sizes. Smaller spark frames get fewer particles; larger get more.
+ */
+export function viewportAreaScale(width: number, height: number) {
+  const raw = rawCanvasMinDimScale(width, height);
+  return raw * raw;
 }
 
-/** Blended area scale — midpoint between sparse (pure area) and dense (full floor). */
 function countAreaScale(width: number, height: number) {
-  const raw = rawCanvasMinDimScale(width, height);
-  const pure = raw * raw;
-  const floored = Math.max(raw, CANVAS_SCALE_FLOOR) ** 2;
-  return blendTowardFloor(pure, floored, COUNT_FLOOR_BLEND);
+  return viewportAreaScale(width, height);
 }
 
-/** Link reach — slight floor boost so the mesh reads on small screens. */
+/** Link reach tracks viewport linearly — no floor boost (avoids solid mesh on phones). */
 function spatialDimScale(width: number, height: number) {
+  return Math.max(MIN_LINK_REACH_SCALE, rawCanvasMinDimScale(width, height));
+}
+
+/** Link mesh reads heavy on narrow frames — ease opacity down below ref width. */
+function linkOpacityViewportScale(width: number, height: number) {
   const raw = rawCanvasMinDimScale(width, height);
-  return blendTowardFloor(raw, CANVAS_SCALE_FLOOR, LINK_FLOOR_BLEND);
+  return Math.max(0.4, Math.min(1, 0.35 + raw * 0.65));
 }
 
 /** Dot/link stroke scale — shrinks slightly on phones, grows on large screens. */
@@ -136,7 +136,6 @@ export function blendPresets(
   );
   const shapeProfile = blendShapeProfiles(profileA, profileB, t);
 
-  const mt = 1 - t;
   return {
     boundaryScale: lerp(a.boundaryScale, b.boundaryScale, t),
     count: scaleParticleCount(Math.round(lerp(a.count, b.count, t)), width, height),
@@ -153,7 +152,9 @@ export function blendPresets(
     alpha: lerp(a.alpha, b.alpha, t),
     glowScale: lerp(a.glowScale, b.glowScale, t),
     linkDistance: lerp(a.linkDistance, b.linkDistance, t) * shapeScale * dimScale,
-    linkOpacity: lerp(a.linkOpacity, b.linkOpacity, t) * mt + b.linkOpacity * t,
+    linkOpacity:
+      lerp(a.linkOpacity, b.linkOpacity, t) *
+      linkOpacityViewportScale(width, height),
     linkLineWidth: PRESET_REFERENCE_LINK_LINE_WIDTH * sizeScale,
     spawnSpread: lerp(a.spawnSpread, b.spawnSpread, t),
     shapeProfile,

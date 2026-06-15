@@ -99,6 +99,7 @@ export const semanticColors = [
   { token: "--text-secondary", label: "Text secondary (80%)" },
   { token: "--text-tertiary", label: "Text tertiary (60%)" },
   { token: "--accent", label: "Accent" },
+  { token: "--accent-foreground", label: "Accent foreground (on lime)" },
   { token: "--rule-light", label: "Rule light" },
   { token: "--rule-strong", label: "Rule strong" },
   { token: "--surface-white", label: "Surface white" },
@@ -261,8 +262,8 @@ export const typographyRamp: readonly TypographyRampEntry[] = [
     weight: "600",
     lineHeight: "1.4",
     letterSpacing: "0.14em · uppercase · vertical-rl",
-    sample: "GRID · 12 · DESIGN SYSTEM",
-    scope: "Left rail · grid location indicator",
+    sample: "CASE STUDIES",
+    scope: "Left rail · current page label",
   },
 ] as const;
 

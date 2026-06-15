@@ -1,33 +1,21 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import {
-  formatGridColumn,
-  resolveSiteLocation,
-} from "@/lib/site-location";
+import { resolveRailPageLabel } from "@/lib/site-location";
 
 /**
- * Vertical grid / page label — rendered in the left rail, centered vertically.
+ * Vertical page label — rendered in the left rail, centered vertically.
  */
 export function GridLocationIndicator() {
   const pathname = usePathname();
-  const location = resolveSiteLocation(pathname);
-  const column = formatGridColumn(location.gridColumn);
-
-  const parts = ["Grid", column, location.pageLabel];
-  if (location.subLabel) {
-    parts.push(location.subLabel);
-  }
-  const line = parts.join(" · ");
+  const label = resolveRailPageLabel(pathname);
 
   return (
     <span
       className="rail-label-vertical pointer-events-none whitespace-nowrap"
-      aria-label={`${location.pageLabel}, grid column ${column}${
-        location.subLabel ? `, ${location.subLabel}` : ""
-      }`}
+      aria-label={`Current page: ${label}`}
     >
-      {line}
+      {label}
     </span>
   );
 }

@@ -2,6 +2,9 @@
  * Maps routes to a position on the master build grid (viewport-right indicator).
  * Desktop: 12 columns · Mobile: 6 columns (indicator shows desktop column index).
  */
+import { isNavSection, menuNav } from "@/content/site";
+import { getCaseStudy, getVignette } from "@/content/portfolio";
+
 export type SiteLocation = {
   pageLabel: string;
   /** Column anchor 1–12 (desktop grid) */
@@ -18,6 +21,77 @@ const PAGE_COLUMNS: Record<string, Omit<SiteLocation, "subLabel">> = {
   "/effects": { pageLabel: "EFFECTS", gridColumn: 11 },
   "/design-system": { pageLabel: "DESIGN SYSTEM", gridColumn: 12 },
 };
+
+function humanizeSlug(slug: string): string {
+  return slug
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+function menuLabelForHref(href: string): string | undefined {
+  for (const item of menuNav) {
+    if (isNavSection(item)) {
+      if (item.href === href) return item.label;
+      for (const child of item.children) {
+        if (child.href === href) return child.label;
+      }
+    } else if (item.href === href) {
+      return item.label;
+    }
+  }
+  return undefined;
+}
+
+/** Longest matching nav section for nested routes (e.g. /effects/foo → Effects). */
+function menuLabelForPathPrefix(pathname: string): string | undefined {
+  let best: { href: string; label: string } | undefined;
+
+  for (const item of menuNav) {
+    const candidates = isNavSection(item)
+      ? [item, ...item.children]
+      : [item];
+
+    for (const entry of candidates) {
+      if (entry.href === "/") continue;
+      if (pathname === entry.href || pathname.startsWith(`${entry.href}/`)) {
+        if (!best || entry.href.length > best.href.length) {
+          best = { href: entry.href, label: entry.label };
+        }
+      }
+    }
+  }
+
+  return best?.label;
+}
+
+/** Human-readable page title for the left-rail vertical label. */
+export function resolveRailPageLabel(pathname: string): string {
+  const caseStudyMatch = pathname.match(/^\/case-studies\/([^/]+)\/?$/);
+  if (caseStudyMatch) {
+    const study = getCaseStudy(caseStudyMatch[1]!);
+    if (study) return study.name;
+  }
+
+  const vignetteMatch = pathname.match(/^\/craft\/([^/]+)\/?$/);
+  if (vignetteMatch) {
+    const row = getVignette(vignetteMatch[1]!);
+    if (row) return row.vignette.name;
+  }
+
+  const effectsMatch = pathname.match(/^\/effects\/([^/]+)/);
+  if (effectsMatch) {
+    return humanizeSlug(effectsMatch[1]!);
+  }
+
+  const exactNav = menuLabelForHref(pathname);
+  if (exactNav) return exactNav;
+
+  const prefixNav = menuLabelForPathPrefix(pathname);
+  if (prefixNav) return prefixNav;
+
+  return "Site";
+}
 
 export function resolveSiteLocation(pathname: string): SiteLocation {
   if (pathname in PAGE_COLUMNS) {

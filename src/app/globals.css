@@ -49,6 +49,7 @@ html {
   --background: var(--color-paper);
   --foreground: var(--text-primary);
   --accent: var(--color-neon-lime);
+  --accent-foreground: var(--color-ink);
   --accent-secondary: var(--color-royal-blue);
   --rule-light: color-mix(in srgb, var(--color-ink) 12%, transparent);
   --rule-strong: var(--color-ink);
@@ -667,6 +668,28 @@ html:has(.home-scroll:not(.home-scroll--static)) {
       100dvh - var(--home-cover-peek) - var(--chrome-top-offset)
     );
   }
+
+  /* Explicit height — variable alone can resolve to the desktop 80dvh band on some builds */
+  .home-scroll:not(.home-scroll--static) .hero-chapter-panel.home-scroll-panel {
+    height: calc(
+      100dvh - var(--home-cover-peek) - var(--chrome-top-offset)
+    );
+    min-height: calc(
+      100dvh - var(--home-cover-peek) - var(--chrome-top-offset)
+    );
+    max-height: calc(
+      100dvh - var(--home-cover-peek) - var(--chrome-top-offset)
+    );
+  }
+
+  .home-scroll:not(.home-scroll--static) .home-spark-pin {
+    height: calc(
+      100dvh - var(--home-cover-peek) - var(--chrome-top-offset)
+    );
+    margin-bottom: calc(
+      -1 * (100dvh - var(--home-cover-peek) - var(--chrome-top-offset))
+    );
+  }
 }
 
 .hero-chapter-panel.home-scroll-panel {
@@ -828,20 +851,31 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
 .home-secondary-panel .home-secondary-stage {
   height: 100%;
   min-height: 0;
+  grid-template-rows: minmax(0, 1fr);
+  align-items: stretch;
 }
 
 .home-secondary-stage > .home-secondary-copy {
   grid-column: 1 / -1;
   grid-row: 1;
-  display: grid;
-  align-content: center;
-  justify-items: start;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
   box-sizing: border-box;
   height: 100%;
   min-height: 0;
   min-width: 0;
   padding-block: max(var(--chrome-top-offset), 1rem)
     clamp(1rem, 3vh, 2rem);
+}
+
+@media (max-width: 1023px) {
+  .home-secondary-stage > .home-secondary-copy {
+    padding-block: clamp(1rem, 3vh, 2rem);
+    /* Match hero — optically center under floating chrome, not at raw 50dvh */
+    translate: 0 calc(-0.5 * var(--chrome-top-offset));
+  }
 }
 
 @media (min-width: 1024px) {
@@ -1121,6 +1155,8 @@ html:has(.cs-detail) {
   padding-top: 0;
   padding-bottom: 0;
   overflow: visible;
+  grid-template-rows: minmax(0, 1fr);
+  align-items: stretch;
 }
 
 /* Narrative column — cols 1–8 on desktop; spark (cols 7–12) overlaps 7–8; beat v-centered */
@@ -1129,15 +1165,25 @@ html:has(.cs-detail) {
   z-index: 1;
   grid-column: 1 / -1;
   grid-row: 1;
-  display: grid;
-  align-content: center;
-  justify-items: start;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
   box-sizing: border-box;
   height: 100%;
   min-height: 0;
   min-width: 0;
   padding-block: max(var(--chrome-top-offset), 1rem)
     clamp(1rem, 3vh, 2rem);
+}
+
+@media (max-width: 1023px) {
+  /* Main + hero band height already reserve chrome — don't double-count here */
+  .primary-hero-copy {
+    padding-block: clamp(1rem, 3vh, 2rem);
+    /* Optically center in the full light hero band (0 → 80dvh), not just the panel box */
+    translate: 0 calc(-0.5 * var(--chrome-top-offset));
+  }
 }
 
 @media (min-width: 1024px) {
@@ -1176,7 +1222,7 @@ html:has(.cs-detail) {
   color: var(--text-secondary);
 }
 
-/* Spark — square in cols 7–12 (lg) / 4–6 (mobile); right edge on col 12 / 6 */
+/* Spark — square in cols 7–12 (lg); home mobile = full-band ambient bg centered */
 .primary-hero-spark-layer {
   position: absolute;
   z-index: 0;
@@ -1188,6 +1234,13 @@ html:has(.cs-detail) {
   transform: translateY(-50%);
   overflow: visible;
   pointer-events: none;
+}
+
+@media (max-width: 1023px) {
+  .home-spark-pin .primary-hero-spark-layer {
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
 }
 
 /* Effects playground — cols 1–6 config rail, cols 7–12 home-sized spark */
@@ -1295,7 +1348,8 @@ html:has(.cs-detail) {
   display: block;
 }
 
-/* Hero scroll dots — right chrome column; color follows chrome surface */
+/* Dot navigation — vertical right chrome (lg+), horizontal bottom strip (mobile) */
+.chrome-dots-rail,
 .chrome-hero-dots-rail {
   position: absolute;
   top: calc(50% - var(--chrome-rail-gap));
@@ -1314,7 +1368,8 @@ html:has(.cs-detail) {
     color 0.2s ease;
 }
 
-/* Case-study detail — many rows; centered in the column, scroll when needed. */
+/* Home, case-study index, case-study detail — scrollable when many steps */
+.chrome-dots-rail--study,
 .chrome-hero-dots-rail--study {
   top: 50%;
   bottom: auto;
@@ -1330,7 +1385,6 @@ html:has(.cs-detail) {
   overscroll-behavior: contain;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  /* Fade edges — padding keeps first/last dots out of the transparent bands. */
   mask-image: linear-gradient(
     180deg,
     transparent 0%,
@@ -1340,18 +1394,110 @@ html:has(.cs-detail) {
   );
 }
 
+@media (max-width: 1023px) {
+  body:has(.home-scroll:not(.home-scroll--static)) {
+    --chrome-dots-bottom-inset: calc(
+      var(--home-cover-peek, 20dvh) + max(0.75rem, env(safe-area-inset-bottom, 0px))
+    );
+  }
+
+  .chrome-dots-rail--study,
+  .chrome-hero-dots-rail--study {
+    position: fixed;
+    top: auto;
+    bottom: var(
+      --chrome-dots-bottom-inset,
+      max(0.75rem, env(safe-area-inset-bottom, 0px))
+    );
+    left: var(--grid-margin);
+    right: var(--grid-margin);
+    width: auto;
+    max-width: none;
+    max-height: none;
+    transform: none;
+    flex-direction: row;
+    justify-content: safe center;
+    align-items: center;
+    gap: 0.25rem;
+    padding-block: 0.375rem;
+    padding-inline: 0.875rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    border-radius: 9999px;
+    border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+    background: color-mix(in srgb, var(--color-paper) 86%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px color-mix(in srgb, var(--color-ink) 10%, transparent);
+  }
+
+  body[data-chrome-surface="dark"] .chrome-dots-rail--study,
+  body[data-chrome-surface="dark"] .chrome-hero-dots-rail--study {
+    background: color-mix(in srgb, var(--color-black) 76%, transparent);
+    box-shadow: 0 4px 24px color-mix(in srgb, var(--color-black) 35%, transparent);
+  }
+
+  body[data-chrome-surface="light"] .chrome-dots-rail--study,
+  body[data-chrome-surface="canvas"] .chrome-dots-rail--study,
+  body[data-chrome-surface="light"] .chrome-hero-dots-rail--study,
+  body[data-chrome-surface="canvas"] .chrome-hero-dots-rail--study {
+    background: color-mix(in srgb, var(--color-paper) 88%, transparent);
+  }
+
+  .chrome-dots-rail--study .chrome-nav-dot:not(.chrome-nav-dot--active),
+  .chrome-hero-dots-rail--study .chrome-nav-dot:not(.chrome-nav-dot--active) {
+    opacity: 0.5;
+  }
+
+  .chrome-dots-rail--study .chrome-nav-dot--active,
+  .chrome-hero-dots-rail--study .chrome-nav-dot--active {
+    opacity: 0.88;
+  }
+
+  .chrome-dots-rail--study,
+  .chrome-hero-dots-rail--study {
+    mask-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      #000 0.75rem,
+      #000 calc(100% - 0.75rem),
+      transparent 100%
+    );
+  }
+
+  .chrome-nav-dot-btn {
+    flex-shrink: 0;
+    padding: 0.8125rem;
+    margin: 0;
+    min-width: 3rem;
+    min-height: 3rem;
+    display: grid;
+    place-items: center;
+  }
+}
+
 /* Footer is canvas/light — keep dots legible over the lime field. */
+body[data-chrome-surface="light"] .chrome-dots-rail--study,
+body[data-chrome-surface="canvas"] .chrome-dots-rail--study,
 body[data-chrome-surface="light"] .chrome-hero-dots-rail--study,
 body[data-chrome-surface="canvas"] .chrome-hero-dots-rail--study {
   filter: drop-shadow(0 0 1px color-mix(in srgb, var(--color-ink) 12%, transparent));
 }
 
 /* Case study detail — mostly dark rows; default dots to paper unless surface is light */
+body:has(.cs-detail) .floating-chrome .chrome-dots-rail--detail,
 body:has(.cs-detail) .floating-chrome .chrome-hero-dots-rail--detail {
   opacity: 1;
   color: var(--color-paper);
 }
 
+body:has(.cs-detail)[data-chrome-surface="light"]
+  .floating-chrome
+  .chrome-dots-rail--detail,
+body:has(.cs-detail)[data-chrome-surface="canvas"]
+  .floating-chrome
+  .chrome-dots-rail--detail,
 body:has(.cs-detail)[data-chrome-surface="light"]
   .floating-chrome
   .chrome-hero-dots-rail--detail,
@@ -1361,17 +1507,20 @@ body:has(.cs-detail)[data-chrome-surface="canvas"]
   color: var(--color-ink);
 }
 
+body:has(.cs-detail) .chrome-dots-rail--detail .chrome-nav-dot:not(.chrome-nav-dot--active),
 body:has(.cs-detail) .chrome-hero-dots-rail--detail .chrome-nav-dot:not(.chrome-nav-dot--active) {
   border-color: color-mix(in srgb, currentColor 50%, transparent);
 }
 
 /* Nav hover dims page rows — dots stay full brightness */
+body.cs-detail-nav-hover .floating-chrome .chrome-dots-rail--detail,
 body.cs-detail-nav-hover .floating-chrome .chrome-hero-dots-rail--detail,
 body.cs-detail-nav-hover .floating-chrome .chrome-nav-dot,
 body.cs-detail-nav-hover .floating-chrome .chrome-nav-dot-ring {
   opacity: 1;
 }
 
+.chrome-dots-rail--study::-webkit-scrollbar,
 .chrome-hero-dots-rail--study::-webkit-scrollbar {
   display: none;
 }
@@ -2452,14 +2601,14 @@ a.craft-card:focus-visible {
   min-height: calc(var(--chrome-hit) + var(--chrome-pad) * 2);
 }
 
-/* ── Primary CTA — accent fill, theme-aware ink/paper contrast ── */
+/* ── Primary CTA — accent fill; ink label regardless of parent theme ── */
 .cta-button--primary {
   border-radius: 9999px;
   background: var(--accent);
   padding: 0.625rem 1.25rem;
   font-size: var(--type-body-sm);
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--accent-foreground);
   transition: opacity 0.15s ease;
 }
 
@@ -2474,9 +2623,9 @@ a.craft-card:focus-visible {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  background: color-mix(in srgb, var(--text-primary) 12%, transparent);
+  background: color-mix(in srgb, var(--accent-foreground) 12%, transparent);
   font-size: 0.75rem;
-  color: var(--text-primary);
+  color: var(--accent-foreground);
 }
 
 /* ── Media / vimeo placeholder ground ── */
