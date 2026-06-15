@@ -235,8 +235,10 @@ export function CaseStudyDetailScroll({
     steps.length > 1,
   );
 
-  // Dot + menu chrome color tracks the active row (not intersection ratios).
+  // Dot + menu chrome color tracks the active row on desktop (mobile uses band sampler).
   useEffect(() => {
+    if (!window.matchMedia("(min-width: 1024px)").matches) return;
+
     const step = steps[activeStep];
     const el = step ? document.getElementById(step.id) : null;
     const surface =

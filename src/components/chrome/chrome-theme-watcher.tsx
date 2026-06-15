@@ -21,6 +21,10 @@ export function ChromeThemeWatcher() {
     const ratios = new Map<Element, number>();
 
     const apply = () => {
+      if (window.matchMedia("(max-width: 1023px)").matches) {
+        return;
+      }
+
       if (document.querySelector(".cs-detail")) {
         return;
       }

@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { ChromeLogo } from "./chrome-logo";
+import { ChromeMobileBand } from "./chrome-mobile-band";
+import { ChromeScrollVisibility } from "./chrome-scroll-visibility";
 import { ChromeThemeWatcher } from "./chrome-theme-watcher";
 import { FloatingChrome } from "./floating-chrome";
 import { LeftRail } from "./left-rail";
@@ -13,7 +15,9 @@ export function SiteShell({ children }: { children: ReactNode }) {
       <LeftRail />
       <MenuOverlay />
       <ChromeLogo />
+      <ChromeMobileBand />
       <FloatingChrome />
+      <ChromeScrollVisibility />
       <ChromeThemeWatcher />
       <div className="min-h-[100dvh] lg:pl-[var(--rail-width)]">
         <main

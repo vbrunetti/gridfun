@@ -15,7 +15,7 @@ export function FloatingChrome() {
       className="floating-chrome pointer-events-none fixed top-0 right-0 z-[80] flex h-[100dvh] w-[calc(var(--chrome-hit)+var(--chrome-pad)*2)] flex-col items-center"
     >
       {/* Menu trigger — top of column, centered on shared axis */}
-      <div className="pointer-events-auto relative z-20 shrink-0 p-[var(--chrome-pad)]">
+      <div className="chrome-mobile-top chrome-mobile-top--menu pointer-events-auto relative z-20 shrink-0 p-[var(--chrome-pad)]">
         <button
           type="button"
           onClick={toggleMenu}
