@@ -1,14 +1,22 @@
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { RuledGrid } from "@/components/layout/ruled-grid";
 import { CaseStudyBrandField } from "@/components/case-studies/case-study-brand-field";
 import { CraftTagList } from "@/components/craft/vignette-media";
 import { caseStudies, caseStudyTags } from "@/content/portfolio";
+import {
+  clientBrandChromeSurface,
+  clientBrandColorVar,
+  clientBrandTextOn,
+} from "@/lib/client-brand-colors";
 
 export function CaseStudyCoverStack() {
   return (
     <div className="sticky-cover-stack" aria-label="Case studies">
       {caseStudies.map((study, index) => {
         const tags = caseStudyTags(study);
+        const textOn = clientBrandTextOn(study.brand.field);
+        const chromeSurface = clientBrandChromeSurface(study.brand.field);
 
         return (
           <section
@@ -16,8 +24,14 @@ export function CaseStudyCoverStack() {
             id={`cs-index-${study.slug}`}
             data-cs-step="panel"
             data-chrome-focus-step={index + 1}
+            data-brand-text-on={textOn}
             className="chrome-focus-target work-snap-section sticky-cover-panel cs-index-panel theme-dark"
-            data-chrome-surface="dark"
+            data-chrome-surface={chromeSurface}
+            style={
+              {
+                "--cs-brand-field": clientBrandColorVar(study.brand.field),
+              } as CSSProperties
+            }
           >
             <RuledGrid className="cs-index-panel__grid">
               <header className="cs-index-panel__meta">

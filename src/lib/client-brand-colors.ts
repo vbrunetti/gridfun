@@ -100,6 +100,20 @@ export function clientBrandColorVar(id: ClientBrandColorId): string {
   return `var(${entryById[id].token})`;
 }
 
+/** Legible text color on a brand field background. */
+export function clientBrandTextOn(
+  id: ClientBrandColorId,
+): (typeof clientBrandColorEntries)[number]["textOn"] {
+  return entryById[id].textOn;
+}
+
+/** Floating chrome surface when a brand field fills the viewport. */
+export function clientBrandChromeSurface(
+  id: ClientBrandColorId,
+): "dark" | "light" {
+  return entryById[id].textOn === "paper" ? "dark" : "light";
+}
+
 /** @deprecated Use `clientBrandColorVar` */
 export const clientBrandPanelVar = clientBrandColorVar;
 

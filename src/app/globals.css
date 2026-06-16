@@ -938,6 +938,42 @@ html:has(.cs-index-scroll) {
   overscroll-behavior-y: none;
 }
 
+@media (max-width: 1023px) {
+  html:has(.cs-index-scroll) {
+    scroll-padding-top: 0;
+    /* ~25dvh — quarter of usable viewport (half the prior 50dvh intro band) */
+    --cs-index-intro-height-mobile: calc(
+      (100dvh - var(--chrome-mobile-dots-height)) / 4
+    );
+  }
+
+  .site-main:has(.cs-index-route) {
+    padding-top: 0 !important;
+  }
+
+  .cs-index-scroll .work-snap-section:not(.work-snap-section--intro) {
+    height: calc(100dvh - var(--chrome-mobile-dots-height));
+    min-height: calc(100dvh - var(--chrome-mobile-dots-height));
+    max-height: calc(100dvh - var(--chrome-mobile-dots-height));
+  }
+
+  .cs-index-scroll .sticky-cover-panel {
+    min-height: calc(100dvh - var(--chrome-mobile-dots-height));
+  }
+
+  /* Extra scroll room so the last card's foot clears the fixed dot rail. */
+  .cs-index-scroll .sticky-cover-stack > .cs-index-panel:last-child {
+    box-sizing: content-box;
+    padding-bottom: var(--chrome-mobile-dots-height);
+    max-height: none;
+    background: var(--cs-brand-field);
+  }
+
+  .cs-index-scroll .sticky-cover-stack > .cs-index-panel:last-child .cs-index-panel__field {
+    height: auto;
+  }
+}
+
 @media (min-width: 1024px) {
   html:has(.cs-index-scroll) {
     scroll-padding-top: 0;
@@ -960,6 +996,25 @@ html:has(.cs-index-scroll) {
   height: 50dvh;
   min-height: 50dvh;
   max-height: 50dvh;
+}
+
+@media (max-width: 1023px) {
+  .cs-index-scroll .work-snap-section--intro {
+    height: var(--cs-index-intro-height-mobile);
+    min-height: var(--cs-index-intro-height-mobile);
+    max-height: var(--cs-index-intro-height-mobile);
+  }
+
+  .cs-index-intro .cs-index-hero__grid {
+    --work-masthead-foot: clamp(1rem, 2.5vh, 1.25rem);
+    min-height: 0;
+    grid-template-rows: 1fr;
+  }
+
+  .cs-index-intro .cs-index-hero__main {
+    padding-top: clamp(0.75rem, 2vh, 1rem);
+    padding-bottom: var(--work-masthead-foot);
+  }
 }
 
 @media (min-width: 1024px) {
@@ -1406,6 +1461,12 @@ html:has(.cs-detail) {
 @media (max-width: 1023px) {
   :root {
     --chrome-mobile-dots-bg: var(--color-paper);
+    /* Sampled chrome fill — shared by top band + bottom dot rail */
+    --chrome-mobile-chrome-fill: 84%;
+    /* Dot rail — 3rem hit target + vertical padding + safe area */
+    --chrome-mobile-dots-height: calc(
+      3rem + 1rem + env(safe-area-inset-bottom, 0px)
+    );
   }
 
   .chrome-dots-rail--study,
@@ -1435,7 +1496,7 @@ html:has(.cs-detail) {
     color: var(--color-ink);
     background: color-mix(
       in srgb,
-      var(--chrome-mobile-dots-bg, var(--color-paper)) 84%,
+      var(--chrome-mobile-dots-bg, var(--color-paper)) var(--chrome-mobile-chrome-fill),
       transparent
     );
     backdrop-filter: none;
@@ -1737,7 +1798,11 @@ body[data-chrome-surface="dark"] .floating-chrome .rail-label-vertical {
     right: 0;
     z-index: 79;
     height: var(--chrome-top-offset);
-    background: var(--chrome-mobile-band-bg);
+    background: color-mix(
+      in srgb,
+      var(--chrome-mobile-band-bg, var(--background)) var(--chrome-mobile-chrome-fill),
+      transparent
+    );
     pointer-events: none;
     transition:
       transform 0.2s ease,
@@ -2369,7 +2434,6 @@ a.craft-card:focus-visible {
   }
 
   .cs-index-route {
-    padding-top: var(--chrome-top-offset);
     background: var(--section-dark-bg);
   }
 }
@@ -2599,6 +2663,113 @@ a.craft-card:focus-visible {
 
 .cs-index-panel__tags {
   margin: 0;
+}
+
+@media (max-width: 1023px) {
+  /* One full-viewport slide — brand field behind copy, logo in top third. */
+  .cs-index-panel {
+    background: transparent;
+    overflow: hidden;
+  }
+
+  .cs-index-panel__grid {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    min-height: 100%;
+    grid-template-rows: minmax(0, 1fr) minmax(0, 2fr);
+    padding-inline: var(--grid-margin);
+    padding-bottom: clamp(0.75rem, 2vh, 1.25rem);
+    row-gap: 0;
+  }
+
+  .cs-index-panel__meta {
+    display: none;
+  }
+
+  .cs-index-panel__field {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) minmax(0, 2fr);
+    align-items: center;
+    justify-items: center;
+    grid-row: unset;
+    grid-column: unset;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .cs-index-brand-field__logo,
+  .cs-index-brand-field__placeholder {
+    grid-row: 1;
+    align-self: center;
+    width: clamp(4.5rem, 32vw, 9rem);
+    max-width: 62%;
+  }
+
+  .cs-index-panel__main {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding-bottom: clamp(0.75rem, 2.5vh, 1.25rem);
+  }
+
+  .cs-index-panel__core {
+    flex: 1;
+    justify-content: center;
+    max-width: none;
+    gap: clamp(0.75rem, 2vh, 1.25rem);
+  }
+
+  .cs-index-panel__foot {
+    flex-shrink: 0;
+    padding-top: clamp(0.75rem, 2vh, 1.25rem);
+  }
+
+  .cs-index-panel[data-brand-text-on="paper"] .cs-index-panel__main {
+    --text-primary: var(--color-paper);
+    --text-secondary: color-mix(in srgb, var(--color-paper) 80%, transparent);
+    --text-tertiary: color-mix(in srgb, var(--color-paper) 58%, transparent);
+    --foreground: var(--color-paper);
+    --rule-light: color-mix(in srgb, var(--color-paper) 22%, transparent);
+    --rule-strong: color-mix(in srgb, var(--color-paper) 42%, transparent);
+    color: var(--color-paper);
+  }
+
+  .cs-index-panel[data-brand-text-on="ink"] .cs-index-panel__main {
+    --text-primary: var(--color-ink);
+    --text-secondary: color-mix(in srgb, var(--color-ink) 72%, transparent);
+    --text-tertiary: color-mix(in srgb, var(--color-ink) 52%, transparent);
+    --foreground: var(--color-ink);
+    --rule-light: color-mix(in srgb, var(--color-ink) 18%, transparent);
+    --rule-strong: color-mix(in srgb, var(--color-ink) 38%, transparent);
+    color: var(--color-ink);
+  }
+
+  .cs-index-panel[data-brand-text-on="paper"] .craft-filter-chip--on {
+    border-color: color-mix(in srgb, var(--color-paper) 72%, transparent);
+    color: var(--color-paper);
+    background: color-mix(in srgb, var(--color-paper) 10%, transparent);
+  }
+
+  .cs-index-panel[data-brand-text-on="paper"] .craft-filter-chip--on .craft-filter-chip__dot {
+    background: var(--color-paper);
+  }
+
+  .cs-index-panel[data-brand-text-on="ink"] .craft-filter-chip--on {
+    border-color: color-mix(in srgb, var(--color-ink) 72%, transparent);
+    color: var(--color-ink);
+    background: color-mix(in srgb, var(--color-ink) 6%, transparent);
+  }
+
+  .cs-index-panel[data-brand-text-on="ink"] .craft-filter-chip--on .craft-filter-chip__dot {
+    background: var(--color-ink);
+  }
 }
 
 /* ── Client logos ────────────────────────────────────────── */

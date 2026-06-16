@@ -10,14 +10,6 @@ import {
 import { useChromeFocusPreview, useChromeFocusSteps } from "@/components/chrome/use-chrome-focus";
 import { useCaseStudiesScrollRegister } from "@/components/case-studies/case-studies-scroll-context";
 
-function chromeAnchorY(): number {
-  const raw = getComputedStyle(document.documentElement).getPropertyValue(
-    "--chrome-top-offset",
-  );
-  const parsed = Number.parseFloat(raw);
-  return Number.isFinite(parsed) ? parsed : 64;
-}
-
 type CaseStudiesScrollProps = {
   children: ReactNode;
 };
@@ -53,7 +45,7 @@ export function CaseStudiesScroll({ children }: CaseStudiesScrollProps) {
     if (steps.length === 0) return;
 
     const desktop = window.matchMedia("(min-width: 1024px)").matches;
-    const anchor = desktop ? 8 : chromeAnchorY() + 8;
+    const anchor = desktop ? 8 : 8;
 
     if (desktop) {
       document.body.dataset.chromeSurface = "dark";

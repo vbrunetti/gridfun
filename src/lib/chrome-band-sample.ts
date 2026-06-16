@@ -152,7 +152,13 @@ export function sampleAboveChromeDots(): Element | null {
   const railHeight =
     rail && rail.getBoundingClientRect().height > 0
       ? rail.getBoundingClientRect().height
-      : 64;
+      : (() => {
+          const raw = getComputedStyle(document.documentElement).getPropertyValue(
+            "--chrome-mobile-dots-height",
+          );
+          const parsed = Number.parseFloat(raw);
+          return Number.isFinite(parsed) ? parsed : 64;
+        })();
 
   const y = Math.max(0, Math.round(window.innerHeight - railHeight - 4));
   const width = window.innerWidth;
