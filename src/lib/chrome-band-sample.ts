@@ -202,12 +202,17 @@ export function sampleChromeDotsBand(menuOpen: boolean): ChromeBandSample | null
   };
 }
 
-export function applyChromeBandSample(sample: ChromeBandSample) {
+export function applyChromeBandSample(
+  sample: ChromeBandSample,
+  options?: { includeSurface?: boolean },
+) {
   document.documentElement.style.setProperty(
     "--chrome-mobile-band-bg",
     sample.background,
   );
-  document.body.dataset.chromeSurface = sample.surface;
+  if (options?.includeSurface !== false) {
+    document.body.dataset.chromeSurface = sample.surface;
+  }
 }
 
 export function applyChromeDotsBandSample(sample: ChromeBandSample) {
@@ -220,7 +225,9 @@ export function applyChromeDotsBandSample(sample: ChromeBandSample) {
 
 export function clearChromeBandSample() {
   document.documentElement.style.removeProperty("--chrome-mobile-band-bg");
-  delete document.body.dataset.chromeSurface;
+  if (!document.querySelector(".cs-detail")) {
+    delete document.body.dataset.chromeSurface;
+  }
 }
 
 export function clearChromeDotsBandSample() {

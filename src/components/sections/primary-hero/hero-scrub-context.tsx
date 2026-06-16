@@ -91,13 +91,13 @@ export function useHeroScrubRegister(
       return;
     }
 
-    setState({
+    setState((prev) => ({
       steps,
       activeStep: activeRef.current,
       scrollToStep: (index) => scrollRef.current(index),
       visible,
-      subChapterProgress: null,
-    });
+      subChapterProgress: prev?.subChapterProgress ?? null,
+    }));
 
     return () => setState(null);
   }, [enabled, steps, visible, setState]);

@@ -1,5 +1,6 @@
 import rawSnapshot from "@/content/spark-hero-snapshot.json";
 import { heroSlates } from "@/content/site";
+import { palette } from "@/lib/colors";
 import {
   createDefaultSparkHeroSnapshot,
   isSparkHeroSnapshot,
@@ -66,3 +67,10 @@ export { HERO_CHAPTER_SHAPES };
 
 /** Fills the hero spark frame — tuned for zone-capped square (cols 7–12). */
 export const HERO_SPARK_SHAPE_SCALE = 2.85;
+
+/** Home hero — neon lime spark on dark-lift ground (mobile + desktop). */
+export const HOME_SPARK_COLOR = {
+  colorMode: "fixed" as const,
+  fixedColor: palette.neonLime,
+  compositeMode: "source-over" as const,
+};

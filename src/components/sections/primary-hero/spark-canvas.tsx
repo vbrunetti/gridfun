@@ -27,7 +27,7 @@ export type SparkBlend = {
   t: number;
 };
 
-export type SparkColorMode = "ink" | "palette" | "cycle";
+export type SparkColorMode = "ink" | "palette" | "cycle" | "fixed";
 
 export type SparkCompositeMode =
   | "lighter"
@@ -56,6 +56,8 @@ type SparkCanvasProps = {
   directPreset?: ParticlePreset | null;
   showBoundary?: boolean;
   colorMode?: SparkColorMode;
+  /** Hex color when colorMode is "fixed". */
+  fixedColor?: string;
   compositeMode?: SparkCompositeMode;
   /** Palette revolutions per second when colorMode is "cycle". */
   colorCycleSpeed?: number;
@@ -170,7 +172,9 @@ function resolveParticleRgb(
   colorMode: SparkColorMode,
   colorOffset: number,
   cyclePhase: number,
+  fixedRgb: Rgb | null,
 ): Rgb {
+  if (colorMode === "fixed" && fixedRgb) return fixedRgb;
   if (colorMode === "ink") return INK_RGB;
   if (colorMode === "palette") {
     const index =
@@ -200,6 +204,7 @@ export function SparkCanvas({
   directPreset = null,
   showBoundary = false,
   colorMode = "ink",
+  fixedColor,
   compositeMode = "lighter",
   colorCycleSpeed = 0.08,
   shapeScale = 1,
@@ -213,6 +218,9 @@ export function SparkCanvas({
   const pausedRef = useRef(paused);
   const showBoundaryRef = useRef(showBoundary);
   const colorModeRef = useRef(colorMode);
+  const fixedRgbRef = useRef<Rgb | null>(
+    colorMode === "fixed" && fixedColor ? hexToRgb(fixedColor) : null,
+  );
   const compositeModeRef = useRef(compositeMode);
   const colorCycleSpeedRef = useRef(colorCycleSpeed);
   const shapeScaleRef = useRef(shapeScale);
@@ -235,6 +243,8 @@ export function SparkCanvas({
   pausedRef.current = paused;
   showBoundaryRef.current = showBoundary;
   colorModeRef.current = colorMode;
+  fixedRgbRef.current =
+    colorMode === "fixed" && fixedColor ? hexToRgb(fixedColor) : null;
   compositeModeRef.current = compositeMode;
   colorCycleSpeedRef.current = colorCycleSpeed;
   shapeScaleRef.current = shapeScale;
@@ -406,13 +416,15 @@ export function SparkCanvas({
 
       if (params.linkDistance > 0 && params.linkOpacity > 0) {
         const linkRgb =
-          mode === "ink"
-            ? INK_RGB
-            : sampleSparkPaletteRgb(
-                mode === "cycle"
-                  ? cyclePhase
-                  : next[0]?.colorOffset ?? 0,
-              );
+          mode === "fixed" && fixedRgbRef.current
+            ? fixedRgbRef.current
+            : mode === "ink"
+              ? INK_RGB
+              : sampleSparkPaletteRgb(
+                  mode === "cycle"
+                    ? cyclePhase
+                    : next[0]?.colorOffset ?? 0,
+                );
         ctx.strokeStyle = rgbaFromRgb(linkRgb, params.linkOpacity);
         ctx.lineWidth = params.linkLineWidth;
         for (let i = 0; i < next.length; i++) {
@@ -438,7 +450,12 @@ export function SparkCanvas({
         const life = lifeAlpha(p.age, p.maxAge);
         const alpha = params.alpha * life;
         if (alpha <= 0.002) continue;
-        const rgb = resolveParticleRgb(mode, p.colorOffset, cyclePhase);
+        const rgb = resolveParticleRgb(
+          mode,
+          p.colorOffset,
+          cyclePhase,
+          fixedRgbRef.current,
+        );
         const glow = p.radius * params.glowScale;
         const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glow);
         grad.addColorStop(0, rgbaFromRgb(rgb, alpha));

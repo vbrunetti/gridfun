@@ -55,6 +55,10 @@ export function CaseStudiesScroll({ children }: CaseStudiesScrollProps) {
     const desktop = window.matchMedia("(min-width: 1024px)").matches;
     const anchor = desktop ? 8 : chromeAnchorY() + 8;
 
+    if (desktop) {
+      document.body.dataset.chromeSurface = "dark";
+    }
+
     let best = 0;
     for (let i = 0; i < steps.length; i++) {
       if (steps[i]!.getBoundingClientRect().top <= anchor) best = i;
@@ -85,6 +89,26 @@ export function CaseStudiesScroll({ children }: CaseStudiesScrollProps) {
 
   useChromeFocusSteps(rootRef, activeStep, stepCount > 1);
   useChromeFocusPreview(rootRef, hoverStep, stepCount > 1);
+
+  // Desktop — case studies index is dark throughout; assert before IO ratios land.
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const apply = () => {
+      if (mq.matches) {
+        document.body.dataset.chromeSurface = "dark";
+      }
+    };
+
+    apply();
+    mq.addEventListener("change", apply);
+
+    return () => {
+      mq.removeEventListener("change", apply);
+      if (mq.matches) {
+        delete document.body.dataset.chromeSurface;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const root = rootRef.current;

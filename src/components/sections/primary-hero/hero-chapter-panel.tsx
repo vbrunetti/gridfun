@@ -19,8 +19,8 @@ export function HeroChapterPanel({
     <section
       id={chapterIndex === 0 ? "home-hero" : undefined}
       data-home-panel={chapterIndex}
-      className={`home-scroll-panel hero-chapter-panel chrome-focus-target theme-light w-full${isHandoffChapter ? " home-scroll-panel--handoff" : ""}`}
-      data-chrome-surface="light"
+      className={`home-scroll-panel hero-chapter-panel chrome-focus-target theme-dark-lift w-full${isHandoffChapter ? " home-scroll-panel--handoff" : ""}`}
+      data-chrome-surface="dark"
       aria-label={`Introduction, statement ${chapterIndex + 1}`}
     >
       <RuledGrid className="primary-hero-stage primary-hero-stage--split-scene h-full">

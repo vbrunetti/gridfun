@@ -659,6 +659,13 @@ html:has(.home-scroll:not(.home-scroll--static)) {
   --home-cover-peek: 20dvh; /* secondary visible above fold during hero chapters */
   --home-peek-translate: calc(100dvh - var(--home-cover-peek));
   --home-hero-band-height: calc(100dvh - var(--home-cover-peek));
+  background: var(--section-dark-lift);
+  color: var(--color-paper);
+}
+
+html:has(.home-scroll:not(.home-scroll--static)),
+body:has(.home-scroll:not(.home-scroll--static)) {
+  background: var(--section-dark-lift);
 }
 
 @media (max-width: 1023px) {
@@ -743,7 +750,8 @@ html:has(.home-scroll:not(.home-scroll--static)) {
 }
 
 /* Sticky spark sits behind scrolling panels — keep chapter shells transparent */
-.hero-chapter-panel.theme-light {
+.hero-chapter-panel.theme-light,
+.hero-chapter-panel.theme-dark-lift {
   background: transparent;
 }
 
@@ -1240,6 +1248,7 @@ html:has(.cs-detail) {
   .home-spark-pin .primary-hero-spark-layer {
     left: 50%;
     transform: translate(-50%, -50%);
+    opacity: 0.82;
   }
 }
 
@@ -1668,6 +1677,21 @@ body.cs-detail-nav-hover .floating-chrome .chrome-nav-dot-ring {
 .floating-chrome[data-chrome-state="menu"],
 body[data-chrome-surface="dark"] .floating-chrome {
   color: var(--color-paper);
+}
+
+body:has(.cs-detail):not([data-chrome-surface="light"]):not([data-chrome-surface="canvas"])
+  .floating-chrome {
+  color: var(--color-paper);
+}
+
+@media (min-width: 1024px) {
+  body:has(.home-scroll) .floating-chrome {
+    color: var(--color-paper);
+  }
+
+  body:has(.cs-index-route) .floating-chrome {
+    color: var(--color-paper);
+  }
 }
 
 body[data-chrome-surface="light"] .floating-chrome,

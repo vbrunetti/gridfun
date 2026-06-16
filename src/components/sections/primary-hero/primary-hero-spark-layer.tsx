@@ -2,7 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { PRESET_REFERENCE_MIN_DIM } from "./particle-presets";
-import { HERO_SPARK_COLOR, HERO_SPARK_SHAPE_SCALE } from "./spark-hero-config";
+import {
+  HERO_SPARK_COLOR,
+  HERO_SPARK_SHAPE_SCALE,
+  HOME_SPARK_COLOR,
+} from "./spark-hero-config";
 import {
   SparkCanvas,
   type SparkBlend,
@@ -80,6 +84,7 @@ export type PrimaryHeroSparkLayerProps = {
   showBoundary?: boolean;
   shapeScale?: number;
   colorMode?: SparkColorMode;
+  fixedColor?: string;
   compositeMode?: SparkCompositeMode;
   colorCycleSpeed?: number;
 };
@@ -91,11 +96,13 @@ export function PrimaryHeroSparkLayer({
   showBoundary = false,
   shapeScale = HERO_SPARK_SHAPE_SCALE,
   colorMode = HERO_SPARK_COLOR.colorMode,
+  fixedColor,
   compositeMode = HERO_SPARK_COLOR.compositeMode,
   colorCycleSpeed = HERO_SPARK_COLOR.colorCycleSpeed,
 }: PrimaryHeroSparkLayerProps) {
   const slotRef = useRef<HTMLDivElement>(null);
   const [frameShapeScale, setFrameShapeScale] = useState(shapeScale);
+  const [homeSparkColor, setHomeSparkColor] = useState(false);
 
   useEffect(() => {
     const slot = slotRef.current;
@@ -113,6 +120,7 @@ export function PrimaryHeroSparkLayer({
 
       const desktop = window.matchMedia(DESKTOP_QUERY).matches;
       const isHomeSpark = stage.closest(".home-spark-pin") !== null;
+      setHomeSparkColor(isHomeSpark);
 
       if (!desktop && isHomeSpark) {
         const stageWidth = stage.clientWidth;
@@ -205,6 +213,8 @@ export function PrimaryHeroSparkLayer({
     };
   }, [shapeScale]);
 
+  const resolvedColor = homeSparkColor ? HOME_SPARK_COLOR : null;
+
   return (
     <div ref={slotRef} className="primary-hero-spark-layer" aria-hidden>
       <SparkCanvas
@@ -213,8 +223,9 @@ export function PrimaryHeroSparkLayer({
         paused={paused}
         showBoundary={showBoundary}
         shapeScale={frameShapeScale}
-        colorMode={colorMode}
-        compositeMode={compositeMode}
+        colorMode={resolvedColor?.colorMode ?? colorMode}
+        fixedColor={resolvedColor?.fixedColor ?? fixedColor}
+        compositeMode={resolvedColor?.compositeMode ?? compositeMode}
         colorCycleSpeed={colorCycleSpeed}
         canvasBleed={0.14}
       />

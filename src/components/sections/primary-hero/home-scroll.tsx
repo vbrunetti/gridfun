@@ -117,6 +117,10 @@ export function HomeScroll({
     const desktop = window.matchMedia("(min-width: 1024px)").matches;
     const anchor = desktop ? 8 : chromeAnchorY() + 8;
 
+    if (desktop) {
+      document.body.dataset.chromeSurface = "dark";
+    }
+
     let best = 0;
     for (let i = 0; i < panels.length; i++) {
       if (panels[i]!.getBoundingClientRect().top <= anchor) best = i;
@@ -129,14 +133,71 @@ export function HomeScroll({
     const onHero = best < slateCount;
     const onCover = hasSecondary && best >= slateCount;
 
-    if (onHero) {
+    let secondarySettled = false;
+    let secondaryCovering = false;
+    let handoffProgress = 0;
+
+    if (hasSecondary) {
+      const coverPanel = panels[slateCount];
+      const lastHero = panels[lastHeroIndex];
+      let translate = "var(--home-peek-translate)";
+      let settled = false;
+      let covering = false;
+
+      if (coverPanel && lastHero) {
+        const anchorAbs = window.scrollY + anchor;
+        const transitionStart = lastHero.offsetTop;
+        const transitionEnd = coverPanel.offsetTop;
+
+        if (anchorAbs >= transitionStart) {
+          handoffProgress = clamp(
+            (anchorAbs - transitionStart) /
+              Math.max(transitionEnd - transitionStart, 1),
+            0,
+            1,
+          );
+
+          if (handoffProgress >= 1) {
+            translate = "0px";
+            settled = true;
+            covering = true;
+          } else if (handoffProgress > 0) {
+            covering = true;
+            translate = `calc((1 - ${handoffProgress}) * var(--home-peek-translate))`;
+          }
+        }
+      }
+
+      secondarySettled = settled;
+      secondaryCovering = covering;
+
+      root.style.setProperty("--home-secondary-translate", translate);
+      root.classList.toggle("home-secondary-covering", covering);
+      root.classList.toggle("home-secondary-settled", settled);
+    }
+
+    const secondaryPanel = root.querySelector<HTMLElement>(".home-secondary-panel");
+    const secondaryDominant = secondaryPanel
+      ? secondaryPanel.getBoundingClientRect().top <= anchor + 4
+      : false;
+
+    const onSecondaryStep =
+      secondarySettled ||
+      onCover ||
+      secondaryDominant ||
+      (secondaryCovering && handoffProgress >= 0.88) ||
+      root.style.getPropertyValue("--home-secondary-translate").trim() === "0px";
+
+    if (onSecondaryStep) {
+      setActiveStep(
+        Math.max(1, Math.min(best - slateCount + 1, coverSections.length)),
+      );
+      setSubChapterProgressState(null);
+    } else if (onHero) {
       setActiveStep(0);
       setSubChapterProgressState({
         progress: (best + 1) / Math.max(slateCount, 1),
       });
-    } else if (onCover) {
-      setActiveStep(Math.min(best - slateCount + 1, coverSections.length));
-      setSubChapterProgressState(null);
     }
 
     const heroPanels = panels.slice(0, slateCount);
@@ -187,42 +248,6 @@ export function HomeScroll({
       // Keep animating while hero panels are in view; pause only after leaving hero band
       sparkPaused: best >= slateCount || !sparkInView,
     });
-
-    if (hasSecondary) {
-      const coverPanel = panels[slateCount];
-      const lastHero = panels[lastHeroIndex];
-      let translate = "var(--home-peek-translate)";
-      let settled = false;
-      let covering = false;
-
-      if (coverPanel && lastHero) {
-        const anchorAbs = window.scrollY + anchor;
-        const transitionStart = lastHero.offsetTop;
-        const transitionEnd = coverPanel.offsetTop;
-
-        if (anchorAbs >= transitionStart) {
-          const progress = clamp(
-            (anchorAbs - transitionStart) /
-              Math.max(transitionEnd - transitionStart, 1),
-            0,
-            1,
-          );
-
-          if (progress >= 1) {
-            translate = "0px";
-            settled = true;
-            covering = true;
-          } else if (progress > 0) {
-            covering = true;
-            translate = `calc((1 - ${progress}) * var(--home-peek-translate))`;
-          }
-        }
-      }
-
-      root.style.setProperty("--home-secondary-translate", translate);
-      root.classList.toggle("home-secondary-covering", covering);
-      root.classList.toggle("home-secondary-settled", settled);
-    }
   }, [coverSections.length, getPanels, hasSecondary, slateCount]);
 
   const scrollToStep = useCallback(
@@ -253,6 +278,26 @@ export function HomeScroll({
   );
 
   useHeroSubChapterProgressRegister(subChapterProgress);
+
+  // Desktop — home owns chrome surface; assert on mount and every scroll sync.
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const apply = () => {
+      if (mq.matches) {
+        document.body.dataset.chromeSurface = "dark";
+      }
+    };
+
+    apply();
+    mq.addEventListener("change", apply);
+
+    return () => {
+      mq.removeEventListener("change", apply);
+      if (mq.matches) {
+        delete document.body.dataset.chromeSurface;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const root = rootRef.current;

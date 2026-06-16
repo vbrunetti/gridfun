@@ -3,6 +3,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type ReactNode,
@@ -61,6 +62,17 @@ function snapScrollTargets(steps: CaseStudyDetailStep[]): number[] {
     const el = document.getElementById(step.id);
     return el ? rowSnapScrollY(el) : 0;
   });
+}
+
+function syncChromeSurfaceFromStep(
+  steps: CaseStudyDetailStep[],
+  stepIndex: number,
+) {
+  const step = steps[stepIndex];
+  const el = step ? document.getElementById(step.id) : null;
+  const surface =
+    (el?.getAttribute(CHROME_SURFACE_ATTR) as ChromeSurface | null) ?? "dark";
+  document.body.dataset.chromeSurface = surface;
 }
 
 /** Active row from snap positions — matches CSS scroll-snap, not bounding-box overlap. */
@@ -128,7 +140,9 @@ export function CaseStudyDetailScroll({
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
 
   const syncActiveStep = useCallback(() => {
-    setActiveStep(activeStepIndex(steps));
+    const next = activeStepIndex(steps);
+    setActiveStep(next);
+    syncChromeSurfaceFromStep(steps, next);
   }, [steps]);
 
   const scrollToStep = useCallback(
@@ -167,6 +181,12 @@ export function CaseStudyDetailScroll({
     hoverStep,
     setHoverStep,
   );
+
+  // Snap-scroll pages keep chrome fixed — reclaim menu visibility before paint.
+  useLayoutEffect(() => {
+    syncChromeSurfaceFromStep(steps, activeStep);
+    document.body.removeAttribute("data-chrome-visibility");
+  }, [steps]);
 
   useEffect(() => {
     syncActiveStep();
@@ -235,18 +255,14 @@ export function CaseStudyDetailScroll({
     steps.length > 1,
   );
 
-  // Dot + menu chrome color tracks the active row on desktop (mobile uses band sampler).
+  // Dot + menu chrome color tracks the active row (detail scroll owns surface on all viewports).
   useEffect(() => {
-    if (!window.matchMedia("(min-width: 1024px)").matches) return;
-
-    const step = steps[activeStep];
-    const el = step ? document.getElementById(step.id) : null;
-    const surface =
-      (el?.getAttribute(CHROME_SURFACE_ATTR) as ChromeSurface | null) ?? "dark";
-    document.body.dataset.chromeSurface = surface;
+    syncChromeSurfaceFromStep(steps, activeStep);
 
     return () => {
-      delete document.body.dataset.chromeSurface;
+      if (!document.querySelector(".cs-detail")) {
+        delete document.body.dataset.chromeSurface;
+      }
     };
   }, [activeStep, steps]);
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { useChrome } from "./chrome-provider";
 
@@ -14,6 +15,7 @@ const SCROLL_DELTA = 4;
  * Desktop is unaffected.
  */
 export function ChromeScrollVisibility() {
+  const pathname = usePathname();
   const { menuOpen } = useChrome();
   const lastYRef = useRef(0);
   const visibleRef = useRef(true);
@@ -36,6 +38,13 @@ export function ChromeScrollVisibility() {
       const mobile = mobileMq.matches;
 
       if (!mobile) {
+        document.body.removeAttribute("data-chrome-visibility");
+        visibleRef.current = true;
+        return;
+      }
+
+      // Snap-scroll detail pages keep menu reachable at every row.
+      if (document.querySelector(".cs-detail")) {
         document.body.removeAttribute("data-chrome-visibility");
         visibleRef.current = true;
         return;
@@ -91,7 +100,7 @@ export function ChromeScrollVisibility() {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       document.body.removeAttribute("data-chrome-visibility");
     };
-  }, [menuOpen]);
+  }, [menuOpen, pathname]);
 
   return null;
 }

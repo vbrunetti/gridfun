@@ -29,6 +29,14 @@ export function ChromeThemeWatcher() {
         return;
       }
 
+      if (document.querySelector(".home-scroll")) {
+        return;
+      }
+
+      if (document.querySelector(".cs-index-route")) {
+        return;
+      }
+
       const surfaces = [
         ...document.querySelectorAll<Element>(`[${CHROME_SURFACE_ATTR}]`),
       ].filter((el) => !el.closest(IGNORE));
@@ -71,9 +79,10 @@ export function ChromeThemeWatcher() {
       for (const el of document.querySelectorAll<Element>(
         `[${CHROME_SURFACE_ATTR}]`,
       )) {
-        if (!el.closest(IGNORE)) {
-          observer.observe(el);
+        if (el.closest(IGNORE) || el.closest(".home-scroll") || el.closest(".cs-index-route")) {
+          continue;
         }
+        observer.observe(el);
       }
       apply();
     };
@@ -82,7 +91,13 @@ export function ChromeThemeWatcher() {
 
     return () => {
       observer.disconnect();
-      delete body.dataset.chromeSurface;
+      if (
+        !document.querySelector(".home-scroll") &&
+        !document.querySelector(".cs-index-route") &&
+        !document.querySelector(".cs-detail")
+      ) {
+        delete body.dataset.chromeSurface;
+      }
     };
   }, [pathname]);
 

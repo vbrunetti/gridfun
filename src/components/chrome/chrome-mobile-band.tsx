@@ -27,7 +27,9 @@ export function ChromeMobileBand() {
         clearChromeDotsBandSample();
         return;
       }
-      applyChromeBandSample(sampleChromeBand(menuOpen));
+      applyChromeBandSample(sampleChromeBand(menuOpen), {
+        includeSurface: !document.querySelector(".cs-detail"),
+      });
       const dots = sampleChromeDotsBand(menuOpen);
       if (dots) {
         applyChromeDotsBandSample(dots);
