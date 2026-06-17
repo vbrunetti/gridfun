@@ -19,6 +19,15 @@ export const STEP_LOCK_MS = 480;
 export const AXIS_LOCK_THRESHOLD_PX = 8;
 /** px travel on touchend that counts as a directional swipe (≥ = step one panel). */
 export const SWIPE_THRESHOLD_PX = 44;
+/**
+ * px/ms above which a touch release is a FLICK (advance exactly one panel from the
+ * index the gesture STARTED on) rather than a deliberate drag (snap to nearest).
+ * This is what keeps "one swipe = one panel" while still letting a slow drag move
+ * proportionally. Tune on-device.
+ */
+export const FLICK_VELOCITY_PX_MS = 0.4;
+/** Minimum travel for a flick (filters out taps). */
+export const FLICK_MIN_TRAVEL_PX = 8;
 /** ms to snap-to-nearest after wheel input goes idle. */
 export const SNAP_IDLE_MS = 90;
 /** ms to ignore new input after the stage enters focus (prevents entry fling). */
@@ -35,6 +44,10 @@ export type HGestureCallbacks = {
   applyDelta(delta: number): void;
   /** Advance/retreat by exactly one panel. */
   step(dir: 1 | -1): void;
+  /** Current resting panel index (nearest panel to the offset). */
+  getIndex(): number;
+  /** Go to an absolute panel index (animated). */
+  goToIndex(index: number): void;
   /** Snap the track to the nearest panel snap point. */
   snapToNearest(): void;
   /** Is this section currently the active/pinned panel in the vertical deck? */
@@ -80,6 +93,8 @@ export function attachHorizontalGestures(
     getMaxOffset,
     applyDelta,
     step,
+    getIndex,
+    goToIndex,
     snapToNearest,
     isFocused,
     mobileBiaxial = false,
@@ -129,6 +144,8 @@ export function attachHorizontalGestures(
   let touchOriginX = 0;
   let touchOriginY = 0;
   let touchOffsetAtStart = 0;
+  let touchStartIndex = 0;
+  let touchStartTime = 0;
   let axisLock: AxisLock = null;
   let lastTouchX = 0;
   let lastTouchY = 0;
@@ -142,6 +159,8 @@ export function attachHorizontalGestures(
     lastTouchX = t.clientX;
     lastTouchY = t.clientY;
     touchOffsetAtStart = getOffset();
+    touchStartIndex = getIndex(); // index BEFORE the drag — a flick advances one from here
+    touchStartTime = performance.now();
     axisLock = null;
     clearTimeout(snapTimer);
   };
@@ -200,11 +219,22 @@ export function attachHorizontalGestures(
 
     const dx = t.clientX - touchOriginX;
     const dy = t.clientY - touchOriginY;
-
-    // Flick: a short fast swipe — step exactly one panel instead of snap-to-nearest.
     const travelAlongAxis = axisLock === "h" ? -dx : -dy; // positive = advance
-    if (Math.abs(travelAlongAxis) >= SWIPE_THRESHOLD_PX) {
-      step(travelAlongAxis > 0 ? 1 : -1);
+
+    const duration = Math.max(performance.now() - touchStartTime, 1);
+    const velocity = Math.abs(travelAlongAxis) / duration;
+
+    // Flick (fast release): advance exactly ONE panel from where the gesture began.
+    // The free-drag already moved the offset/index; without anchoring to the start
+    // index, the flick's +1 would stack on the drag and skip a panel ("one swipe →
+    // two panels"). Slow/deliberate drags fall through to snap-to-nearest, so they
+    // still land proportionally where the finger let go.
+    if (
+      velocity >= FLICK_VELOCITY_PX_MS &&
+      Math.abs(travelAlongAxis) >= FLICK_MIN_TRAVEL_PX
+    ) {
+      goToIndex(touchStartIndex + (travelAlongAxis > 0 ? 1 : -1));
+      axisLock = null;
       return;
     }
 

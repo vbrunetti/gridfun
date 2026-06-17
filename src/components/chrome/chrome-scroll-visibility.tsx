@@ -43,12 +43,10 @@ export function ChromeScrollVisibility() {
         return;
       }
 
-      // Snap-scroll detail pages keep menu reachable at every row.
-      if (document.querySelector(".cs-detail")) {
-        document.body.removeAttribute("data-chrome-visibility");
-        visibleRef.current = true;
-        return;
-      }
+      // D1: auto-hide is uniform across ALL deck routes — no detail-page opt-out.
+      // The top inset is fixed clearspace (the band hides via transform, keeping
+      // its measured height constant), so snap geometry never shifts when the nav
+      // hides; scrolling up reveals it, so the menu stays reachable.
 
       if (reducedMq.matches || menuOpen) {
         setVisible(true);

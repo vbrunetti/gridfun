@@ -316,22 +316,69 @@ Build the new system beside the old, migrate one route at a time, delete the old
 
 ## 11. Decisions (resolved by Victor 2026-06-16)
 
-- **D1 — Mobile top-nav on deck routes: RESOLVED → auto-hide everywhere; inset is fixed clearspace.**
+- **D1 — Mobile top-nav on deck routes: RESOLVED → auto-hide everywhere; inset is fixed clearspace. ✅ IMPLEMENTED 2026-06-16.**
   The top nav must NOT be persistently visible (it adds noise). It auto-hides on scroll on *all* deck routes. Crucially, the reserved top space stays constant whether the nav is shown or hidden, so the layout never shifts and snap geometry stays stable — the nav fades in/out *over* permanent clearspace rather than collapsing it.
-  This is already most of the way there: `.chrome-mobile-band` has a fixed `height: var(--chrome-top-offset)` (`globals.css:1861`) and hides via `transform: translateY(...)` (`globals.css:1877`), which does not change its measured box height, so `--chrome-top-inset` (measured by `chrome-insets.ts`) is constant in both states. Panels already subtract that constant inset. **No inset→0, no re-pin needed** (sidesteps the original D1 option b).
-  **Action:** remove the `.cs-detail` opt-out in `chrome-scroll-visibility.tsx:47-51` so auto-hide is uniform across deck routes (today the detail page keeps the nav pinned).
+  Why it's stable: `.chrome-mobile-band` has a fixed `height: var(--chrome-top-offset)` and hides via `transform: translateY(...)`, which does not change its measured box height, so `--chrome-top-inset` is constant in both states. Panels already subtract that constant inset. **No inset→0, no re-pin needed.**
+  **Implemented in two places** (the opt-out was wired twice): removed the `.cs-detail` early-return in `chrome-scroll-visibility.tsx`, AND removed the `document.body.removeAttribute("data-chrome-visibility")` strip in `case-study-detail-scroll.tsx`'s pre-paint `useLayoutEffect` (it was wiping the `hidden` state on every step change). Verified: detail auto-hides on scroll-down, reveals on scroll-up, `--chrome-top-inset` constant at 84px in all states.
 
 - **D2 — History model: RESOLVED → route-level Back only.**
   Back navigates between routes, not panel-by-panel. Panel `id`s still map to a URL hash for sharing/deep-link restore, but traversal uses `replaceState` so Back isn't flooded with per-panel entries. (Builds into Stage 1/3.)
 
-- **D3 — BAND fraction: RESOLVED → per-section author-set.**
-  Each section/band panel declares its own fraction (e.g. 40% vs 60%), default 0.5. Data model is ready: `PanelDef.bandFraction` (`deck/types.ts:8`) and the `--panel-band-fraction` → `--panel-band-h` chain (`globals.css:88-89`). Wiring needed: apply `bandFraction` as an inline `--panel-band-fraction` on each band panel when rendered through the deck.
+- **D3 — BAND fraction: RESOLVED → per-section author-set. ⏸️ DEFERRED (premature) 2026-06-16.**
+  Each section/band panel declares its own fraction (e.g. 40% vs 60%), default 0.5. Data model is ready: `PanelDef.bandFraction` (`deck/types.ts`) and the `--panel-band-fraction` → `--panel-band-h` chain (`globals.css:88-89`). **No code to write yet:** zero `size:"band"` panels are rendered anywhere — both deck routes use only `size:"fullscreen"`, and the deck is still an active-index hook, not a panel renderer. Wire `bandFraction` → inline `--panel-band-fraction` when panels first render through a `<Panel>` (Stage 3+).
 
-- **D4 — Snap strictness: RESOLVED → `mandatory` everywhere.**
-  No `proximity` downgrades, no per-breakpoint variance. Collapse the existing `mandatory`/`proximity` inconsistency (`globals.css:775,1043,1107`) to a single `mandatory` rule in Stage 5.
+- **D4 — Snap strictness: RESOLVED → `mandatory` everywhere. ✅ ALREADY SATISFIED 2026-06-16.**
+  The single shared `mandatory` rule is in place (`globals.css:657`). The per-breakpoint `proximity`/`scroll-snap-stop: normal` downgrades the original audit flagged were already removed in the Stage 1 migration. The only remaining `proximity`/`normal` are inside `@media (prefers-reduced-motion: reduce)` blocks (`globals.css:795,799,1057,1110`) — the intentional reduced-motion degrade (§7), which D4 must **not** remove. No change needed.
+
+- **D5 — Vignette panel widths by gridline unit. 🆕 OPEN — design decision, orthogonal to the phased deck work (raised by Victor 2026-06-16).**
+  Panel widths for vignette filmstrips should be expressed in **gridlines** (the master grid columns) as the unit of measurement.
+  - **Desktop:** varying widths per panel kind are correct (today's behaviour). Current mapping lives in `gridFraction()` in `vignette-chapter.tsx`: title = 4/12 cols, `16x9` = 12/12, `1x1` = 8/12, default (e.g. `9x16`) = 6/12. Keep this *intent* on desktop.
+  - **Mobile:** every panel should be **virtually full width AND full height** of the usable panel area — one panel ≈ one screen. Today's code reuses the same 12-based fractions against a 6-col mobile grid (`applyLayout()` rounds `gridFraction(kind) * cols`), so on mobile a title → ~2 cols, `1x1` → ~4 cols, etc. — i.e. scaled-down panels, NOT the desired full-bleed-per-panel.
+  - **Where:** `gridFraction()` + the mobile path of `applyLayout()` in `vignette-chapter.tsx` (and the grid-column ruler measurement). Height is already `--app-vh` per `.vchapter`/`.vchapter__pin`; the gap is width.
+  - **Intended to be independent** of Stages 1–5. Can land on the current vignette-chapter implementation now, or fold into the deck's `§5.3` sizing later — but the desktop-varying / mobile-full split is the requirement either way. **Not yet started.**
 
 ---
 
 ## 12. The one-paragraph version (for the PR description)
 
 > The site grew five separate scroll engines that each recompute panel height (in three different viewport units), snap position (native CSS in some, JS transforms in others), and active-panel detection (with divergent magic offsets). The result is off-by-a-bit snapping and the complete absence of touch gestures on horizontal sections. We replace all five with one `PanelDeck` primitive driven by a single stable height model (`--app-vh` + measured chrome insets → `--panel-h`), a unified gesture layer that finally implements mobile touch + bi-axial swipe with axis-lock and an explicit edge-release contract, and one active-index algorithm feeding the dot rail and chrome. Panels declare only an axis and one of three size classes; they never touch the viewport. Migrate route-by-route behind the existing UI, with on-device acceptance tests as the definition of done.
+
+---
+
+## 13. Known issues / QA backlog
+
+Priority scale: **P0** = breaks a shipped route, fix now · **P1** = latent / not currently observed, fix opportunistically · **P2** = polish.
+
+### Open
+
+- **P1 — `width: 100vw` full-bleed keylines overflow when a classic scrollbar is present.**
+  The full-bleed keyline rules (`globals.css:347,357` — `.keyline-b::after` / `.keyline-t::before`) are sized `100vw`, which includes the vertical scrollbar gutter. On any viewport with a *classic* (non-overlay) scrollbar, a tall page overflows horizontally by the scrollbar width (~15–27px), which on mobile widens the layout viewport and pushes the fixed chrome (hamburger + dot rail) off-screen.
+  - **Why P1, not P0:** not reproducible where it matters today. Mobile Chrome device mode and real phones use *overlay* scrollbars (0 width), so `100vw == screen width`. Desktop shows no horizontal scrollbar in current testing (Victor confirmed 2026-06-16). It only surfaced in the local preview environment (classic scrollbars) on `/about`, where `scrollWidth == innerWidth` and zero real content elements overflowed — i.e. a pure scrollbar-gutter artifact.
+  - **Elevate to P0 if:** a horizontal scrollbar/off-screen chrome is observed on any real desktop or mobile browser.
+  - **Candidate fix:** scrollbar-safe full-bleed — e.g. `width: 100%` with a negative-margin bleed to the viewport edge, or `calc(100vw - (100vw - 100%))`, instead of raw `100vw`. Must preserve the edge-to-edge bleed past the grid margins (the whole point of these rules).
+
+### Resolved (this QA pass, 2026-06-16) — see git history
+
+- **P0 — Home hero: oversized mobile spark caused horizontal overflow** → pushed fixed chrome off-screen. Fixed by `overflow-x: clip` on `.home-spark-pin`.
+- **P0 — Home hero: touch fling skipped all chapters into the secondary.** Fixed by making the handoff chapter a real snap stop (`scroll-snap-align: start; scroll-snap-stop: always`) instead of relying on a 1px anchor; also stabilized `--home-cover-peek` (`dvh` → `calc(var(--app-vh) * 0.2)`).
+- **P0 — `/craft`: hero filters `grid-column: 5 / -1`** was only 2 cols on the 6-col mobile grid → chips overflowed. Fixed: full width on mobile, `5/-1` only ≥1024px.
+
+---
+
+## 14. Progress log (as of 2026-06-16)
+
+Where the rebuild stands. Verification this session was via the local preview at 412px with synthetic touch — **mechanics are proven; gesture *feel* still needs real-device confirmation.**
+
+**Stages**
+- **Stage 0 — Height model: ✅ shipped.** `lib/viewport-height.ts` (`--app-vh`, URL-bar-stable), `lib/chrome-insets.ts` (measured `--chrome-top-inset`/`--chrome-dots-inset`), `--panel-h`/`--panel-band-h` tokens, booted by `components/chrome/viewport-insets.tsx`.
+- **Stage 1 — Deck active-index: ✅ shipped** on case-study detail + case-studies index (`usePanelDeck` owns active-index via the §5.4 algorithm; `nudgeToNearestSnap` gone). Deck is currently an *active-index hook*, not yet a panel renderer.
+- **Stage 2 — Horizontal touch gestures: ✅ implemented + verified, ⏳ pending on-device feel tuning.** `vignette-chapter.tsx` consumes `attachHorizontalGestures`. Verified: vertical + horizontal swipe drive the track, edge-release at both ends, `preventDefault` while consuming. Fixed the "one swipe → 2 panels" double-count with a **velocity-based flick** (drag-follow model #2): fast flick = one panel from the start index; slow drag = proportional snap. **Tune `FLICK_VELOCITY_PX_MS` (currently 0.4) on a real device.** Run the §9 Stage 2 acceptance tests (a–e) on-device.
+- **Stage 3 (home + cs-index onto the deck, retire `home-scroll.tsx`): ⛔ not started.**
+- **Stage 4 (craft carousel onto shared gesture module): ⛔ not started.**
+- **Stage 5 (cleanup: delete `lib/nav.ts`, `src/content/_BK/`, committed `.DS_Store`s, dead engines; one gesture-tuning config): ⛔ not started.**
+
+**Decisions:** D1 ✅ implemented · D2 ⏳ (lands with Stage 1/3) · D3 ⏸️ deferred (no band panels yet) · D4 ✅ already satisfied · D5 🆕 open (vignette panel widths, §11).
+
+**Files changed this session (uncommitted):** `lib/viewport-height.ts`, `lib/chrome-insets.ts`, `components/chrome/viewport-insets.tsx`, `components/deck/*`, `app/globals.css`, `components/chrome/chrome-scroll-visibility.tsx`, `components/case-studies/case-study-detail-scroll.tsx`, `components/craft/vignette-chapter.tsx`.
+
+**Immediate next steps:** (1) on-device test Stage 2 + tune flick velocity; (2) D5 mobile panel widths (independent); (3) Stage 3.

@@ -149,10 +149,11 @@ export function CaseStudyDetailScroll({
     setHoverStep,
   );
 
-  // Snap-scroll pages keep chrome pinned — remove hide/show behavior before paint.
+  // Pre-paint surface sync — avoids a flash of the wrong chrome color on step change.
+  // D1: detail no longer pins the nav (auto-hide is uniform), so we no longer strip
+  // data-chrome-visibility here — that fought the scroll hide/show logic.
   useLayoutEffect(() => {
     syncChromeSurfaceFromStep(steps, activeIndex);
-    document.body.removeAttribute("data-chrome-visibility");
   }, [steps, activeIndex]);
 
   // Surface ownership: derive from active panel's declared attribute, not imperative poke.

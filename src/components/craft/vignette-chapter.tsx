@@ -394,6 +394,11 @@ export function VignetteChapter({
         if (!desktop.matches) return;
         goToPanel(indexRef.current + dir, true);
       },
+      getIndex: () => indexRef.current,
+      goToIndex: (i) => {
+        if (!desktop.matches) return;
+        goToPanel(i, true);
+      },
       snapToNearest: () => {
         if (!desktop.matches) return;
         const offsets = panelOffsets();

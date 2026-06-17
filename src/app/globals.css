@@ -673,7 +673,9 @@ html:has(.home-scroll:not(.home-scroll--static), .cs-index-scroll, .cs-detail) {
 }
 
 .home-scroll:not(.home-scroll--static) {
-  --home-cover-peek: 20dvh; /* secondary visible above fold during hero chapters */
+  /* Derive the peek from the STABLE --app-vh, not dvh: a dvh-based peek resizes
+     as the mobile URL bar collapses, shifting every downstream snap position. */
+  --home-cover-peek: calc(var(--app-vh) * 0.2); /* secondary visible above fold during hero chapters */
   --home-peek-translate: calc(var(--app-vh) - var(--home-cover-peek));
   --home-hero-band-height: calc(var(--app-vh) - var(--home-cover-peek));
   background: var(--section-dark-lift);
@@ -715,16 +717,18 @@ body:has(.home-scroll:not(.home-scroll--static)) {
   max-height: var(--home-hero-band-height);
 }
 
-/* Last hero chapter — scroll-linked secondary handoff, no snap back to chapter top */
+/* Last hero chapter — a real snap stop so a touch fling can't skip it into the
+   secondary. (A 1px anchor isn't enough: high-velocity flings blow past it.) */
 .hero-chapter-panel.home-scroll-panel--handoff {
-  scroll-snap-align: none;
-  scroll-snap-stop: normal;
-}
-
-/* Snap anchor before the handoff chapter — stops scroll without blocking motion through it */
-.home-hero-chapter-stop.home-scroll-panel {
   scroll-snap-align: start;
   scroll-snap-stop: always;
+}
+
+/* Redundant now the handoff itself snaps — keep the sentinel, drop its snap point
+   so we don't have two snap targets 1px apart. */
+.home-hero-chapter-stop.home-scroll-panel {
+  scroll-snap-align: none;
+  scroll-snap-stop: normal;
   height: 1px;
   margin-bottom: -1px;
   overflow: visible;
@@ -746,7 +750,13 @@ body:has(.home-scroll:not(.home-scroll--static)) {
   height: var(--home-hero-band-height);
   margin-bottom: calc(-1 * var(--home-hero-band-height));
   pointer-events: none;
-  overflow: visible;
+  /* Clip horizontally only: the oversized ambient spark bleeds well past the
+     viewport on mobile; left unclipped it widens the layout viewport and pushes
+     the fixed chrome (hamburger + dot rail) off-screen. clip (not hidden) keeps
+     vertical glow bleed and does not create a scroll container, so sticky/snap
+     are unaffected. */
+  overflow-x: clip;
+  overflow-y: visible;
   isolation: isolate;
 }
 
@@ -2050,8 +2060,17 @@ body[data-chrome-surface="dark"] .floating-chrome .rail-label-vertical {
 }
 
 .craft-hero__filters {
-  grid-column: 5 / -1;
+  /* Mobile: full width, wraps below the title. On the 6-col mobile grid, 5/-1 is
+     only 2 columns — far too narrow for the filter chips, which then overflowed
+     the viewport and pushed the fixed chrome off-screen. */
+  grid-column: 1 / -1;
   min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .craft-hero__filters {
+    grid-column: 5 / -1;
+  }
 }
 
 .craft-hero-meta {
