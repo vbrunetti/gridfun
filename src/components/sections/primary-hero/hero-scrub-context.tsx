@@ -38,7 +38,7 @@ export type HeroScrubState = {
 type HeroScrubContextValue = {
   state: HeroScrubState | null;
   setState: Dispatch<SetStateAction<HeroScrubState | null>>;
-  setSubChapterProgress: (progress: HeroSubChapterProgress | null) => void;
+  setSubChapterProgress: Dispatch<SetStateAction<HeroSubChapterProgress | null>>;
 };
 
 const HeroScrubContext = createContext<HeroScrubContextValue | null>(null);
