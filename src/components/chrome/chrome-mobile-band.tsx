@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   applyChromeBandSample,
   applyChromeDotsBandSample,
@@ -27,9 +27,18 @@ export function ChromeMobileBand() {
         clearChromeDotsBandSample();
         return;
       }
-      applyChromeBandSample(sampleChromeBand(menuOpen), {
-        includeSurface: !document.querySelector(".cs-detail"),
-      });
+
+      const onDetail = Boolean(document.querySelector(".cs-detail"));
+
+      // Detail scroll owns band + dots surface/bg; only force dark band when menu opens.
+      if (onDetail) {
+        if (menuOpen) {
+          applyChromeBandSample(sampleChromeBand(true), { includeSurface: false });
+        }
+        return;
+      }
+
+      applyChromeBandSample(sampleChromeBand(menuOpen));
       const dots = sampleChromeDotsBand(menuOpen);
       if (dots) {
         applyChromeDotsBandSample(dots);
@@ -77,7 +86,16 @@ export function ChromeMobileBand() {
     };
   }, [menuOpen, pathname]);
 
-  return <div className="chrome-mobile-band" aria-hidden />;
+  return <div className="chrome-mobile-band" data-chrome-inset="top" aria-hidden />;
+}
+
+/** Routes whose mobile chrome starts dark before scroll sync runs. */
+function pathnameDarkDefault(pathname: string): boolean {
+  return (
+    pathname === "/" ||
+    pathname === "/case-studies" ||
+    pathname.startsWith("/case-studies/")
+  );
 }
 
 /** Logo variant follows the active chrome surface on mobile. */
@@ -85,13 +103,21 @@ export function useChromeSurface(): ChromeSurface {
   const pathname = usePathname();
   const { menuOpen } = useChrome();
   const [surface, setSurface] = useState<ChromeSurface>("light");
+  const [synced, setSynced] = useState(false);
 
-  useEffect(() => {
-    const read = () =>
-      (document.body.dataset.chromeSurface as ChromeSurface | undefined) ||
-      "light";
+  useLayoutEffect(() => {
+    const read = (): ChromeSurface => {
+      const fromBody = document.body.dataset.chromeSurface as ChromeSurface | undefined;
+      if (fromBody) return fromBody;
+      if (pathnameDarkDefault(pathname)) return "dark";
+      return "light";
+    };
 
-    const sync = () => setSurface(read());
+    const sync = () => {
+      setSurface(read());
+      setSynced(true);
+    };
+
     sync();
 
     const observer = new MutationObserver(sync);
@@ -104,5 +130,6 @@ export function useChromeSurface(): ChromeSurface {
   }, [pathname]);
 
   if (menuOpen) return "dark";
+  if (!synced && pathnameDarkDefault(pathname)) return "dark";
   return surface;
 }

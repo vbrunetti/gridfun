@@ -22,11 +22,13 @@ import {
   type ChromeSurface,
   peekCursorSurface,
 } from "@/lib/chrome-surface";
+import {
+  getEffectiveBackground,
+  isMobileChromeBand,
+} from "@/lib/chrome-band-sample";
+import { usePanelDeck } from "@/components/deck/use-panel-deck";
 
 const PEEK_DESKTOP_QUERY = "(min-width: 768px)";
-const ANCHOR_DESKTOP_QUERY = "(min-width: 1024px)";
-const SNAP_NUDGE_MS = 100;
-const SNAP_NUDGE_THRESHOLD_PX = 56;
 
 type PeekTarget = {
   surface: "light" | "dark";
@@ -34,35 +36,6 @@ type PeekTarget = {
   | { type: "section"; sectionId: string }
   | { type: "panel"; sectionId: string; panelIndex: number }
 );
-
-function chromeAnchorY(): number {
-  const desktop = window.matchMedia(ANCHOR_DESKTOP_QUERY).matches;
-  if (desktop) return 8;
-
-  const raw = getComputedStyle(document.documentElement).getPropertyValue(
-    "--chrome-top-offset",
-  );
-  const parsed = Number.parseFloat(raw);
-  return Number.isFinite(parsed) ? parsed : 64;
-}
-
-/** Scroll Y where a row's snap-start aligns with the document snap port. */
-function rowSnapScrollY(el: HTMLElement): number {
-  const marginTop =
-    parseFloat(getComputedStyle(el).scrollMarginTop) || 0;
-  const paddingTop =
-    parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) ||
-    0;
-  const docTop = el.getBoundingClientRect().top + window.scrollY;
-  return docTop - marginTop - paddingTop;
-}
-
-function snapScrollTargets(steps: CaseStudyDetailStep[]): number[] {
-  return steps.map((step) => {
-    const el = document.getElementById(step.id);
-    return el ? rowSnapScrollY(el) : 0;
-  });
-}
 
 function syncChromeSurfaceFromStep(
   steps: CaseStudyDetailStep[],
@@ -73,31 +46,20 @@ function syncChromeSurfaceFromStep(
   const surface =
     (el?.getAttribute(CHROME_SURFACE_ATTR) as ChromeSurface | null) ?? "dark";
   document.body.dataset.chromeSurface = surface;
+  document.body.dataset.chromeDotsSurface = surface;
+
+  if (isMobileChromeBand()) {
+    const darkBg =
+      getComputedStyle(document.documentElement)
+        .getPropertyValue("--color-ink")
+        .trim() || "var(--color-ink)";
+    const bg = el ? getEffectiveBackground(el) : darkBg;
+    document.documentElement.style.setProperty("--chrome-mobile-band-bg", bg);
+    document.documentElement.style.setProperty("--chrome-mobile-dots-bg", bg);
+  }
 }
 
-/** Active row from snap positions — matches CSS scroll-snap, not bounding-box overlap. */
-function activeStepIndex(steps: CaseStudyDetailStep[]): number {
-  const anchor = chromeAnchorY() + 8;
-  const anchorAbs = window.scrollY + anchor;
-  const maxScroll =
-    document.documentElement.scrollHeight - window.innerHeight;
-
-  if (window.scrollY >= maxScroll - 4) {
-    return steps.length - 1;
-  }
-
-  const snapYs: number[] = snapScrollTargets(steps);
-
-  for (let i = steps.length - 1; i >= 0; i--) {
-    const snapY = snapYs[i]!;
-    const nextSnapY = snapYs[i + 1] ?? Number.POSITIVE_INFINITY;
-    if (anchorAbs >= snapY && anchorAbs < nextSnapY) return i;
-  }
-
-  return 0;
-}
-
-/** Dot-nav jumps: vignette filmstrips further down the page start at panel 1. */
+/** Dot-nav jumps: vignette filmstrips below the target start reset to panel 1. */
 function resetVignettesBelowStep(
   steps: CaseStudyDetailStep[],
   targetIndex: number,
@@ -123,39 +85,44 @@ type CaseStudyDetailScrollProps = {
 };
 
 /**
- * Native scroll-snap (CSS) for row / panel alignment. JS tracks active step
- * for dot nav + chrome focus and handles peek-to-jump. Vignette filmstrips
- * map vertical wheel → horizontal scroll in vignette-chapter.tsx.
+ * Snap-scroll container for case-study detail pages.
+ * Uses usePanelDeck for active-index tracking — one algorithm, measured chrome inset,
+ * no nudge timer.
  */
 export function CaseStudyDetailScroll({
   steps,
   children,
 }: CaseStudyDetailScrollProps) {
   const rootRef = useRef<HTMLElement>(null);
-  const rafRef = useRef(0);
-  const snapTimerRef = useRef(0);
-  const [activeStep, setActiveStep] = useState(0);
   const [hoverStep, setHoverStep] = useState<number | null>(null);
   const [peekTarget, setPeekTarget] = useState<PeekTarget | null>(null);
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
 
-  const syncActiveStep = useCallback(() => {
-    const next = activeStepIndex(steps);
-    setActiveStep(next);
-    syncChromeSurfaceFromStep(steps, next);
-  }, [steps]);
+  const sections = [
+    {
+      id: "cs-detail",
+      axis: "y" as const,
+      panels: steps.map((step) => ({
+        id: step.id,
+        size: "fullscreen" as const,
+        surface: "dark" as const,
+      })),
+    },
+  ];
+
+  const { activeIndex, goTo } = usePanelDeck({
+    sections,
+    onActiveChange: (_id, index) => {
+      syncChromeSurfaceFromStep(steps, index);
+    },
+  });
 
   const scrollToStep = useCallback(
     (index: number) => {
-      const step = steps[index];
-      if (!step) return;
-
       resetVignettesBelowStep(steps, index);
-
-      const el = document.getElementById(step.id);
-      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+      goTo(index);
     },
-    [steps],
+    [steps, goTo],
   );
 
   const scrollToVignettePanel = useCallback(
@@ -175,96 +142,35 @@ export function CaseStudyDetailScroll({
   useCaseStudyDetailScrollRegister(
     true,
     steps,
-    activeStep,
+    activeIndex,
     scrollToStep,
     true,
     hoverStep,
     setHoverStep,
   );
 
-  // Snap-scroll pages keep chrome fixed — reclaim menu visibility before paint.
+  // Snap-scroll pages keep chrome pinned — remove hide/show behavior before paint.
   useLayoutEffect(() => {
-    syncChromeSurfaceFromStep(steps, activeStep);
+    syncChromeSurfaceFromStep(steps, activeIndex);
     document.body.removeAttribute("data-chrome-visibility");
-  }, [steps]);
+  }, [steps, activeIndex]);
 
+  // Surface ownership: derive from active panel's declared attribute, not imperative poke.
   useEffect(() => {
-    syncActiveStep();
-
-    const nudgeToNearestSnap = () => {
-      if (
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
-        !window.matchMedia(PEEK_DESKTOP_QUERY).matches
-      ) {
-        return;
-      }
-
-      const targets = snapScrollTargets(steps);
-      if (targets.length < 2) return;
-
-      const scrollY = window.scrollY;
-
-      for (let i = 0; i < targets.length - 1; i++) {
-        const start = targets[i]!;
-        const end = targets[i + 1]!;
-        if (scrollY <= start + 4 || scrollY >= end - 4) continue;
-
-        const targetIndex = scrollY < (start + end) / 2 ? i : i + 1;
-        const targetY = targets[targetIndex]!;
-        const dist = Math.abs(scrollY - targetY);
-
-        if (dist > 4 && dist < SNAP_NUDGE_THRESHOLD_PX) {
-          document
-            .getElementById(steps[targetIndex]!.id)
-            ?.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-        return;
-      }
-    };
-
-    const onScroll = () => {
-      if (rafRef.current) return;
-      rafRef.current = requestAnimationFrame(() => {
-        rafRef.current = 0;
-        syncActiveStep();
-      });
-
-      window.clearTimeout(snapTimerRef.current);
-      snapTimerRef.current = window.setTimeout(
-        nudgeToNearestSnap,
-        SNAP_NUDGE_MS,
-      );
-    };
-
-    const onResize = () => syncActiveStep();
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onResize, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      window.clearTimeout(snapTimerRef.current);
-    };
-  }, [syncActiveStep, steps]);
-
-  useChromeFocusById(steps[activeStep]?.id, steps.length > 1);
-  useChromeFocusPreviewById(
-    hoverStep !== null ? steps[hoverStep]?.id : null,
-    steps.length > 1,
-  );
-
-  // Dot + menu chrome color tracks the active row (detail scroll owns surface on all viewports).
-  useEffect(() => {
-    syncChromeSurfaceFromStep(steps, activeStep);
+    syncChromeSurfaceFromStep(steps, activeIndex);
 
     return () => {
       if (!document.querySelector(".cs-detail")) {
         delete document.body.dataset.chromeSurface;
       }
     };
-  }, [activeStep, steps]);
+  }, [activeIndex, steps]);
+
+  useChromeFocusById(steps[activeIndex]?.id, steps.length > 1);
+  useChromeFocusPreviewById(
+    hoverStep !== null ? steps[hoverStep]?.id : null,
+    steps.length > 1,
+  );
 
   // Dimmed sections + vignette panels: plus cursor, hover preview, click to jump.
   useEffect(() => {

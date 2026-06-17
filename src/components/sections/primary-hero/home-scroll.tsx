@@ -20,17 +20,10 @@ import {
   type HeroSubChapterProgress,
   type HomeScrollStep,
 } from "./hero-scrub-context";
+import { getTopInset } from "@/components/deck/use-panel-deck";
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
-}
-
-function chromeAnchorY(): number {
-  const raw = getComputedStyle(document.documentElement).getPropertyValue(
-    "--chrome-top-offset",
-  );
-  const parsed = Number.parseFloat(raw);
-  return Number.isFinite(parsed) ? parsed : 64;
 }
 
 function buildHomeScrollSteps(
@@ -72,6 +65,12 @@ export function HomeScroll({
 }: HomeScrollProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef(0);
+  const syncRef = useRef<() => void>(() => {});
+  const secondaryDomRef = useRef({
+    covering: false,
+    settled: false,
+    translate: "",
+  });
   const [activePanel, setActivePanel] = useState(0);
   const [activeStep, setActiveStep] = useState(0);
   const [subChapterProgress, setSubChapterProgressState] =
@@ -114,19 +113,20 @@ export function HomeScroll({
     const panels = getPanels();
     if (!root || panels.length === 0) return;
 
-    const desktop = window.matchMedia("(min-width: 1024px)").matches;
-    const anchor = desktop ? 8 : chromeAnchorY() + 8;
-
-    if (desktop) {
-      document.body.dataset.chromeSurface = "dark";
-    }
+    const anchor = getTopInset();
 
     let best = 0;
     for (let i = 0; i < panels.length; i++) {
       if (panels[i]!.getBoundingClientRect().top <= anchor) best = i;
     }
 
-    setActivePanel(best);
+    // Surface derives from the active panel's declared attribute.
+    const activePanelEl = panels[best];
+    if (activePanelEl?.dataset.chromeSurface) {
+      document.body.dataset.chromeSurface = activePanelEl.dataset.chromeSurface;
+    }
+
+    setActivePanel((prev) => (prev === best ? prev : best));
 
     const heroPanelCount = Math.min(slateCount, panels.length);
     const lastHeroIndex = Math.max(heroPanelCount - 1, 0);
@@ -171,9 +171,19 @@ export function HomeScroll({
       secondarySettled = settled;
       secondaryCovering = covering;
 
-      root.style.setProperty("--home-secondary-translate", translate);
-      root.classList.toggle("home-secondary-covering", covering);
-      root.classList.toggle("home-secondary-settled", settled);
+      const dom = secondaryDomRef.current;
+      if (dom.translate !== translate) {
+        dom.translate = translate;
+        root.style.setProperty("--home-secondary-translate", translate);
+      }
+      if (dom.covering !== covering) {
+        dom.covering = covering;
+        root.classList.toggle("home-secondary-covering", covering);
+      }
+      if (dom.settled !== settled) {
+        dom.settled = settled;
+        root.classList.toggle("home-secondary-settled", settled);
+      }
     }
 
     const secondaryPanel = root.querySelector<HTMLElement>(".home-secondary-panel");
@@ -189,15 +199,18 @@ export function HomeScroll({
       root.style.getPropertyValue("--home-secondary-translate").trim() === "0px";
 
     if (onSecondaryStep) {
-      setActiveStep(
-        Math.max(1, Math.min(best - slateCount + 1, coverSections.length)),
+      const nextStep = Math.max(
+        1,
+        Math.min(best - slateCount + 1, coverSections.length),
       );
-      setSubChapterProgressState(null);
+      setActiveStep((prev) => (prev === nextStep ? prev : nextStep));
+      setSubChapterProgressState((prev) => (prev === null ? prev : null));
     } else if (onHero) {
-      setActiveStep(0);
-      setSubChapterProgressState({
-        progress: (best + 1) / Math.max(slateCount, 1),
-      });
+      const nextProgress = (best + 1) / Math.max(slateCount, 1);
+      setActiveStep((prev) => (prev === 0 ? prev : 0));
+      setSubChapterProgressState((prev) =>
+        prev?.progress === nextProgress ? prev : { progress: nextProgress },
+      );
     }
 
     const heroPanels = panels.slice(0, slateCount);
@@ -242,13 +255,28 @@ export function HomeScroll({
       ? sparkPin.getBoundingClientRect().height > 0
       : false;
 
-    setVisualState({
+    const nextVisualState: HomeScrollVisualState = {
       activeChapter: clamp(best, 0, lastHeroIndex),
       sparkBlend,
       // Keep animating while hero panels are in view; pause only after leaving hero band
       sparkPaused: best >= slateCount || !sparkInView,
+    };
+
+    setVisualState((prev) => {
+      if (
+        prev.activeChapter === nextVisualState.activeChapter &&
+        prev.sparkPaused === nextVisualState.sparkPaused &&
+        prev.sparkBlend.from === nextVisualState.sparkBlend.from &&
+        prev.sparkBlend.to === nextVisualState.sparkBlend.to &&
+        prev.sparkBlend.t === nextVisualState.sparkBlend.t
+      ) {
+        return prev;
+      }
+      return nextVisualState;
     });
   }, [coverSections.length, getPanels, hasSecondary, slateCount]);
+
+  syncRef.current = syncFromScroll;
 
   const scrollToStep = useCallback(
     (index: number) => {
@@ -314,13 +342,15 @@ export function HomeScroll({
   useEffect(() => {
     if (reducedMotion) return;
 
-    syncFromScroll();
+    const runSync = () => syncRef.current();
+
+    runSync();
 
     const onScroll = () => {
       if (rafRef.current) return;
       rafRef.current = requestAnimationFrame(() => {
         rafRef.current = 0;
-        syncFromScroll();
+        runSync();
       });
     };
 
@@ -334,7 +364,7 @@ export function HomeScroll({
       window.removeEventListener("scrollend", onScroll);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [reducedMotion, syncFromScroll]);
+  }, [reducedMotion]);
 
   return (
     <HomeScrollVisualProvider value={visualState}>

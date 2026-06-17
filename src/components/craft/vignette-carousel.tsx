@@ -14,13 +14,10 @@ import type { CraftVignette, ImageRatio, VignetteImage } from "@/content/portfol
 import { vignetteFrameSrc } from "@/lib/portfolio-assets";
 import { parseVimeoId } from "@/lib/vimeo";
 import { VimeoPlayer } from "@/components/media/vimeo-embed";
+import { STEP_LOCK_MS, SWIPE_THRESHOLD_PX } from "@/components/deck/gestures";
 
-/** One gesture (or button press) advances exactly one frame. */
-const STEP_LOCK_MS = 480;
-/** Horizontal wheel delta needed before a page turn registers. */
+/** Wheel delta magnitude needed before a page turn registers. */
 const WHEEL_THRESHOLD = 14;
-/** Pointer travel that counts as a swipe rather than a tap. */
-const SWIPE_THRESHOLD = 44;
 
 function ratioDimensions(ratio: ImageRatio): { width: number; height: number } {
   return ratio === "16x9"
@@ -135,10 +132,14 @@ export function VignetteImageScroll({
     if (!node) return;
 
     const onWheel = (event: WheelEvent) => {
-      if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
-      if (Math.abs(event.deltaX) < WHEEL_THRESHOLD) return;
+      // Accept whichever axis has dominant intent — horizontal trackpad or vertical scroll.
+      const dominant =
+        Math.abs(event.deltaX) >= Math.abs(event.deltaY)
+          ? event.deltaX
+          : event.deltaY;
+      if (Math.abs(dominant) < WHEEL_THRESHOLD) return;
       event.preventDefault();
-      step(event.deltaX > 0 ? 1 : -1);
+      step(dominant > 0 ? 1 : -1);
     };
 
     node.addEventListener("wheel", onWheel, { passive: false });
@@ -177,7 +178,7 @@ export function VignetteImageScroll({
     if (pointerStartX.current === null) return;
     const dx = event.clientX - pointerStartX.current;
     pointerStartX.current = null;
-    if (Math.abs(dx) > SWIPE_THRESHOLD) {
+    if (Math.abs(dx) > SWIPE_THRESHOLD_PX) {
       step(dx < 0 ? 1 : -1);
     }
   }

@@ -238,5 +238,7 @@ export function clearChromeBandSample() {
 
 export function clearChromeDotsBandSample() {
   document.documentElement.style.removeProperty("--chrome-mobile-dots-bg");
-  delete document.body.dataset.chromeDotsSurface;
+  if (!document.querySelector(".cs-detail")) {
+    delete document.body.dataset.chromeDotsSurface;
+  }
 }

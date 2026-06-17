@@ -117,9 +117,14 @@ export function useHeroSubChapterProgressRegister(
   progress: HeroSubChapterProgress | null,
 ) {
   const { setSubChapterProgress } = useHeroScrubContext();
+  const progressValue = progress?.progress ?? null;
 
   useEffect(() => {
-    setSubChapterProgress(progress);
+    setSubChapterProgress((prev) => {
+      if (progressValue === null) return prev === null ? prev : null;
+      if (prev?.progress === progressValue) return prev;
+      return { progress: progressValue };
+    });
     return () => setSubChapterProgress(null);
-  }, [progress, setSubChapterProgress]);
+  }, [progressValue, setSubChapterProgress]);
 }

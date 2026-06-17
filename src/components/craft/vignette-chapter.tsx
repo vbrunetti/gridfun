@@ -19,13 +19,10 @@ import { parseVimeoId } from "@/lib/vimeo";
 import { VimeoPlayer } from "@/components/media/vimeo-embed";
 import { useCaseStudyVignetteProgressRegister } from "@/components/case-studies/case-study-detail-scroll-context";
 import { CraftTagList } from "@/components/craft/vignette-media";
+import { attachHorizontalGestures } from "@/components/deck/gestures";
 
-/** Below this the chapter stacks vertically (no horizontal strip). */
-const DESKTOP_QUERY = "(min-width: 768px)";
-/** Snap to nearest panel after wheel goes idle. */
-const SNAP_IDLE_MS = 90;
-/** Ignore vertical-scroll momentum briefly as focus lands on this chapter. */
-const FOCUS_ENTRY_MS = 100;
+/** Always use horizontal filmstrip — all viewport sizes. */
+const DESKTOP_QUERY = "all";
 
 export const VCHAPTER_PANEL_EVENT = "vchapter:panel";
 
@@ -34,15 +31,6 @@ export type VchapterPanelEventDetail = {
   smooth?: boolean;
 };
 
-function wheelDeltaY(event: WheelEvent): number {
-  if (event.deltaMode === WheelEvent.DOM_DELTA_LINE) {
-    return event.deltaY * 16;
-  }
-  if (event.deltaMode === WheelEvent.DOM_DELTA_PAGE) {
-    return event.deltaY * 48;
-  }
-  return event.deltaY;
-}
 
 type PanelKind = "title" | "field" | ImageRatio;
 
@@ -225,8 +213,6 @@ export function VignetteChapter({
   const indexRef = useRef(0);
   const insetRef = useRef(0);
   const offsetRef = useRef(0);
-  const snapTimerRef = useRef(0);
-  const entryLockUntilRef = useRef(0);
 
   useEffect(() => {
     indexRef.current = index;
@@ -301,21 +287,11 @@ export function VignetteChapter({
     [indexAtOffset, maxOffset, setTrackTransition],
   );
 
-  const scheduleSnap = useCallback(() => {
-    window.clearTimeout(snapTimerRef.current);
-    snapTimerRef.current = window.setTimeout(() => {
-      const offsets = panelOffsets();
-      const idx = indexAtOffset(offsetRef.current);
-      applyOffset(offsets[idx] ?? 0, true);
-    }, SNAP_IDLE_MS);
-  }, [applyOffset, indexAtOffset, panelOffsets]);
-
   const goToPanel = useCallback(
     (next: number, animate: boolean) => {
       const clamped = Math.max(0, Math.min(steps - 1, next));
       const panel = panelRefs.current[clamped];
       if (!panel) return;
-      window.clearTimeout(snapTimerRef.current);
       applyOffset(panel.offsetLeft, animate);
     },
     [applyOffset, steps],
@@ -388,77 +364,52 @@ export function VignetteChapter({
     if (!section) return;
 
     const desktop = window.matchMedia(DESKTOP_QUERY);
-    let wasFocused = section.classList.contains("is-focused");
 
+    // Sync chapterActive from focused class; gestures module owns entry lock.
     const syncFocused = () => {
-      const focused = section.classList.contains("is-focused");
-      if (focused && !wasFocused) {
-        entryLockUntilRef.current = performance.now() + FOCUS_ENTRY_MS;
-      }
-      wasFocused = focused;
-      setChapterActive(focused);
+      setChapterActive(section.classList.contains("is-focused"));
     };
-
-    const atEdge = (deltaY: number) => {
-      const offset = offsetRef.current;
-      const max = maxOffset();
-      if (deltaY < 0 && offset <= 0) return true;
-      if (deltaY > 0 && offset >= max - 1) return true;
-      return false;
-    };
-
-    const onWheel = (event: WheelEvent) => {
-      if (!desktop.matches || !section.classList.contains("is-focused")) return;
-
-      const deltaY = wheelDeltaY(event);
-      if (Math.abs(deltaY) < 0.5) return;
-      if (atEdge(deltaY)) return;
-
-      event.preventDefault();
-      if (performance.now() < entryLockUntilRef.current) return;
-
-      applyOffset(offsetRef.current + deltaY, false);
-      scheduleSnap();
-    };
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (!desktop.matches || !section.classList.contains("is-focused")) return;
-      const delta =
-        event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
-      if (delta === 0) return;
-      const target = event.target as HTMLElement | null;
-      if (target?.closest("input, textarea, select, [contenteditable='true']")) {
-        return;
-      }
-      event.preventDefault();
-      goToPanel(indexRef.current + delta, true);
-    };
+    const focusObserver = new MutationObserver(syncFocused);
+    focusObserver.observe(section, { attributes: true, attributeFilter: ["class"] });
+    syncFocused();
 
     const onPanelJump = (event: Event) => {
       const detail = (event as CustomEvent<VchapterPanelEventDetail>).detail;
       if (!detail || !Number.isFinite(detail.panelIndex)) return;
       goToPanel(detail.panelIndex, detail.smooth ?? true);
     };
-
-    const focusObserver = new MutationObserver(syncFocused);
-    focusObserver.observe(section, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    syncFocused();
     section.addEventListener(VCHAPTER_PANEL_EVENT, onPanelJump);
-    document.addEventListener("wheel", onWheel, { passive: false, capture: true });
-    window.addEventListener("keydown", onKeyDown);
+
+    // Gesture layer: wheel + touch + keyboard (gestures.ts owns all inputs).
+    // mobileBiaxial = true on touch-capable viewports below the desktop breakpoint,
+    // so that vertical swipe also advances the horizontal track.
+    const detachGestures = attachHorizontalGestures(section, {
+      getOffset: () => offsetRef.current,
+      getMaxOffset: maxOffset,
+      applyDelta: (delta) => {
+        if (!desktop.matches) return; // stacked layout — no track to drive
+        applyOffset(offsetRef.current + delta, false);
+      },
+      step: (dir) => {
+        if (!desktop.matches) return;
+        goToPanel(indexRef.current + dir, true);
+      },
+      snapToNearest: () => {
+        if (!desktop.matches) return;
+        const offsets = panelOffsets();
+        const idx = indexAtOffset(offsetRef.current);
+        applyOffset(offsets[idx] ?? 0, true);
+      },
+      isFocused: () => section.classList.contains("is-focused"),
+      mobileBiaxial: true,
+    });
 
     return () => {
       focusObserver.disconnect();
       section.removeEventListener(VCHAPTER_PANEL_EVENT, onPanelJump);
-      document.removeEventListener("wheel", onWheel, { capture: true });
-      window.removeEventListener("keydown", onKeyDown);
-      window.clearTimeout(snapTimerRef.current);
+      detachGestures();
     };
-  }, [applyOffset, goToPanel, maxOffset, scheduleSnap]);
+  }, [applyOffset, goToPanel, indexAtOffset, maxOffset, panelOffsets]);
 
   if (total === 0) return null;
 

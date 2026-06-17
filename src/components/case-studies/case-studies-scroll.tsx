@@ -1,111 +1,89 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useChromeFocusPreview, useChromeFocusSteps } from "@/components/chrome/use-chrome-focus";
 import { useCaseStudiesScrollRegister } from "@/components/case-studies/case-studies-scroll-context";
+import { usePanelDeck } from "@/components/deck/use-panel-deck";
+import type { ChromeSurface } from "@/lib/chrome-surface";
+
+export type CaseStudiesStep = {
+  id: string;
+  surface: ChromeSurface;
+};
 
 type CaseStudiesScrollProps = {
+  steps: CaseStudiesStep[];
   children: ReactNode;
 };
 
 /**
- * Native scroll-snap (CSS) for step alignment. JS only tracks the active step
- * for dot nav + chrome focus — no wheel / key hijacking.
+ * Native scroll-snap (CSS) for step alignment on the case-studies index.
+ * usePanelDeck owns active-index detection; dots + chrome surface derive from
+ * the active panel's declared surface, not imperative dataset pokes.
  */
-export function CaseStudiesScroll({ children }: CaseStudiesScrollProps) {
+export function CaseStudiesScroll({ steps, children }: CaseStudiesScrollProps) {
   const rootRef = useRef<HTMLElement>(null);
-  const rafRef = useRef(0);
-  const [activeStep, setActiveStep] = useState(0);
   const [hoverStep, setHoverStep] = useState<number | null>(null);
-  const [stepCount, setStepCount] = useState(1);
   const [dotsVisible, setDotsVisible] = useState(false);
 
-  const getSteps = useCallback(() => {
-    const root = rootRef.current;
-    if (!root) return [];
+  const sections = [
+    {
+      id: "cs-index",
+      axis: "y" as const,
+      panels: steps.map((s) => ({
+        id: s.id,
+        size: "fullscreen" as const,
+        surface: s.surface,
+      })),
+    },
+  ];
 
-    return Array.from(
-      root.querySelectorAll<HTMLElement>("[data-chrome-focus-step]"),
-    ).sort(
-      (a, b) =>
-        Number(a.dataset.chromeFocusStep ?? 0) -
-        Number(b.dataset.chromeFocusStep ?? 0),
-    );
-  }, []);
-
-  const syncActiveStep = useCallback(() => {
-    const steps = getSteps();
-    setStepCount(Math.max(steps.length, 1));
-    if (steps.length === 0) return;
-
-    const desktop = window.matchMedia("(min-width: 1024px)").matches;
-    const anchor = desktop ? 8 : 8;
-
-    if (desktop) {
-      document.body.dataset.chromeSurface = "dark";
-    }
-
-    let best = 0;
-    for (let i = 0; i < steps.length; i++) {
-      if (steps[i]!.getBoundingClientRect().top <= anchor) best = i;
-    }
-    setActiveStep(best);
-  }, [getSteps]);
+  const { activeIndex, goTo } = usePanelDeck({
+    sections,
+    onActiveChange: (id) => {
+      const el = document.getElementById(id);
+      const surface = (el?.dataset.chromeSurface as ChromeSurface | undefined) ?? "dark";
+      document.body.dataset.chromeSurface = surface;
+    },
+  });
 
   const scrollToStep = useCallback(
     (index: number) => {
-      const steps = getSteps();
-      const el = steps[index];
-      if (!el) return;
-
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      goTo(index);
     },
-    [getSteps],
+    [goTo],
   );
 
   useCaseStudiesScrollRegister(
     true,
-    stepCount,
-    activeStep,
+    steps.length,
+    activeIndex,
     scrollToStep,
     dotsVisible,
     hoverStep,
     setHoverStep,
   );
 
-  useChromeFocusSteps(rootRef, activeStep, stepCount > 1);
-  useChromeFocusPreview(rootRef, hoverStep, stepCount > 1);
+  useChromeFocusSteps(rootRef, activeIndex, steps.length > 1);
+  useChromeFocusPreview(rootRef, hoverStep, steps.length > 1);
 
-  // Desktop — case studies index is dark throughout; assert before IO ratios land.
+  // Desktop — case studies index is dark; set before IntersectionObserver fires.
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1024px)");
     const apply = () => {
-      if (mq.matches) {
-        document.body.dataset.chromeSurface = "dark";
-      }
+      if (mq.matches) document.body.dataset.chromeSurface = "dark";
     };
-
     apply();
     mq.addEventListener("change", apply);
-
     return () => {
       mq.removeEventListener("change", apply);
-      if (mq.matches) {
-        delete document.body.dataset.chromeSurface;
-      }
+      if (mq.matches) delete document.body.dataset.chromeSurface;
     };
   }, []);
 
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-
     const observer = new IntersectionObserver(
       ([entry]) => setDotsVisible(entry?.isIntersecting ?? false),
       { threshold: 0.05 },
@@ -113,29 +91,6 @@ export function CaseStudiesScroll({ children }: CaseStudiesScrollProps) {
     observer.observe(root);
     return () => observer.disconnect();
   }, []);
-
-  useEffect(() => {
-    syncActiveStep();
-
-    const onScroll = () => {
-      if (rafRef.current) return;
-      rafRef.current = requestAnimationFrame(() => {
-        rafRef.current = 0;
-        syncActiveStep();
-      });
-    };
-
-    const onResize = () => syncActiveStep();
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onResize, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
-  }, [syncActiveStep]);
 
   return (
     <article ref={rootRef} className="work-scroll-snap cs-index-scroll">
