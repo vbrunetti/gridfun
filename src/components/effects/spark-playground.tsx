@@ -192,6 +192,13 @@ export function SparkPlayground() {
                 .
               </p>
               <p className="mt-3 text-sm text-secondary">
+                <Link
+                  href="/effects/hero-atmosphere"
+                  className="border-b border-current text-primary"
+                >
+                  Atmosphere playground
+                </Link>
+                {" · "}
                 <button
                   type="button"
                   onClick={reloadHomeConfig}

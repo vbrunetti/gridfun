@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "noise": {
+    "enabled": true,
+    "cellFrequency": 0.36,
+    "cellOctaves": 3,
+    "density": 0.88,
+    "tone": {
+      "amplitude": 0.82,
+      "highlightSuppression": 2.55,
+      "shadowBias": -0.09
+    },
+    "blend": {
+      "baseTone": "#949494",
+      "opacity": 0.24,
+      "mode": "overlay"
+    }
+  },
+  "blobs": {
+    "enabled": true,
+    "countPerChapter": 2,
+    "size": 0.38,
+    "driftSpeed": 0.22,
+    "wobble": 1.1,
+    "randomness": 0.75,
+    "blur": 88,
+    "lightStrength": 0.22,
+    "darkStrength": 0.28,
+    "transitionDistance": 0.14
+  }
+}

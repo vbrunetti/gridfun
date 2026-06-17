@@ -741,6 +741,41 @@ body:has(.home-scroll:not(.home-scroll--static)) {
   max-height: var(--home-secondary-band-height);
 }
 
+/* Sticky atmosphere (noise + blobs) — behind spark, desktop only */
+.home-atmosphere-pin {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  @media (prefers-reduced-motion: no-preference) {
+    .home-atmosphere-pin {
+      display: block;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      width: 100%;
+      height: var(--home-hero-band-height);
+      margin-bottom: calc(-1 * var(--home-hero-band-height));
+      pointer-events: none;
+      overflow: hidden;
+      background: var(--section-dark-lift);
+    }
+
+    .home-atmosphere-pin__noise,
+    .home-atmosphere-pin__blobs {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .home-atmosphere-pin__blobs {
+      z-index: 1;
+    }
+  }
+}
+
 /* Sticky spark — pinned in the hero band while copy panels scroll */
 .home-spark-pin {
   position: sticky;
@@ -1350,6 +1385,47 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
   overflow: visible;
   border-block: 1px solid var(--rule-light);
   background: var(--surface-white);
+}
+
+.spark-playground-band--dark {
+  background: var(--section-dark-lift);
+  color: var(--color-paper);
+  border-block-color: color-mix(in srgb, var(--color-paper) 12%, transparent);
+}
+
+/* Hero atmosphere playground — full-page dark colorway */
+.atmosphere-playground-route .spark-playground-rail {
+  background: var(--panel-surface);
+}
+
+.atmosphere-playground-route .spark-playground-chapter-select {
+  border-color: var(--rule-light);
+  background-color: var(--panel-surface-secondary);
+  color: var(--text-primary);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.5 4.5L6 8L9.5 4.5' stroke='%23a8a8a8' stroke-width='1.25' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.atmosphere-playground-route .spark-playground-band {
+  border-block-color: var(--rule-light);
+}
+
+.atmosphere-playground-route .spark-playground-viz__caption {
+  color: var(--text-tertiary);
+}
+
+.atmosphere-playground-stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.atmosphere-playground-stage .home-atmosphere-pin__noise,
+.atmosphere-playground-stage .home-atmosphere-pin__blobs {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 @media (max-width: 1023px) {
