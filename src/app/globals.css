@@ -306,6 +306,23 @@ body {
   color: var(--accent);
 }
 
+@media (max-width: 1023px) {
+  /* Mobile menu — top-level at display-xl (reading ceiling); nested at display-md. */
+  #site-menu nav > ul > li > a {
+    font-size: var(--type-display-xl);
+    font-weight: 700;
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+  }
+
+  #site-menu nav ul ul a {
+    font-size: var(--type-display-md);
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+  }
+}
+
 /* ——— Full-viewport keylines ———
    Structural horizontal rules span edge-to-edge regardless of max-width containers. */
 :root {
@@ -655,8 +672,17 @@ body {
 /* Shared snap-deck rule — home, case-studies index, case-study detail */
 html:has(.home-scroll:not(.home-scroll--static), .cs-index-scroll, .cs-detail) {
   scroll-snap-type: y mandatory;
-  scroll-padding-top: var(--chrome-top-inset);
   overscroll-behavior-y: none;
+}
+
+html:has(.cs-detail) {
+  scroll-padding-top: var(--chrome-top-inset);
+}
+
+@media (max-width: 1023px) {
+  html:has(.home-scroll:not(.home-scroll--static), .cs-index-scroll) {
+    scroll-padding-top: 0;
+  }
 }
 
 @media (min-width: 1024px) {
@@ -673,9 +699,9 @@ html:has(.home-scroll:not(.home-scroll--static), .cs-index-scroll, .cs-detail) {
 }
 
 .home-scroll:not(.home-scroll--static) {
-  /* Derive the peek from the STABLE --app-vh, not dvh: a dvh-based peek resizes
-     as the mobile URL bar collapses, shifting every downstream snap position. */
-  --home-cover-peek: calc(var(--app-vh) * 0.2); /* secondary visible above fold during hero chapters */
+  /* No secondary peek — hero chapters fill the viewport; secondary stays off-screen
+     until the handoff scroll brings it in. Peek uses stable --app-vh, not dvh. */
+  --home-cover-peek: 0px;
   --home-peek-translate: calc(var(--app-vh) - var(--home-cover-peek));
   --home-hero-band-height: calc(var(--app-vh) - var(--home-cover-peek));
   background: var(--section-dark-lift);
@@ -700,9 +726,9 @@ body:has(.home-scroll:not(.home-scroll--static)) {
 
   /* Explicit height — variable alone can resolve to the desktop 80dvh band on some builds */
   .home-scroll:not(.home-scroll--static) .hero-chapter-panel.home-scroll-panel {
-    height: calc(var(--app-vh) - var(--home-cover-peek));
-    min-height: calc(var(--app-vh) - var(--home-cover-peek));
-    max-height: calc(var(--app-vh) - var(--home-cover-peek));
+    height: var(--home-hero-band-height);
+    min-height: var(--home-hero-band-height);
+    max-height: var(--home-hero-band-height);
   }
 
   .home-scroll:not(.home-scroll--static) .home-spark-pin {
@@ -855,7 +881,7 @@ body:has(.home-scroll:not(.home-scroll--static)) {
   --home-beat-gap: clamp(0.75rem, 2vh, 1.25rem);
 }
 
-/* Fixed secondary — peeks at bottom during hero, full viewport when settled */
+/* Fixed secondary — off-screen during hero, full viewport when settled */
 .home-secondary-panel {
   position: fixed;
   top: 0;
@@ -989,41 +1015,65 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
 @media (max-width: 1023px) {
   html:has(.cs-index-scroll) {
     scroll-padding-top: 0;
-    scroll-padding-bottom: var(--chrome-mobile-dots-height);
-    /* ~25dvh — quarter of usable viewport (half the prior 50dvh intro band) */
-    --cs-index-intro-height-mobile: calc(
-      (var(--app-vh) - var(--chrome-mobile-dots-height)) / 4
-    );
+    scroll-padding-bottom: 0;
   }
 
   .site-main:has(.cs-index-route) {
     padding-top: 0 !important;
   }
 
-  .cs-index-scroll .work-snap-section:not(.work-snap-section--intro) {
-    height: calc(var(--app-vh) - var(--chrome-mobile-dots-height));
-    min-height: calc(var(--app-vh) - var(--chrome-mobile-dots-height));
-    max-height: calc(var(--app-vh) - var(--chrome-mobile-dots-height));
+  .cs-index-sr-title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 
+  /* Full-viewport stack — panels abut; snap stride = 100svh (matches viewport). */
+  .cs-index-scroll .sticky-cover-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .cs-index-scroll .work-snap-section:not(.work-snap-section--intro),
   .cs-index-scroll .sticky-cover-panel {
-    min-height: calc(var(--app-vh) - var(--chrome-mobile-dots-height));
-  }
-
-  /* Extra scroll room so the last card's foot clears the fixed dot rail. */
-  .cs-index-scroll .sticky-cover-stack > .cs-index-panel:last-child {
-    box-sizing: content-box;
-    padding-bottom: var(--chrome-mobile-dots-height);
-    max-height: none;
+    position: relative;
+    top: auto;
+    flex: none;
+    box-sizing: border-box;
+    height: 100svh;
+    min-height: 100svh;
+    max-height: 100svh;
+    margin: 0;
+    padding: 0;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    scroll-margin: 0;
     background: var(--cs-brand-field);
   }
 
-  .cs-index-scroll .sticky-cover-stack > .cs-index-panel:last-child .cs-index-panel__field {
-    height: auto;
+  .cs-index-scroll .work-snap-section:not(.work-snap-section--intro) {
+    height: 100svh;
+    min-height: 100svh;
+    max-height: 100svh;
+  }
+
+  .cs-index-scroll .sticky-cover-panel + .sticky-cover-panel::before {
+    content: none;
   }
 }
 
 @media (min-width: 1024px) {
+  .cs-index-sr-title {
+    display: none;
+  }
+
   html:has(.cs-index-scroll) {
     scroll-padding-top: 0;
     scroll-padding-right: var(--chrome-right-inset);
@@ -1048,12 +1098,6 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
 }
 
 @media (max-width: 1023px) {
-  .cs-index-scroll .work-snap-section--intro {
-    height: var(--cs-index-intro-height-mobile);
-    min-height: var(--cs-index-intro-height-mobile);
-    max-height: var(--cs-index-intro-height-mobile);
-  }
-
   .cs-index-intro .cs-index-hero__grid {
     --work-masthead-foot: clamp(1rem, 2.5vh, 1.25rem);
     min-height: 0;
@@ -1097,7 +1141,7 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
 
 @media (max-width: 1023px) {
   html:has(.cs-detail) {
-    scroll-padding-top: var(--chrome-top-inset);
+    scroll-padding-top: 0;
     scroll-padding-bottom: var(--chrome-dots-inset, var(--chrome-mobile-dots-height));
     background: var(--color-ink);
   }
@@ -1117,7 +1161,7 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
   }
 
   .site-main:has(.cs-detail) {
-    padding-top: var(--chrome-top-offset) !important;
+    padding-top: 0 !important;
     background: var(--color-ink);
   }
 
@@ -1864,6 +1908,34 @@ body.cs-detail-nav-hover .floating-chrome .chrome-nav-dot-ring {
   border: 0;
 }
 
+/* Index page labels (Case Studies, Craft, …) — desktop masthead only. */
+@media (max-width: 1023px) {
+  .page-hero-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .craft-hero-header .craft-hero__grid {
+    grid-template-rows: auto minmax(0, auto);
+  }
+
+  .craft-hero-header .craft-hero__main {
+    padding-top: clamp(0.75rem, 2vh, 1rem);
+    padding-bottom: clamp(1rem, 2.5vh, 1.25rem);
+  }
+
+  .craft-sticky-header__title {
+    display: none;
+  }
+}
+
 .rail-label-vertical {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
@@ -1943,9 +2015,22 @@ body[data-chrome-surface="dark"] .floating-chrome .rail-label-vertical {
    it colour-matches the content below. Desktop unchanged. */
 @media (max-width: 1023px) {
   :root {
-    --chrome-left-clear: calc(var(--chrome-hit) + var(--chrome-pad) * 2);
-    --chrome-right-clear: var(--chrome-right-width);
+    --chrome-left-clear: calc(var(--grid-margin) + var(--chrome-hit));
+    --chrome-right-clear: calc(var(--grid-margin-inline-end) + var(--chrome-hit));
     --chrome-mobile-band-bg: var(--background);
+  }
+
+  /* Logo + menu align to master grid margins — same inset as panel copy. */
+  .chrome-mobile-top--logo {
+    padding-left: var(--grid-margin);
+  }
+
+  .chrome-mobile-top--menu {
+    padding-right: var(--grid-margin-inline-end);
+  }
+
+  .floating-chrome {
+    width: calc(var(--chrome-hit) + var(--chrome-pad) + var(--grid-margin-inline-end));
   }
 
   .chrome-mobile-band {
@@ -2813,21 +2898,22 @@ a.craft-card:focus-visible {
 }
 
 @media (max-width: 1023px) {
-  /* One full-viewport slide — brand field behind copy, logo in top third. */
+  /* Full-viewport slide — brand color on the section; copy clears chrome in the grid. */
   .cs-index-panel {
-    background: transparent;
+    position: relative;
+    background: var(--cs-brand-field);
     overflow: hidden;
   }
 
   .cs-index-panel__grid {
     position: relative;
     z-index: 1;
+    box-sizing: border-box;
     height: 100%;
-    min-height: 100%;
+    min-height: 0;
     grid-template-rows: minmax(0, 1fr) minmax(0, 2fr);
     padding-inline: var(--grid-margin);
-    /* Reserve the fixed bottom dot rail so the tags clear it (the snap section is
-       full-height; the brand field still bleeds full behind the chrome). */
+    padding-top: var(--chrome-top-inset);
     padding-bottom: var(--chrome-dots-inset, var(--chrome-mobile-dots-height));
     row-gap: 0;
   }
@@ -2838,23 +2924,27 @@ a.craft-card:focus-visible {
 
   .cs-index-panel__field {
     position: absolute;
-    inset: 0;
+    top: var(--chrome-top-inset);
+    bottom: var(--chrome-dots-inset, var(--chrome-mobile-dots-height));
+    left: var(--grid-margin);
+    right: var(--grid-margin-inline-end);
     z-index: 0;
     display: grid;
     grid-template-rows: minmax(0, 1fr) minmax(0, 2fr);
     align-items: center;
-    justify-items: center;
+    justify-items: start;
     grid-row: unset;
     grid-column: unset;
     margin: 0;
-    width: 100%;
-    height: 100%;
+    width: auto;
+    height: auto;
   }
 
   .cs-index-brand-field__logo,
   .cs-index-brand-field__placeholder {
     grid-row: 1;
     align-self: center;
+    justify-self: start;
     width: clamp(4.5rem, 32vw, 9rem);
     max-width: 62%;
   }
@@ -3231,7 +3321,7 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
 }
 
 @media (max-width: 1023px) {
-  /* site-main reserves var(--chrome-top-offset) — facts sit in the band below fixed chrome */
+  /* Hero snaps flush to viewport top; facts reserve var(--chrome-top-inset) below fixed chrome */
   .cs-hero {
     margin-top: 0;
   }
@@ -3307,21 +3397,23 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
   min-width: 0;
 }
 
-.cs-hero__fact--client {
-  grid-column: 1 / 3;
-}
+@media (min-width: 1024px) {
+  .cs-hero__fact--client {
+    grid-column: 1 / 3;
+  }
 
-.cs-hero__fact--date {
-  grid-column: 3 / 5;
-}
+  .cs-hero__fact--date {
+    grid-column: 3 / 5;
+  }
 
-.cs-hero__fact--role {
-  grid-column: 5 / 9;
-}
+  .cs-hero__fact--role {
+    grid-column: 5 / 9;
+  }
 
-.cs-hero__fact--tools,
-.cs-hero__fact--study {
-  grid-column: 9 / -1;
+  .cs-hero__fact--tools,
+  .cs-hero__fact--study {
+    grid-column: 9 / -1;
+  }
 }
 
 .cs-hero__fact-kicker {
@@ -3392,45 +3484,80 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
 
 @media (max-width: 1023px) {
   .cs-hero__grid {
-    grid-template-rows:
-      auto
-      minmax(var(--work-masthead-main-min), 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
   }
 
+  /* Facts below chrome — row 1: client · role; row 2: date · tools (cols 1 · 3–6). */
   .cs-hero__facts {
     grid-row: 1;
     grid-column: 1 / -1;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    grid-template-rows: auto auto auto;
+    grid-template-columns: subgrid;
+    grid-template-rows: auto auto;
+    align-content: start;
+    align-items: start;
+    align-self: start;
     height: auto;
     min-height: 0;
-    padding-block: 0.65rem;
-    row-gap: 0.65rem;
+    padding-top: calc(var(--chrome-top-inset) + clamp(0.35rem, 1vh, 0.5rem));
+    padding-bottom: 0;
+    row-gap: clamp(0.9rem, 2.5vh, 1.15rem);
+  }
+
+  .cs-hero__fact {
+    justify-content: flex-start;
+    align-self: start;
   }
 
   .cs-hero__main {
     grid-row: 2;
+    min-height: 0;
   }
 
   .cs-hero__fact--client {
-    grid-column: 1 / span 2;
+    grid-column: 1 / 3;
     grid-row: 1;
   }
 
   .cs-hero__fact--date {
-    grid-column: 3 / span 2;
-    grid-row: 1;
+    grid-column: 1 / 3;
+    grid-row: 2;
   }
 
   .cs-hero__fact--role {
-    grid-column: 1 / -1;
-    grid-row: 2;
+    grid-column: 3 / -1;
+    grid-row: 1;
   }
 
   .cs-hero__fact--tools,
   .cs-hero__fact--study {
-    grid-column: 1 / -1;
-    grid-row: 3;
+    grid-column: 3 / -1;
+    grid-row: 2;
+  }
+
+  .cs-hero__title-copy {
+    padding-top: clamp(1rem, 2.5vh, 1.5rem);
+    padding-bottom: 0;
+  }
+
+  .cs-hero__subhead {
+    max-width: none;
+  }
+
+  .cs-detail .cs-hero {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cs-detail .cs-hero__grid {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .cs-detail .cs-hero__title-copy {
+    padding-bottom: calc(
+      var(--chrome-dots-inset, var(--chrome-mobile-dots-height)) +
+        clamp(1.25rem, 3vh, 2rem)
+    );
   }
 }
 
@@ -3810,16 +3937,20 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
     height: 100%;
     min-height: 0;
     --panel-kicker: clamp(2.5rem, 6vh, 3.25rem);
+    /* Match cs-index-panel__grid — one grid-margin inset on the pin, not per band. */
+    box-sizing: border-box;
+    padding-inline: var(--grid-margin);
+    padding-inline-end: var(--grid-margin-inline-end);
+  }
+
+  .vframe__kicker,
+  .vframe__main,
+  .vframe__foot {
+    padding-inline: 0;
   }
 
   .vframe {
     box-sizing: border-box;
-  }
-
-  .cs-detail .cs-hero__title-copy {
-    padding-bottom: calc(
-      var(--work-masthead-foot) + var(--chrome-dots-inset, var(--chrome-mobile-dots-height))
-    );
   }
 
   /* End-card footer (canvas) — reserve the dot rail plus breathing room so the

@@ -13,7 +13,7 @@ type HomeSecondaryFixedProps = {
   label?: string;
 };
 
-/** Fixed secondary panel — peeks during hero chapters, full viewport when settled. */
+/** Fixed secondary panel — off-screen during hero chapters, full viewport when settled. */
 export function HomeSecondaryFixed({
   eyebrow,
   headline,

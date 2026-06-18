@@ -55,7 +55,7 @@ type HomeScrollProps = {
 
 /**
  * Document scroll-snap for home hero panels. JS tracks active panel for dots,
- * chrome focus, sticky spark blend, and fixed secondary translate.
+ * chrome focus, sticky spark blend, and fixed secondary translate on handoff.
  */
 export function HomeScroll({
   slateCount,

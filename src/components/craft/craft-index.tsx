@@ -372,7 +372,7 @@ export function CraftIndex({ initialTag }: { initialTag?: string } = {}) {
           </div>
           <div className="craft-hero__main">
             <div className="craft-hero__main-grid">
-              <h1 className="craft-hero__title display-xl">Craft</h1>
+              <h1 className="craft-hero__title page-hero-label display-xl">Craft</h1>
               <CraftFilters
                 variant="hero"
                 tags={allTags}

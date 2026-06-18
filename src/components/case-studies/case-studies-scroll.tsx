@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useChromeFocusPreview, useChromeFocusSteps } from "@/components/chrome/use-chrome-focus";
 import { useCaseStudiesScrollRegister } from "@/components/case-studies/case-studies-scroll-context";
 import { usePanelDeck } from "@/components/deck/use-panel-deck";
@@ -16,27 +16,54 @@ type CaseStudiesScrollProps = {
   children: ReactNode;
 };
 
+const MOBILE_QUERY = "(max-width: 1023px)";
+const INTRO_STEP_ID = "cs-index-intro";
+
+function useMobileIndexSteps(steps: CaseStudiesStep[]) {
+  const [mobile, setMobile] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia(MOBILE_QUERY).matches;
+  });
+
+  useEffect(() => {
+    const mq = window.matchMedia(MOBILE_QUERY);
+    const sync = () => setMobile(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  return useMemo(
+    () => (mobile ? steps.filter((step) => step.id !== INTRO_STEP_ID) : steps),
+    [mobile, steps],
+  );
+}
+
 /**
- * Native scroll-snap (CSS) for step alignment on the case-studies index.
- * usePanelDeck owns active-index detection; dots + chrome surface derive from
- * the active panel's declared surface, not imperative dataset pokes.
+ * Native scroll-snap for the case-studies index. usePanelDeck tracks the active
+ * panel for dots + chrome surface; mobile skips the desktop-only intro band.
  */
 export function CaseStudiesScroll({ steps, children }: CaseStudiesScrollProps) {
   const rootRef = useRef<HTMLElement>(null);
   const [hoverStep, setHoverStep] = useState<number | null>(null);
   const [dotsVisible, setDotsVisible] = useState(false);
+  const deckSteps = useMobileIndexSteps(steps);
+  const introSkipped = deckSteps.length !== steps.length;
 
-  const sections = [
-    {
-      id: "cs-index",
-      axis: "y" as const,
-      panels: steps.map((s) => ({
-        id: s.id,
-        size: "fullscreen" as const,
-        surface: s.surface,
-      })),
-    },
-  ];
+  const sections = useMemo(
+    () => [
+      {
+        id: "cs-index",
+        axis: "y" as const,
+        panels: deckSteps.map((s) => ({
+          id: s.id,
+          size: "fullscreen" as const,
+          surface: s.surface,
+        })),
+      },
+    ],
+    [deckSteps],
+  );
 
   const { activeIndex, goTo } = usePanelDeck({
     sections,
@@ -54,9 +81,13 @@ export function CaseStudiesScroll({ steps, children }: CaseStudiesScrollProps) {
     [goTo],
   );
 
+  const focusStep = introSkipped ? activeIndex + 1 : activeIndex;
+  const previewStep =
+    hoverStep !== null && introSkipped ? hoverStep + 1 : hoverStep;
+
   useCaseStudiesScrollRegister(
     true,
-    steps.length,
+    deckSteps.length,
     activeIndex,
     scrollToStep,
     dotsVisible,
@@ -64,10 +95,9 @@ export function CaseStudiesScroll({ steps, children }: CaseStudiesScrollProps) {
     setHoverStep,
   );
 
-  useChromeFocusSteps(rootRef, activeIndex, steps.length > 1);
-  useChromeFocusPreview(rootRef, hoverStep, steps.length > 1);
+  useChromeFocusSteps(rootRef, focusStep, deckSteps.length > 1);
+  useChromeFocusPreview(rootRef, previewStep, deckSteps.length > 1);
 
-  // Desktop — case studies index is dark; set before IntersectionObserver fires.
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1024px)");
     const apply = () => {

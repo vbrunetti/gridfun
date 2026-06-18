@@ -44,7 +44,7 @@ export function MenuOverlay() {
                             href={item.href}
                             onClick={closeMenu}
                             aria-current={sectionActive ? "page" : undefined}
-                            className={`display-lg block py-3 transition-opacity hover:opacity-70 ${
+                            className={`display-lg block py-3 max-lg:py-3.5 transition-opacity hover:opacity-70 ${
                               sectionActive ? "text-accent" : "text-primary"
                             }`}
                           >
@@ -59,7 +59,7 @@ export function MenuOverlay() {
                                     href={child.href}
                                     onClick={closeMenu}
                                     aria-current={childActive ? "page" : undefined}
-                                    className={`heading-lg block py-2 transition-opacity hover:opacity-70 ${
+                                    className={`heading-lg block py-2 max-lg:py-2.5 transition-opacity hover:opacity-70 ${
                                       childActive ? "text-accent" : "text-secondary"
                                     }`}
                                   >
@@ -81,7 +81,7 @@ export function MenuOverlay() {
                           href={item.href}
                           onClick={closeMenu}
                           aria-current={active ? "page" : undefined}
-                          className={`display-lg block py-3 transition-opacity hover:opacity-70 ${
+                          className={`display-lg block py-3 max-lg:py-3.5 transition-opacity hover:opacity-70 ${
                             active ? "text-accent" : "text-primary"
                           }`}
                         >

@@ -14,17 +14,16 @@ export type PanelDeckReturn = {
   goTo: (indexOrId: number | string, opts?: { smooth?: boolean }) => void;
 };
 
-/** Reads --chrome-top-inset from :root (set by chrome-insets.ts), falls back to scroll-padding-top. */
+/** Reads the effective snap inset from scroll-padding-top (matches CSS scroll-snap). */
 export function getTopInset(): number {
-  const fromVar = parseFloat(
-    getComputedStyle(document.documentElement).getPropertyValue("--chrome-top-inset"),
-  );
+  const style = getComputedStyle(document.documentElement);
+  const scrollPadding = parseFloat(style.scrollPaddingTop);
+  if (Number.isFinite(scrollPadding)) return scrollPadding;
+
+  const fromVar = parseFloat(style.getPropertyValue("--chrome-top-inset"));
   if (Number.isFinite(fromVar) && fromVar > 0) return fromVar;
 
-  const fromPadding = parseFloat(
-    getComputedStyle(document.documentElement).scrollPaddingTop,
-  );
-  return Number.isFinite(fromPadding) ? fromPadding : 0;
+  return 0;
 }
 
 /**
@@ -116,9 +115,11 @@ export function usePanelDeck({
       if (index < 0 || index >= panelIds.length) return;
 
       const el = document.getElementById(panelIds[index]!);
-      el?.scrollIntoView({
+      if (!el) return;
+
+      window.scrollTo({
+        top: panelSnapY(el),
         behavior: opts.smooth === false ? "instant" : "smooth",
-        block: "start",
       });
     },
     [panelIds.join(",")], // eslint-disable-line react-hooks/exhaustive-deps

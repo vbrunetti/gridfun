@@ -20,8 +20,10 @@ import { VimeoPlayer } from "@/components/media/vimeo-embed";
 import { useCaseStudyVignetteProgressRegister } from "@/components/case-studies/case-study-detail-scroll-context";
 import { CraftTagList } from "@/components/craft/vignette-media";
 import { attachHorizontalGestures } from "@/components/deck/gestures";
-/** Always use horizontal filmstrip — all viewport sizes. */
-const DESKTOP_QUERY = "all";
+/** Grid-width panel layout — lg+ only; mobile uses CSS widths + pin padding. */
+const GRID_LAYOUT_QUERY = "(min-width: 1024px)";
+/** Horizontal filmstrip gestures — active on all viewports. */
+const HORIZONTAL_TRACK_QUERY = "all";
 
 export const VCHAPTER_PANEL_EVENT = "vchapter:panel";
 
@@ -306,8 +308,8 @@ export function VignetteChapter({
     const ruler = rulerRef.current;
     if (!stage || !ruler) return;
 
-    const desktop = window.matchMedia(DESKTOP_QUERY).matches;
-    if (!desktop) {
+    const useGridLayout = window.matchMedia(GRID_LAYOUT_QUERY).matches;
+    if (!useGridLayout) {
       panelRefs.current.forEach((node) => {
         if (node) node.style.width = "";
       });
@@ -367,7 +369,7 @@ export function VignetteChapter({
     const section = sectionRef.current;
     if (!section) return;
 
-    const desktop = window.matchMedia(DESKTOP_QUERY);
+    const desktop = window.matchMedia(HORIZONTAL_TRACK_QUERY);
 
     // Sync chapterActive from focused class; gestures module owns entry lock.
     const syncFocused = () => {
