@@ -129,19 +129,30 @@ function pickSampleElement(stack: Element[]): Element | null {
   return null;
 }
 
-/** First content element just below the chrome band (module directly underneath). */
-export function sampleBelowChromeBand(): Element | null {
+/**
+ * A probe resolves two things at a point:
+ *  - `tagged`  — nearest declared [data-chrome-surface] region → contrast (light/dark).
+ *  - `painted` — the actual painted element at that pixel → the colour to match.
+ * These differ when the colour lives on a descendant (e.g. an index brand field
+ * inside a section whose own/ancestor background is the dark route), which is why
+ * matching the painted pixel — not the tagged ancestor's walked-up bg — is what
+ * makes the band/rail always match what they sit on.
+ */
+type ChromeProbe = { tagged: Element | null; painted: Element | null };
+
+function probeChromeAt(x: number, y: number): ChromeProbe {
+  return {
+    tagged: sampleChromeSurfaceAt(x, y),
+    painted: pickSampleElement(document.elementsFromPoint(x, y)),
+  };
+}
+
+/** Module directly below the chrome band. */
+export function sampleBelowChromeBand(): ChromeProbe {
   const bandBottom = chromeTopOffsetPx();
   const x = Math.max(0, Math.round(window.innerWidth / 2));
-  const y = Math.min(
-    window.innerHeight - 1,
-    Math.round(bandBottom + 4),
-  );
-
-  return (
-    sampleChromeSurfaceAt(x, y) ??
-    pickSampleElement(document.elementsFromPoint(x, y))
-  );
+  const y = Math.min(window.innerHeight - 1, Math.round(bandBottom + 4));
+  return probeChromeAt(x, y);
 }
 
 export type ChromeBandSample = {
@@ -150,7 +161,7 @@ export type ChromeBandSample = {
 };
 
 /** Content directly under the fixed bottom dots strip (viewport floor, not page chrome). */
-export function sampleAboveChromeDots(): Element | null {
+export function sampleAboveChromeDots(): ChromeProbe {
   const rail = document.querySelector<HTMLElement>(
     ".chrome-dots-rail--study, .chrome-dots-rail--detail",
   );
@@ -174,13 +185,19 @@ export function sampleAboveChromeDots(): Element | null {
   ];
 
   for (const x of xs) {
-    const hit =
-      sampleChromeSurfaceAt(x, y) ??
-      pickSampleElement(document.elementsFromPoint(x, y));
-    if (hit) return hit;
+    const probe = probeChromeAt(x, y);
+    if (probe.painted || probe.tagged) return probe;
   }
 
-  return null;
+  return { tagged: null, painted: null };
+}
+
+/** bg follows the painted pixel, contrast follows the declared region. */
+function sampleFromProbe(probe: ChromeProbe): ChromeBandSample {
+  return {
+    background: getEffectiveBackground(probe.painted ?? probe.tagged),
+    surface: resolveChromeSurface(probe.tagged ?? probe.painted),
+  };
 }
 
 export function sampleChromeBand(menuOpen: boolean): ChromeBandSample {
@@ -194,11 +211,7 @@ export function sampleChromeBand(menuOpen: boolean): ChromeBandSample {
     };
   }
 
-  const hit = sampleBelowChromeBand();
-  return {
-    background: getEffectiveBackground(hit),
-    surface: resolveChromeSurface(hit),
-  };
+  return sampleFromProbe(sampleBelowChromeBand());
 }
 
 export function sampleChromeDotsBand(menuOpen: boolean): ChromeBandSample | null {
@@ -206,11 +219,7 @@ export function sampleChromeDotsBand(menuOpen: boolean): ChromeBandSample | null
     return null;
   }
 
-  const hit = sampleAboveChromeDots();
-  return {
-    background: getEffectiveBackground(hit),
-    surface: resolveChromeSurface(hit),
-  };
+  return sampleFromProbe(sampleAboveChromeDots());
 }
 
 export function applyChromeBandSample(
