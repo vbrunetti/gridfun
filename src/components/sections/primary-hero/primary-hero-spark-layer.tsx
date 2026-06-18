@@ -5,6 +5,7 @@ import { PRESET_REFERENCE_MIN_DIM } from "./particle-presets";
 import {
   HERO_SPARK_COLOR,
   HERO_SPARK_SHAPE_SCALE,
+  HOME_DESKTOP_SPARK_SIZE_SCALE,
   HOME_SPARK_COLOR,
 } from "./spark-hero-config";
 import {
@@ -168,9 +169,10 @@ export function PrimaryHeroSparkLayer({
       );
       const zoneWidth = Math.max(0, zoneRight - zoneLeft);
 
-      const sparkSize = desktop
-        ? zoneWidth
-        : Math.min(stageHeight * MOBILE_SPARK_HEIGHT_RATIO, zoneWidth);
+      const homeDesktopScale = desktop && isHomeSpark ? HOME_DESKTOP_SPARK_SIZE_SCALE : 1;
+      const sparkSize =
+        (desktop ? zoneWidth : Math.min(stageHeight * MOBILE_SPARK_HEIGHT_RATIO, zoneWidth)) *
+        homeDesktopScale;
       const sparkLeftOnGrid = zoneRight - sparkSize;
       const stageOffset =
         stage === metricGrid

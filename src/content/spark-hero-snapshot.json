@@ -70,7 +70,7 @@
     {
       "label": "Ch 4 · Mobile-first",
       "shape": "circle",
-      "boundaryScale": 0.10,
+      "boundaryScale": 0.1,
       "rotationDeg": 0,
       "count": 390,
       "particleRadiusMin": 1,
