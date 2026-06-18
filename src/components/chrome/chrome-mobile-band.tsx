@@ -28,16 +28,10 @@ export function ChromeMobileBand() {
         return;
       }
 
-      const onDetail = Boolean(document.querySelector(".cs-detail"));
-
-      // Detail scroll owns band + dots surface/bg; only force dark band when menu opens.
-      if (onDetail) {
-        if (menuOpen) {
-          applyChromeBandSample(sampleChromeBand(true), { includeSurface: false });
-        }
-        return;
-      }
-
+      // Header (top band + logo) and footer (dot rail) each sample the section
+      // they sit over, so they colour-match independently — e.g. a dark chapter
+      // under the band while the lime end-card sits under the dots. Works the
+      // same on detail and non-detail routes.
       applyChromeBandSample(sampleChromeBand(menuOpen));
       const dots = sampleChromeDotsBand(menuOpen);
       if (dots) {

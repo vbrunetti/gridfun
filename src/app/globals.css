@@ -516,8 +516,8 @@ body {
 .skeleton-column {
   min-height: 100%;
   box-sizing: border-box;
-  background: color-mix(in srgb, var(--rule-light) 35%, transparent);
-  box-shadow: inset -1px 0 0 var(--rule-light);
+  background: color-mix(in srgb, var(--color-neon-lime) 20%, transparent);
+  box-shadow: inset -1px 0 0 color-mix(in srgb, var(--color-neon-lime) 20%, transparent);
 }
 
 .skeleton-column:last-child {
@@ -1098,6 +1098,7 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
 @media (max-width: 1023px) {
   html:has(.cs-detail) {
     scroll-padding-top: var(--chrome-top-inset);
+    scroll-padding-bottom: var(--chrome-mobile-dots-height);
     background: var(--color-ink);
   }
 
@@ -1642,16 +1643,21 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
     --chrome-mobile-dots-bg: var(--color-ink);
   }
 
-  body:has(.cs-detail):not([data-chrome-surface="light"]):not([data-chrome-surface="canvas"])
+  /* Driven by --chrome-dots-surface (the section under the rail), independent of
+     the top band's --chrome-surface, so header + footer colour-match separately. */
+  body:has(.cs-detail):not([data-chrome-dots-surface="light"]):not([data-chrome-dots-surface="canvas"])
     .chrome-dots-rail--detail {
     color: var(--color-paper);
-    border-top-color: color-mix(in srgb, var(--color-paper) 22%, transparent);
+    /* Match the dark filmstrip seam color (--rule-light = paper 18%) so the rail
+       border reads as the same grid line, not a darker separate rule. */
+    border-top-color: color-mix(in srgb, var(--color-paper) 18%, transparent);
   }
 
-  body:has(.cs-detail)[data-chrome-surface="light"] .chrome-dots-rail--detail,
-  body:has(.cs-detail)[data-chrome-surface="canvas"] .chrome-dots-rail--detail {
+  body:has(.cs-detail)[data-chrome-dots-surface="light"] .chrome-dots-rail--detail,
+  body:has(.cs-detail)[data-chrome-dots-surface="canvas"] .chrome-dots-rail--detail {
     color: var(--color-ink);
-    border-top-color: color-mix(in srgb, currentColor 14%, transparent);
+    /* Match the white filmstrip seam color (--rule-light = ink 12%). */
+    border-top-color: color-mix(in srgb, currentColor 12%, transparent);
   }
 
   body[data-chrome-dots-surface="light"] .chrome-dots-rail--study,
@@ -1692,23 +1698,25 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
   }
 }
 
-/* Case study detail — mostly dark rows; default dots to paper unless surface is light */
+/* Case study detail — the dot rail follows the section under IT (--chrome-dots-surface),
+   independent of the top band's --chrome-surface. Default paper on the dark rows.
+   (On desktop dots-surface tracks the active step, so this matches prior behaviour.) */
 body:has(.cs-detail) .floating-chrome .chrome-dots-rail--detail,
 body:has(.cs-detail) .floating-chrome .chrome-hero-dots-rail--detail {
   opacity: 1;
   color: var(--color-paper);
 }
 
-body:has(.cs-detail)[data-chrome-surface="light"]
+body:has(.cs-detail)[data-chrome-dots-surface="light"]
   .floating-chrome
   .chrome-dots-rail--detail,
-body:has(.cs-detail)[data-chrome-surface="canvas"]
+body:has(.cs-detail)[data-chrome-dots-surface="canvas"]
   .floating-chrome
   .chrome-dots-rail--detail,
-body:has(.cs-detail)[data-chrome-surface="light"]
+body:has(.cs-detail)[data-chrome-dots-surface="light"]
   .floating-chrome
   .chrome-hero-dots-rail--detail,
-body:has(.cs-detail)[data-chrome-surface="canvas"]
+body:has(.cs-detail)[data-chrome-dots-surface="canvas"]
   .floating-chrome
   .chrome-hero-dots-rail--detail {
   color: var(--color-ink);
@@ -1930,7 +1938,9 @@ body[data-chrome-surface="dark"] .floating-chrome .rail-label-vertical {
   color: inherit;
 }
 
-/* Mobile — chrome clearspace + scroll hide/show (logo + menu only; desktop unchanged) */
+/* Mobile — chrome clearspace + persistent painted band. The logo + menu and the
+   band stay put (like the bottom dot rail); only the band background animates as
+   it colour-matches the content below. Desktop unchanged. */
 @media (max-width: 1023px) {
   :root {
     --chrome-left-clear: calc(var(--chrome-hit) + var(--chrome-pad) * 2);
@@ -1951,32 +1961,13 @@ body[data-chrome-surface="dark"] .floating-chrome .rail-label-vertical {
       transparent
     );
     pointer-events: none;
-    transition:
-      transform 0.2s ease,
-      background-color 0.2s ease;
-  }
-
-  .chrome-mobile-top {
-    transition: transform 0.2s ease;
-  }
-
-  body[data-chrome-visibility="hidden"] .chrome-mobile-band,
-  body[data-chrome-visibility="hidden"] .chrome-mobile-top {
-    transform: translateY(calc(-1 * var(--chrome-top-offset)));
-    pointer-events: none;
+    transition: background-color 0.2s ease;
   }
 }
 
 @media (max-width: 1023px) and (prefers-reduced-motion: reduce) {
-  .chrome-mobile-band,
-  .chrome-mobile-top {
+  .chrome-mobile-band {
     transition: none;
-  }
-
-  body[data-chrome-visibility="hidden"] .chrome-mobile-band,
-  body[data-chrome-visibility="hidden"] .chrome-mobile-top {
-    transform: none;
-    pointer-events: auto;
   }
 }
 
@@ -2835,7 +2826,9 @@ a.craft-card:focus-visible {
     min-height: 100%;
     grid-template-rows: minmax(0, 1fr) minmax(0, 2fr);
     padding-inline: var(--grid-margin);
-    padding-bottom: clamp(0.75rem, 2vh, 1.25rem);
+    /* Reserve the fixed bottom dot rail so the tags clear it (the snap section is
+       full-height; the brand field still bleeds full behind the chrome). */
+    padding-bottom: var(--chrome-dots-inset, var(--chrome-mobile-dots-height));
     row-gap: 0;
   }
 
@@ -3804,6 +3797,48 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
   --panel-pad: clamp(1rem, 2vw, 1.5rem);
 }
 
+@media (max-width: 1023px) {
+  /* Seat the sticky pin below the top nav (the page snaps section tops to
+     --chrome-top-inset) and let it fill to the viewport bottom — behind the dot
+     rail. The panels carry the rail reservation as their own bottom padding, so
+     their seams + bottom rule reach the rail's top border as one continuous grid
+     line while the content (foot/tags) still clears the rail. (Sizing the pin to
+     --panel-h left the panel bottom rule floating ~15px above the rail border:
+     a doubled, mismatched line.) */
+  .vchapter__pin {
+    top: var(--chrome-top-inset);
+    height: calc(var(--app-vh) - var(--chrome-top-inset));
+  }
+
+  .vframe {
+    box-sizing: border-box;
+    padding-bottom: var(--chrome-dots-inset, var(--chrome-mobile-dots-height));
+  }
+
+  .cs-detail .cs-hero__title-copy {
+    padding-bottom: calc(
+      var(--work-masthead-foot) + var(--chrome-dots-inset, var(--chrome-mobile-dots-height))
+    );
+  }
+
+  /* End-card footer (canvas) — reserve the dot rail plus breathing room so the
+     "next case study" type never crowds the dots sitting over it. */
+  .cs-detail [data-cs-detail-row].theme-canvas {
+    padding-bottom: calc(
+      var(--chrome-dots-inset, var(--chrome-mobile-dots-height)) + clamp(0.75rem, 2vh, 1.25rem)
+    );
+  }
+
+  /* Short rows (hero, prose) must fill the viewport so the next full-height
+     vignette chapter never peeks up under the fixed bottom dot rail. The
+     filmstrip is already var(--app-vh); the footer is last so nothing peeks
+     below it. */
+  .cs-detail .cs-hero,
+  .cs-detail .cs-section--prose {
+    min-height: var(--app-vh);
+  }
+}
+
 /* Phantom panel — not in scroll/nav; extends the last panel color to viewport. */
 @media (min-width: 768px) {
   .vchapter__trail {
@@ -3958,6 +3993,19 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
 /* Text beat — 6 cols; wins over its ratio class via source order. */
 .vframe--field {
   width: calc(100cqw * 6 / 12);
+}
+
+@media (max-width: 1023px) {
+  .vframe.vframe--title {
+    width: calc(100cqw * 4 / 6);
+  }
+
+  .vframe--16x9,
+  .vframe--1x1,
+  .vframe--9x16,
+  .vframe--field {
+    width: 100cqw;
+  }
 }
 
 /* Client brand panels — paper text on saturated grounds. */

@@ -22,10 +22,7 @@ import {
   type ChromeSurface,
   peekCursorSurface,
 } from "@/lib/chrome-surface";
-import {
-  getEffectiveBackground,
-  isMobileChromeBand,
-} from "@/lib/chrome-band-sample";
+import { isMobileChromeBand } from "@/lib/chrome-band-sample";
 import { usePanelDeck } from "@/components/deck/use-panel-deck";
 
 const PEEK_DESKTOP_QUERY = "(min-width: 768px)";
@@ -41,22 +38,17 @@ function syncChromeSurfaceFromStep(
   steps: CaseStudyDetailStep[],
   stepIndex: number,
 ) {
+  // Mobile: the top band + logo and the bottom dot rail each sample the section
+  // they sit over (ChromeMobileBand), so they colour-match independently. Setting
+  // a single active-step surface here would fight that on every scroll frame.
+  if (isMobileChromeBand()) return;
+
   const step = steps[stepIndex];
   const el = step ? document.getElementById(step.id) : null;
   const surface =
     (el?.getAttribute(CHROME_SURFACE_ATTR) as ChromeSurface | null) ?? "dark";
   document.body.dataset.chromeSurface = surface;
   document.body.dataset.chromeDotsSurface = surface;
-
-  if (isMobileChromeBand()) {
-    const darkBg =
-      getComputedStyle(document.documentElement)
-        .getPropertyValue("--color-ink")
-        .trim() || "var(--color-ink)";
-    const bg = el ? getEffectiveBackground(el) : darkBg;
-    document.documentElement.style.setProperty("--chrome-mobile-band-bg", bg);
-    document.documentElement.style.setProperty("--chrome-mobile-dots-bg", bg);
-  }
 }
 
 /** Dot-nav jumps: vignette filmstrips below the target start reset to panel 1. */
@@ -150,8 +142,6 @@ export function CaseStudyDetailScroll({
   );
 
   // Pre-paint surface sync — avoids a flash of the wrong chrome color on step change.
-  // D1: detail no longer pins the nav (auto-hide is uniform), so we no longer strip
-  // data-chrome-visibility here — that fought the scroll hide/show logic.
   useLayoutEffect(() => {
     syncChromeSurfaceFromStep(steps, activeIndex);
   }, [steps, activeIndex]);

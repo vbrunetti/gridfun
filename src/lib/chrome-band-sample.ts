@@ -86,8 +86,13 @@ export function sampleChromeSurfaceAt(x: number, y: number): Element | null {
   tagged.sort((a, b) => {
     const z = elementZIndex(b) - elementZIndex(a);
     if (z !== 0) return z;
-    // Later DOM wins at equal z — matches paint order for siblings.
     const pos = b.compareDocumentPosition(a);
+    // Most specific region wins at equal z: a nested section beats a page-spanning
+    // theme wrapper that also contains the point (checked before sibling order,
+    // since CONTAINS/CONTAINED_BY arrive bundled with PRECEDING/FOLLOWING).
+    if (pos & Node.DOCUMENT_POSITION_CONTAINS) return 1; // a is ancestor of b → b first
+    if (pos & Node.DOCUMENT_POSITION_CONTAINED_BY) return -1; // a is nested in b → a first
+    // Siblings: later DOM wins (paint order).
     if (pos & Node.DOCUMENT_POSITION_FOLLOWING) return 1;
     if (pos & Node.DOCUMENT_POSITION_PRECEDING) return -1;
     return 0;

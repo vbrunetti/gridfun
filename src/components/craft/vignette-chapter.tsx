@@ -34,11 +34,16 @@ export type VchapterPanelEventDetail = {
 
 type PanelKind = "title" | "field" | ImageRatio;
 
-function gridFraction(kind: PanelKind): number {
-  if (kind === "title") return 4 / 12;
-  if (kind === "16x9") return 12 / 12;
-  if (kind === "1x1") return 8 / 12;
-  return 6 / 12;
+/** Column span on the master grid — mobile uses the 6-col track explicitly. */
+function panelColSpan(kind: PanelKind, cols: number): number {
+  if (cols <= 6) {
+    if (kind === "title") return 4;
+    return 6;
+  }
+  if (kind === "title") return 4;
+  if (kind === "16x9") return 12;
+  if (kind === "1x1") return 8;
+  return 6;
 }
 
 function ratioAspect(ratio: ImageRatio): "16/9" | "9/16" | "1/1" {
@@ -337,7 +342,7 @@ export function VignetteChapter({
     panelKinds.forEach((kind, i) => {
       const node = panelRefs.current[i];
       if (!node) return;
-      const n = Math.max(1, Math.round(gridFraction(kind) * cols));
+      const n = Math.max(1, Math.min(cols, panelColSpan(kind, cols)));
       node.style.width = `${widthForCols(n)}px`;
     });
 
