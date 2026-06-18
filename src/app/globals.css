@@ -1098,7 +1098,7 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
 @media (max-width: 1023px) {
   html:has(.cs-detail) {
     scroll-padding-top: var(--chrome-top-inset);
-    scroll-padding-bottom: var(--chrome-mobile-dots-height);
+    scroll-padding-bottom: var(--chrome-dots-inset, var(--chrome-mobile-dots-height));
     background: var(--color-ink);
   }
 
@@ -1585,9 +1585,9 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
     --chrome-mobile-dots-bg: var(--color-paper);
     /* Sampled chrome fill — shared by top band + bottom dot rail */
     --chrome-mobile-chrome-fill: 84%;
-    /* Dot rail — 3rem hit target + vertical padding + safe area */
+    /* Dot rail — border + padding + hit target + safe area (matches .chrome-dots-rail--study) */
     --chrome-mobile-dots-height: calc(
-      3rem + 1rem + env(safe-area-inset-bottom, 0px)
+      1px + 0.5rem + 3rem + max(0.5rem, env(safe-area-inset-bottom, 0px))
     );
   }
 
@@ -3798,21 +3798,22 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
 }
 
 @media (max-width: 1023px) {
-  /* Seat the sticky pin below the top nav (the page snaps section tops to
-     --chrome-top-inset) and let it fill to the viewport bottom — behind the dot
-     rail. The panels carry the rail reservation as their own bottom padding, so
-     their seams + bottom rule reach the rail's top border as one continuous grid
-     line while the content (foot/tags) still clears the rail. (Sizing the pin to
-     --panel-h left the panel bottom rule floating ~15px above the rail border:
-     a doubled, mismatched line.) */
+  /* Framed filmstrip — panel height sits between fixed header + dot rail; chrome
+     keeps a stable surface colour instead of sampling colourful panel pixels. */
+  .vchapter {
+    height: var(--panel-h);
+    min-height: var(--panel-h);
+  }
+
   .vchapter__pin {
     top: var(--chrome-top-inset);
-    height: calc(var(--app-vh) - var(--chrome-top-inset));
+    height: 100%;
+    min-height: 0;
+    --panel-kicker: clamp(2.5rem, 6vh, 3.25rem);
   }
 
   .vframe {
     box-sizing: border-box;
-    padding-bottom: var(--chrome-dots-inset, var(--chrome-mobile-dots-height));
   }
 
   .cs-detail .cs-hero__title-copy {
@@ -3875,7 +3876,7 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
   height: 0;
 }
 
-/* ── Title panel (4 cols) — shares the panel grid; tags sit in the foot band ── */
+/* ── Title panel (4 cols) — numeral in main; title + tags grouped in foot ── */
 .vframe.vframe--title {
   width: calc(100cqw * 4 / 12);
   background: var(--panel-surface, var(--section-dark-bg));
@@ -3887,11 +3888,18 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
   flex: none;
 }
 
-/* Chapter opener — lands above tags; distinct from beat panels. */
+/* Chapter opener — grouped with tags in the foot band. */
 .vchapter__title {
   margin: 0;
-  margin-top: auto;
   max-width: 14ch;
+}
+
+.vframe__title-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  gap: var(--panel-foot-pad);
 }
 
 .vchapter__tags {
@@ -3963,7 +3971,8 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
   padding-bottom: calc(var(--panel-foot-pad) + 3px);
 }
 
-.vframe__foot--tags {
+.vframe__foot--tags,
+.vframe__foot--title {
   justify-content: flex-end;
 }
 
@@ -3998,6 +4007,23 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
 @media (max-width: 1023px) {
   .vframe.vframe--title {
     width: calc(100cqw * 4 / 6);
+    grid-template-rows: var(--panel-kicker) 1fr auto;
+  }
+
+  .vframe.vframe--title .vframe__main--title {
+    padding-bottom: 0;
+  }
+
+  .vframe.vframe--title .vframe__foot--title {
+    padding-top: 0;
+  }
+
+  .vframe.vframe--title .vframe__title-block {
+    gap: 0.85rem;
+  }
+
+  .vframe.vframe--title .vchapter__tags {
+    gap: 0.25rem;
   }
 
   .vframe--16x9,

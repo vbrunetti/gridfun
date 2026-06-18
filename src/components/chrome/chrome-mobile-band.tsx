@@ -5,6 +5,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   applyChromeBandSample,
   applyChromeDotsBandSample,
+  CHROME_RESAMPLE_EVENT,
   clearChromeBandSample,
   clearChromeDotsBandSample,
   isMobileChromeBand,
@@ -52,6 +53,7 @@ export function ChromeMobileBand() {
     sync();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll, { passive: true });
+    window.addEventListener(CHROME_RESAMPLE_EVENT, onScroll);
 
     const mobileMq = window.matchMedia("(max-width: 1023px)");
     mobileMq.addEventListener("change", sync);
@@ -72,6 +74,7 @@ export function ChromeMobileBand() {
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
+      window.removeEventListener(CHROME_RESAMPLE_EVENT, onScroll);
       mobileMq.removeEventListener("change", sync);
       dotsObserver.disconnect();
       if (rafRef.current) cancelAnimationFrame(rafRef.current);

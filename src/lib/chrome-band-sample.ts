@@ -5,6 +5,10 @@ import {
 
 const MOBILE_QUERY = "(max-width: 1023px)";
 
+/** Dispatched on window to ask the mobile chrome band/rail to re-sample (e.g. when
+ *  a horizontal filmstrip advances and fires no scroll event). */
+export const CHROME_RESAMPLE_EVENT = "chrome:resample";
+
 const SAMPLE_IGNORE =
   ".chrome-mobile-band, .chrome-mobile-top, .floating-chrome, #site-menu, .skeleton-wrap, .chrome-dots-rail, .chrome-hero-dots-rail";
 
@@ -140,10 +144,26 @@ function pickSampleElement(stack: Element[]): Element | null {
  */
 type ChromeProbe = { tagged: Element | null; painted: Element | null };
 
+/**
+ * Topmost element actually painting a non-transparent background at the point —
+ * the colour the chrome visually sits on. Unlike pickSampleElement, this does NOT
+ * prefer a tagged ancestor: a colorful panel (e.g. a brand-bg vframe) must win over
+ * its section even when that section carries a theme background (theme-dark, etc.).
+ */
+function topmostPaintedAt(x: number, y: number): Element | null {
+  for (const el of document.elementsFromPoint(x, y)) {
+    if (!(el instanceof Element) || el.closest(SAMPLE_IGNORE)) continue;
+    const bg = getComputedStyle(el).backgroundColor;
+    if (bg && !isTransparentColor(bg)) return el;
+  }
+  return null;
+}
+
 function probeChromeAt(x: number, y: number): ChromeProbe {
   return {
     tagged: sampleChromeSurfaceAt(x, y),
-    painted: pickSampleElement(document.elementsFromPoint(x, y)),
+    painted:
+      topmostPaintedAt(x, y) ?? pickSampleElement(document.elementsFromPoint(x, y)),
   };
 }
 
@@ -192,8 +212,39 @@ export function sampleAboveChromeDots(): ChromeProbe {
   return { tagged: null, painted: null };
 }
 
+function stableChromeBackground(surface: ChromeSurface): string {
+  const root = document.documentElement;
+  const token = (name: string, fallback: string) =>
+    getComputedStyle(root).getPropertyValue(name).trim() || fallback;
+
+  if (surface === "dark") return token("--color-ink", "#000000");
+  if (surface === "canvas") return token("--canvas-blue", token("--background", "#efefef"));
+  return token("--background", "#efefef");
+}
+
+/** Mobile h-scroll vignettes — stable chrome from declared surface, not panel colour. */
+function mobileVchapterChromeSample(probe: ChromeProbe): ChromeBandSample | null {
+  if (!isMobileChromeBand()) return null;
+
+  const region =
+    probe.tagged?.closest(".vchapter") ??
+    probe.painted?.closest(".vchapter") ??
+    document.querySelector(".vchapter.is-focused");
+
+  if (!region) return null;
+
+  const surface = resolveChromeSurface(region);
+  return {
+    background: stableChromeBackground(surface),
+    surface,
+  };
+}
+
 /** bg follows the painted pixel, contrast follows the declared region. */
 function sampleFromProbe(probe: ChromeProbe): ChromeBandSample {
+  const vignette = mobileVchapterChromeSample(probe);
+  if (vignette) return vignette;
+
   return {
     background: getEffectiveBackground(probe.painted ?? probe.tagged),
     surface: resolveChromeSurface(probe.tagged ?? probe.painted),

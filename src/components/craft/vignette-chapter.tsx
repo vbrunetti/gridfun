@@ -20,7 +20,6 @@ import { VimeoPlayer } from "@/components/media/vimeo-embed";
 import { useCaseStudyVignetteProgressRegister } from "@/components/case-studies/case-study-detail-scroll-context";
 import { CraftTagList } from "@/components/craft/vignette-media";
 import { attachHorizontalGestures } from "@/components/deck/gestures";
-
 /** Always use horizontal filmstrip — all viewport sizes. */
 const DESKTOP_QUERY = "all";
 
@@ -468,14 +467,16 @@ export function VignetteChapter({
               <p className="display-numeral vchapter__numeral">
                 {String(chapterNumber).padStart(2, "0")}
               </p>
-              <h2 className="display-md vchapter__title">{vignette.name}</h2>
             </div>
-            <footer className="vframe__foot vframe__foot--tags">
-              <CraftTagList
-                tags={vignette.tags}
-                className="vchapter__tags"
-                variant="filter-link"
-              />
+            <footer className="vframe__foot vframe__foot--title">
+              <div className="vframe__title-block">
+                <h2 className="display-md vchapter__title">{vignette.name}</h2>
+                <CraftTagList
+                  tags={vignette.tags}
+                  className="vchapter__tags"
+                  variant="filter-link"
+                />
+              </div>
             </footer>
           </article>
           ) : null}
