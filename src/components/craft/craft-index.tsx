@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
 import { GhostButton } from "@/components/chrome/cta-button";
 import { CraftMasonry } from "@/components/craft/craft-masonry";
 import { VignetteKeyImage, craftCardRatio } from "@/components/craft/vignette-media";
@@ -283,6 +284,117 @@ function CraftFiltersPager({
   );
 }
 
+function CraftFilterTrigger({
+  activeTags,
+  total,
+  onClick,
+  className = "",
+}: {
+  activeTags: Set<string>;
+  total: number;
+  onClick: () => void;
+  className?: string;
+}) {
+  const count = activeTags.size;
+  const allOn = count === total;
+  return (
+    <button
+      type="button"
+      className={`craft-filter-trigger ${className}`.trim()}
+      onClick={onClick}
+      aria-label={`Open filters, ${count} of ${total} active`}
+    >
+      <span className="craft-filter-trigger__label">Filters</span>
+      <span className="craft-filter-trigger__status">
+        {allOn ? `All ${total}` : `${count} / ${total}`}
+      </span>
+      <span className="craft-filter-trigger__arrow" aria-hidden>↑</span>
+    </button>
+  );
+}
+
+function CraftFilterSheet({
+  open,
+  onClose,
+  activeTags,
+  onToggle,
+  onToggleAll,
+  tags,
+}: {
+  open: boolean;
+  onClose: () => void;
+  activeTags: Set<string>;
+  onToggle: (tag: string) => void;
+  onToggleAll: () => void;
+  tags: string[];
+}) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
+
+  if (!mounted) return null;
+
+  return createPortal(
+    <>
+      <div
+        className={`craft-filter-sheet__backdrop${open ? " craft-filter-sheet__backdrop--open" : ""}`}
+        onClick={onClose}
+        aria-hidden
+      />
+      <div
+        className={`craft-filter-sheet${open ? " craft-filter-sheet--open" : ""}`}
+        role="dialog"
+        aria-modal
+        aria-label="Filter by craft tag"
+        aria-hidden={!open}
+      >
+        <button
+          type="button"
+          className="craft-filter-sheet__handle-zone"
+          onClick={onClose}
+          aria-label="Close filters"
+        >
+          <span className="craft-filter-sheet__handle" aria-hidden />
+        </button>
+        <div className="craft-filter-sheet__header">
+          <p className="text-label-sm text-mono-label craft-filter-sheet__title">
+            {activeTags.size} of {tags.length} active
+          </p>
+          <CraftFiltersAllToggle
+            activeTags={activeTags}
+            onToggleAll={onToggleAll}
+            tags={tags}
+            variant="compact"
+          />
+        </div>
+        <div className="craft-filter-sheet__body">
+          <div
+            className="craft-filter-sheet__grid"
+            role="group"
+            aria-label="Filter by craft tag"
+          >
+            {tags.map((tag) => (
+              <CraftFilterToggle
+                key={tag}
+                tag={tag}
+                active={activeTags.has(tag)}
+                onToggle={() => onToggle(tag)}
+                variant="hero"
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </>,
+    document.body,
+  );
+}
+
 function VignetteCard({ entry }: { entry: VignetteWithStudy }) {
   const { vignette, caseStudy } = entry;
 
@@ -309,6 +421,7 @@ export function CraftIndex({ initialTag }: { initialTag?: string } = {}) {
     craftActiveTagsFromParam(initialTag),
   );
   const [compactHeader, setCompactHeader] = useState(false);
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -381,6 +494,12 @@ export function CraftIndex({ initialTag }: { initialTag?: string } = {}) {
                 onToggleAll={toggleAllTags}
                 className="craft-hero__filters"
               />
+              <CraftFilterTrigger
+                activeTags={activeTags}
+                total={allTags.length}
+                onClick={() => setFilterSheetOpen(true)}
+                className="craft-hero__filter-trigger"
+              />
             </div>
           </div>
         </RuledGrid>
@@ -406,10 +525,26 @@ export function CraftIndex({ initialTag }: { initialTag?: string } = {}) {
               onToggle={toggleTag}
               onToggleAll={toggleAllTags}
               visible={compactHeader}
+              className="craft-sticky-filters-pager"
+            />
+            <CraftFilterTrigger
+              activeTags={activeTags}
+              total={allTags.length}
+              onClick={() => setFilterSheetOpen(true)}
+              className="craft-sticky-filter-trigger"
             />
           </div>
         </div>
       </header>
+
+      <CraftFilterSheet
+        open={filterSheetOpen}
+        onClose={() => setFilterSheetOpen(false)}
+        activeTags={activeTags}
+        onToggle={toggleTag}
+        onToggleAll={toggleAllTags}
+        tags={allTags}
+      />
 
       {visibleVignettes.length === 0 ? (
         <p className="craft-empty text-secondary">

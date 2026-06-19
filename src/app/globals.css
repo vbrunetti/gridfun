@@ -2329,6 +2329,167 @@ body[data-chrome-surface="dark"] .floating-chrome .rail-label-vertical {
   min-width: 0;
 }
 
+/* ── Mobile filter trigger + bottom sheet ──────────────────────────────── */
+
+/* Trigger: compact "Filters · N / 17 ↑" row — mobile only */
+.craft-filter-trigger {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  /* Double-class for specificity over .craft-filters { display: flex } */
+  .craft-filters.craft-hero__filters {
+    display: none;
+  }
+
+  .craft-hero__filter-trigger {
+    display: flex;
+    grid-column: 1 / -1;
+  }
+
+  /* Hide pager in sticky header; show trigger */
+  .craft-filters-pager.craft-sticky-filters-pager {
+    display: none;
+  }
+
+  .craft-sticky-filter-trigger {
+    display: flex;
+  }
+
+  .craft-filter-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0;
+    font-size: var(--type-label);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: color 0.15s ease;
+  }
+
+  .craft-filter-trigger:hover {
+    color: var(--text-primary);
+  }
+
+  .craft-filter-trigger__label {
+    color: var(--text-primary);
+  }
+
+  .craft-filter-trigger__status {
+    color: var(--text-tertiary);
+  }
+
+  .craft-filter-trigger__arrow {
+    color: var(--text-tertiary);
+  }
+}
+
+/* Bottom sheet — fixed overlay, slides up from bottom */
+.craft-filter-sheet__backdrop {
+  display: none;
+}
+
+.craft-filter-sheet {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .craft-filter-sheet__backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 199;
+    background: rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.28s ease;
+  }
+
+  .craft-filter-sheet__backdrop--open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .craft-filter-sheet {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    max-height: 82dvh;
+    background: var(--color-paper);
+    border-top: 1px solid var(--rule-strong);
+    border-radius: 1rem 1rem 0 0;
+    transform: translateY(100%);
+    transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .craft-filter-sheet--open {
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .craft-filter-sheet {
+      transition: none;
+    }
+    .craft-filter-sheet__backdrop {
+      transition: none;
+    }
+  }
+
+  .craft-filter-sheet__handle-zone {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 0.75rem 0 0.5rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .craft-filter-sheet__handle {
+    width: 2.5rem;
+    height: 0.25rem;
+    border-radius: 999px;
+    background: var(--rule-strong);
+  }
+
+  .craft-filter-sheet__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.25rem var(--grid-margin) 0.75rem;
+    border-bottom: 1px solid var(--rule-light);
+    flex-shrink: 0;
+  }
+
+  .craft-filter-sheet__title {
+    margin: 0;
+  }
+
+  .craft-filter-sheet__body {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 1rem var(--grid-margin) max(1.25rem, env(safe-area-inset-bottom, 1rem));
+  }
+
+  .craft-filter-sheet__grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}
+
 .craft-filters {
   display: flex;
   min-width: 0;
