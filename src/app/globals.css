@@ -4372,7 +4372,6 @@ ul.cs-hero__subhead {
 /* ── Prose beat — lives in the main band ── */
 .vframe__beat {
   margin: 0;
-  max-width: 22ch;
 }
 
 /* ── Media — scale to the largest size that fits the main band (contain) ── */
