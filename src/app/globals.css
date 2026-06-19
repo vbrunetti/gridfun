@@ -4462,3 +4462,77 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
     grid-column: 1 / -1;
   }
 }
+
+/* ── Mobile scroll hint ──────────────────────────────────── */
+
+.scroll-hint {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  @keyframes scroll-hint-travel {
+    0% {
+      opacity: 0;
+      transform: translateY(-3px);
+    }
+    15% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    70% {
+      opacity: 1;
+      transform: translateY(7px);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  }
+
+  .scroll-hint {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    position: fixed;
+    bottom: calc(var(--chrome-dots-inset, 3.5rem) + 1rem);
+    left: 50%;
+    z-index: 80;
+    transform: translateX(-50%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  .scroll-hint--visible {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-hint {
+      display: none;
+    }
+  }
+
+  /* Surface-aware color: most mobile scroll pages are dark */
+  .scroll-hint {
+    color: color-mix(in srgb, var(--color-paper) 50%, transparent);
+  }
+
+  body[data-chrome-surface="light"] .scroll-hint,
+  body[data-chrome-surface="canvas"] .scroll-hint {
+    color: color-mix(in srgb, var(--color-ink) 40%, transparent);
+  }
+
+  .scroll-hint__arrow {
+    animation: scroll-hint-travel 1.4s ease-in-out infinite;
+  }
+
+  .scroll-hint__label {
+    font-size: 0.5rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+}

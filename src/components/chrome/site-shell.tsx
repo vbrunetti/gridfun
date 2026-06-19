@@ -5,6 +5,7 @@ import { ChromeThemeWatcher } from "./chrome-theme-watcher";
 import { FloatingChrome } from "./floating-chrome";
 import { LeftRail } from "./left-rail";
 import { MenuOverlay } from "./menu-overlay";
+import { ScrollHint } from "./scroll-hint";
 import { SkeletonOverlay } from "./skeleton-overlay";
 import { ViewportInsets } from "./viewport-insets";
 
@@ -21,6 +22,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
       <div className="chrome-dots-inset-sentinel" data-chrome-inset="dots" aria-hidden />
       <ChromeThemeWatcher />
       <ViewportInsets />
+      <ScrollHint />
       <div className="min-h-[var(--app-vh)] lg:pl-[var(--rail-width)]">
         <main
           id="main-content"
