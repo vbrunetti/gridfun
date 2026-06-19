@@ -368,8 +368,8 @@ export const spacingTokens = [
   {
     token: "--panel-pad",
     label: "Vignette panel inline pad",
-    mobile: "clamp(0.75rem, 2vw, 1rem) (breathing room from panel color field edge)",
-    desktop: "clamp(1.5rem, 2.5vw, 2rem)",
+    mobile: "0px (pin provides padding-inline: var(--grid-margin))",
+    desktop: "0px (track JS layout already offsets by --grid-margin; bands need no extra inset)",
   },
   {
     token: "--cs-hero-foot",
