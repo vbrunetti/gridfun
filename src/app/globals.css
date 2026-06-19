@@ -2495,9 +2495,9 @@ body[data-chrome-surface="dark"] .floating-chrome .rail-label-vertical {
 }
 
 .craft-filter-chip--on {
-  border-color: var(--color-ink);
+  border-color: color-mix(in srgb, currentColor 72%, transparent);
   color: var(--text-primary);
-  background: color-mix(in srgb, var(--color-ink) 6%, transparent);
+  background: color-mix(in srgb, currentColor 6%, transparent);
 }
 
 .craft-filter-chip__dot {
