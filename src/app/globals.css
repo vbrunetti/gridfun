@@ -63,7 +63,7 @@
    */
   --grid-columns: 6;
   --grid-gutter: clamp(1rem, 2.5vw, 1.5rem);
-  --grid-margin: 1rem;
+  --grid-margin: 1.5rem;
   --grid-margin-inline-end: var(--grid-margin);
   --grid-max: none;
   --grid-row-gap: clamp(1.5rem, 4vw, 3rem);
@@ -3921,32 +3921,31 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
   --panel-main-inset-top: clamp(1.25rem, 3vh, 2rem);
   --panel-foot: clamp(5.25rem, 14vh, 8.5rem);
   --panel-foot-pad: clamp(0.85rem, 2vh, 1.35rem);
-  --panel-pad: clamp(1rem, 2vw, 1.5rem);
+  --panel-pad: clamp(1.5rem, 2.5vw, 2rem);
 }
 
 @media (max-width: 1023px) {
-  /* Framed filmstrip — panel height sits between fixed header + dot rail; chrome
-     keeps a stable surface colour instead of sampling colourful panel pixels. */
+  /* Framed filmstrip — the SECTION is full-viewport so it shares the uniform
+     100svh snap stride with hero/prose rows (snap-align:start → y=0). The pinned
+     filmstrip itself is --panel-h, held by the sticky offset in the band between
+     the fixed header + dot rail; chrome keeps a stable surface colour instead of
+     sampling colourful panel pixels. */
   .vchapter {
-    height: var(--panel-h);
-    min-height: var(--panel-h);
+    height: var(--app-vh);
+    min-height: var(--app-vh);
   }
 
   .vchapter__pin {
     top: var(--chrome-top-inset);
-    height: 100%;
+    height: var(--panel-h);
     min-height: 0;
     --panel-kicker: clamp(2.5rem, 6vh, 3.25rem);
-    /* Match cs-index-panel__grid — one grid-margin inset on the pin, not per band. */
+    /* Pin carries --grid-margin so panel copy aligns with logo, hamburger,
+       and all other content. No extra --panel-pad. */
     box-sizing: border-box;
     padding-inline: var(--grid-margin);
     padding-inline-end: var(--grid-margin-inline-end);
-  }
-
-  .vframe__kicker,
-  .vframe__main,
-  .vframe__foot {
-    padding-inline: 0;
+    --panel-pad: 0px;
   }
 
   .vframe {
