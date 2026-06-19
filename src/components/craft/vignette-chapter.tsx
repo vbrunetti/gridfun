@@ -333,12 +333,14 @@ export function VignetteChapter({
     ).slice(0, cols);
     if (cells.length < cols) return;
 
-    const lefts = cells.map((c) => c.getBoundingClientRect().left - pinLeft);
     const rights = cells.map((c) => c.getBoundingClientRect().right - pinLeft);
-    insetRef.current = lefts[0] ?? 0;
+    // Track starts flush with the pin left edge (not offset by the grid margin).
+    // --panel-pad in CSS then insets content to the grid baseline, so colored
+    // panel backgrounds bleed to the pin edge while text aligns with prose.
+    insetRef.current = 0;
 
     const widthForCols = (n: number) =>
-      rights[Math.min(Math.max(n, 1), cols) - 1]! - lefts[0]!;
+      rights[Math.min(Math.max(n, 1), cols) - 1]!;
 
     panelKinds.forEach((kind, i) => {
       const node = panelRefs.current[i];
