@@ -3925,28 +3925,30 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
 }
 
 @media (max-width: 1023px) {
-  /* Framed filmstrip — panel height sits between fixed header + dot rail; chrome
-     keeps a stable surface colour instead of sampling colourful panel pixels. */
+  /* Framed filmstrip — the SECTION is full-viewport so it shares the uniform
+     100svh snap stride with hero/prose rows (snap-align:start → y=0). The pinned
+     filmstrip itself is --panel-h, held by the sticky offset in the band between
+     the fixed header + dot rail; chrome keeps a stable surface colour instead of
+     sampling colourful panel pixels. */
   .vchapter {
-    height: var(--panel-h);
-    min-height: var(--panel-h);
+    height: var(--app-vh);
+    min-height: var(--app-vh);
   }
 
   .vchapter__pin {
     top: var(--chrome-top-inset);
-    height: 100%;
+    height: var(--panel-h);
     min-height: 0;
     --panel-kicker: clamp(2.5rem, 6vh, 3.25rem);
-    /* Match cs-index-panel__grid — one grid-margin inset on the pin, not per band. */
+    /* Match cs-index-panel__grid — one grid-margin inset on the pin, not per band.
+       Zero --panel-pad so the bands don't double the inset: the base band rule
+       resolves through the cascade, which beats a per-band override here on
+       source order. Net result: panel copy aligns to the same grid margin as the
+       hero/prose rows (one --grid-margin), not grid-margin + panel-pad. */
     box-sizing: border-box;
     padding-inline: var(--grid-margin);
     padding-inline-end: var(--grid-margin-inline-end);
-  }
-
-  .vframe__kicker,
-  .vframe__main,
-  .vframe__foot {
-    padding-inline: 0;
+    --panel-pad: 0px;
   }
 
   .vframe {
