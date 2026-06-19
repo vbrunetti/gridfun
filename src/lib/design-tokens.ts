@@ -322,7 +322,7 @@ export const spacingTokens = [
   {
     token: "--grid-margin",
     label: "Grid side margin",
-    mobile: "1rem",
+    mobile: "1.5rem",
     desktop: "clamp(1rem, 4vw, 3rem)",
   },
   {
@@ -368,8 +368,8 @@ export const spacingTokens = [
   {
     token: "--panel-pad",
     label: "Vignette panel inline pad",
-    mobile: "clamp(1rem, 2vw, 1.5rem)",
-    desktop: "same",
+    mobile: "clamp(0.75rem, 2vw, 1rem) (breathing room from panel color field edge)",
+    desktop: "clamp(1.5rem, 2.5vw, 2rem)",
   },
   {
     token: "--cs-hero-foot",
