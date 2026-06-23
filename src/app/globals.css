@@ -4075,6 +4075,11 @@ ul.cs-hero__subhead {
   height: var(--app-vh);
 }
 
+/* Snap-stop markers exist only for the desktop scroll-driven pin (enabled below). */
+.vchapter__stops {
+  display: none;
+}
+
 .vchapter__pin {
   position: sticky;
   top: 0;
@@ -4102,6 +4107,40 @@ ul.cs-hero__subhead {
        so text has breathing room from the keyline without over-indenting
        beyond the grid baseline. */
     --panel-pad: clamp(1rem, 1.5vw, 1.5rem);
+  }
+
+  /* Scroll-driven horizontal pin. The section is tall — one viewport of scroll per
+     panel, from the in-flow snap markers below — and the filmstrip pin sticks while
+     you scroll through it; JS maps scroll progress → translateX. Per-panel snap stops
+     give native scroll-snap one forced stop per panel (scroll-snap-stop: always =
+     one flick = one panel, inertia handled by the browser). */
+  .cs-detail .vchapter[data-scroll-pin] {
+    position: relative;
+    /* Height comes from the sticky pin (one viewport) plus the stops below it;
+       the stops are pulled up under the pin so total height = vpanels viewports. */
+    height: auto;
+  }
+
+  .cs-detail .vchapter[data-scroll-pin] .vchapter__pin {
+    z-index: 1;
+  }
+
+  /* In-flow snap markers (one viewport each) define the scroll length and serve as
+     real scroll-snap targets — absolute elements are unreliable for snap-align. The
+     negative margin pulls the first marker up under the sticky pin so marker k sits
+     at k viewports of scroll, matching the JS progress→panel mapping. */
+  .cs-detail .vchapter[data-scroll-pin] .vchapter__stops {
+    display: block;
+    position: relative;
+    z-index: 0;
+    margin-top: calc(-1 * var(--app-vh));
+    pointer-events: none;
+  }
+
+  .vchapter__stop {
+    height: var(--app-vh);
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
   }
 }
 

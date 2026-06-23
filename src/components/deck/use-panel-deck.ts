@@ -39,7 +39,7 @@ function panelSnapY(el: HTMLElement): number {
  * Unified active-index algorithm (spec §5.4):
  * Active = panel whose snap-start is the greatest position ≤ (scrollY + topInset).
  */
-function computeActiveIndex(panelIds: string[], topInset: number): number {
+export function computeActiveIndex(panelIds: string[], topInset: number): number {
   const anchorAbs = window.scrollY + topInset;
   const maxScroll =
     document.documentElement.scrollHeight - window.innerHeight;

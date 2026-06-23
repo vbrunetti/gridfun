@@ -23,7 +23,7 @@ import {
   peekCursorSurface,
 } from "@/lib/chrome-surface";
 import { isMobileChromeBand } from "@/lib/chrome-band-sample";
-import { usePanelDeck } from "@/components/deck/use-panel-deck";
+import { useCaseStudyDeck } from "@/components/case-studies/use-case-study-deck";
 
 const PEEK_DESKTOP_QUERY = "(min-width: 768px)";
 
@@ -90,21 +90,9 @@ export function CaseStudyDetailScroll({
   const [peekTarget, setPeekTarget] = useState<PeekTarget | null>(null);
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
 
-  const sections = [
-    {
-      id: "cs-detail",
-      axis: "y" as const,
-      panels: steps.map((step) => ({
-        id: step.id,
-        size: "fullscreen" as const,
-        surface: "dark" as const,
-      })),
-    },
-  ];
-
-  const { activeIndex, goTo } = usePanelDeck({
-    sections,
-    onActiveChange: (_id, index) => {
+  const { activeIndex, goToStep, goToPanel } = useCaseStudyDeck({
+    steps,
+    onActiveChange: (index) => {
       syncChromeSurfaceFromStep(steps, index);
     },
   });
@@ -112,23 +100,9 @@ export function CaseStudyDetailScroll({
   const scrollToStep = useCallback(
     (index: number) => {
       resetVignettesBelowStep(steps, index);
-      goTo(index);
+      goToStep(index);
     },
-    [steps, goTo],
-  );
-
-  const scrollToVignettePanel = useCallback(
-    (sectionId: string, panelIndex: number) => {
-      const section = document.getElementById(sectionId);
-      if (!section) return;
-
-      section.dispatchEvent(
-        new CustomEvent<VchapterPanelEventDetail>(VCHAPTER_PANEL_EVENT, {
-          detail: { panelIndex, smooth: true },
-        }),
-      );
-    },
-    [],
+    [steps, goToStep],
   );
 
   useCaseStudyDetailScrollRegister(
@@ -248,15 +222,15 @@ export function CaseStudyDetailScroll({
 
       event.preventDefault();
 
+      const stepIndex = steps.findIndex((step) => step.id === target.sectionId);
+      if (stepIndex < 0) return;
+
       if (target.type === "panel") {
-        scrollToVignettePanel(target.sectionId, target.panelIndex);
+        goToPanel(stepIndex, target.panelIndex);
         return;
       }
 
-      const stepIndex = steps.findIndex((step) => step.id === target.sectionId);
-      if (stepIndex >= 0) {
-        scrollToStep(stepIndex);
-      }
+      scrollToStep(stepIndex);
     };
 
     document.addEventListener("pointermove", onPointerMove, { passive: true });
@@ -267,7 +241,7 @@ export function CaseStudyDetailScroll({
       root.removeEventListener("click", onClick);
       root.classList.remove("is-peek-cursor");
     };
-  }, [scrollToStep, scrollToVignettePanel, steps]);
+  }, [scrollToStep, goToPanel, steps]);
 
   return (
     <article ref={rootRef} className="cs-detail">

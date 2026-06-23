@@ -19,6 +19,11 @@ export type CaseStudyDetailStep = {
   kind: CaseStudyDetailStepKind;
   label: string;
   vignetteSlug?: string;
+  /**
+   * Number of horizontal stops this row contributes to the controlled deck.
+   * Narrative vignettes = title panel + one per image; everything else = 1.
+   */
+  panelCount: number;
 };
 
 export type VignettePanelProgress = {

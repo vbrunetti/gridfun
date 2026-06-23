@@ -111,6 +111,7 @@ export default async function VignettePage({ params }: PageProps) {
           date={caseStudy.date}
           showTitlePanel={false}
           colorway="white"
+          controlled
         />
 
         <section

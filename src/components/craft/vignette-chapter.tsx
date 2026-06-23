@@ -179,6 +179,7 @@ export function VignetteChapter({
   date,
   showTitlePanel = true,
   colorway = "dark",
+  controlled = false,
 }: {
   vignette: CraftVignette;
   chapterNumber: number;
@@ -187,6 +188,12 @@ export function VignetteChapter({
   showTitlePanel?: boolean;
   /** Surface theme for the filmstrip — white on standalone craft detail. */
   colorway?: "dark" | "white";
+  /**
+   * When true, an external deck controller owns wheel/keyboard input at the desktop
+   * breakpoint (case-study detail). This component then only moves on panel-jump
+   * events; it keeps its own gestures on mobile and on standalone craft detail.
+   */
+  controlled?: boolean;
 }) {
   const frames = vignette.images;
   const total = frames.length;
@@ -381,48 +388,118 @@ export function VignetteChapter({
     focusObserver.observe(section, { attributes: true, attributeFilter: ["class"] });
     syncFocused();
 
+    const controlMq = window.matchMedia(GRID_LAYOUT_QUERY);
+    let scrollPinActive = false;
+    let detachGestures: (() => void) | null = null;
+    let rafId = 0;
+
     const onPanelJump = (event: Event) => {
+      // In scroll-pin mode the native scroll position owns the track, so ignore
+      // imperative jumps (the deck scrolls to the panel instead).
+      if (scrollPinActive) return;
       const detail = (event as CustomEvent<VchapterPanelEventDetail>).detail;
       if (!detail || !Number.isFinite(detail.panelIndex)) return;
       goToPanel(detail.panelIndex, detail.smooth ?? true);
     };
     section.addEventListener(VCHAPTER_PANEL_EVENT, onPanelJump);
 
-    // Gesture layer: wheel + touch + keyboard (gestures.ts owns all inputs).
-    // mobileBiaxial = true on touch-capable viewports below the desktop breakpoint,
-    // so that vertical swipe also advances the horizontal track.
-    const detachGestures = attachHorizontalGestures(section, {
-      getOffset: () => offsetRef.current,
-      getMaxOffset: maxOffset,
-      applyDelta: (delta) => {
-        if (!desktop.matches) return; // stacked layout — no track to drive
-        applyOffset(offsetRef.current + delta, false);
-      },
-      step: (dir) => {
-        if (!desktop.matches) return;
-        goToPanel(indexRef.current + dir, true);
-      },
-      getIndex: () => indexRef.current,
-      goToIndex: (i) => {
-        if (!desktop.matches) return;
-        goToPanel(i, true);
-      },
-      snapToNearest: () => {
-        if (!desktop.matches) return;
-        const offsets = panelOffsets();
-        const idx = indexAtOffset(offsetRef.current);
-        applyOffset(offsets[idx] ?? 0, true);
-      },
-      isFocused: () => section.classList.contains("is-focused"),
-      mobileBiaxial: true,
-    });
+    // Scroll-driven horizontal pin (controlled + desktop). The section is tall and
+    // the filmstrip pin sticks; native vertical scroll progress maps 1:1 to the
+    // track's translateX, interpolating between panel snap offsets. CSS snap-stops
+    // (one per panel) make the browser snap one panel per flick — no wheel hijack.
+    const applyFromScroll = () => {
+      const pin = stageRef.current;
+      if (!pin) return;
+      const travel = section.offsetHeight - pin.offsetHeight;
+      if (travel <= 0) {
+        applyOffset(0, false);
+        return;
+      }
+      const scrolled = Math.min(
+        Math.max(-section.getBoundingClientRect().top, 0),
+        travel,
+      );
+      const frac = (scrolled / travel) * Math.max(steps - 1, 0);
+      const offsets = panelOffsets();
+      const i0 = Math.floor(frac);
+      const i1 = Math.min(i0 + 1, offsets.length - 1);
+      const a = offsets[i0] ?? 0;
+      const b = offsets[i1] ?? a;
+      applyOffset(a + (b - a) * (frac - i0), false);
+    };
+
+    const onScroll = () => {
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = 0;
+        applyFromScroll();
+      });
+    };
+
+    // Gesture layer (mobile, or standalone non-pinned): vertical/horizontal swipe
+    // drives the track. mobileBiaxial lets a vertical swipe advance it on touch.
+    const attachGestures = () =>
+      attachHorizontalGestures(section, {
+        getOffset: () => offsetRef.current,
+        getMaxOffset: maxOffset,
+        applyDelta: (delta) => {
+          if (!desktop.matches) return;
+          applyOffset(offsetRef.current + delta, false);
+        },
+        step: (dir) => {
+          if (!desktop.matches) return;
+          goToPanel(indexRef.current + dir, true);
+        },
+        getIndex: () => indexRef.current,
+        goToIndex: (i) => {
+          if (!desktop.matches) return;
+          goToPanel(i, true);
+        },
+        snapToNearest: () => {
+          if (!desktop.matches) return;
+          const offsets = panelOffsets();
+          const idx = indexAtOffset(offsetRef.current);
+          applyOffset(offsets[idx] ?? 0, true);
+        },
+        isFocused: () => section.classList.contains("is-focused"),
+        mobileBiaxial: true,
+      });
+
+    const evaluateInput = () => {
+      const wantPin = controlled && controlMq.matches;
+      if (wantPin === scrollPinActive) {
+        if (!wantPin && !detachGestures) detachGestures = attachGestures();
+        return;
+      }
+      scrollPinActive = wantPin;
+      if (wantPin) {
+        if (detachGestures) {
+          detachGestures();
+          detachGestures = null;
+        }
+        window.addEventListener("scroll", onScroll, { passive: true });
+        window.addEventListener("resize", onScroll, { passive: true });
+        applyFromScroll();
+      } else {
+        window.removeEventListener("scroll", onScroll);
+        window.removeEventListener("resize", onScroll);
+        if (!detachGestures) detachGestures = attachGestures();
+      }
+    };
+
+    evaluateInput();
+    controlMq.addEventListener("change", evaluateInput);
 
     return () => {
       focusObserver.disconnect();
       section.removeEventListener(VCHAPTER_PANEL_EVENT, onPanelJump);
-      detachGestures();
+      controlMq.removeEventListener("change", evaluateInput);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (rafId) cancelAnimationFrame(rafId);
+      if (detachGestures) detachGestures();
     };
-  }, [applyOffset, goToPanel, indexAtOffset, maxOffset, panelOffsets]);
+  }, [applyOffset, controlled, goToPanel, indexAtOffset, maxOffset, panelOffsets, steps]);
 
   if (total === 0) return null;
 
@@ -438,6 +515,7 @@ export function VignetteChapter({
       className={`cs-focus-section vchapter ${themeClass}`}
       id={`vignette-${vignette.slug}`}
       data-cs-detail-row
+      data-scroll-pin={controlled ? "" : undefined}
       data-chrome-surface={chromeSurface}
       data-colorway={colorway}
       aria-roledescription="vignette chapter"
@@ -523,6 +601,13 @@ export function VignetteChapter({
           />
         </div>
       </div>
+      {controlled ? (
+        <div className="vchapter__stops" aria-hidden>
+          {Array.from({ length: steps }).map((_, i) => (
+            <div key={i} className="vchapter__stop" />
+          ))}
+        </div>
+      ) : null}
     </section>
   );
 }
