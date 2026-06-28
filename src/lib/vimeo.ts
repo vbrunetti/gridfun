@@ -32,12 +32,17 @@ export function vimeoEmbedUrl(videoId: string): string {
 /** Borderless background embed — autoplay, loop, muted, no UI/controls (vibe reel). */
 export function vimeoBackgroundUrl(videoId: string): string {
   const params = new URLSearchParams({
-    background: "1", // implies autoplay + loop + muted + no controls
-    muted: "1",
+    badge: "0",
+    autopause: "0",
     autoplay: "1",
     loop: "1",
-    autopause: "0",
+    muted: "1",
+    title: "0",
+    byline: "0",
+    portrait: "0",
+    controls: "0",
     dnt: "1",
+    playsinline: "1",
   });
 
   return `https://player.vimeo.com/video/${videoId}?${params.toString()}`;

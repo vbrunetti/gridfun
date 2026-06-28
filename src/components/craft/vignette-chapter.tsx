@@ -135,7 +135,8 @@ function FrameContent({
               <VimeoPlayer
                 videoId={frame.vimeo}
                 title={title}
-                aspectRatio={aspect === "1/1" ? "16/9" : aspect}
+                aspectRatio={aspect}
+                background={frame.vimeoBackground}
                 className="vframe__media vframe__media--video"
               />
             ) : (

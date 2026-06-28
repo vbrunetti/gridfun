@@ -59,6 +59,8 @@ export type VignetteImage = {
   src?: string;
   /** Vimeo video ID or full vimeo.com URL — renders a player instead of an image. */
   vimeo?: string;
+  /** Borderless looping embed (no player chrome) instead of interactive controls. */
+  vimeoBackground?: boolean;
   /** Render as a type-driven color field instead of media. */
   colorField?: boolean;
   /** Beat kicker (mono caps), e.g. "The problem". */
@@ -168,15 +170,18 @@ function cruiseMedia(
   label: string,
   caption: string,
   ratio: ImageRatio = "16x9",
-  src?: string,
+  media?: string | Pick<VignetteImage, "src" | "vimeo" | "vimeoBackground">,
   panelBg?: PanelBg,
 ): VignetteImage {
+  const mediaFields =
+    typeof media === "string" ? { src: media } : (media ?? {});
+
   return {
     ratio,
     accent: cruiseAccent,
     label,
     caption,
-    ...(src ? { src } : {}),
+    ...mediaFields,
     ...(panelBg ? { panelBg } : {}),
   };
 }
@@ -551,18 +556,18 @@ export const caseStudies: CaseStudy[] = [
       logo: "/portfolio/logos/cruise.png",
     },
     location: "San Francisco, CA",
-    role: "Lead product designer",
-    tools: "Figma, motion prototyping, operator research",
-    heroVideo: { vimeo: "1119829651", opacity: 0.15 },
+    role: "Sr. UX Design Manager",
+    tools: "Figma, Storybook",
+    heroVideo: { vimeo: "1205281684", opacity: 0.30 },
     sections: [
       cruiseProse(
         "cruise-intro",
-        "The terminal",
-        "Cruise's remote operators were the humans in the loop of a driverless fleet — the people a stuck robotaxi phoned for help, often with seconds to act. The terminal they worked in was built on radar and air-traffic-control tradition: rigorous, safety-first, and almost entirely blind to what the machine already knew.\n\nThe through-line across this work is a single idea — context gain. The AV's AI perceived, classified, and planned constantly; very little of that intelligence reached the operator. Each vignette is one move toward closing that gap: surfacing what the system knew, in a form a human under stress could read in seconds.",
+        "The Terminal",
+        "Cruise's remote operators were the humans-in-the-loop of a driverless fleet. When a robotaxi got stuck, or confused, it literally phoned a human for help. These people, Remote Operators, were like call-center agents sitting in a remote location waiting to catch inbound requests. When they did, they needed to act within seconds. The Terminal (the name of the software they used to support the driverless fleet) was built on rigorous, safety-first human factors traditions; designed for humans in control of a machine, not humans working alongside an AI stack. As a result, the Terminal was almost entirely blind to what the machine already knew — and everyone who depended on that knowledge paid the price: operators scrambling to read a scene in seconds, passengers in the back seat wondering when they'd move again, and the LEOs, first responders, and pedestrians on the street trying to figure out whether anyone was even home.\n\nThe through-line across my work at Cruise is a single idea — allow the humans working with the AI stack to quickly gain context, so they can help augment - not override - what the machine could do. The AV's AI perceived, classified, and planned constantly, but very little of that intelligence reached the Remote Operator. Each vignette below represents one move closer towards closing that gap: surfacing what the system knew, in a form a human under stress could read and respond to in seconds.",
       ),
       cruiseVignette(
         "semantic-color-shape",
-        "Semantic Color + Shape Language",
+        "Develoiping a Semantic Color & Shape Language",
         ["Visual design", "Data viz", "Human factors"],
         "Context gain / semantic legibility / color as meaning",
         [
@@ -573,9 +578,8 @@ export const caseStudies: CaseStudy[] = [
           cruiseMedia(
             "Before",
             "The legacy scene: a single orange encoding for every object type. Safe for the eyes, silent about meaning.",
-            "16x9",
-            "/portfolio/cruise/before-16x9.jpg",
-            "tertiary",
+            "1x1",
+            { vimeo: "1205288733", vimeoBackground: true },
           ),
           cruiseBeat(
             "The insight",

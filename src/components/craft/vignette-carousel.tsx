@@ -248,6 +248,7 @@ export function VignetteImageScroll({
                       videoId={image.vimeo}
                       title={alt}
                       aspectRatio={ratioAspect(image.ratio)}
+                      background={image.vimeoBackground}
                       className="vignette-gallery__video"
                     />
                   ) : (
