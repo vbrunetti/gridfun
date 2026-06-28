@@ -752,6 +752,17 @@ html:has(.cs-detail) {
   html:has(.home-scroll:not(.home-scroll--static), .cs-index-scroll) {
     scroll-padding-top: 0;
   }
+
+  /* A long prose row can exceed the viewport (min-height: var(--app-vh) + copy).
+     Mandatory snapping traps that overflow — the middle of a tall row can't rest
+     under the scroll, so it fights the swipe-to-next-section gesture. Proximity
+     still snaps the full-height hero/vignette rows but lets a tall prose row
+     scroll through freely. The selector specificity matches the shared mandatory
+     rule above and is scoped to detail (which always contains prose rows) so it
+     wins here without touching home / case-studies index. */
+  html:has(.cs-detail .cs-section--prose) {
+    scroll-snap-type: y proximity;
+  }
 }
 
 @media (min-width: 1024px) {
@@ -1180,15 +1191,28 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
 }
 
 @media (min-width: 1024px) {
-  /* Case studies index — page title band + each cover card share title-slide height */
-  .cs-index-scroll .work-snap-section--intro,
-  .cs-index-scroll .sticky-cover-panel.work-snap-section {
-    height: var(--case-study-title-slide-height);
-    min-height: var(--case-study-title-slide-height);
-    max-height: var(--case-study-title-slide-height);
+  /* Case studies index — page title band sizes to its masthead content (chrome band
+     + title band + foot pad). Cover cards stay full-height via the base work-snap rule;
+     only the detail hero below opts into the taller title-slide height. */
+  .cs-index-scroll .work-snap-section--intro {
+    height: calc(
+      var(--chrome-top-offset) +
+        clamp(9rem, 24vh, 16rem) +
+        clamp(2rem, 5vh, 3.5rem)
+    );
+    min-height: calc(
+      var(--chrome-top-offset) +
+        clamp(9rem, 24vh, 16rem) +
+        clamp(2rem, 5vh, 3.5rem)
+    );
+    max-height: calc(
+      var(--chrome-top-offset) +
+        clamp(9rem, 24vh, 16rem) +
+        clamp(2rem, 5vh, 3.5rem)
+    );
   }
 
-  /* Case study detail — hero title card */
+  /* Case study detail — hero title card (intentionally taller than its content). */
   .cs-detail .cs-hero {
     height: var(--case-study-title-slide-height);
     min-height: var(--case-study-title-slide-height);
@@ -2168,8 +2192,9 @@ body[data-chrome-surface="dark"] .floating-chrome .rail-label-vertical {
  * Shared masthead rhythm — craft index, case studies index, case study detail.
  * Row 1: chrome band (meta / facts). Row 2: title pinned above keyline foot pad.
  *
- * Case study title slides (index cover cards + detail heroes) share one desktop
- * snap height — see --case-study-title-slide-height below.
+ * The case study detail hero opts into a taller desktop snap height — see
+ * --case-study-title-slide-height below. Index title band + cover cards keep
+ * their own heights (masthead calc / full-bleed).
  */
 .craft-hero__grid,
 .cs-index-hero__grid,
@@ -2203,14 +2228,10 @@ body[data-chrome-surface="dark"] .floating-chrome .rail-label-vertical {
     );
   }
 
-  /* Fixed title-slide shells — inner grids fill the band instead of masthead calc. */
-  .cs-index-scroll .work-snap-section--intro .cs-index-hero__grid,
+  /* Fixed title-slide shell — inner grid fills the detail hero band instead of masthead calc. */
   .cs-detail .cs-hero__grid {
     min-height: 0;
     height: 100%;
-  }
-
-  .cs-detail .cs-hero__grid {
     flex: 1;
   }
 }
@@ -3487,7 +3508,7 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
   opacity: 1;
 }
 
-/* Dimmed sections — hide system cursor; render a 200×200 plus follower. */
+/* Dimmed sections — hide system cursor; render a 100×100 plus follower. */
 .cs-detail.is-peek-cursor,
 .cs-detail.is-peek-cursor * {
   cursor: none !important;
@@ -3498,9 +3519,9 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
   top: 0;
   left: 0;
   z-index: 90;
-  width: 200px;
-  height: 200px;
-  margin: -100px 0 0 -100px;
+  width: 100px;
+  height: 100px;
+  margin: -50px 0 0 -50px;
   pointer-events: none;
   color: var(--color-paper);
 }
@@ -3518,16 +3539,16 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
 
 .cs-peek-cursor::before {
   top: 0;
-  left: calc(50% - 1px);
-  width: 2px;
-  height: 200px;
+  left: calc(50% - 0.5px);
+  width: 1px;
+  height: 100px;
 }
 
 .cs-peek-cursor::after {
-  top: calc(50% - 1px);
+  top: calc(50% - 0.5px);
   left: 0;
-  width: 200px;
-  height: 2px;
+  width: 100px;
+  height: 1px;
 }
 
 .cs-section {
@@ -3605,12 +3626,23 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
   object-position: center;
 }
 
+.cs-hero__video-poster {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
 /* Vimeo background iframe can't object-fit, so size it as a 16:9 box that always
    covers the container (container-query units) and centre-crop via overflow. */
 .cs-hero__video iframe {
   position: absolute;
   top: 50%;
   left: 50%;
+  z-index: 1;
   translate: -50% -50%;
   border: 0;
   width: max(100cqw, calc(100cqh * 16 / 9));
@@ -4034,16 +4066,41 @@ ul.cs-hero__subhead {
 
 .vimeo-player {
   position: relative;
-  height: 100%;
-  width: auto;
   overflow: hidden;
 }
 
+.vimeo-player__poster {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: top center;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.vimeo-player__poster.is-playing {
+  opacity: 0;
+}
+
 .vimeo-player__iframe {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
   display: block;
   width: 100%;
   height: 100%;
   border: 0;
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vimeo-player__poster,
+  .vimeo-player__iframe {
+    transition: none;
+  }
 }
 
 .vimeo-embed {
@@ -4409,7 +4466,8 @@ ul.cs-hero__subhead {
 
 /* ── Title panel (4 cols) — numeral in main; title + tags grouped in foot ── */
 .vframe.vframe--title {
-  width: calc(100cqw * 4 / 12);
+  /* --title-cols set inline from content (CraftVignette.titlePanelWidth); 4/12 default. */
+  width: calc(100cqw * var(--title-cols, 4) / 12);
   background: var(--panel-surface, var(--section-dark-bg));
   color: var(--text-primary);
 }
@@ -4533,26 +4591,29 @@ ul.cs-hero__subhead {
   border-right: 0;
 }
 
+/* Frame widths follow the master grid; --frame-cols (set inline from
+   VignetteImage.width) overrides the ratio-based column default below. */
 .vframe--16x9 {
-  width: 100cqw;
+  width: calc(100cqw * var(--frame-cols, 12) / 12);
 }
 
 .vframe--1x1 {
-  width: calc(100cqw * 8 / 12);
+  width: calc(100cqw * var(--frame-cols, 8) / 12);
 }
 
 .vframe--9x16 {
-  width: calc(100cqw * 6 / 12);
+  width: calc(100cqw * var(--frame-cols, 6) / 12);
 }
 
 /* Text beat — 6 cols; wins over its ratio class via source order. */
 .vframe--field {
-  width: calc(100cqw * 6 / 12);
+  width: calc(100cqw * var(--frame-cols, 6) / 12);
 }
 
 @media (max-width: 1023px) {
   .vframe.vframe--title {
-    width: calc(100cqw * 4 / 6);
+    /* --title-cols-mobile set inline from content; 4 of 6 cols default. */
+    width: calc(100cqw * var(--title-cols-mobile, 4) / 6);
     grid-template-rows: var(--panel-kicker) 1fr auto;
   }
 
@@ -4576,7 +4637,8 @@ ul.cs-hero__subhead {
   .vframe--1x1,
   .vframe--9x16,
   .vframe--field {
-    width: 100cqw;
+    /* --frame-cols-mobile set inline from content; full-bleed (6 of 6) default. */
+    width: calc(100cqw * var(--frame-cols-mobile, 6) / 6);
   }
 }
 

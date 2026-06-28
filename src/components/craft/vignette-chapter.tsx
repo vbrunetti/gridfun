@@ -9,7 +9,13 @@ import {
   useRef,
   useState,
 } from "react";
-import type { CraftVignette, ImageRatio, PanelBg, VignetteImage } from "@/content/portfolio";
+import type {
+  CraftVignette,
+  ImageRatio,
+  PanelBg,
+  PanelWidth,
+  VignetteImage,
+} from "@/content/portfolio";
 import {
   clientBrandColorVar,
   isClientBrandColor,
@@ -24,6 +30,23 @@ import { attachHorizontalGestures } from "@/components/deck/gestures";
 const GRID_LAYOUT_QUERY = "(min-width: 1024px)";
 /** Horizontal filmstrip gestures — active on all viewports. */
 const HORIZONTAL_TRACK_QUERY = "all";
+
+/**
+ * Map a content `PanelWidth` to the CSS column vars the `.vframe` width calc reads.
+ * `desktopVar`/`mobileVar` differ per panel kind (title vs. frame). Returns an empty
+ * object when unset so the ratio/title CSS defaults apply.
+ */
+function panelWidthVars(
+  width: PanelWidth | undefined,
+  desktopVar: string,
+  mobileVar: string,
+): React.CSSProperties {
+  if (!width) return {};
+  return {
+    [desktopVar]: width.desktop,
+    [mobileVar]: width.mobile,
+  } as React.CSSProperties;
+}
 
 export const VCHAPTER_PANEL_EVENT = "vchapter:panel";
 
@@ -137,7 +160,17 @@ function FrameContent({
                 title={title}
                 aspectRatio={aspect}
                 background={frame.vimeoBackground}
+                poster={frame.poster}
                 className="vframe__media vframe__media--video"
+              />
+            ) : frame.poster ? (
+              <Image
+                src={frame.poster}
+                alt={title}
+                fill
+                draggable={false}
+                className="vframe__media"
+                sizes="(max-width: 767px) 92vw, min(100vw, 90rem)"
               />
             ) : (
               <div className="vframe__media vframe__media--placeholder" aria-hidden>
@@ -212,6 +245,17 @@ export function VignetteChapter({
         ? ["title", ...frames.map((f) => (f.colorField ? "field" : f.ratio))]
         : frames.map((f) => (f.colorField ? "field" : f.ratio)),
     [frames, showTitlePanel],
+  );
+
+  // Content-driven column spans (aligned with panelKinds); undefined falls back
+  // to the ratio/title default in panelColSpan. Title panel width comes from the
+  // vignette; frame widths from each image.
+  const panelWidths = useMemo<(PanelWidth | undefined)[]>(
+    () =>
+      showTitlePanel
+        ? [vignette.titlePanelWidth, ...frames.map((f) => f.width)]
+        : frames.map((f) => f.width),
+    [frames, showTitlePanel, vignette.titlePanelWidth],
   );
 
   const sectionRef = useRef<HTMLElement>(null);
@@ -353,12 +397,18 @@ export function VignetteChapter({
     panelKinds.forEach((kind, i) => {
       const node = panelRefs.current[i];
       if (!node) return;
-      const n = Math.max(1, Math.min(cols, panelColSpan(kind, cols)));
+      const override = panelWidths[i];
+      const span = override
+        ? cols <= 6
+          ? override.mobile
+          : override.desktop
+        : panelColSpan(kind, cols);
+      const n = Math.max(1, Math.min(cols, span));
       node.style.width = `${widthForCols(n)}px`;
     });
 
     applyOffset(offsetRef.current, false);
-  }, [applyOffset, panelKinds]);
+  }, [applyOffset, panelKinds, panelWidths]);
 
   useLayoutEffect(() => {
     const stage = stageRef.current;
@@ -542,6 +592,11 @@ export function VignetteChapter({
             }}
             className={`vframe vframe--title${index === 0 ? " is-active" : ""}`}
             data-vframe-index={0}
+            style={panelWidthVars(
+              vignette.titlePanelWidth,
+              "--title-cols",
+              "--title-cols-mobile",
+            )}
           >
             <header className="vframe__kicker">
               <p className="vframe__kicker-text text-meta">{date ?? "\u00A0"}</p>
@@ -580,6 +635,7 @@ export function VignetteChapter({
                 data-panel-bg={panelBg}
                 style={{
                   ["--panel-bg" as string]: panelBgVar(panelBg, colorway),
+                  ...panelWidthVars(frame.width, "--frame-cols", "--frame-cols-mobile"),
                 }}
                 aria-hidden={idx !== index}
               >

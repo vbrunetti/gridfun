@@ -249,7 +249,22 @@ export function VignetteImageScroll({
                       title={alt}
                       aspectRatio={ratioAspect(image.ratio)}
                       background={image.vimeoBackground}
+                      poster={image.poster}
                       className="vignette-gallery__video"
+                    />
+                  ) : image.poster ? (
+                    <Image
+                      src={image.poster}
+                      alt={alt}
+                      width={width}
+                      height={height}
+                      draggable={false}
+                      className="vignette-gallery__media"
+                      sizes={
+                        layout === "grid"
+                          ? "(min-width: 1024px) 90rem, 100vw"
+                          : "(max-width: 768px) 86vw, 60vw"
+                      }
                     />
                   ) : (
                     <div

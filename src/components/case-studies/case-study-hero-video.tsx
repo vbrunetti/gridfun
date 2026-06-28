@@ -29,13 +29,24 @@ export function CaseStudyHeroVideo({
       }
     >
       {vimeoId ? (
-        <iframe
-          src={vimeoBackgroundUrl(vimeoId)}
-          title="Background reel"
-          tabIndex={-1}
-          aria-hidden
-          allow="autoplay; fullscreen; picture-in-picture"
-        />
+        <>
+          {poster ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={poster}
+              alt=""
+              className="cs-hero__video-poster"
+              aria-hidden
+            />
+          ) : null}
+          <iframe
+            src={vimeoBackgroundUrl(vimeoId)}
+            title="Background reel"
+            tabIndex={-1}
+            aria-hidden
+            allow="autoplay; fullscreen; picture-in-picture"
+          />
+        </>
       ) : src ? (
         <video autoPlay loop muted playsInline preload="auto" poster={poster}>
           <source src={src} type="video/mp4" />

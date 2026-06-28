@@ -42,6 +42,13 @@ export type PanelBg =
   | "brand";
 
 /**
+ * Panel width in grid columns. `desktop` counts out of the 12-column desktop grid;
+ * `mobile` out of the 6-column mobile grid. Omit on a panel to fall back to the
+ * ratio-based default (frames) or the title-panel default (title panel).
+ */
+export type PanelWidth = { desktop: number; mobile: number };
+
+/**
  * One frame in a vignette's horizontal chapter.
  *
  * A frame is either a *media* frame (image / gif via `src`, or Vimeo via `vimeo`)
@@ -61,6 +68,8 @@ export type VignetteImage = {
   vimeo?: string;
   /** Borderless looping embed (no player chrome) instead of interactive controls. */
   vimeoBackground?: boolean;
+  /** Still shown behind Vimeo until the player is ready; also used on inactive panels. */
+  poster?: string;
   /** Render as a type-driven color field instead of media. */
   colorField?: boolean;
   /** Beat kicker (mono caps), e.g. "The problem". */
@@ -71,6 +80,8 @@ export type VignetteImage = {
   surface?: FrameSurface;
   /** Filmstrip panel ground; omit for chapter default. Trail inherits the last frame. */
   panelBg?: PanelBg;
+  /** Panel width in grid columns; omit to use the ratio-based default. */
+  width?: PanelWidth;
   caption?: string;
 };
 
@@ -90,6 +101,8 @@ export type CraftVignette = {
   themeLine?: string;
   /** Honest shipping status, e.g. "Never shipped — Figma prototypes exist". */
   status?: string;
+  /** Opener panel width in grid columns; omit to use the title-panel default. */
+  titlePanelWidth?: PanelWidth;
   images: VignetteImage[];
 };
 
@@ -147,6 +160,9 @@ export type CaseStudy = {
   sections: CaseStudySection[];
 };
 
+/** Default vignette opener-panel width — 6 of 12 cols on desktop, 5 of 6 on mobile. */
+const TITLE_PANEL_WIDTH = { desktop: 6, mobile: 5 } as const satisfies PanelWidth;
+
 /* ── Cruise content helpers (beats + glue prose) ───────────────── */
 const cruiseAccent = "charcoal" as const satisfies AccentKey;
 
@@ -170,7 +186,7 @@ function cruiseMedia(
   label: string,
   caption: string,
   ratio: ImageRatio = "16x9",
-  media?: string | Pick<VignetteImage, "src" | "vimeo" | "vimeoBackground">,
+  media?: string | Pick<VignetteImage, "src" | "vimeo" | "vimeoBackground" | "poster">,
   panelBg?: PanelBg,
 ): VignetteImage {
   const mediaFields =
@@ -202,6 +218,7 @@ function cruiseVignette(
     keyImageAccent: cruiseAccent,
     tags,
     themeLine,
+    titlePanelWidth: TITLE_PANEL_WIDTH,
     images,
   };
 }
@@ -268,6 +285,7 @@ function googleVignette(
     tags,
     themeLine,
     ...(status ? { status } : {}),
+    titlePanelWidth: TITLE_PANEL_WIDTH,
     images,
   };
 }
@@ -330,6 +348,7 @@ function pearsonVignette(
     tags,
     themeLine,
     ...(status ? { status } : {}),
+    titlePanelWidth: TITLE_PANEL_WIDTH,
     images,
   };
 }
@@ -558,7 +577,11 @@ export const caseStudies: CaseStudy[] = [
     location: "San Francisco, CA",
     role: "Sr. UX Design Manager",
     tools: "Figma, Storybook",
-    heroVideo: { vimeo: "1205281684", opacity: 0.30 },
+    heroVideo: {
+      vimeo: "1205281684",
+      opacity: 0.30,
+      poster: "/portfolio/cruise/cruise_title_poster.png",
+    },
     sections: [
       cruiseProse(
         "cruise-intro",
@@ -567,7 +590,7 @@ export const caseStudies: CaseStudy[] = [
       ),
       cruiseVignette(
         "semantic-color-shape",
-        "Develoiping a Semantic Color & Shape Language",
+        "Developing a Semantic Color & Shape Language",
         ["Visual design", "Data viz", "Human factors"],
         "Context gain / semantic legibility / color as meaning",
         [
@@ -579,7 +602,11 @@ export const caseStudies: CaseStudy[] = [
             "Before",
             "The legacy scene: a single orange encoding for every object type. Safe for the eyes, silent about meaning.",
             "1x1",
-            { vimeo: "1205288733", vimeoBackground: true },
+            {
+              vimeo: "1205288733",
+              vimeoBackground: true,
+              poster: "/portfolio/cruise/Cruise_v1_before_poster.png",
+            },
           ),
           cruiseBeat(
             "The insight",
