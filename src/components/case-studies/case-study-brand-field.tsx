@@ -69,7 +69,6 @@ export function CaseStudyBrandField({
       style={{ "--cs-brand-field": clientBrandColorVar(brand.field) } as CSSProperties}
       aria-hidden
     >
-      <div className="cs-index-brand-field__glow" />
       {loadedSrc ? (
         // eslint-disable-next-line @next/next/no-img-element -- gif transparency
         <img

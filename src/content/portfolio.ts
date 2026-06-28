@@ -103,7 +103,10 @@ export type CaseStudySection = ProseSection | CraftVignette;
 
 /** Optional looping MP4 behind the case study hero (Vercel Blob or CDN). */
 export type CaseStudyHeroVideo = {
-  src: string;
+  /** Direct MP4 source (e.g. Vercel Blob). Use this OR `vimeo`. */
+  src?: string;
+  /** Vimeo video id or URL — rendered as a borderless background loop. */
+  vimeo?: string;
   /** Layer opacity, 0–1. Default 0.3 in the hero component. */
   opacity?: number;
   poster?: string;
@@ -538,18 +541,19 @@ export const caseStudies: CaseStudy[] = [
   },
   {
     slug: "cruise-teleops",
-    name: "Tele-Operations Terminal",
+    name: "Autonomous Vehicle Tele-Operations",
     subhead:
-      "Designing the human side of an autonomous fleet — context gain over a black box.",
-    date: "2023",
+      "Designing the human component of an autonomous fleet.",
+    date: "2023-2025",
     client: "Cruise",
     brand: {
       field: "cruise-primary",
-      logo: "/portfolio/logos/cruise.gif",
+      logo: "/portfolio/logos/cruise.png",
     },
     location: "San Francisco, CA",
     role: "Lead product designer",
     tools: "Figma, motion prototyping, operator research",
+    heroVideo: { vimeo: "1119829651", opacity: 0.15 },
     sections: [
       cruiseProse(
         "cruise-intro",

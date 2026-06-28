@@ -20,10 +20,7 @@ const MOBILE_QUERY = "(max-width: 1023px)";
 const INTRO_STEP_ID = "cs-index-intro";
 
 function useMobileIndexSteps(steps: CaseStudiesStep[]) {
-  const [mobile, setMobile] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia(MOBILE_QUERY).matches;
-  });
+  const [mobile, setMobile] = useState(false);
 
   useEffect(() => {
     const mq = window.matchMedia(MOBILE_QUERY);

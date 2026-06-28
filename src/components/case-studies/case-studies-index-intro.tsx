@@ -7,10 +7,7 @@ const DESKTOP_QUERY = "(min-width: 1024px)";
 
 /** Desktop-only title band — not rendered on mobile. */
 export function CaseStudiesIndexIntro() {
-  const [desktop, setDesktop] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia(DESKTOP_QUERY).matches;
-  });
+  const [desktop, setDesktop] = useState(false);
 
   useEffect(() => {
     const mq = window.matchMedia(DESKTOP_QUERY);

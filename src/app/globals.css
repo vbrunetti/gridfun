@@ -1111,23 +1111,21 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
 }
 
 @media (min-width: 1024px) {
-  /* Match craft / detail masthead height — same chrome band + title band + foot pad */
-  .cs-index-scroll .work-snap-section--intro {
-    height: calc(
-      var(--chrome-top-offset) +
-        clamp(9rem, 24vh, 16rem) +
-        clamp(2rem, 5vh, 3.5rem)
-    );
-    min-height: calc(
-      var(--chrome-top-offset) +
-        clamp(9rem, 24vh, 16rem) +
-        clamp(2rem, 5vh, 3.5rem)
-    );
-    max-height: calc(
-      var(--chrome-top-offset) +
-        clamp(9rem, 24vh, 16rem) +
-        clamp(2rem, 5vh, 3.5rem)
-    );
+  /* Case studies index — page title band + each cover card share title-slide height */
+  .cs-index-scroll .work-snap-section--intro,
+  .cs-index-scroll .sticky-cover-panel.work-snap-section {
+    height: var(--case-study-title-slide-height);
+    min-height: var(--case-study-title-slide-height);
+    max-height: var(--case-study-title-slide-height);
+  }
+
+  /* Case study detail — hero title card */
+  .cs-detail .cs-hero {
+    height: var(--case-study-title-slide-height);
+    min-height: var(--case-study-title-slide-height);
+    max-height: var(--case-study-title-slide-height);
+    display: flex;
+    flex-direction: column;
   }
 }
 
@@ -2100,6 +2098,9 @@ body[data-chrome-surface="dark"] .floating-chrome .rail-label-vertical {
 /*
  * Shared masthead rhythm — craft index, case studies index, case study detail.
  * Row 1: chrome band (meta / facts). Row 2: title pinned above keyline foot pad.
+ *
+ * Case study title slides (index cover cards + detail heroes) share one desktop
+ * snap height — see --case-study-title-slide-height below.
  */
 .craft-hero__grid,
 .cs-index-hero__grid,
@@ -2118,6 +2119,10 @@ body[data-chrome-surface="dark"] .floating-chrome .rail-label-vertical {
 }
 
 @media (min-width: 1024px) {
+  :root {
+    --case-study-title-slide-height: 75vh;
+  }
+
   .craft-hero__grid,
   .cs-index-hero__grid,
   .cs-hero__grid {
@@ -2127,6 +2132,17 @@ body[data-chrome-surface="dark"] .floating-chrome .rail-label-vertical {
         var(--work-masthead-main-min) +
         var(--work-masthead-foot)
     );
+  }
+
+  /* Fixed title-slide shells — inner grids fill the band instead of masthead calc. */
+  .cs-index-scroll .work-snap-section--intro .cs-index-hero__grid,
+  .cs-detail .cs-hero__grid {
+    min-height: 0;
+    height: 100%;
+  }
+
+  .cs-detail .cs-hero__grid {
+    flex: 1;
   }
 }
 
@@ -2884,35 +2900,25 @@ a.craft-card:focus-visible {
   background: var(--cs-brand-field, var(--color-neon-lime));
 }
 
-.cs-index-brand-field__glow {
-  position: absolute;
-  inset: -20%;
-  background: radial-gradient(
-    circle at 50% 45%,
-    color-mix(in srgb, var(--color-white) 28%, transparent) 0%,
-    transparent 62%
-  );
-  pointer-events: none;
-}
-
 .cs-index-brand-field__logo {
   position: relative;
   z-index: 1;
-  width: clamp(7rem, 42cqi, 18rem);
-  max-width: 72%;
+  width: clamp(13.125rem, 78.75cqi, 33.75rem);
+  max-width: 100%;
   height: auto;
   object-fit: contain;
   pointer-events: none;
   user-select: none;
 }
 
-/* Placeholder — exactly 3 master-grid columns, centered */
+/* Placeholder — ~3 master-grid columns at 2.5×, centered */
 .cs-index-brand-field__placeholder {
   display: block;
   position: relative;
   z-index: 1;
   flex-shrink: 0;
-  width: var(--grid-span-3-width);
+  width: calc(var(--grid-span-3-width) * 1.875);
+  max-width: 100%;
   height: auto;
   aspect-ratio: 1;
   pointer-events: none;
@@ -3106,8 +3112,8 @@ a.craft-card:focus-visible {
     grid-row: 1;
     align-self: center;
     justify-self: start;
-    width: clamp(4.5rem, 32vw, 9rem);
-    max-width: 62%;
+    width: clamp(11.25rem, 80vw, 22.5rem);
+    max-width: 100%;
   }
 
   .cs-index-panel__main {
@@ -3517,6 +3523,8 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
   );
   z-index: 0;
   pointer-events: none;
+  overflow: hidden;
+  container-type: size;
   opacity: var(--cs-hero-video-opacity, 0.3);
 }
 
@@ -3526,6 +3534,19 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
   height: 100%;
   object-fit: cover;
   object-position: center;
+}
+
+/* Vimeo background iframe can't object-fit, so size it as a 16:9 box that always
+   covers the container (container-query units) and centre-crop via overflow. */
+.cs-hero__video iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  border: 0;
+  width: max(100cqw, calc(100cqh * 16 / 9));
+  height: max(100cqh, calc(100cqw * 9 / 16));
+  pointer-events: none;
 }
 
 .cs-hero__grid {
@@ -4187,6 +4208,100 @@ ul.cs-hero__subhead {
   }
 }
 
+/* ── Mobile vignette swipe hint ───────────────────────────────────────────
+   A small looping arrow cueing the next swipe: points RIGHT while there are more
+   panels in the active vignette, DOWN otherwise. Touch-only (hidden ≥1024px). */
+.swipe-hint {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .swipe-hint {
+    display: grid;
+    place-items: center;
+    position: fixed;
+    left: 50%;
+    bottom: calc(
+      var(--chrome-dots-inset, var(--chrome-mobile-dots-height)) + 0.85rem
+    );
+    width: 2.25rem;
+    height: 2.25rem;
+    transform: translateX(-50%);
+    z-index: 100;
+    pointer-events: none;
+    /* Difference blend auto-inverts against whatever panel colour is behind it, so
+       the arrow stays visible on dark, light, and brand-coloured panels without
+       relying on the (mobile-unreliable) body[data-chrome-surface] flag. */
+    color: #fff;
+    mix-blend-mode: difference;
+    /* Per-panel lifecycle (element is remounted via `key` on each panel): fade in,
+       hold, fade out — cue on arrival, then clear. `forwards` keeps it cleared. */
+    opacity: 0;
+    animation: swipe-hint-life 4.5s ease forwards;
+  }
+
+  .swipe-hint__chevron {
+    width: 1.5rem;
+    height: 1.5rem;
+    animation: swipe-hint-down 1.5s ease-in-out infinite;
+  }
+
+  .swipe-hint--right .swipe-hint__chevron {
+    animation-name: swipe-hint-right;
+  }
+}
+
+@keyframes swipe-hint-down {
+  0%,
+  100% {
+    transform: translateY(-22%);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(22%);
+    opacity: 1;
+  }
+}
+
+/* rotate(-90deg) points the down chevron rightward; translateY then bounces it
+   along that rotated axis (i.e. horizontally). */
+@keyframes swipe-hint-right {
+  0%,
+  100% {
+    transform: rotate(-90deg) translateY(-22%);
+    opacity: 0.4;
+  }
+  50% {
+    transform: rotate(-90deg) translateY(22%);
+    opacity: 1;
+  }
+}
+
+/* Wrapper opacity envelope — fast fade-in, hold, fade-out (~4.5s total). */
+@keyframes swipe-hint-life {
+  0% {
+    opacity: 0;
+  }
+  4% {
+    opacity: 0.9;
+  }
+  72% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .swipe-hint__chevron {
+    animation: none;
+  }
+  .swipe-hint--right .swipe-hint__chevron {
+    transform: rotate(-90deg);
+  }
+}
+
 /* Phantom panel — not in scroll/nav; extends the last panel color to viewport. */
 @media (min-width: 768px) {
   .vchapter__trail {
@@ -4533,76 +4648,3 @@ ul.cs-hero__subhead {
   }
 }
 
-/* ── Mobile scroll hint ──────────────────────────────────── */
-
-.scroll-hint {
-  display: none;
-}
-
-@media (max-width: 1023px) {
-  @keyframes scroll-hint-travel {
-    0% {
-      opacity: 0;
-      transform: translateY(-3px);
-    }
-    15% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    70% {
-      opacity: 1;
-      transform: translateY(7px);
-    }
-    100% {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-  }
-
-  .scroll-hint {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.2rem;
-    position: fixed;
-    bottom: calc(var(--chrome-dots-inset, 3.5rem) + 1rem);
-    left: 50%;
-    z-index: 80;
-    transform: translateX(-50%);
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-  }
-
-  .scroll-hint--visible {
-    opacity: 1;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .scroll-hint {
-      display: none;
-    }
-  }
-
-  /* Surface-aware color: most mobile scroll pages are dark */
-  .scroll-hint {
-    color: color-mix(in srgb, var(--color-paper) 50%, transparent);
-  }
-
-  body[data-chrome-surface="light"] .scroll-hint,
-  body[data-chrome-surface="canvas"] .scroll-hint {
-    color: color-mix(in srgb, var(--color-ink) 40%, transparent);
-  }
-
-  .scroll-hint__arrow {
-    animation: scroll-hint-travel 1.4s ease-in-out infinite;
-  }
-
-  .scroll-hint__label {
-    font-size: 0.5rem;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
-}

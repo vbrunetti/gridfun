@@ -24,6 +24,7 @@ import {
 } from "@/lib/chrome-surface";
 import { isMobileChromeBand } from "@/lib/chrome-band-sample";
 import { useCaseStudyDeck } from "@/components/case-studies/use-case-study-deck";
+import { VignetteSwipeHint } from "@/components/case-studies/vignette-swipe-hint";
 
 const PEEK_DESKTOP_QUERY = "(min-width: 768px)";
 
@@ -246,6 +247,7 @@ export function CaseStudyDetailScroll({
   return (
     <article ref={rootRef} className="cs-detail">
       {children}
+      <VignetteSwipeHint />
       {peekTarget ? (
         <div
           className="cs-peek-cursor"
