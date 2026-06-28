@@ -323,6 +323,75 @@ body {
   }
 }
 
+/* Menu grid overlay toggle */
+.menu-grid-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 2.5rem;
+}
+
+.menu-grid-toggle__label {
+  color: var(--text-secondary);
+}
+
+.menu-grid-toggle__key {
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.menu-grid-toggle__switch {
+  position: relative;
+  width: 2.5rem;
+  height: 1.375rem;
+  flex-shrink: 0;
+  border: 1px solid var(--rule-light);
+  border-radius: 9999px;
+  background: transparent;
+  padding: 0.125rem;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.menu-grid-toggle__switch:hover {
+  border-color: var(--rule-strong);
+}
+
+.menu-grid-toggle__switch.is-on {
+  border-color: color-mix(in srgb, var(--accent) 72%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.menu-grid-toggle__thumb {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 9999px;
+  background: var(--text-tertiary);
+  transition:
+    transform 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.menu-grid-toggle__switch.is-on .menu-grid-toggle__thumb {
+  transform: translateX(1.25rem);
+  background: var(--accent);
+}
+
+.menu-grid-toggle__switch:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-grid-toggle__switch,
+  .menu-grid-toggle__thumb {
+    transition: none;
+  }
+}
+
 /* ——— Full-viewport keylines ———
    Structural horizontal rules span edge-to-edge regardless of max-width containers. */
 :root {

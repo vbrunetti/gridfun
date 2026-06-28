@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SiteGrid, SiteGridCell } from "@/components/layout/site-grid";
 import { isNavSection, menuNav } from "@/content/site";
+import { GridToggle } from "./grid-toggle";
 import { useChrome } from "./chrome-provider";
 
 function isActive(pathname: string, href: string) {
@@ -91,6 +92,7 @@ export function MenuOverlay() {
                     );
                   })}
                 </ul>
+                <GridToggle />
               </nav>
             </SiteGridCell>
           </SiteGrid>
