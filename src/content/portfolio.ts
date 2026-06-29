@@ -64,6 +64,18 @@ export type VignetteImage = {
   accent: AccentKey;
   /** Optional real image / gif source (overrides the placeholder fill). */
   src?: string;
+  /**
+   * Multiple image sources for this frame. One entry behaves like a static
+   * image (same as `src`); two or more render a lightweight in-panel carousel
+   * (dots + hover arrows). Takes precedence over `src` when non-empty.
+   */
+  sources?: string[];
+  /**
+   * Auto-advance delay in milliseconds for a multi-source carousel. Omit to use
+   * the default cadence; set to 0 to disable autoplay for this frame. Autoplay
+   * pauses on hover/focus and is skipped when the viewer prefers reduced motion.
+   */
+  autoplayMs?: number;
   /** Vimeo video ID or full vimeo.com URL — renders a player instead of an image. */
   vimeo?: string;
   /** Borderless looping embed (no player chrome) instead of interactive controls. */
@@ -186,7 +198,12 @@ function cruiseMedia(
   label: string,
   caption: string,
   ratio: ImageRatio = "16x9",
-  media?: string | Pick<VignetteImage, "src" | "vimeo" | "vimeoBackground" | "poster">,
+  media?:
+    | string
+    | Pick<
+        VignetteImage,
+        "src" | "sources" | "autoplayMs" | "vimeo" | "vimeoBackground" | "poster"
+      >,
   panelBg?: PanelBg,
 ): VignetteImage {
   const mediaFields =
@@ -254,15 +271,23 @@ function googleMedia(
   label: string,
   caption: string,
   ratio: ImageRatio = "16x9",
-  src?: string,
+  media?:
+    | string
+    | Pick<
+        VignetteImage,
+        "src" | "sources" | "autoplayMs" | "vimeo" | "vimeoBackground" | "poster"
+      >,
   panelBg?: PanelBg,
 ): VignetteImage {
+  const mediaFields =
+    typeof media === "string" ? { src: media } : (media ?? {});
+
   return {
     ratio,
     accent: googleAccent,
     label,
     caption,
-    ...(src ? { src } : {}),
+    ...mediaFields,
     ...(panelBg ? { panelBg } : {}),
   };
 }
@@ -317,15 +342,23 @@ function pearsonMedia(
   label: string,
   caption: string,
   ratio: ImageRatio = "16x9",
-  src?: string,
+  media?:
+    | string
+    | Pick<
+        VignetteImage,
+        "src" | "sources" | "autoplayMs" | "vimeo" | "vimeoBackground" | "poster"
+      >,
   panelBg?: PanelBg,
 ): VignetteImage {
+  const mediaFields =
+    typeof media === "string" ? { src: media } : (media ?? {});
+
   return {
     ratio,
     accent: pearsonAccent,
     label,
     caption,
-    ...(src ? { src } : {}),
+    ...mediaFields,
     ...(panelBg ? { panelBg } : {}),
   };
 }
@@ -617,20 +650,24 @@ export const caseStudies: CaseStudy[] = [
             "The solution",
             "A universal color + shape language: each object class gets a distinct hue and a footprint shape mapped to its radar/lidar return.",
             "1x1",
-            "/portfolio/cruise/solution-1x1.jpg",
-            "secondary",
+            {
+              sources: [
+                "/portfolio/cruise/carousel_2.jpg",
+                "/portfolio/cruise/carousel_3.jpg",
+                "/portfolio/cruise/carousel_2.jpg"
+              ],
+            },
           ),
           cruiseMedia(
             "In scene",
             "Pedestrians, cyclists, vehicles, and static objects read at a glance — the semantic meaning of the scene became immediately legible.",
-            "9x16",
-            "/portfolio/cruise/scene-9x16.jpg",
+            "16x9",
+            "/portfolio/cruise/cruise_v1_full.jpg",
           ),
           cruiseBeat(
             "Outcome",
             "Operators gained context about the scene faster and more accurately — the first move in a broader context-gain philosophy that shaped the rest of the terminal.",
             "16x9",
-            "cruise-primary",
           ),
         ],
       ),

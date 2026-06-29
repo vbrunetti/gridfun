@@ -2950,6 +2950,16 @@ a.craft-card:focus-visible {
   justify-content: flex-end;
 }
 
+/* Desktop-only title band: kept in the DOM (so it ships in the initial HTML and
+   never inserts above the viewport post-hydration, which scroll-anchoring would
+   compensate for by scrolling past it), hidden on mobile. Placed after the base
+   `display: flex` so it wins on source order at equal specificity. */
+@media (max-width: 1023px) {
+  .cs-index-intro {
+    display: none;
+  }
+}
+
 .cs-index-hero-header {
   width: 100%;
 }
@@ -4695,6 +4705,112 @@ ul.cs-hero__subhead {
 .vframe__play {
   font-size: 2rem;
   opacity: 0.7;
+}
+
+/* ── In-panel image carousel — crossfade + near-chrome-less controls ── */
+.vframe__carousel {
+  position: absolute;
+  inset: 0;
+}
+
+.vframe__carousel-slide {
+  opacity: 0;
+  transition: opacity 320ms ease;
+}
+
+.vframe__carousel-slide.is-active {
+  opacity: 1;
+}
+
+/* Full-area tap target (advance). Sits above slides, below the controls. */
+.vframe__carousel-advance {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  cursor: pointer;
+}
+
+.vframe__carousel-arrow {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  color: currentColor;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 160ms ease, background-color 160ms ease;
+}
+
+.vframe__carousel-arrow--prev {
+  left: clamp(0.25rem, 2cqw, 1rem);
+}
+
+.vframe__carousel-arrow--next {
+  right: clamp(0.25rem, 2cqw, 1rem);
+}
+
+.vframe__carousel:hover .vframe__carousel-arrow,
+.vframe__carousel-arrow:focus-visible {
+  opacity: 0.85;
+}
+
+.vframe__carousel-arrow:hover {
+  background: color-mix(in srgb, currentColor 16%, transparent);
+  opacity: 1;
+}
+
+/* Touch: no hover to reveal arrows — dots + tap-to-advance carry it. */
+@media (hover: none) {
+  .vframe__carousel-arrow {
+    display: none;
+  }
+}
+
+.vframe__carousel-dots {
+  position: absolute;
+  bottom: clamp(0.5rem, 2cqh, 1rem);
+  left: 50%;
+  translate: -50% 0;
+  z-index: 3;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.375rem 0.5rem;
+}
+
+.vframe__carousel-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.32;
+  cursor: pointer;
+  transition: opacity 160ms ease;
+}
+
+.vframe__carousel-dot:hover {
+  opacity: 0.6;
+}
+
+.vframe__carousel-dot.is-active {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vframe__carousel-slide {
+    transition: none;
+  }
 }
 
 .vframe__caption {

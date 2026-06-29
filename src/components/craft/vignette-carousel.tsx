@@ -31,7 +31,9 @@ function ratioAspect(ratio: ImageRatio): "16/9" | "9/16" {
 
 function frameSrc(vignette: CraftVignette, frameIndex: number): string {
   const image = vignette.images[frameIndex];
-  return image.src ?? vignetteFrameSrc(image.accent, image.ratio);
+  return (
+    image.sources?.[0] ?? image.src ?? vignetteFrameSrc(image.accent, image.ratio)
+  );
 }
 
 function isVideoFrame(image: VignetteImage): boolean {

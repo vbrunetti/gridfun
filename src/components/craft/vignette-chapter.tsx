@@ -25,6 +25,7 @@ import { parseVimeoId } from "@/lib/vimeo";
 import { VimeoPlayer } from "@/components/media/vimeo-embed";
 import { useCaseStudyVignetteProgressRegister } from "@/components/case-studies/case-study-detail-scroll-context";
 import { CraftTagList } from "@/components/craft/vignette-media";
+import { VignettePanelCarousel } from "@/components/craft/vignette-panel-carousel";
 import { attachHorizontalGestures } from "@/components/deck/gestures";
 /** Grid-width panel layout — lg+ only; mobile uses CSS widths + pin padding. */
 const GRID_LAYOUT_QUERY = "(min-width: 1024px)";
@@ -84,6 +85,16 @@ function ratioAspectNumbers(ratio: ImageRatio): { w: number; h: number } {
 
 function isVideoFrame(frame: VignetteImage): boolean {
   return Boolean(frame.vimeo && parseVimeoId(frame.vimeo));
+}
+
+/** Resolved image sources for a still frame — placeholder when the author gave none. */
+function frameSources(frame: VignetteImage): string[] {
+  const list = frame.sources?.length
+    ? frame.sources
+    : frame.src
+      ? [frame.src]
+      : [];
+  return list.length ? list : [vignetteFrameSrc(frame.accent, frame.ratio)];
 }
 
 function prefersReducedMotion(): boolean {
@@ -179,7 +190,19 @@ function FrameContent({
             )
           ) : (
             (() => {
-              const src = frame.src ?? vignetteFrameSrc(frame.accent, frame.ratio);
+              const sources = frameSources(frame);
+              if (sources.length > 1) {
+                return (
+                  <VignettePanelCarousel
+                    sources={sources}
+                    alt={title}
+                    priority={index === 0}
+                    active={active}
+                    autoplayMs={frame.autoplayMs}
+                  />
+                );
+              }
+              const src = sources[0]!;
               return (
                 <Image
                   src={src}

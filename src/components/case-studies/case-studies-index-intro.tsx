@@ -1,24 +1,12 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { RuledGrid } from "@/components/layout/ruled-grid";
 
-const DESKTOP_QUERY = "(min-width: 1024px)";
-
-/** Desktop-only title band — not rendered on mobile. */
+/**
+ * Desktop-only title band. Rendered server-side and on every client paint so it
+ * is present in the initial HTML; CSS hides it on mobile. (Gating its existence
+ * behind a JS media-query state inserted it *above* the viewport after
+ * hydration, which scroll-anchoring then compensated for by scrolling past it.)
+ */
 export function CaseStudiesIndexIntro() {
-  const [desktop, setDesktop] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia(DESKTOP_QUERY);
-    const sync = () => setDesktop(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
-
-  if (!desktop) return null;
-
   return (
     <section
       id="cs-index-intro"
