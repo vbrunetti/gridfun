@@ -7,10 +7,10 @@ import { CraftTagList } from "@/components/craft/vignette-media";
 import { VignetteChapter } from "@/components/craft/vignette-chapter";
 import { RuledGrid } from "@/components/layout/ruled-grid";
 import {
-  getAllVignettes,
   getVignette,
-  vignetteIndexLabel,
+  visibleVignettes,
 } from "@/content/portfolio";
+import { isUnlocked } from "@/lib/gate";
 import { buildCraftDetailSteps } from "@/lib/craft-detail-steps";
 
 type PageProps = {
@@ -18,7 +18,11 @@ type PageProps = {
 };
 
 export function generateStaticParams() {
-  return getAllVignettes().map(({ vignette }) => ({ vignette: vignette.slug }));
+  // Gated vignettes are omitted from prerender; they render dynamically and
+  // 404 for locked visitors (see the cookie check below).
+  return visibleVignettes(false).map(({ vignette }) => ({
+    vignette: vignette.slug,
+  }));
 }
 
 export async function generateMetadata({
@@ -26,23 +30,27 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const { vignette: slug } = await params;
   const found = getVignette(slug);
-  return { title: found?.vignette.name ?? "Vignette" };
+  if (!found || (found.caseStudy.gated && !(await isUnlocked()))) {
+    return { title: "Vignette" };
+  }
+  return { title: found.vignette.name };
 }
 
 export default async function VignettePage({ params }: PageProps) {
   const { vignette: slug } = await params;
   const found = getVignette(slug);
+  const unlocked = await isUnlocked();
 
-  if (!found) {
+  if (!found || (found.caseStudy.gated && !unlocked)) {
     notFound();
   }
 
   const { vignette, caseStudy } = found;
-  const allVignettes = getAllVignettes();
+  const allVignettes = visibleVignettes(unlocked);
   const index = allVignettes.findIndex(({ vignette: v }) => v.slug === slug);
   const previous = index > 0 ? allVignettes[index - 1] : undefined;
   const next = allVignettes[index + 1];
-  const chapterNumber = Number.parseInt(vignetteIndexLabel(slug), 10) || 1;
+  const chapterNumber = index >= 0 ? index + 1 : 1;
   const detailSteps = buildCraftDetailSteps(vignette);
 
   const heroFacts = [

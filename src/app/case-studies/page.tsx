@@ -2,17 +2,19 @@ import type { Metadata } from "next";
 import { CaseStudyCoverStack } from "@/components/case-studies/case-study-cover-stack";
 import { CaseStudiesIndexIntro } from "@/components/case-studies/case-studies-index-intro";
 import { CaseStudiesScroll } from "@/components/case-studies/case-studies-scroll";
-import { caseStudies } from "@/content/portfolio";
+import { visibleCaseStudies } from "@/content/portfolio";
+import { isUnlocked } from "@/lib/gate";
 import { clientBrandChromeSurface } from "@/lib/client-brand-colors";
 
 export const metadata: Metadata = {
   title: "Case Studies",
 };
 
-export default function CaseStudiesPage() {
+export default async function CaseStudiesPage() {
+  const studies = visibleCaseStudies(await isUnlocked());
   const steps = [
     { id: "cs-index-intro", surface: "dark" as const },
-    ...caseStudies.map((study) => ({
+    ...studies.map((study) => ({
       id: `cs-index-${study.slug}`,
       surface: clientBrandChromeSurface(study.brand.field),
     })),
@@ -26,7 +28,7 @@ export default function CaseStudiesPage() {
       <h1 className="cs-index-sr-title page-hero-label display-xl">Case Studies</h1>
       <CaseStudiesScroll steps={steps}>
         <CaseStudiesIndexIntro />
-        <CaseStudyCoverStack />
+        <CaseStudyCoverStack studies={studies} />
       </CaseStudiesScroll>
     </div>
   );

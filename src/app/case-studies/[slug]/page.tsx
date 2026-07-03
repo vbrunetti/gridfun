@@ -11,11 +11,13 @@ import { DetailNavFooter } from "@/components/case-studies/detail-nav-footer";
 import { CaseStudyHeroVideo } from "@/components/case-studies/case-study-hero-video";
 import { VignetteChapter } from "@/components/craft/vignette-chapter";
 import {
-  caseStudies,
   getCaseStudy,
+  isGatedAway,
   isVignette,
+  visibleCaseStudies,
   type CraftVignette,
 } from "@/content/portfolio";
+import { isUnlocked } from "@/lib/gate";
 import { buildCaseStudyDetailSteps } from "@/lib/case-study-detail-steps";
 
 /** A vignette is a "chapter" once it carries narrative beats or a theme line. */
@@ -31,7 +33,9 @@ type PageProps = {
 };
 
 export function generateStaticParams() {
-  return caseStudies.map((study) => ({ slug: study.slug }));
+  // Gated studies are omitted from prerender; they render dynamically and
+  // 404 for locked visitors (see the cookie check below).
+  return visibleCaseStudies(false).map((study) => ({ slug: study.slug }));
 }
 
 export async function generateMetadata({
@@ -39,19 +43,24 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const study = getCaseStudy(slug);
-  return { title: study?.name ?? "Case study" };
+  if (!study || isGatedAway(study, await isUnlocked())) {
+    return { title: "Case study" };
+  }
+  return { title: study.name };
 }
 
 export default async function CaseStudyPage({ params }: PageProps) {
   const { slug } = await params;
   const study = getCaseStudy(slug);
+  const unlocked = await isUnlocked();
 
-  if (!study) {
+  if (!study || isGatedAway(study, unlocked)) {
     notFound();
   }
 
-  const index = caseStudies.findIndex((item) => item.slug === slug);
-  const next = caseStudies[index + 1];
+  const studies = visibleCaseStudies(unlocked);
+  const index = studies.findIndex((item) => item.slug === slug);
+  const next = studies[index + 1];
 
   const chapterNumbers = new Map<string, number>();
   let chapterCount = 0;

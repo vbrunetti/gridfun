@@ -14,13 +14,24 @@ import { GhostButton } from "@/components/chrome/cta-button";
 import { CraftMasonry } from "@/components/craft/craft-masonry";
 import { VignetteKeyImage, craftCardRatio } from "@/components/craft/vignette-media";
 import { RuledGrid } from "@/components/layout/ruled-grid";
-import {
-  allCraftTags,
-  craftActiveTagsFromParam,
-  getAllVignettes,
-  vignetteMatchesActiveTags,
-  type VignetteWithStudy,
-} from "@/content/portfolio";
+import { type VignetteWithStudy } from "@/content/portfolio";
+
+/** Initial active tags — one from `?tag=` if valid, otherwise all tags on. */
+function initialActiveTags(tags: string[], initialTag?: string): Set<string> {
+  if (initialTag && tags.includes(initialTag)) {
+    return new Set([initialTag]);
+  }
+  return new Set(tags);
+}
+
+/** OR-match: a vignette shows if it carries at least one active tag. */
+function matchesActiveTags(
+  vignette: VignetteWithStudy["vignette"],
+  activeTags: ReadonlySet<string>,
+): boolean {
+  if (activeTags.size === 0) return false;
+  return vignette.tags.some((tag) => activeTags.has(tag));
+}
 
 function CraftFilterToggle({
   tag,
@@ -413,25 +424,33 @@ function VignetteCard({ entry }: { entry: VignetteWithStudy }) {
   );
 }
 
-export function CraftIndex({ initialTag }: { initialTag?: string } = {}) {
-  const allVignettes = useMemo(() => getAllVignettes(), []);
-  const allTags = useMemo(() => allCraftTags(), []);
+export function CraftIndex({
+  vignettes,
+  tags,
+  initialTag,
+}: {
+  vignettes: VignetteWithStudy[];
+  tags: string[];
+  initialTag?: string;
+}) {
+  const allVignettes = vignettes;
+  const allTags = tags;
 
   const [activeTags, setActiveTags] = useState<Set<string>>(() =>
-    craftActiveTagsFromParam(initialTag),
+    initialActiveTags(allTags, initialTag),
   );
   const [compactHeader, setCompactHeader] = useState(false);
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setActiveTags(craftActiveTagsFromParam(initialTag));
-  }, [initialTag]);
+    setActiveTags(initialActiveTags(allTags, initialTag));
+  }, [allTags, initialTag]);
 
   const visibleVignettes = useMemo(
     () =>
       allVignettes.filter(({ vignette }) =>
-        vignetteMatchesActiveTags(vignette, activeTags),
+        matchesActiveTags(vignette, activeTags),
       ),
     [allVignettes, activeTags],
   );

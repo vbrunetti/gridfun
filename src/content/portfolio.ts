@@ -150,6 +150,11 @@ export type CaseStudyBrand = {
 export type CaseStudy = {
   slug: string;
   name: string;
+  /**
+   * Hidden from the public site until the visitor unlocks gated content for the
+   * session (via `?p=true`). Its vignettes inherit the gate. See `src/lib/gate.ts`.
+   */
+  gated?: boolean;
   /** One-line deck under the hero title. */
   subhead: string;
   /** Display date, e.g. "2024" or "Mar 2024". */
@@ -393,6 +398,7 @@ function pearsonProse(id: string, heading: string, body: string): ProseSection {
 export const caseStudies: CaseStudy[] = [
   {
     slug: "pearson",
+    gated: true,
     name: "The Nebula Design System",
     subhead:
       "Building an AI-native design system from tokens to a natural-language prototyping pipeline.",
@@ -1268,6 +1274,38 @@ export function getAllVignettes(): VignetteWithStudy[] {
   return out;
 }
 
+/* ------------------------------------------------------------------ *
+ * Gated content — hidden from the public site until unlocked for the
+ * session via `?p=true`. The cookie read happens in `src/lib/gate.ts`;
+ * these helpers just take the resolved `unlocked` flag so they stay
+ * usable from any runtime. See AGENTS.md backlog + gate.ts.
+ * ------------------------------------------------------------------ */
+
+/** Case studies visible to this visitor — drops gated studies when locked. */
+export function visibleCaseStudies(unlocked: boolean): CaseStudy[] {
+  return unlocked ? caseStudies : caseStudies.filter((study) => !study.gated);
+}
+
+/** Vignettes visible to this visitor — drops gated studies' vignettes when locked. */
+export function visibleVignettes(unlocked: boolean): VignetteWithStudy[] {
+  return getAllVignettes().filter(
+    ({ caseStudy }) => unlocked || !caseStudy.gated,
+  );
+}
+
+/** Deduped union of tags across the vignettes this visitor can see. */
+export function visibleCraftTags(unlocked: boolean): string[] {
+  return dedupe(visibleVignettes(unlocked).flatMap(({ vignette }) => vignette.tags));
+}
+
+/** True once a case study exists but is gated away from this visitor. */
+export function isGatedAway(
+  study: CaseStudy | undefined,
+  unlocked: boolean,
+): boolean {
+  return Boolean(study?.gated) && !unlocked;
+}
+
 export function getVignette(slug: string): VignetteWithStudy | undefined {
   return getAllVignettes().find(({ vignette }) => vignette.slug === slug);
 }
@@ -1282,32 +1320,9 @@ export function caseStudyTags(caseStudy: CaseStudy): string[] {
   return dedupe(caseStudyVignettes(caseStudy).flatMap((v) => v.tags));
 }
 
-/** Deduped union of every tag used by any vignette (first-seen order). */
-export function allCraftTags(): string[] {
-  return dedupe(getAllVignettes().flatMap(({ vignette }) => vignette.tags));
-}
-
-/** OR-match: a vignette is shown if it has at least one active tag. */
-export function vignetteMatchesActiveTags(
-  vignette: CraftVignette,
-  activeTags: ReadonlySet<string>,
-): boolean {
-  if (activeTags.size === 0) return false;
-  return vignette.tags.some((tag) => activeTags.has(tag));
-}
-
 /** Craft index URL with a single tag pre-selected. */
 export function craftTagFilterHref(tag: string): string {
   return `/craft?tag=${encodeURIComponent(tag)}`;
-}
-
-/** Initial active tags for /craft — one tag from ?tag= or all tags by default. */
-export function craftActiveTagsFromParam(tagParam?: string | null): Set<string> {
-  const allTags = allCraftTags();
-  if (tagParam && allTags.includes(tagParam)) {
-    return new Set([tagParam]);
-  }
-  return new Set(allTags);
 }
 
 /** Stable two-digit index (01…) from master vignette order. */

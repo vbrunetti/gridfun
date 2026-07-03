@@ -3,17 +3,17 @@ import type { CSSProperties } from "react";
 import { RuledGrid } from "@/components/layout/ruled-grid";
 import { CaseStudyBrandField } from "@/components/case-studies/case-study-brand-field";
 import { CraftTagList } from "@/components/craft/vignette-media";
-import { caseStudies, caseStudyTags } from "@/content/portfolio";
+import { caseStudyTags, type CaseStudy } from "@/content/portfolio";
 import {
   clientBrandChromeSurface,
   clientBrandColorVar,
   clientBrandTextOn,
 } from "@/lib/client-brand-colors";
 
-export function CaseStudyCoverStack() {
+export function CaseStudyCoverStack({ studies }: { studies: CaseStudy[] }) {
   return (
     <div className="sticky-cover-stack" aria-label="Case studies">
-      {caseStudies.map((study, index) => {
+      {studies.map((study, index) => {
         const tags = caseStudyTags(study);
         const textOn = clientBrandTextOn(study.brand.field);
         const chromeSurface = clientBrandChromeSurface(study.brand.field);
