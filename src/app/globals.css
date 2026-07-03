@@ -4891,34 +4891,45 @@ ul.cs-hero__subhead {
 
 /* Dot rail — its own row beneath the image (not an overlay), centered on the
    media width. Sits on the panel surface, so dots take the panel's text tone. */
+/* Dots left-align under the image, flush with the media + caption left edge.
+   Visual design mirrors the site nav rail (.chrome-nav-dot): hollow rings when
+   inactive, filled + slightly scaled when active. */
 .vframe__carousel-dots {
   flex: none;
   height: var(--vframe-dots-h, 1.75rem);
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  color: var(--text-secondary);
+  justify-content: flex-start;
+  gap: 0.75rem;
+  color: var(--text-primary);
 }
 
 .vframe__carousel-dot {
-  width: 0.5rem;
-  height: 0.5rem;
+  width: 0.5625rem;
+  height: 0.5625rem;
   padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: currentColor;
-  opacity: 0.4;
+  border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
+  border-radius: 9999px;
+  background: transparent;
+  opacity: 0.5;
   cursor: pointer;
-  transition: opacity 160ms ease;
+  transition:
+    opacity 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
 }
 
 .vframe__carousel-dot:hover {
-  opacity: 0.8;
+  border-color: currentColor;
+  opacity: 1;
 }
 
 .vframe__carousel-dot.is-active {
-  opacity: 1;
+  border-color: currentColor;
+  background: currentColor;
+  opacity: 0.88;
+  transform: scale(1.12);
 }
 
 @media (prefers-reduced-motion: reduce) {
