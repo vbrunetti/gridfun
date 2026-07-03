@@ -183,8 +183,12 @@ export type CaseStudy = {
   sections: CaseStudySection[];
 };
 
-/** Default vignette opener-panel width — 6 of 12 cols on desktop, 5 of 6 on mobile. */
-const TITLE_PANEL_WIDTH = { desktop: 6, mobile: 5 } as const satisfies PanelWidth;
+/**
+ * Default vignette opener-panel width — 8 of 12 cols on desktop, full-bleed on
+ * mobile. Runs wide (like the stat panel) so the oversized `.display-2xl` chapter
+ * title dominates without long words clipping the panel seam.
+ */
+const TITLE_PANEL_WIDTH = { desktop: 8, mobile: 6 } as const satisfies PanelWidth;
 
 /* ── Cruise content helpers (beats + glue prose) ───────────────── */
 const cruiseAccent = "charcoal" as const satisfies AccentKey;
@@ -689,7 +693,7 @@ export const caseStudies: CaseStudy[] = [
                 "/portfolio/cruise/cruise_v1_c3.jpg",
                 "/portfolio/cruise/cruise_v1_c4.jpg",
                 "/portfolio/cruise/cruise_v1_c5.jpg",
-                "/portfolio/cruise/cruise_v1_c6.jpg"
+                "/portfolio/cruise/cruise_v1_c6.jpg",
               ],
             },
           ),
@@ -713,28 +717,51 @@ export const caseStudies: CaseStudy[] = [
         "Once you accept that the AV already knows more than it shows, the design problem shifts from \"build a better display\" to \"translate machine perception into human-readable meaning.\" Color and shape were the first vocabulary — but the same question kept resurfacing: what else was the vehicle planning, remembering, or dealing with that never made it to the Terminal?",
       ),
       cruiseVignette(
-        "vehicle-intent-path",
-        "Visualizing Vehicle Intent on a Projected Path",
+        "operator-stop-go-control",
+        "Giving Operators Insight and Direct Control of Vehicle Intent",
         ["Visual design", "Data visualization", "Interaction design"],
         "Context gain / vehicle intent legibility / minimum viable signal",
         [
           cruiseBeat(
             "The problem",
-            `The AV is non-deterministic — a true ML ranker refreshing its decision-making potentially hundreds of times per second. When an AV decided on a trajectory to pursue, it was rendered for the human operator as a single-color path-spline, projecting 50 meters out in front. There was no "why" behind the "what," no thinking or options considered surfaced. Our operators would witness the vehicle doing anything at any time for any reason. A black box is not something that builds trust, and our operators didn't trust the system.`,
+            `The AV is non-deterministic. A true ML ranker refreshing its decision-making potentially hundreds of times per second. When the vehicle decided what to do, it rendered for the operator as a single-color path spline projecting 50 meters ahead. No speed intent. Unreliable stop point visualizations. Little scene context explaining why the vehicle was behaving the way it was. Operators would watch the vehicle do anything, at any time, for any reason, and when it inexplicably stopped, they had no explanation and no obvious way to get it moving again.`,
           ),
-          cruiseBeat(
+          cruiseMedia(
             "The constraint",
-            "We couldn't guarantee decision persistence — no binding route, no guaranteed future intentions. But we could surface planned speed changes and planned stop points. If the vehicle was planning to slow down, it was probably planning to stop.",
+            "We couldn't guarantee decision persistence — no binding route, no guaranteed future intentions, no speed deltas.",
             "1x1",
+            {
+              vimeo: "1206793002",
+              vimeoBackground: true,
+              poster: "/portfolio/cruise/Cruise_v2_path_poster.jpg",
+            },
           ),
           cruiseBeat(
             "The insight",
-            "Even this coarse signal — stop or go, faster or slower — was dramatically more useful than nothing. We also knew roughly where the vehicle intended to stop, even if the exact point wasn't certain.",
+            "Even a coarse signal — stop or go, faster or slower — was dramatically more useful than nothing. And since we had speed deltas and the vehicle's perception of surrounding objects, we could build a scene that told a coherent story. So that if and when the vehicle stopped, the operator already understood why.",
             "9x16",
           ),
           cruiseMedia(
             "The solution",
-            "Color-coded the projected path (red/green) to show planned stops, stop zones, and speed deltas. Also added the ability for operators to override stop points — e.g., when a police officer was waving the vehicle through.",
+            "Changes to the path spline and surrounding object labeling helped connect velocity intent to scene context.",
+            "1x1",
+            {
+              sources: [
+                "/portfolio/cruise/cruise_v1_c1.jpg",
+                "/portfolio/cruise/cruise_v1_c2.jpg",
+                "/portfolio/cruise/cruise_v1_c3.jpg",
+                "/portfolio/cruise/cruise_v1_c4.jpg",
+                "/portfolio/cruise/cruise_v1_c5.jpg",
+                "/portfolio/cruise/cruise_v1_c6.jpg",
+                "/portfolio/cruise/cruise_v1_c7.jpg"
+              ],
+            },
+          ),
+          cruiseMedia(
+            "The solution",
+            "We attacked the problem on three fronts. First, we color-coded the projected path (red/green) to communicate speed deltas and intent: slow, stop, go; so the path itself told a story. Second, we visualized the scene objects the vehicle was actually perceiving and responding to, so operators could see why the vehicle was behaving the way it was. Third, and most importantly for getting stuck vehicles moving again, we made stop points interactive. When a stop point appeared on the path, the operator could lift it with a single click, signaling to the vehicle that it was safe to proceed. A police officer waving the car through a stop sign. A construction worker clearing an obstruction. Whatever the case: one click, car moves.",
+            "16x9",
+            "/portfolio/cruise/cruise_v1_full.jpg",
           ),
           cruiseBeat(
             "Outcome",
@@ -997,36 +1024,67 @@ export const caseStudies: CaseStudy[] = [
         "By the time Cruise was running 500+ autonomous rides daily in San Francisco, human interventions had to complete in three seconds or less: connect, understand the blockage, issue an instruction, get moving. Everything that follows — new maneuver types, a floating toolbar, hotkeys — only makes sense against that clock.",
       ),
       cruiseVignette(
-        "new-maneuver-types",
-        "New Maneuver Types (Speculative)",
-        ["AI-native design", "Systems thinking", "Interaction design"],
-        "Human-AI control / determinism as trust signal / speculative systems thinking",
+        "springloaded-splines",
+        "Spring-Loaded Splines (Speculative)",
+        ["Interaction design", "Human factors", "Systems thinking"],
+        "Ergonomic evolution of a trusted paradigm / determinism as trust signal",
         [
           cruiseBeat(
-            "The context",
-            "The old intervention stack assumed safety drivers in seat and engineers in close coordination. At fleet scale, operators only trusted what was deterministic. Pivot and Assisted Pathing were non-deterministic and fell out of use. Sudo — drag, drop, rotate, hold go — was loved because it just executed.",
+            "The trust problem",
+            "The old intervention stack assumed safety drivers in seat and engineers in close coordination. At 500+ autonomous rides a day in San Francisco, that model was a liability — interventions had to complete in three seconds. And operators only trusted what was deterministic.",
           ),
           cruiseBeat(
-            "Spring-loaded splines",
-            "Ergonomic evolution of Sudo: mouse movement generates a Bezier spline in real time, previewing the most efficient feasible path. Infeasible positions disallowed by design. Lower friction for short-distance maneuvers.",
+            "What fell short",
+            "Pivot (a lane-preference nudge) and Assisted Pathing (breadcrumb control points) were non-deterministic — the car could ignore the input or sit there saying \"executing\" while doing nothing. Operators stopped trusting them, and stopped using them.",
             "1x1",
           ),
+          cruiseBeat(
+            "What they trusted",
+            "Sudo was fully deterministic: drag, drop, and rotate a vehicle icon to the end-state pose, hold go, and the car closed the gap. Basic collision avoidance aside, it just executed. Operators loved it — you said where, it went there.",
+            "9x16",
+          ),
           cruiseMedia(
-            "Alternate intents",
-            "Ghost paths surfacing the AV's already-computed but unchosen routes. Click to preference — near-immediate execution because the vehicle doesn't need to re-solve.",
+            "Spring-loaded splines",
+            "An ergonomic evolution of Sudo. Moving the mouse generates a Bezier spline in real time between the vehicle and the cursor, previewing the most efficient feasible path. Kinematically infeasible positions are disallowed by design — the spring-loaded curves resist impossible configurations. For the common case (back up, assert around something, small adjustment) precise pose-and-place was overkill; splines handled short maneuvers faster and with less cognitive load, while preserving the determinism operators trusted.",
             "16x9",
           ),
           cruiseBeat(
-            "Drop a pin",
-            "Reach a lat/long — any path, operator doesn't specify how. Medium-distance counterpart to splines. Drop-execute-drop-execute sequences could replace Assisted Pathing without its failure modes.",
+            "Artifact status",
+            "Never shipped. Cruise shut down before the behaviors-engineering collaboration needed to wire it into the AV stack could be completed. Figma prototypes exist.",
+          ),
+        ],
+        "1x1",
+      ),
+      cruiseVignette(
+        "alternate-intents",
+        "Alternate Intents (Speculative)",
+        ["AI-native design", "Interaction design", "Systems thinking"],
+        "Surfacing latent machine intelligence / human-AI collaboration at the control layer",
+        [
+          cruiseBeat(
+            "The insight",
+            "At any moment the AV's planning stack has already solved multiple paths forward — it just picks one and discards the rest. That solved intelligence is invisible to the operator. Alternate Intents surfaces the unchosen, already-computed routes as selectable ghost paths on the map. Click one to preference it.",
+          ),
+          cruiseMedia(
+            "Select, don't instruct",
+            "Every other intervention made the operator tell the vehicle what to do — specify a pose, draw a path, define an end state. This inverts the model: the vehicle already did the planning, so the operator just says that one. Nothing to re-solve, so execution is near-immediate — no latency, no re-planning cycle, no waiting.",
+            "16x9",
+          ),
+          cruiseBeat(
+            "When the human sees more",
+            "Sometimes a person perceives what the sensors can't — a pedestrian waving the car through, a construction worker's gesture, social context the ML ranker has no access to. In those moments the AV's second-best path is the correct one, and the operator can redirect toward a route the vehicle had already validated.",
+            "1x1",
+          ),
+          cruiseBeat(
+            "The stability problem",
+            "Ghost paths flicker. The AV re-plans constantly, so alternates appear and vanish as the scene changes — you can't reliably click a path that might disappear in half a second. The tool only exposes alternates that hold past a stability threshold, scoped to conditions where stable options are likely.",
             "9x16",
           ),
           cruiseBeat(
             "Artifact status",
-            "Never shipped. Cruise shut down before behaviors engineering could implement these in the AV stack. Figma prototypes exist.",
+            "Never shipped. Cruise shut down before the behaviors-engineering collaboration needed to implement it in the AV stack could be completed. Figma prototypes exist.",
           ),
         ],
-        "1x1",
       ),
       cruiseVignette(
         "maneuver-controls-ui",

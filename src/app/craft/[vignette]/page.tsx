@@ -116,7 +116,6 @@ export default async function VignettePage({ params }: PageProps) {
         <VignetteChapter
           vignette={vignette}
           chapterNumber={chapterNumber}
-          date={caseStudy.date}
           showTitlePanel={false}
           colorway="white"
           controlled

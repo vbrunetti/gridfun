@@ -121,8 +121,21 @@ export type TypographyRampEntry = {
   fontFamily?: string;
 };
 
-/** Core reading hierarchy — Display XL is the ceiling (4.75rem). */
+/**
+ * Core reading hierarchy — Display XL is the standard reading ceiling (4.75rem);
+ * Display 2XL (6.5rem) is a poster/hero step one rung above it.
+ */
 export const typographyRamp: readonly TypographyRampEntry[] = [
+  {
+    className: "display-2xl",
+    label: "Display 2XL",
+    size: "var(--type-display-2xl) · clamp(3rem, 7vw, 6.5rem)",
+    weight: "700",
+    lineHeight: "1",
+    letterSpacing: "-0.04em",
+    sample: "Developing a Semantic Color & Shape Language",
+    scope: "Vignette chapter-opener title — the hero title panel",
+  },
   {
     className: "display-xl",
     label: "Display XL",
@@ -151,7 +164,7 @@ export const typographyRamp: readonly TypographyRampEntry[] = [
     lineHeight: "1.12",
     letterSpacing: "-0.025em",
     sample: "Craft",
-    scope: "Sticky page titles · vignette chapter titles · related links",
+    scope: "Sticky page titles · related links",
   },
   {
     className: "display-sm",
@@ -288,7 +301,7 @@ export const ornamentalTypography: readonly TypographyRampEntry[] = [
     lineHeight: "0.86",
     letterSpacing: "-0.04em",
     sample: "01",
-    scope: "Vignette chapter opener numeral",
+    scope: "Ornamental index numeral (available token)",
   },
   {
     className: "display-metric",
@@ -391,7 +404,7 @@ export const spacingTokens = [
 ] as const;
 
 export const vignettePanelWidths = [
-  { kind: "Title (chapter opener)", cols: "4 / 12", className: ".vframe--title" },
+  { kind: "Title (chapter opener)", cols: "8 / 12", className: ".vframe--title" },
   { kind: "Field beat · portrait 9×16", cols: "6 / 12", className: ".vframe--field · .vframe--9x16" },
   { kind: "Square 1×1", cols: "8 / 12", className: ".vframe--1x1" },
   { kind: "Landscape 16×9", cols: "12 / 12", className: ".vframe--16x9" },
@@ -495,9 +508,10 @@ export const fonts = [
 
 /** Where each ramp step is used across the site. */
 export const typographyUsageMap = [
+  { role: "Vignette title", className: "display-2xl", routes: "Vignette chapter-opener panel (case study + craft detail)" },
   { role: "Page title", className: "display-xl", routes: "Home hero · /about · /contact · /craft · /case-studies · CS detail hero" },
   { role: "Section title", className: "display-lg", routes: "CS prose/vignette headings · DS sections · menu primary" },
-  { role: "Compact page title", className: "display-md", routes: "/craft sticky header · vignette chapter title" },
+  { role: "Compact page title", className: "display-md", routes: "/craft sticky header" },
   { role: "Subsection title", className: "display-sm", routes: "/about sections · menu nested links" },
   { role: "Lead / subhead", className: "body-lg", routes: "Hero subheads · CS hero subhead · about intro" },
   { role: "Body copy", className: "body-md", routes: "Prose paragraphs · testimonials · experience summaries" },

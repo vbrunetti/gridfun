@@ -104,9 +104,12 @@
   --media-column: min(100%, 22rem);
 
   /*
-   * Type scale — Display XL (4.75rem) is the reading-hierarchy ceiling.
-   * Ornamental numerals (.display-ghost, .display-numeral) sit outside this ramp.
+   * Type scale — Display XL (4.75rem) is the standard reading ceiling.
+   * Display 2XL (6.5rem) is a poster/hero display step one rung above it,
+   * reserved for the vignette chapter-opener title. Ornamental numerals
+   * (.display-ghost, .display-numeral, .display-metric) sit outside this ramp.
    */
+  --type-display-2xl: clamp(3rem, 7vw, 6.5rem);
   --type-display-xl: clamp(2.5rem, 6vw, 4.75rem);
   --type-display-lg: clamp(1.75rem, 4vw, 3.25rem);
   --type-display-md: clamp(1.375rem, 2.8vw, 2.65rem);
@@ -1284,6 +1287,14 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
 }
 
 /* ── Type ramp utilities ─────────────────────────────────── */
+
+/* Poster/hero display — one rung above the XL reading ceiling. */
+.display-2xl {
+  font-size: var(--type-display-2xl);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
 
 .display-xl {
   font-size: var(--type-display-xl);
@@ -4495,24 +4506,29 @@ ul.cs-hero__subhead {
   height: 0;
 }
 
-/* ── Title panel (4 cols) — numeral in main; title + tags grouped in foot ── */
+/* ── Title panel — number kicker on top; oversized title in main; tags in foot ── */
 .vframe.vframe--title {
-  /* --title-cols set inline from content (CraftVignette.titlePanelWidth); 4/12 default. */
-  width: calc(100cqw * var(--title-cols, 4) / 12);
+  /* --title-cols set inline from content (CraftVignette.titlePanelWidth); 8/12 default. */
+  width: calc(100cqw * var(--title-cols, 8) / 12);
   background: var(--panel-surface, var(--section-dark-bg));
   color: var(--text-primary);
 }
 
-.vchapter__numeral {
-  margin: 0;
-  flex: none;
-}
+/* Chapter opener — oversized title sits at the TOP of the main band, directly
+   under the number kicker (inherits .vframe__main's flex-start). Top-aligning
+   keeps a consistent title top edge from panel to panel — no bottom-to-top
+   zig-zag as titles vary in length. Tags stay pinned in the foot band. */
 
-/* Chapter opener — grouped with tags in the foot band. */
 .vchapter__title {
   margin: 0;
   width: 100%;
   min-width: 0;
+}
+
+/* Number index kicker — the chapter numeral, demoted from a giant ornamental
+   figure to a quiet mono eyebrow in the kicker band. */
+.vchapter__index {
+  margin: 0;
 }
 
 .vframe.vframe--title .vframe__kicker-text,
@@ -4522,18 +4538,6 @@ ul.cs-hero__subhead {
 }
 
 .vframe.vframe--title .vframe__foot--title {
-  align-items: stretch;
-}
-
-.vframe__title-block {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 100%;
-  gap: var(--panel-foot-pad);
-}
-
-.vframe.vframe--title .vframe__title-block {
   align-items: stretch;
 }
 
@@ -4663,21 +4667,9 @@ ul.cs-hero__subhead {
 
 @media (max-width: 1023px) {
   .vframe.vframe--title {
-    /* --title-cols-mobile set inline from content; 4 of 6 cols default. */
-    width: calc(100cqw * var(--title-cols-mobile, 4) / 6);
+    /* --title-cols-mobile set inline from content; full-bleed (6 of 6) default. */
+    width: calc(100cqw * var(--title-cols-mobile, 6) / 6);
     grid-template-rows: var(--panel-kicker) 1fr auto;
-  }
-
-  .vframe.vframe--title .vframe__main--title {
-    padding-bottom: 0;
-  }
-
-  .vframe.vframe--title .vframe__foot--title {
-    padding-top: 0;
-  }
-
-  .vframe.vframe--title .vframe__title-block {
-    gap: 0.85rem;
   }
 
   .vframe.vframe--title .vchapter__tags {
@@ -4749,9 +4741,22 @@ ul.cs-hero__subhead {
 }
 
 /* ── In-panel image carousel — crossfade + near-chrome-less controls ── */
+/* Match the still/video sizing: shrink to the media's aspect box and center in
+   the cell, so the carousel element *is* the visible media rect. Controls then
+   anchor to the media (arrows on its vertical center, dots on its bottom edge)
+   rather than floating in the panel's empty contain-space. */
 .vframe__carousel {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 50%;
+  translate: -50% 0;
+  aspect-ratio: var(--media-ar-w, 16) / var(--media-ar-h, 9);
+  width: min(
+    100cqw,
+    calc(100cqh * var(--media-ar-w, 16) / var(--media-ar-h, 9))
+  );
+  height: auto;
+  max-height: 100cqh;
 }
 
 .vframe__carousel-slide {
@@ -4865,8 +4870,17 @@ ul.cs-hero__subhead {
 
 .vframe__caption {
   margin: 0;
-  max-width: 42ch;
+  /* Fill the panel, but cap at 6 master-grid columns so line length stays readable
+     on wide (16x9) panels. Narrower panels (1x1, 9x16) fall under this and fill. */
+  max-width: calc(100cqw * 6 / 12);
   color: var(--text-secondary);
+}
+
+/* Mobile panels are full-bleed on a 6-col grid; let the caption fill the inset. */
+@media (max-width: 1023px) {
+  .vframe__caption {
+    max-width: none;
+  }
 }
 
 

@@ -119,7 +119,6 @@ export default async function CaseStudyPage({ params }: PageProps) {
                 key={section.slug}
                 vignette={section}
                 chapterNumber={chapterNumbers.get(section.slug) ?? 1}
-                date={study.date}
                 controlled
               />
             );

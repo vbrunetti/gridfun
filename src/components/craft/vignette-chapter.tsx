@@ -253,15 +253,13 @@ function FrameContent({
 export function VignetteChapter({
   vignette,
   chapterNumber,
-  date,
   showTitlePanel = true,
   colorway = "dark",
   controlled = false,
 }: {
   vignette: CraftVignette;
   chapterNumber: number;
-  date?: string;
-  /** Opener panel (numeral + title + tags). Off when the page hero already covers it. */
+  /** Opener panel (number kicker + oversized title + tags). Off when the page hero already covers it. */
   showTitlePanel?: boolean;
   /** Surface theme for the filmstrip — white on standalone craft detail. */
   colorway?: "dark" | "white";
@@ -642,22 +640,19 @@ export function VignetteChapter({
             )}
           >
             <header className="vframe__kicker">
-              <p className="vframe__kicker-text text-meta">{date ?? "\u00A0"}</p>
-            </header>
-            <div className="vframe__main vframe__main--title">
-              <p className="display-numeral vchapter__numeral">
+              <p className="vframe__kicker-text text-meta vchapter__index">
                 {String(chapterNumber).padStart(2, "0")}
               </p>
+            </header>
+            <div className="vframe__main vframe__main--title">
+              <h2 className="display-2xl vchapter__title">{vignette.name}</h2>
             </div>
             <footer className="vframe__foot vframe__foot--title">
-              <div className="vframe__title-block">
-                <h2 className="display-md vchapter__title">{vignette.name}</h2>
-                <CraftTagList
-                  tags={vignette.tags}
-                  className="vchapter__tags"
-                  variant="filter-link"
-                />
-              </div>
+              <CraftTagList
+                tags={vignette.tags}
+                className="vchapter__tags"
+                variant="filter-link"
+              />
             </footer>
           </article>
           ) : null}
