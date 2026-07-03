@@ -57,7 +57,25 @@ export type HGestureCallbacks = {
    * swipes drive the horizontal track (§6.3).
    */
   mobileBiaxial?: boolean;
+  /**
+   * Optional inner vertical scroller for the active panel (e.g. a media panel
+   * whose caption overflows). When it can still scroll in the gesture direction
+   * the module yields — it neither consumes nor preventDefaults — so the panel
+   * body scrolls natively first; the track only advances once the inner scroll
+   * is at its edge.
+   */
+  getActiveScroller?(): HTMLElement | null;
 };
+
+/** Can `el` still scroll in the direction of `delta` (positive = forward/down)? */
+function scrollerCanConsume(el: HTMLElement | null, delta: number): boolean {
+  if (!el) return false;
+  const max = el.scrollHeight - el.clientHeight;
+  if (max <= 1) return false;
+  if (delta > 0) return el.scrollTop < max - 1;
+  if (delta < 0) return el.scrollTop > 1;
+  return false;
+}
 
 function normaliseWheelDeltaY(e: WheelEvent): number {
   if (e.deltaMode === WheelEvent.DOM_DELTA_LINE) return e.deltaY * 16;
@@ -98,6 +116,7 @@ export function attachHorizontalGestures(
     snapToNearest,
     isFocused,
     mobileBiaxial = false,
+    getActiveScroller,
   } = cbs;
 
   let snapTimer = 0;
@@ -128,6 +147,9 @@ export function attachHorizontalGestures(
     const delta = Math.abs(rawDeltaY) >= Math.abs(rawDeltaX) ? rawDeltaY : rawDeltaX;
 
     if (Math.abs(delta) < 0.5) return;
+    // Yield to the active panel's inner scroller until it reaches its edge, so a
+    // long caption scrolls within the panel before the track advances.
+    if (scrollerCanConsume(getActiveScroller?.() ?? null, delta)) return;
     if (atEdge(delta, getOffset, getMaxOffset)) return;
 
     e.preventDefault();
@@ -193,6 +215,16 @@ export function attachHorizontalGestures(
 
     // The gesture direction: horizontal swipe uses ddx, vertical uses ddy.
     const delta = axisLock === "h" ? ddx : ddy;
+
+    // Vertical swipe over a scrollable panel body scrolls the body natively until
+    // it reaches its edge; only then does the swipe drive the track.
+    if (
+      axisLock === "v" &&
+      scrollerCanConsume(getActiveScroller?.() ?? null, delta)
+    ) {
+      axisLock = "released";
+      return;
+    }
 
     if (atEdge(delta, getOffset, getMaxOffset)) {
       axisLock = "released";

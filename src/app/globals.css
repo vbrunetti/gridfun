@@ -4716,6 +4716,53 @@ ul.cs-hero__subhead {
   object-position: top center;
 }
 
+/* ── Media panel — image atop a caption in normal document flow ──────────────
+   The panel body scrolls as a unit: the image is sized to fit the panel width
+   and the height budget left after reserving room for the first lines of the
+   caption; the caption flows directly beneath it. Longer captions push the body
+   past the panel and the band scrolls; once that scroll bottoms out, the wheel
+   chains to the page (scroll-pin mode) or the gesture module releases (gesture
+   mode) and the filmstrip advances to the next panel. */
+.vframe--media {
+  grid-template-rows: var(--panel-kicker) 1fr;
+  /* Vertical room held for the caption to peek before the body needs to scroll. */
+  --vframe-caption-reserve: clamp(4.5rem, 12vh, 7.5rem);
+}
+
+.vframe__scroll {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  /* Inactive panels never capture scroll; only the focused panel scrolls. */
+  overflow: hidden;
+  container-type: size;
+  padding-inline: var(--panel-pad);
+  padding-top: var(--panel-main-inset-top);
+  padding-bottom: calc(var(--panel-foot-pad) + 3px);
+}
+
+.vframe--media.is-active .vframe__scroll {
+  overflow-y: auto;
+  /* Default (auto) overscroll so bottoming out chains to the page and advances
+     the filmstrip — do NOT set `contain` here. */
+}
+
+/* Media box sized to contain within the panel width × (height − caption reserve),
+   centered horizontally. Overrides the flex:1 fill used by the old foot layout. */
+.vframe--media .vframe__media-box {
+  flex: none;
+  aspect-ratio: var(--media-ar-w, 16) / var(--media-ar-h, 9);
+  width: min(
+    100cqw,
+    calc(
+      (100cqh - var(--vframe-caption-reserve)) *
+        var(--media-ar-w, 16) / var(--media-ar-h, 9)
+    )
+  );
+  max-height: calc(100cqh - var(--vframe-caption-reserve));
+  margin-inline: auto;
+}
+
 /* Video + placeholder share the same contain sizing as stills. */
 .vframe__media--video,
 .vframe__media--placeholder {
@@ -4868,11 +4915,11 @@ ul.cs-hero__subhead {
   }
 }
 
+/* Caption — flows directly beneath the image inside the scrollable media body
+   (see .vframe--media). Left-aligned figure caption, capped for readable measure. */
 .vframe__caption {
-  margin: 0;
-  /* Fill the panel, but cap at 6 master-grid columns so line length stays readable
-     on wide (16x9) panels. Narrower panels (1x1, 9x16) fall under this and fill. */
-  max-width: calc(100cqw * 6 / 12);
+  margin: var(--panel-foot-pad) 0 0;
+  max-width: calc(100cqw * 8 / 12);
   color: var(--text-secondary);
 }
 

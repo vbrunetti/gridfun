@@ -182,7 +182,7 @@ function FrameContent({
           <p className="vframe__kicker-text text-meta">{frame.label}</p>
         ) : null}
       </header>
-      <div className="vframe__main vframe__main--media">
+      <div className="vframe__scroll">
         <div className="vframe__media-box" style={mediaBoxStyle}>
           {isVideoFrame(frame) && frame.vimeo ? (
             active ? (
@@ -238,10 +238,10 @@ function FrameContent({
             })()
           )}
         </div>
+        {caption ? (
+          <p className="text-caption vframe__caption text-secondary">{caption}</p>
+        ) : null}
       </div>
-      <footer className="vframe__foot">
-        {caption ? <p className="text-caption vframe__caption text-secondary">{caption}</p> : null}
-      </footer>
     </>
   );
 }
@@ -315,6 +315,13 @@ export function VignetteChapter({
 
   useEffect(() => {
     indexRef.current = index;
+    // Reset every non-active panel's inner scroll so entering a panel always
+    // starts at the image top (and matches the filmstrip's snapped position).
+    panelRefs.current.forEach((panel, i) => {
+      if (!panel || i === index) return;
+      const scroller = panel.querySelector<HTMLElement>(".vframe__scroll");
+      if (scroller) scroller.scrollTop = 0;
+    });
   }, [index]);
 
   const vignetteProgress = useMemo(
@@ -555,6 +562,10 @@ export function VignetteChapter({
         },
         isFocused: () => section.classList.contains("is-focused"),
         mobileBiaxial: true,
+        getActiveScroller: () =>
+          panelRefs.current[indexRef.current]?.querySelector<HTMLElement>(
+            ".vframe__scroll",
+          ) ?? null,
       });
 
     const evaluateInput = () => {
@@ -667,7 +678,7 @@ export function VignetteChapter({
                   panelRefs.current[idx] = node;
                 }}
                 className={`vframe vframe--${frame.ratio}${
-                  frame.colorField || frame.stat ? " vframe--field" : ""
+                  frame.colorField || frame.stat ? " vframe--field" : " vframe--media"
                 }${frame.stat ? " vframe--stat" : ""}${
                   idx === index ? " is-active" : ""
                 }`}

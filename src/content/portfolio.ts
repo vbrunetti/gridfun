@@ -753,7 +753,6 @@ export const caseStudies: CaseStudy[] = [
                 "/portfolio/cruise/cruise_v1_c4.jpg",
                 "/portfolio/cruise/cruise_v1_c5.jpg",
                 "/portfolio/cruise/cruise_v1_c6.jpg",
-                "/portfolio/cruise/cruise_v1_c7.jpg"
               ],
             },
           ),
