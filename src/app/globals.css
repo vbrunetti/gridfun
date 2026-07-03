@@ -4783,8 +4783,12 @@ ul.cs-hero__subhead {
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: color-mix(in srgb, currentColor 8%, transparent);
-  color: currentColor;
+  /* Neutral glass scrim + light mark — legible on any media, independent of the
+     page theme (the media it overlays isn't the same luminance as the panel). */
+  background: color-mix(in srgb, var(--color-black) 32%, transparent);
+  color: var(--color-paper);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;
@@ -4806,7 +4810,7 @@ ul.cs-hero__subhead {
 }
 
 .vframe__carousel-arrow:hover {
-  background: color-mix(in srgb, currentColor 16%, transparent);
+  background: color-mix(in srgb, var(--color-black) 48%, transparent);
   opacity: 1;
 }
 
@@ -4826,6 +4830,11 @@ ul.cs-hero__subhead {
   display: flex;
   gap: 0.5rem;
   padding: 0.375rem 0.5rem;
+  /* Glass scrim pill — keeps the light dots legible on any media / page theme. */
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-black) 30%, transparent);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 
 .vframe__carousel-dot {
@@ -4834,14 +4843,14 @@ ul.cs-hero__subhead {
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: currentColor;
-  opacity: 0.32;
+  background: var(--color-paper);
+  opacity: 0.5;
   cursor: pointer;
   transition: opacity 160ms ease;
 }
 
 .vframe__carousel-dot:hover {
-  opacity: 0.6;
+  opacity: 0.8;
 }
 
 .vframe__carousel-dot.is-active {
