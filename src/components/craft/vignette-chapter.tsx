@@ -455,6 +455,14 @@ export function VignetteChapter({
       node.style.width = `${widthForCols(n)}px`;
     });
 
+    // Expose the true 8-column master-grid width (measured off the ruler) so the
+    // caption can cap its line length to grid line 8 rather than a container-
+    // relative cqw fraction that the panel padding/inset shrinks unpredictably.
+    stage.style.setProperty(
+      "--vframe-caption-grid8",
+      `${widthForCols(Math.min(8, cols))}px`,
+    );
+
     applyOffset(offsetRef.current, false);
   }, [applyOffset, panelKinds, panelWidths]);
 

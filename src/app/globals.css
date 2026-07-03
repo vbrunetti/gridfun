@@ -4916,10 +4916,15 @@ ul.cs-hero__subhead {
 }
 
 /* Caption — flows directly beneath the image inside the scrollable media body
-   (see .vframe--media). Left-aligned figure caption, capped for readable measure. */
+   (see .vframe--media). Left-aligned figure caption. The width is capped to the
+   real 8-column master-grid span (`--vframe-caption-grid8`, measured off the
+   ruler in JS): the active panel's left edge sits on grid line 0, so subtracting
+   one --panel-pad lands the caption's right edge on grid line 8. Narrower panels
+   (1x1, 9x16) fall under this and just fill their body. Falls back to the padded
+   body width before layout runs. */
 .vframe__caption {
   margin: var(--panel-foot-pad) 0 0;
-  max-width: calc(100cqw * 8 / 12);
+  max-width: calc(var(--vframe-caption-grid8, 100cqw) - var(--panel-pad));
   color: var(--text-secondary);
 }
 
