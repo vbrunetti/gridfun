@@ -748,12 +748,12 @@ export const caseStudies: CaseStudy[] = [
             {
               sources: [
                 "/portfolio/cruise/Cruise_V2_c1.jpg",
-                "/portfolio/cruise/cruise_V2_c2.jpg",
-                "/portfolio/cruise/cruise_V2_c3.jpg",
-                "/portfolio/cruise/cruise_V2_c4.jpg",
-                "/portfolio/cruise/cruise_V2_c5.jpg",
-                "/portfolio/cruise/cruise_V2_c6.jpg",
-                "/portfolio/cruise/cruise_V2_c7.jpg",
+                "/portfolio/cruise/Cruise_V2_c2.jpg",
+                "/portfolio/cruise/Cruise_V2_c3.jpg",
+                "/portfolio/cruise/Cruise_V2_c4.jpg",
+                "/portfolio/cruise/Cruise_V2_c5.jpg",
+                "/portfolio/cruise/Cruise_V2_c6.jpg",
+                "/portfolio/cruise/Cruise_V2_c7.jpg",
               ],
             },
           ),
