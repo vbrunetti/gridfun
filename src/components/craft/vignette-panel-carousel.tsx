@@ -27,6 +27,7 @@ export function VignettePanelCarousel({
   active = true,
   autoplayMs,
   sizes = "(max-width: 767px) 92vw, min(100vw, 90rem)",
+  style,
 }: {
   sources: string[];
   alt: string;
@@ -36,6 +37,8 @@ export function VignettePanelCarousel({
   /** Auto-advance delay; defaults to DEFAULT_AUTOPLAY_MS. 0 (or less) disables. */
   autoplayMs?: number;
   sizes?: string;
+  /** Aspect vars (--media-ar-w/h) that size the figure; from the frame ratio. */
+  style?: React.CSSProperties;
 }) {
   const total = sources.length;
   const [index, setIndex] = useState(0);
@@ -80,7 +83,8 @@ export function VignettePanelCarousel({
 
   return (
     <div
-      className="vframe__carousel"
+      className="vframe__figure vframe__carousel"
+      style={style}
       role="group"
       aria-roledescription="carousel"
       aria-label={alt}
@@ -91,54 +95,56 @@ export function VignettePanelCarousel({
       onFocus={() => setPaused(true)}
       onBlur={onBlur}
     >
-      {sources.map((src, i) => {
-        const active = i === index;
-        return (
-          <Image
-            key={i}
-            src={src}
-            alt={active ? alt : ""}
-            aria-hidden={!active}
-            fill
-            draggable={false}
-            priority={priority && i === 0}
-            unoptimized={src.startsWith("data:")}
-            sizes={sizes}
-            className={`vframe__media vframe__carousel-slide${
-              active ? " is-active" : ""
-            }`}
-          />
-        );
-      })}
+      <div className="vframe__carousel-viewport">
+        {sources.map((src, i) => {
+          const isActive = i === index;
+          return (
+            <Image
+              key={i}
+              src={src}
+              alt={isActive ? alt : ""}
+              aria-hidden={!isActive}
+              fill
+              draggable={false}
+              priority={priority && i === 0}
+              unoptimized={src.startsWith("data:")}
+              sizes={sizes}
+              className={`vframe__media vframe__carousel-slide${
+                isActive ? " is-active" : ""
+              }`}
+            />
+          );
+        })}
 
-      {/*
-        Tap anywhere = advance. A real drag travels past the click threshold, so
-        onClick never fires and the gesture bubbles to the filmstrip instead —
-        giving tap-to-advance and swipe-the-strip from the same surface. Not a
-        focus stop; keyboard uses the arrow keys + the controls below.
-      */}
-      <div
-        className="vframe__carousel-advance"
-        aria-hidden
-        onClick={() => go(index + 1)}
-      />
+        {/*
+          Tap anywhere = advance. A real drag travels past the click threshold, so
+          onClick never fires and the gesture bubbles to the filmstrip instead —
+          giving tap-to-advance and swipe-the-strip from the same surface. Not a
+          focus stop; keyboard uses the arrow keys + the dots below.
+        */}
+        <div
+          className="vframe__carousel-advance"
+          aria-hidden
+          onClick={() => go(index + 1)}
+        />
 
-      <button
-        type="button"
-        className="vframe__carousel-arrow vframe__carousel-arrow--prev"
-        aria-label="Previous image"
-        onClick={() => go(index - 1)}
-      >
-        ‹
-      </button>
-      <button
-        type="button"
-        className="vframe__carousel-arrow vframe__carousel-arrow--next"
-        aria-label="Next image"
-        onClick={() => go(index + 1)}
-      >
-        ›
-      </button>
+        <button
+          type="button"
+          className="vframe__carousel-arrow vframe__carousel-arrow--prev"
+          aria-label="Previous image"
+          onClick={() => go(index - 1)}
+        >
+          ‹
+        </button>
+        <button
+          type="button"
+          className="vframe__carousel-arrow vframe__carousel-arrow--next"
+          aria-label="Next image"
+          onClick={() => go(index + 1)}
+        >
+          ›
+        </button>
+      </div>
 
       <div className="vframe__carousel-dots" aria-label="Choose image">
         {sources.map((_, i) => (

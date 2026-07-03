@@ -175,6 +175,10 @@ function FrameContent({
     "--media-ar-h": arH,
   } as React.CSSProperties;
 
+  const isVideo = isVideoFrame(frame) && Boolean(frame.vimeo);
+  const sources = isVideo ? [] : frameSources(frame);
+  const isCarousel = sources.length > 1;
+
   return (
     <>
       <header className="vframe__kicker">
@@ -183,61 +187,57 @@ function FrameContent({
         ) : null}
       </header>
       <div className="vframe__scroll">
-        <div className="vframe__media-box" style={mediaBoxStyle}>
-          {isVideoFrame(frame) && frame.vimeo ? (
-            active ? (
-              <VimeoPlayer
-                videoId={frame.vimeo}
-                title={title}
-                aspectRatio={aspect}
-                background={frame.vimeoBackground}
-                poster={frame.poster}
-                className="vframe__media vframe__media--video"
-              />
-            ) : frame.poster ? (
-              <Image
-                src={frame.poster}
-                alt={title}
-                fill
-                draggable={false}
-                className="vframe__media"
-                sizes="(max-width: 767px) 92vw, min(100vw, 90rem)"
-              />
-            ) : (
-              <div className="vframe__media vframe__media--placeholder" aria-hidden>
-                <span className="vframe__play">▶</span>
-              </div>
-            )
-          ) : (
-            (() => {
-              const sources = frameSources(frame);
-              if (sources.length > 1) {
-                return (
-                  <VignettePanelCarousel
-                    sources={sources}
-                    alt={title}
-                    priority={index === 0}
-                    active={active}
-                    autoplayMs={frame.autoplayMs}
-                  />
-                );
-              }
-              const src = sources[0]!;
-              return (
+        {isCarousel ? (
+          // Carousel owns its own figure (image viewport + dot rail below it), so
+          // the dots sit under the media instead of overlaying it.
+          <VignettePanelCarousel
+            sources={sources}
+            alt={title}
+            priority={index === 0}
+            active={active}
+            autoplayMs={frame.autoplayMs}
+            style={mediaBoxStyle}
+          />
+        ) : (
+          <div className="vframe__media-box" style={mediaBoxStyle}>
+            {isVideo && frame.vimeo ? (
+              active ? (
+                <VimeoPlayer
+                  videoId={frame.vimeo}
+                  title={title}
+                  aspectRatio={aspect}
+                  background={frame.vimeoBackground}
+                  poster={frame.poster}
+                  className="vframe__media vframe__media--video"
+                />
+              ) : frame.poster ? (
                 <Image
-                  src={src}
+                  src={frame.poster}
                   alt={title}
                   fill
                   draggable={false}
-                  priority={index === 0}
-                  unoptimized={src.startsWith("data:")}
                   className="vframe__media"
                   sizes="(max-width: 767px) 92vw, min(100vw, 90rem)"
                 />
-              );
-            })()
-          )}
-        </div>
+              ) : (
+                <div className="vframe__media vframe__media--placeholder" aria-hidden>
+                  <span className="vframe__play">▶</span>
+                </div>
+              )
+            ) : (
+              <Image
+                src={sources[0]!}
+                alt={title}
+                fill
+                draggable={false}
+                priority={index === 0}
+                unoptimized={sources[0]!.startsWith("data:")}
+                className="vframe__media"
+                sizes="(max-width: 767px) 92vw, min(100vw, 90rem)"
+              />
+            )}
+          </div>
+        )}
         {caption ? (
           <p className="text-caption vframe__caption text-secondary">{caption}</p>
         ) : null}

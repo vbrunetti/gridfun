@@ -679,7 +679,7 @@ export const caseStudies: CaseStudy[] = [
           ),
           cruiseBeat(
             "The insight",
-            "The system was informed by human factors but not by color theory or semantic design. Meanwhile the AV's AI could already classify everything it perceived. That intelligence existed — it just wasn't surfaced. The machine knew. The human didn't.",
+            "The legacy system was informed by human factors but not by semantic color theory. Meanwhile, the AV's AI could already classify nearly everything it perceived, it just wasn't surfaced. The machine knew what was there, but the human didn't.",
             "1x1",
           ),
           cruiseMedia(
@@ -718,7 +718,7 @@ export const caseStudies: CaseStudy[] = [
       ),
       cruiseVignette(
         "operator-stop-go-control",
-        "Giving Operators Insight and Direct Control of Vehicle Intent",
+        "Insight and Direct Control of Vehicle Intent",
         ["Visual design", "Data visualization", "Interaction design"],
         "Context gain / vehicle intent legibility / minimum viable signal",
         [
@@ -743,28 +743,23 @@ export const caseStudies: CaseStudy[] = [
           ),
           cruiseMedia(
             "The solution",
-            "Changes to the path spline and surrounding object labeling helped connect velocity intent to scene context.",
+            "We attacked the problem on three fronts. First, we color-coded the projected path (red/green) to communicate speed deltas and intent — slow, stop, go — so the path itself told a story. Second, we visualized the scene objects the vehicle was actually perceiving and responding to, so operators could see why the vehicle was behaving the way it was. Third — and most importantly for getting stuck vehicles moving again — we made stop points interactive. When a stop point appeared on the path, the operator could lift it with a single click, signaling to the vehicle that it was safe to proceed. A police officer waving the car through a stop sign. A construction worker clearing an obstruction. Whatever the case: one click, car moves.",
             "1x1",
             {
               sources: [
-                "/portfolio/cruise/cruise_v1_c1.jpg",
-                "/portfolio/cruise/cruise_v1_c2.jpg",
-                "/portfolio/cruise/cruise_v1_c3.jpg",
-                "/portfolio/cruise/cruise_v1_c4.jpg",
-                "/portfolio/cruise/cruise_v1_c5.jpg",
-                "/portfolio/cruise/cruise_v1_c6.jpg",
+                "/portfolio/cruise/Cruise_V2_c1.jpg",
+                "/portfolio/cruise/cruise_V2_c2.jpg",
+                "/portfolio/cruise/cruise_V2_c3.jpg",
+                "/portfolio/cruise/cruise_V2_c4.jpg",
+                "/portfolio/cruise/cruise_V2_c5.jpg",
+                "/portfolio/cruise/cruise_V2_c6.jpg",
+                "/portfolio/cruise/cruise_V2_c7.jpg",
               ],
             },
           ),
-          cruiseMedia(
-            "The solution",
-            "We attacked the problem on three fronts. First, we color-coded the projected path (red/green) to communicate speed deltas and intent: slow, stop, go; so the path itself told a story. Second, we visualized the scene objects the vehicle was actually perceiving and responding to, so operators could see why the vehicle was behaving the way it was. Third, and most importantly for getting stuck vehicles moving again, we made stop points interactive. When a stop point appeared on the path, the operator could lift it with a single click, signaling to the vehicle that it was safe to proceed. A police officer waving the car through a stop sign. A construction worker clearing an obstruction. Whatever the case: one click, car moves.",
-            "16x9",
-            "/portfolio/cruise/cruise_v1_full.jpg",
-          ),
           cruiseBeat(
             "Outcome",
-            "Operators had a legible model of vehicle intent without being overwhelmed by the full complexity of the AV's decision-making process.",
+            "Operators went from watching a black box to reading a scene. They understood why the vehicle stopped, and they had a discoverable, single-action control to get it moving again. The terminal stopped being something operators watched and started being something they could act on.",
           ),
         ],
       ),

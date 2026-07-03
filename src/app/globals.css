@@ -4732,6 +4732,8 @@ ul.cs-hero__subhead {
 .vframe__scroll {
   display: flex;
   flex-direction: column;
+  /* Left edge shared by the media, dots, kicker, and caption — a clean column. */
+  align-items: flex-start;
   min-height: 0;
   /* Inactive panels never capture scroll; only the focused panel scrolls. */
   overflow: hidden;
@@ -4747,8 +4749,10 @@ ul.cs-hero__subhead {
      the filmstrip — do NOT set `contain` here. */
 }
 
-/* Media box sized to contain within the panel width × (height − caption reserve),
-   centered horizontally. Overrides the flex:1 fill used by the old foot layout. */
+/* Media box sized to contain within the panel width × (height − caption reserve).
+   Left-aligned (not centered) so the image, kicker label, and caption share one
+   left edge — a clean editorial column, with slack collapsing to the right.
+   Overrides the flex:1 fill used by the old foot layout. */
 .vframe--media .vframe__media-box {
   flex: none;
   aspect-ratio: var(--media-ar-w, 16) / var(--media-ar-h, 9);
@@ -4760,7 +4764,6 @@ ul.cs-hero__subhead {
     )
   );
   max-height: calc(100cqh - var(--vframe-caption-reserve));
-  margin-inline: auto;
 }
 
 /* Video + placeholder share the same contain sizing as stills. */
@@ -4787,23 +4790,36 @@ ul.cs-hero__subhead {
   opacity: 0.7;
 }
 
-/* ── In-panel image carousel — crossfade + near-chrome-less controls ── */
-/* Match the still/video sizing: shrink to the media's aspect box and center in
-   the cell, so the carousel element *is* the visible media rect. Controls then
-   anchor to the media (arrows on its vertical center, dots on its bottom edge)
-   rather than floating in the panel's empty contain-space. */
-.vframe__carousel {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  translate: -50% 0;
-  aspect-ratio: var(--media-ar-w, 16) / var(--media-ar-h, 9);
+/* ── In-panel image carousel — crossfade slides + a dot rail below the media ──
+   The carousel is a figure: an aspect-boxed image viewport with the dot nav in
+   its own row beneath, so the dots never overlay the image. Left-aligned and
+   sized so the viewport + dots fit the panel's height budget (minus the caption
+   reserve), matching the still/video contain sizing. */
+.vframe__figure {
+  --vframe-dots-h: 1.75rem;
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  /* Hold the computed size — never let the caption's competition for vertical
+     space shrink the viewport (which would squish the aspect box and leave
+     contain letterbox bars). Overflow scrolls the panel instead. */
+  flex: none;
   width: min(
     100cqw,
-    calc(100cqh * var(--media-ar-w, 16) / var(--media-ar-h, 9))
+    calc(
+      (100cqh - var(--vframe-caption-reserve, 0px) - var(--vframe-dots-h)) *
+        var(--media-ar-w, 16) / var(--media-ar-h, 9)
+    )
   );
-  height: auto;
-  max-height: 100cqh;
+}
+
+/* Image viewport — the visible media rect; slides fill it (object-fit: contain). */
+.vframe__carousel-viewport {
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--media-ar-w, 16) / var(--media-ar-h, 9);
+  container-type: size;
 }
 
 .vframe__carousel-slide {
@@ -4873,20 +4889,16 @@ ul.cs-hero__subhead {
   }
 }
 
+/* Dot rail — its own row beneath the image (not an overlay), centered on the
+   media width. Sits on the panel surface, so dots take the panel's text tone. */
 .vframe__carousel-dots {
-  position: absolute;
-  bottom: clamp(0.5rem, 2cqh, 1rem);
-  left: 50%;
-  translate: -50% 0;
-  z-index: 3;
+  flex: none;
+  height: var(--vframe-dots-h, 1.75rem);
   display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 0.5rem;
-  padding: 0.375rem 0.5rem;
-  /* Glass scrim pill — keeps the light dots legible on any media / page theme. */
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--color-black) 30%, transparent);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
+  color: var(--text-secondary);
 }
 
 .vframe__carousel-dot {
@@ -4895,8 +4907,8 @@ ul.cs-hero__subhead {
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: var(--color-paper);
-  opacity: 0.5;
+  background: currentColor;
+  opacity: 0.4;
   cursor: pointer;
   transition: opacity 160ms ease;
 }
