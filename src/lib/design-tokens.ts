@@ -291,6 +291,17 @@ export const ornamentalTypography: readonly TypographyRampEntry[] = [
     scope: "Vignette chapter opener numeral",
   },
   {
+    className: "display-metric",
+    label: "Display Metric",
+    size: "var(--type-metric) · clamp(4rem, 40cqw, 20rem)",
+    weight: "700",
+    lineHeight: "0.82",
+    letterSpacing: "-0.05em",
+    sample: ">20%",
+    wrapperClass: "craft-card",
+    scope: "Vignette stat panel — quantified-impact figure (fills its container)",
+  },
+  {
     className: "display-sm",
     label: "Vignette beat",
     size: "var(--type-display-sm)",

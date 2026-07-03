@@ -126,6 +126,7 @@
 
   --type-ghost: clamp(4.5rem, 62cqi, 15rem);
   --type-numeral: clamp(3.5rem, 9vw, 7.5rem);
+  --type-metric: clamp(4rem, 40cqw, 20rem);
 }
 
 @media (min-width: 1024px) {
@@ -1405,6 +1406,26 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
   line-height: 0.86;
   letter-spacing: -0.04em;
   color: var(--text-primary);
+}
+
+/* Quantified-impact figure — the boldest foreground type; type-as-graphic.
+   Sits above the numeral in the ornamental tier. tabular-nums keeps digits
+   even; the clamp keeps short figures from overflowing their panel. */
+.display-metric {
+  font-size: var(--type-metric);
+  font-weight: 700;
+  line-height: 0.82;
+  letter-spacing: -0.05em;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  text-wrap: nowrap;
+}
+
+/* cqw fills the figure to its container; fall back to viewport when unsupported. */
+@supports not (font-size: 1cqi) {
+  .display-metric {
+    font-size: clamp(4rem, 20vw, 18rem);
+  }
 }
 
 /* Shared stage — split-scene beat (copy) + grid-anchored spark companion */
@@ -4618,6 +4639,26 @@ ul.cs-hero__subhead {
 /* Text beat — 6 cols; wins over its ratio class via source order. */
 .vframe--field {
   width: calc(100cqw * var(--frame-cols, 6) / 12);
+}
+
+/* Stat panel — supporting lede up top, oversized figure locked to the foot.
+   Foot row auto-sizes to the figure instead of the fixed caption band. */
+.vframe--stat {
+  grid-template-rows: var(--panel-kicker) 1fr auto;
+}
+
+.vframe__stat-lede {
+  max-width: 34ch;
+}
+
+/* The foot band is the query container: its content box already excludes the
+   panel padding, so the figure's cqw fills flush to the inset at every width. */
+.vframe__foot--stat {
+  container-type: inline-size;
+}
+
+.vframe__stat-figure {
+  margin: 0;
 }
 
 @media (max-width: 1023px) {

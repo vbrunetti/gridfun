@@ -95,6 +95,12 @@ export type VignetteImage = {
   /** Panel width in grid columns; omit to use the ratio-based default. */
   width?: PanelWidth;
   caption?: string;
+  /**
+   * Oversized quantified-impact figure (e.g. ">20%"). Presence turns the frame
+   * into a *stat panel*: `label` kicker on top, `body` prose as supporting lede,
+   * and this figure locked huge to the footer (`.display-metric`). Type-as-graphic.
+   */
+  stat?: string;
 };
 
 export type CraftVignette = {
@@ -220,6 +226,26 @@ function cruiseMedia(
     label,
     caption,
     ...mediaFields,
+    ...(panelBg ? { panelBg } : {}),
+  };
+}
+
+function cruiseStat(
+  label: string,
+  stat: string,
+  body: string,
+  ratio: ImageRatio = "16x9",
+  panelBg?: PanelBg,
+): VignetteImage {
+  return {
+    ratio,
+    accent: cruiseAccent,
+    label,
+    stat,
+    body,
+    // Stat panels run wider than a text beat so the figure can dominate;
+    // full-bleed on mobile. Override per-frame if a figure needs more/less room.
+    width: { desktop: 8, mobile: 6 },
     ...(panelBg ? { panelBg } : {}),
   };
 }
@@ -673,8 +699,9 @@ export const caseStudies: CaseStudy[] = [
             "16x9",
             "/portfolio/cruise/cruise_v1_full.jpg",
           ),
-          cruiseBeat(
+          cruiseStat(
             "Outcome",
+            ">20%",
             "As a result of the improved map work, operators gained context about the scene >20% faster and more accurately than before.",
             "16x9",
           ),

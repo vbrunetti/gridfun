@@ -131,6 +131,26 @@ function FrameContent({
 }) {
   const aspect = ratioAspect(frame.ratio);
 
+  if (frame.stat) {
+    return (
+      <>
+        <header className="vframe__kicker">
+          {frame.label ? (
+            <p className="vframe__kicker-text text-meta">{frame.label}</p>
+          ) : null}
+        </header>
+        <div className="vframe__main vframe__main--stat">
+          {frame.body ? (
+            <p className="body-md vframe__stat-lede text-secondary">{frame.body}</p>
+          ) : null}
+        </div>
+        <footer className="vframe__foot vframe__foot--stat">
+          <p className="display-metric vframe__stat-figure">{frame.stat}</p>
+        </footer>
+      </>
+    );
+  }
+
   if (frame.colorField) {
     return (
       <>
@@ -265,8 +285,8 @@ export function VignetteChapter({
   const panelKinds = useMemo<PanelKind[]>(
     () =>
       showTitlePanel
-        ? ["title", ...frames.map((f) => (f.colorField ? "field" : f.ratio))]
-        : frames.map((f) => (f.colorField ? "field" : f.ratio)),
+        ? ["title", ...frames.map((f) => (f.colorField || f.stat ? "field" : f.ratio))]
+        : frames.map((f) => (f.colorField || f.stat ? "field" : f.ratio)),
     [frames, showTitlePanel],
   );
 
@@ -652,8 +672,10 @@ export function VignetteChapter({
                   panelRefs.current[idx] = node;
                 }}
                 className={`vframe vframe--${frame.ratio}${
-                  frame.colorField ? " vframe--field" : ""
-                }${idx === index ? " is-active" : ""}`}
+                  frame.colorField || frame.stat ? " vframe--field" : ""
+                }${frame.stat ? " vframe--stat" : ""}${
+                  idx === index ? " is-active" : ""
+                }`}
                 data-vframe-index={idx}
                 data-panel-bg={panelBg}
                 style={{
