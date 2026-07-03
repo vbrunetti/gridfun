@@ -482,7 +482,7 @@ export const caseStudies: CaseStudy[] = [
           ),
           pearsonMedia(
             "Color — narrow brand into a full system",
-            "Pearson's palette is narrow — pink and purple, \"cotton candy.\" A system needs more: semantic colors (error/success/warning), full primary chroma ramps, and a tertiary palette for data viz and chips. Ran brand and semantic keys through a Figma ramp generator; every ramp passed contrast and usability testing.",
+            "Pearson's palette is narrow — pink and purple, \"cotton candy.\" A system needs more: semantic colors (error/success/warning), full primary chroma ramps, and a tertiary palette for data visualization and chips. Ran brand and semantic keys through a Figma ramp generator; every ramp passed contrast and usability testing.",
             "16x9",
           ),
           pearsonBeat(
@@ -630,7 +630,7 @@ export const caseStudies: CaseStudy[] = [
       cruiseVignette(
         "semantic-color-shape",
         "Developing a Semantic Color & Shape Language",
-        ["Visual design", "Data viz", "Human factors"],
+        ["Visual design", "Data visualization", "Human factors"],
         "Context gain / semantic legibility / color as meaning",
         [
           cruiseBeat(
@@ -654,13 +654,16 @@ export const caseStudies: CaseStudy[] = [
           ),
           cruiseMedia(
             "The solution",
-            "A universal color + shape language: each object class gets a distinct hue and a footprint shape mapped to its radar/lidar return.",
+            "A semantic color + shape language applied to the tilemap where each object class received a distinct hue and a footprint shape mapped to its radar/lidar return.",
             "1x1",
             {
               sources: [
-                "/portfolio/cruise/carousel_2.jpg",
-                "/portfolio/cruise/carousel_3.jpg",
-                "/portfolio/cruise/carousel_2.jpg"
+                "/portfolio/cruise/cruise_v1_c1.jpg",
+                "/portfolio/cruise/cruise_v1_c2.jpg",
+                "/portfolio/cruise/cruise_v1_c3.jpg",
+                "/portfolio/cruise/cruise_v1_c4.jpg",
+                "/portfolio/cruise/cruise_v1_c5.jpg",
+                "/portfolio/cruise/cruise_v1_c6.jpg"
               ],
             },
           ),
@@ -672,7 +675,7 @@ export const caseStudies: CaseStudy[] = [
           ),
           cruiseBeat(
             "Outcome",
-            "Operators gained context about the scene faster and more accurately — the first move in a broader context-gain philosophy that shaped the rest of the terminal.",
+            "As a result of the improved map work, operators gained context about the scene >20% faster and more accurately than before.",
             "16x9",
           ),
         ],
@@ -680,17 +683,17 @@ export const caseStudies: CaseStudy[] = [
       cruiseProse(
         "cruise-scene-legibility",
         "Making the scene speak",
-        "Once you accept that the AV already knows more than it shows, the design problem shifts from \"build a better display\" to \"translate machine perception into human-readable meaning.\" Color and shape were the first vocabulary — but the same question kept resurfacing: what else was the vehicle planning, remembering, or dealing with that never made it to the glass?",
+        "Once you accept that the AV already knows more than it shows, the design problem shifts from \"build a better display\" to \"translate machine perception into human-readable meaning.\" Color and shape were the first vocabulary — but the same question kept resurfacing: what else was the vehicle planning, remembering, or dealing with that never made it to the Terminal?",
       ),
       cruiseVignette(
         "vehicle-intent-path",
-        "Visualizing Vehicle Intent on the Projected Path",
-        ["Data viz", "Human factors", "Interaction design"],
+        "Visualizing Vehicle Intent on a Projected Path",
+        ["Visual design", "Data visualization", "Interaction design"],
         "Context gain / vehicle intent legibility / minimum viable signal",
         [
           cruiseBeat(
             "The problem",
-            "The AV is non-deterministic — a true ML ranker refreshing its decision-making potentially hundreds of times per second. The projected path was generic, one color, unspecified. Operators described it as a black box: the vehicle could do anything at any time for any reason.",
+            `The AV is non-deterministic — a true ML ranker refreshing its decision-making potentially hundreds of times per second. When an AV decided on a trajectory to pursue, it was rendered for the human operator as a single-color path-spline, projecting 50 meters out in front. There was no "why" behind the "what," no thinking or options considered surfaced. Our operators would witness the vehicle doing anything at any time for any reason. A black box is not something that builds trust, and our operators didn't trust the system.`,
           ),
           cruiseBeat(
             "The constraint",
@@ -1087,7 +1090,7 @@ export const caseStudies: CaseStudy[] = [
       googleVignette(
         "funnel-aware-ad-formats",
         "Google Shopping Ads — Funnel-Aware Ad Formats",
-        ["Strategy", "Data viz", "Web"],
+        ["Strategy", "Data visualization", "Web"],
         "Funnel-stage design / query intelligence / privacy-safe personalization",
         [
           googleBeat(
