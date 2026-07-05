@@ -654,18 +654,23 @@ export const caseStudies: CaseStudy[] = [
     sections: [
       cruiseProse(
         "cruise-intro",
-        "The Terminal",
-        "Cruise's remote operators were the humans-in-the-loop of a driverless fleet. When a robotaxi got stuck, or confused, it literally phoned a human for help. These people, Remote Operators, were like call-center agents sitting in a remote location waiting to catch inbound requests. When they did, they needed to act within seconds. The Terminal (the name of the software they used to support the driverless fleet) was built on rigorous, safety-first human factors traditions; designed for humans in control of a machine, not humans working alongside an AI stack. As a result, the Terminal was almost entirely blind to what the machine already knew — and everyone who depended on that knowledge paid the price: operators scrambling to read a scene in seconds, passengers in the back seat wondering when they'd move again, and the LEOs, first responders, and pedestrians on the street trying to figure out whether anyone was even home.\n\nThe through-line across my work at Cruise is a single idea — allow the humans working with the AI stack to quickly gain context, so they can help augment - not override - what the machine could do. The AV's AI perceived, classified, and planned constantly, but very little of that intelligence reached the Remote Operator. Each vignette below represents one move closer towards closing that gap: surfacing what the system knew, in a form a human under stress could read and respond to in seconds.",
+        "Tick Tock",
+        "Cruise's Terminal wasn't originally built for what it needed to become. In the early days, autonomous drives ran at night, when the streets were empty, there was no traffic to negotiate, and no police officers or emergency vehicles to manage. Terminal v1 was built for that world: get the remote operator's mental model of the scene to match ground truth as closely as possible, and record everything. Signal fidelity was the priority, which was a reasonable design for a testing program.\n\nThen the business needed to scale into real hours and real traffic on real streets, and the old model turned out to be solving the wrong problem. Signal fidelity didn't matter much if the vehicle was still sitting there ten seconds later. Our CEO at the time, Kyle Vogt, put a number on why: the risk of a Vehicle Recovery Event (a tow truck sent to retrieve a failed AV in the field) grew exponentially with every second the vehicle stayed stuck. Time wasn't one factor among many; it was the factor.\n\nThe counterintuitive part was that the exact right direction mattered less than simply moving. A vehicle correcting itself imperfectly but visibly in motion read as competent, like it was still working and on its way. A vehicle sitting dead still, even for a few extra seconds while an operator built the perfect plan, read as broken: an inert two-ton lump of batteries and computers, both to the rider inside and to everyone outside. Progress, not perfection, was the signal that mattered.\n\nThat reframing is the actual thesis behind everything below. Two numbers governed the redesign: time to first action, meaning how fast an operator could read a scene and issue any instruction at all, and time to resolution, meaning how fast the vehicle was actually moving again. Each vignette below is one move toward compressing one or both of those numbers, in service of one goal: get the car moving, now.",
+      ),
+      cruiseProse(
+        "cruise-context-shift",
+        "The design problem, restated",
+        "Time was the stakes. Context was the mechanism. Once you accept that the AV already knows more than it shows, the design problem shifts from \"build a better display\" to \"translate machine perception into human-readable meaning.\" That's where the work below begins.",
       ),
       cruiseVignette(
-        "semantic-color-shape",
-        "Developing a Semantic Color & Shape Language",
-        ["Visual design", "Data visualization", "Human factors"],
-        "Context gain / semantic legibility / color as meaning",
+        "reading-the-scene",
+        "Reading the Scene",
+        ["Visual design", "Data visualization", "Interaction design", "Human factors", "Information architecture"],
+        "Context gain / semantic legibility / vehicle intent / operator handoff",
         [
           cruiseBeat(
             "The problem",
-            "Operators viewed the AV scene entirely in orange-on-black. Every object type — pedestrian, cyclist, vehicle, immovable obstacle — rendered identically. Legitimate human-factors science, but every object in the scene was visually equivalent.",
+            "Operators viewed the AV scene entirely in orange-on-black. Every object type, pedestrian, cyclist, vehicle, immovable obstacle, rendered identically. Legitimate human-factors science, but every object in the scene was visually equivalent.",
           ),
           cruiseMedia(
             "Before",
@@ -699,7 +704,7 @@ export const caseStudies: CaseStudy[] = [
           ),
           cruiseMedia(
             "In scene",
-            "Pedestrians, cyclists, vehicles, and static objects read at a glance — the semantic meaning of the scene became immediately legible.",
+            "Pedestrians, cyclists, vehicles, and static objects read at a glance. The semantic meaning of the scene became immediately legible.",
             "16x9",
             "/portfolio/cruise/cruise_v1_full.jpg",
           ),
@@ -709,26 +714,13 @@ export const caseStudies: CaseStudy[] = [
             "As a result of the improved map work, operators gained context about the scene ~20% faster and more accurately than before.",
             "16x9",
           ),
-        ],
-      ),
-      cruiseProse(
-        "cruise-scene-legibility",
-        "Making the scene speak",
-        "Once you accept that the AV already knows more than it shows, the design problem shifts from \"build a better display\" to \"translate machine perception into human-readable meaning.\" Color and shape were the first vocabulary — but the same question kept resurfacing: what else was the vehicle planning, remembering, or dealing with that never made it to the Terminal?",
-      ),
-      cruiseVignette(
-        "operator-stop-go-control",
-        "Insight and Direct Control of Vehicle Intent",
-        ["Visual design", "Data visualization", "Interaction design"],
-        "Context gain / vehicle intent legibility / minimum viable signal",
-        [
           cruiseBeat(
-            "The problem",
-            `The AV is non-deterministic. A true ML ranker refreshing its decision-making potentially hundreds of times per second. When the vehicle decided what to do, it rendered for the operator as a single-color path spline projecting 50 meters ahead. No speed intent. Unreliable stop point visualizations. Little scene context explaining why the vehicle was behaving the way it was. Operators would watch the vehicle do anything, at any time, for any reason, and when it inexplicably stopped, they had no explanation and no obvious way to get it moving again.`,
+            "The next layer",
+            "Color and shape solved what an object was. The next question was what the vehicle intended to do about it, a harder signal to surface. The AV is non-deterministic. A true ML ranker refreshing its decision-making potentially hundreds of times per second. When the vehicle decided what to do, it rendered for the operator as a single-color path spline projecting 50 meters ahead. No speed intent. Unreliable stop point visualizations. Little scene context explaining why the vehicle was behaving the way it was. Operators would watch the vehicle do anything, at any time, for any reason, and when it inexplicably stopped, they had no explanation and no obvious way to get it moving again.",
           ),
           cruiseMedia(
             "The constraint",
-            "We couldn't guarantee decision persistence — no binding route, no guaranteed future intentions, no speed deltas.",
+            "We couldn't guarantee decision persistence: no binding route, no guaranteed future intentions, no speed deltas.",
             "1x1",
             {
               vimeo: "1206793002",
@@ -738,12 +730,12 @@ export const caseStudies: CaseStudy[] = [
           ),
           cruiseBeat(
             "The insight",
-            "Even a coarse signal — stop or go, faster or slower — was dramatically more useful than nothing. And since we had speed deltas and the vehicle's perception of surrounding objects, we could build a scene that told a coherent story. So that if and when the vehicle stopped, the operator already understood why.",
+            "Even a coarse signal, stop or go, faster or slower, was dramatically more useful than nothing. And since we had speed deltas and the vehicle's perception of surrounding objects, we could build a scene that told a coherent story. So that if and when the vehicle stopped, the operator already understood why.",
             "9x16",
           ),
           cruiseMedia(
             "The solution",
-            "We attacked the problem on three fronts. First, we color-coded the projected path (red/green) to communicate speed deltas and intent — slow, stop, go — so the path itself told a story. Second, we visualized the scene objects the vehicle was actually perceiving and responding to, so operators could see why the vehicle was behaving the way it was. Third — and most importantly for getting stuck vehicles moving again — we made stop points interactive. When a stop point appeared on the path, the operator could lift it with a single click, signaling to the vehicle that it was safe to proceed. A police officer waving the car through a stop sign. A construction worker clearing an obstruction. Whatever the case: one click, car moves.",
+            "We attacked the problem on three fronts. First, we color-coded the projected path (red/green) to communicate speed deltas and intent: slow, stop, go, so the path itself told a story. Second, we visualized the scene objects the vehicle was actually perceiving and responding to, so operators could see why the vehicle was behaving the way it was. Third, and most importantly for getting stuck vehicles moving again, we made stop points interactive. When a stop point appeared on the path, the operator could lift it with a single click, signaling to the vehicle that it was safe to proceed. A police officer waving the car through a stop sign. A construction worker clearing an obstruction. Whatever the case: one click, car moves.",
             "1x1",
             {
               sources: [
@@ -761,80 +753,32 @@ export const caseStudies: CaseStudy[] = [
             "Outcome",
             "Operators went from watching a black box to reading a scene. They understood why the vehicle stopped, and they had a discoverable, single-action control to get it moving again. The terminal stopped being something operators watched and started being something they could act on.",
           ),
-        ],
-      ),
-      cruiseVignette(
-        "event-timeline-panel",
-        "Event Timeline + \"What Is the Vehicle Dealing With\" Panel",
-        ["Information architecture", "Human factors", "Workflow & ops"],
-        "Context gain / situational awareness / operator handoff / cold start",
-        [
           cruiseBeat(
-            "The problem",
-            "When operators connected to a vehicle, they were context-blind. They didn't know what had happened in the moments before they took over — what the previous operator had done, what the vehicle had tried autonomously, or why the car was stopped.",
-          ),
-          cruiseBeat(
-            "The cold start",
-            "In a safety-critical system, an operator connecting without context could take the wrong action — or waste critical seconds reconstructing a situation that was already well-understood by the previous operator.",
+            "One more gap",
+            "Object classification and vehicle intent solved what was happening on the map right now. But operators arriving fresh on a vehicle were still starting from zero, context-blind to what had happened moments before they connected: what the previous operator had done, what the vehicle had tried autonomously, why the car was stopped at all. In a safety-critical system, that cold start could mean the wrong action, or critical seconds spent reconstructing a situation someone else already understood.",
             "1x1",
           ),
-          cruiseBeat(
-            "Event timeline",
-            "A coarse-grained log pulling from vehicle event APIs already exposed but not rendered. Stops, collisions, operator overrides, course changes — a readable history of what the vehicle had been through.",
-            "9x16",
-          ),
           cruiseMedia(
-            "Dealing-with panel",
-            "Big icons, color-coded, with timers showing how long each condition had been active. Also surfaced sequential steps to resolve the vehicle's current state.",
+            "The solution",
+            "A coarse-grained event timeline, pulling from vehicle event APIs already exposed but never rendered, gave incoming operators a readable history: stops, collisions, overrides, course changes. Paired with a \"what is the vehicle dealing with\" panel: big icons, color-coded, with timers showing how long each condition had been active, plus the sequential steps to resolve it.",
             "16x9",
           ),
           cruiseBeat(
             "Outcome",
-            "What previously required a verbal debrief between operators — or an educated guess — became a 5-second visual scan. Operators arrived in context, not blind.",
+            "What previously required a verbal debrief between operators, or an educated guess, became a 5-second visual scan. Three different signals, one throughline: surface what the machine already knew, in a form a human under stress could read in seconds.",
           ),
         ],
       ),
       cruiseProse(
-        "cruise-handoff",
-        "Arriving in context",
-        "Cold start wasn't a UX nicety — it was a safety variable. Every time an operator connected mid-incident, they were reconstructing a story someone else had already read. The timeline and dealing-with panel were attempts to make handoff as fast as reading a headline: what happened, what's active now, what do I do next.",
+        "cruise-ecosystem",
+        "The room around the operator",
+        "Reading the Scene solved what an operator could see on the map. But an operator was never just a person alone with a screen. Remote Assistant Advisors worked inside a wider ecosystem: Customer Service handling the passenger, Subject-Matter Experts stepping in on the hardest scenes, Supervisors walking the floor, and the customer themselves, often just trying to understand why their ride had stopped. Each of these people had their own tools and their own partial view of the situation, and often no idea what the others could see. Designing the Terminal meant designing for that whole ecosystem, and it started with something as basic as where things lived on the operator's own screen.",
       ),
       cruiseVignette(
-        "camera-array-redesign",
-        "The Camera Array Redesign That Didn't Work",
-        ["Research", "Human factors", "Motion"],
-        "Craft humility / safety-critical constraints / when HF research beats design intuition",
-        [
-          cruiseBeat(
-            "The inspiration",
-            "A glimpse of what appeared to be a Waymo tele-ops interface — a single horizontal filmstrip that shifted based on area of interest. Compared to our T-shaped array, it looked elegant, responsive, and spatially smart.",
-          ),
-          cruiseMedia(
-            "The hypothesis",
-            "Replace the T-shape with a scrollable filmstrip that auto-centers the area of interest — cleaner layout, better spatial correlation between map and cameras.",
-            "16x9",
-          ),
-          cruiseBeat(
-            "The pushback",
-            "Human factors researchers were appalled. Operators in safety-critical environments need spatial muscle memory. Left is left. Right is right. Always. The T-shape was a trusted spatial anchor under stress.",
-            "1x1",
-          ),
-          cruiseBeat(
-            "The result",
-            "Motion prototypes performed poorly. Scrolling introduced spatial disorientation. The muscle memory disruption was real. The T-shape stayed — awkward for layout, correct for cognition.",
-            "9x16",
-          ),
-          cruiseBeat(
-            "What was learned",
-            "Elegance is not always correct. A design that looks cleaner can be cognitively more dangerous. Pushing on the T-shape was the right instinct — understanding why it needed to stay was the right outcome.",
-          ),
-        ],
-      ),
-      cruiseVignette(
-        "predictable-ui-regions",
-        "Predictable UI Regions (Bentable Box Model)",
-        ["Information architecture", "Human factors"],
-        "IA clarity / cognitive load reduction / layout as cognitive aid",
+        "designing-the-container",
+        "Designing the Container",
+        ["Information architecture", "Human factors", "Interaction design", "Research"],
+        "Layout as cognitive aid / consumer patterns in a safety-critical context / designing for who actually shows up",
         [
           cruiseBeat(
             "The problem",
@@ -854,42 +798,31 @@ export const caseStudies: CaseStudy[] = [
             "Knowing where to look for a certain type of information — before you even read it — is itself a form of speed. Type-based regionalization over importance-based centering.",
             "9x16",
           ),
-        ],
-      ),
-      cruiseProse(
-        "cruise-layout",
-        "Layout as a cognitive aid",
-        "Human-factors tradition gave operators a rigorous center-stage for whatever mattered most in the moment. The problem was that \"what matters most\" changed faster than human attention could re-orient. Regionalizing by content type — and protecting the centerline for the scene itself — was a bet that spatial predictability beats dynamic prominence.",
-      ),
-      cruiseVignette(
-        "av-positioning-control-ring",
-        "AV Positioning Control Ring",
-        ["Interaction design", "Systems thinking"],
-        "Interaction craft / command validation / physics-informed design",
-        [
           cruiseBeat(
-            "The old design",
-            "A plain rectangle with no front/back indication. A tiny spin icon above it — no orientation feedback, no rotation distance, no kinematic feasibility boundaries, poor hit targets, no affordance for drag-to-position.",
-          ),
-          cruiseMedia(
-            "The redesign",
-            "Clear front/back directionality, a generous circular grab-ring for drag-and-rotate, kinematic feasibility boundaries visualized, and pre-send validation for infeasible poses.",
+            "The same idea, applied to controls",
+            "Regions solved where information lived on screen. Controls were the other half of the same problem. Human factors had a sound rule here too: keep the upper half of the screen — the operator's threat cone — completely free of UI. The vehicle points up, center screen. Everything else had to live in the lower half.",
             "1x1",
           ),
           cruiseBeat(
-            "The deeper insight",
-            "Operators sent infeasible commands regularly — not from carelessness, but because the interface gave no way to know what was feasible. Every rejection created a round-trip. The redesign encoded physics upstream.",
-            "9x16",
+            "The problem",
+            "HF built maneuver controls in a fly-out drawer, far bottom-right. Hidden by default. Operators connecting to a stuck vehicle need to read the scene, choose a maneuver, and engage — within three seconds. A drawer could cost a full second.",
+            "1x1",
+          ),
+          cruiseMedia(
+            "The solution",
+            "Floating toolbar at bottom center, permanently visible, clear iconography with color and shape language. Hotkeys for experienced operators — eyes stay on the scene.",
+            "16x9",
           ),
           cruiseBeat(
-            "Outcome",
-            "Fewer round trips. Faster operations. Less operator frustration — validation moved from the AV's rejection loop into the interface itself.",
+            "The insight — and the one that reframes the whole terminal",
+            "Cruise's remote operators weren't trained specialists — not air traffic controllers, not engineers, not safety professionals. They were regular people, many coming from food service, retail, or other hourly work, making a little above minimum wage. They played video games. They used iPhones. A floating action toolbar at the bottom of the screen with hotkey support is a video game pattern — one these operators already knew in their hands. Meeting them there, rather than forcing an enterprise mental model on them, was the correct decision. The three-second target wasn't just a product requirement. It was only achievable if the interface spoke the user's native language.",
+            "9x16",
           ),
         ],
       ),
       cruiseVignette(
         "control-handoff-visualization",
-        "Control Handoff Visualization",
+        "Who's Driving? — Control Handoff Visualization",
         ["Motion", "Interaction design", "Workflow & ops"],
         "State legibility / handoff smoothness / animation as communication",
         [
@@ -914,39 +847,29 @@ export const caseStudies: CaseStudy[] = [
           ),
         ],
       ),
-      cruiseProse(
-        "cruise-operations",
-        "Keeping the car moving",
-        "Stopping is the safe default in a safety-critical stack. But unnecessary stops are expensive, disruptive, and — in a fleet context — contagious. Pre-authorizing control handoffs and visualizing intent on the path were both attempts to preserve safety while recovering operational tempo.",
-      ),
       cruiseVignette(
-        "workflow-sidebar-rail",
-        "Workflow Streamlining + Sidebar Card Rail",
-        ["Workflow & ops", "Systems thinking"],
-        "Coordination design / workflow consolidation / automation-first",
+        "av-positioning-control-ring",
+        "AV Positioning Control Ring",
+        ["Interaction design", "Systems thinking"],
+        "Interaction craft / command validation / physics-informed design",
         [
           cruiseBeat(
-            "The before state",
-            "Operators juggling tabs, Slack, Google Sheets, and Google Meet. Tele-ops and customer service in adjacent rooms at Phoenix — separated by a wall, not coordinating. Recovery, security, and support all in parallel channels.",
-          ),
-          cruiseBeat(
-            "The principle",
-            "Automate first. Whatever still requires human intervention gets condensed and surfaced inside the terminal itself. No tab-switching. Everything the operator needs, in one window, in the right moment.",
-            "1x1",
+            "The old design",
+            "A plain rectangle with no front/back indication. A tiny spin icon above it — no orientation feedback, no rotation distance, no kinematic feasibility boundaries, poor hit targets, no affordance for drag-to-position.",
           ),
           cruiseMedia(
-            "Sidebar card rail",
-            "Workflows requiring human action appeared as cards in a sidebar rail — text, rich media, or interactive controls depending on scenario.",
-            "16x9",
+            "The redesign",
+            "Clear front/back directionality, a generous circular grab-ring for drag-and-rotate, kinematic feasibility boundaries visualized, and pre-send validation for infeasible poses.",
+            "1x1",
           ),
           cruiseBeat(
-            "Police pullover",
-            "The showcase scenario: passenger notification, exterior voice comms, safety overrides, vehicle movement, and telephony channels — orchestrated into a single guided workflow surfacing the right controls in order.",
+            "The deeper insight",
+            "Operators sent infeasible commands regularly — not from carelessness, but because the interface gave no way to know what was feasible. Every rejection created a round-trip. The redesign encoded physics upstream.",
             "9x16",
           ),
           cruiseBeat(
             "Outcome",
-            "Shipped in a partially-built form before Cruise shut down. The polished vision exists in Figma — the innovation was orchestration, not invention.",
+            "Fewer round trips. Faster operations. Less operator frustration — validation moved from the AV's rejection loop into the interface itself.",
           ),
         ],
       ),
@@ -979,49 +902,100 @@ export const caseStudies: CaseStudy[] = [
       cruiseProse(
         "cruise-one-window",
         "One window, many roles",
-        "The terminal was never just a driving interface. It was the coordination layer for a small city of teams — recovery, security, customer service, tele-ops — who had been working in parallel tools and parallel rooms. Cards, modules, and rails were all variations on the same mandate: bring the right human into the loop at the right moment, without making them leave the scene.",
+        "The terminal was never just a driving interface. It was the coordination layer for a small city of teams — recovery, security, customer service, tele-ops — who had been working in parallel tools and parallel rooms. Everything below is a variation on the same mandate: bring the right human into the loop at the right moment, without making the operator leave the scene.",
       ),
       cruiseVignette(
-        "telephony-service",
-        "Telephony Service",
-        ["Communication design", "Systems thinking"],
-        "Org insight / role convergence / communication design",
+        "coordination",
+        "Coordination",
+        ["Workflow & ops", "Systems thinking", "Communication design"],
+        "Coordination design / role convergence / automation-first / orchestration over invention",
         [
           cruiseBeat(
-            "The hardware constraint",
-            "Cruise used Chevy Bolts — stock cars retrofitted in-house, not purpose-built AVs. Unlike Zoox, communication with the outside world had to be creative within production-vehicle limits.",
+            "The before state",
+            "Operators juggling tabs, Slack, Google Sheets, and Google Meet. Tele-ops and customer service in adjacent rooms at Phoenix — separated by a wall, not coordinating. They weren't even on a first-name basis. Recovery, security, and support all in parallel channels.",
           ),
           cruiseBeat(
-            "The blind spot",
-            "Customer service could call passengers. Operators could move the vehicle. The business kept roles siloed — except the real world kept crossing that line. CS spoke with no idea what the operator was doing; operators had no channel to speak.",
+            "Two teams, one blind spot",
+            "Cruise used Chevy Bolts — stock cars retrofitted in-house, not purpose-built AVs. Communication with the outside world had to be creative within those limits. Worse, the org had split communication itself: customer service could call passengers, but had no idea what the operator was doing — moving, stopping, clearing a collision. Operators could move the vehicle and manage every system, but had no channel to speak to a passenger or an officer outside the car. The business kept these roles cleanly siloed. The real world kept crossing that line.",
             "1x1",
           ),
+          cruiseBeat(
+            "The principle",
+            "Automate first. Whatever still requires human intervention gets condensed and surfaced inside the terminal itself. No tab-switching. Everything the operator needs, in one window, in the right moment.",
+            "9x16",
+          ),
           cruiseMedia(
-            "The solution",
-            "Full telephony wired into the terminal — passenger cabin, front interior, exterior speakers, inter-operator channels. First-class feature, not an external tool.",
+            "Sidebar card rail",
+            "Workflows requiring human action appeared as cards in a sidebar rail — text, rich media, or interactive controls depending on scenario.",
             "16x9",
+          ),
+          cruiseMedia(
+            "Telephony, wired in",
+            "Full telephony wired into the terminal — passenger cabin, front interior, exterior speakers, inter-operator channels. First-class feature, not an external tool.",
+            "9x16",
           ),
           cruiseBeat(
             "Dual-channel audio",
             "Borrowed from 911 dispatch: left ear for operator-to-operator, right ear for scene audio. The ear told you the source — no visual lookup required.",
+            "1x1",
+          ),
+          cruiseBeat(
+            "Police pullover",
+            "The showcase scenario, tying both threads together: passenger notification, exterior voice comms, safety overrides, vehicle movement, and telephony channels — orchestrated into a single guided workflow inside the sidebar rail, surfacing the right controls in order.",
             "9x16",
           ),
           cruiseBeat(
             "Outcome",
-            "Research and dogfooding confirmed what the org structure denied: the people moving the vehicle needed to speak, and the people speaking needed operational visibility.",
+            "Research and dogfooding confirmed what the org structure denied: the people moving the vehicle needed to speak, and the people speaking needed operational visibility. The sidebar rail and telephony service were two answers to the same question — how do you bring the right human into the loop without making the operator leave the scene. Shipped in a partially-built form before Cruise shut down; the polished vision exists in Figma. The innovation here was never invention. It was orchestration.",
+          ),
+        ],
+      ),
+      cruiseProse(
+        "cruise-camera-bridge",
+        "Not every idea worked",
+        "Not every idea worked. Some of the most valuable lessons came from the ones that didn't.",
+      ),
+      cruiseVignette(
+        "camera-array-redesign",
+        "The Camera Array Redesign That Didn't Work",
+        ["Research", "Human factors", "Motion"],
+        "Craft humility / safety-critical constraints / when HF research beats design intuition",
+        [
+          cruiseBeat(
+            "The inspiration",
+            "A glimpse of what appeared to be a Waymo tele-ops interface — a single horizontal filmstrip that shifted based on area of interest. Compared to our T-shaped array, it looked elegant, responsive, and spatially smart.",
+          ),
+          cruiseMedia(
+            "The hypothesis",
+            "Replace the T-shape with a scrollable filmstrip that auto-centers the area of interest — cleaner layout, better spatial correlation between map and cameras.",
+            "16x9",
+          ),
+          cruiseBeat(
+            "The pushback",
+            "Human factors researchers were appalled. Operators in safety-critical environments need spatial muscle memory. Left is left. Right is right. Always. The T-shape was a trusted spatial anchor under stress.",
+            "1x1",
+          ),
+          cruiseBeat(
+            "The result",
+            "Motion prototypes performed poorly. Scrolling introduced spatial disorientation. The muscle memory disruption was real. The T-shape stayed — awkward for layout, correct for cognition.",
+            "9x16",
+          ),
+          cruiseBeat(
+            "What was learned",
+            "Elegance is not always correct. A design that looks cleaner can be cognitively more dangerous. Pushing on the T-shape was the right instinct — understanding why it needed to stay was the right outcome.",
           ),
         ],
       ),
       cruiseProse(
         "cruise-intervention",
         "Three seconds",
-        "By the time Cruise was running 500+ autonomous rides daily in San Francisco, human interventions had to complete in three seconds or less: connect, understand the blockage, issue an instruction, get moving. Everything that follows — new maneuver types, a floating toolbar, hotkeys — only makes sense against that clock.",
+        "By the time Cruise was running 500+ autonomous rides daily in San Francisco, human interventions had to complete in three seconds or less: connect, understand the blockage, issue an instruction, get moving. The two speculative maneuver types below — never shipped — only make sense against that clock.",
       ),
       cruiseVignette(
-        "springloaded-splines",
-        "Spring-Loaded Splines (Speculative)",
-        ["Interaction design", "Human factors", "Systems thinking"],
-        "Ergonomic evolution of a trusted paradigm / determinism as trust signal",
+        "new-maneuver-types",
+        "New Maneuver Types (Speculative)",
+        ["Interaction design", "Human factors", "Systems thinking", "AI-native design"],
+        "Determinism as trust signal / surfacing latent machine intelligence / ending on unfinished work",
         [
           cruiseBeat(
             "The trust problem",
@@ -1043,21 +1017,9 @@ export const caseStudies: CaseStudy[] = [
             "16x9",
           ),
           cruiseBeat(
-            "Artifact status",
-            "Never shipped. Cruise shut down before the behaviors-engineering collaboration needed to wire it into the AV stack could be completed. Figma prototypes exist.",
-          ),
-        ],
-        "1x1",
-      ),
-      cruiseVignette(
-        "alternate-intents",
-        "Alternate Intents (Speculative)",
-        ["AI-native design", "Interaction design", "Systems thinking"],
-        "Surfacing latent machine intelligence / human-AI collaboration at the control layer",
-        [
-          cruiseBeat(
-            "The insight",
-            "At any moment the AV's planning stack has already solved multiple paths forward — it just picks one and discards the rest. That solved intelligence is invisible to the operator. Alternate Intents surfaces the unchosen, already-computed routes as selectable ghost paths on the map. Click one to preference it.",
+            "A different kind of new",
+            "Spring-loaded splines made a trusted paradigm faster. Alternate Intents asked a different question: what if the operator didn't have to instruct the vehicle at all? At any moment the AV's planning stack has already solved multiple paths forward — it just picks one and discards the rest. That solved intelligence is invisible to the operator. Alternate Intents surfaces the unchosen, already-computed routes as selectable ghost paths on the map. Click one to preference it.",
+            "1x1",
           ),
           cruiseMedia(
             "Select, don't instruct",
@@ -1067,49 +1029,19 @@ export const caseStudies: CaseStudy[] = [
           cruiseBeat(
             "When the human sees more",
             "Sometimes a person perceives what the sensors can't — a pedestrian waving the car through, a construction worker's gesture, social context the ML ranker has no access to. In those moments the AV's second-best path is the correct one, and the operator can redirect toward a route the vehicle had already validated.",
-            "1x1",
+            "9x16",
           ),
           cruiseBeat(
             "The stability problem",
             "Ghost paths flicker. The AV re-plans constantly, so alternates appear and vanish as the scene changes — you can't reliably click a path that might disappear in half a second. The tool only exposes alternates that hold past a stability threshold, scoped to conditions where stable options are likely.",
-            "9x16",
+            "1x1",
           ),
           cruiseBeat(
             "Artifact status",
-            "Never shipped. Cruise shut down before the behaviors-engineering collaboration needed to implement it in the AV stack could be completed. Figma prototypes exist.",
+            "Neither shipped. Cruise shut down before the behaviors-engineering collaboration needed to wire either into the AV stack could be completed. Figma prototypes exist for both — spring-loaded splines and Alternate Intents were the last ideas on the table when the lights went out.",
           ),
         ],
-      ),
-      cruiseVignette(
-        "maneuver-controls-ui",
-        "Maneuver Controls UI",
-        ["Interaction design", "Research", "Human factors"],
-        "Consumer patterns in safety-critical context / speed of access",
-        [
-          cruiseBeat(
-            "The constraint",
-            "Human factors mandated the upper half of the screen — the threat cone — stay free of UI. The vehicle points up, center screen. Everything else lives in the lower half.",
-          ),
-          cruiseBeat(
-            "The problem",
-            "HF built maneuver controls in a fly-out drawer, far bottom-right. Hidden by default. Operators connecting to a stuck vehicle need to read the scene, choose a maneuver, and engage — within three seconds. A drawer could cost a full second.",
-            "1x1",
-          ),
-          cruiseMedia(
-            "The solution",
-            "Floating toolbar at bottom center, permanently visible, clear iconography with color and shape language. Hotkeys for experienced operators — eyes stay on the scene.",
-            "16x9",
-          ),
-          cruiseBeat(
-            "The insight",
-            "Cruise's remote operators weren't air traffic controllers — they were regular people from food service and retail, making a little above minimum wage. A floating action toolbar with hotkeys is a video game pattern. Meeting them there was the correct design decision.",
-            "9x16",
-          ),
-          cruiseBeat(
-            "Outcome",
-            "The three-second target wasn't just a product requirement. It was only achievable if the interface spoke the user's native language.",
-          ),
-        ],
+        "1x1",
       ),
     ],
   },
