@@ -3925,6 +3925,198 @@ ul.cs-hero__subhead {
   }
 }
 
+/* ─── Prose layout variants ─────────────────────────────────────────────
+   Every variant lives on the master ruled grid and reuses the site type
+   tokens; only the column allocation changes. See `ProseVariant` in
+   content/portfolio.ts and the ProseBlock renderer. Row-gap on .site-grid
+   handles vertical rhythm between stacked rows. */
+
+/* Shared media frame. */
+.cs-prose__figure-wrap {
+  margin: 0;
+}
+
+.cs-prose__media-frame {
+  width: 100%;
+}
+
+.cs-prose__media-caption {
+  margin-top: 0.75rem;
+}
+
+/* 01 · Statement — one large single-measure line, no heading rail. */
+.cs-prose__statement {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+@media (min-width: 1024px) {
+  .cs-prose__statement {
+    grid-column: 1 / 11; /* wide measure, breathes on the right */
+  }
+}
+
+/* 03 · Two-column — full-width heading, body flowing across two columns. */
+.cs-prose__heading--wide {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.cs-prose__body--columns {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 1024px) {
+  .cs-prose__heading--wide {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+
+  .cs-prose__body--columns {
+    column-count: 2;
+    column-gap: var(--grid-gutter);
+  }
+
+  .cs-prose__body--columns .cs-prose__paragraph:first-child {
+    margin-top: 0;
+  }
+}
+
+/* 04 · Epigraph — oversized pull-quote + mono attribution. */
+.cs-prose__epigraph {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+@media (min-width: 1024px) {
+  .cs-prose__epigraph {
+    grid-column: 1 / 10; /* col 1, span 9 (three-quarter width) */
+  }
+}
+
+.cs-prose__quote {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.cs-prose__attribution {
+  display: block;
+  margin-top: clamp(1rem, 2vw, 1.5rem);
+}
+
+/* 05 · Meta rail — narrow mono-caps fact rail + body. */
+.cs-prose__meta {
+  grid-column: 1 / -1;
+}
+
+.cs-prose__body--meta {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 1024px) {
+  .cs-prose__meta {
+    grid-column: 1 / 4;
+  }
+
+  .cs-prose__body--meta {
+    grid-column: 4 / -1;
+  }
+}
+
+.cs-prose__meta-list {
+  margin: 0;
+}
+
+.cs-prose__meta-row {
+  padding: 0.75rem 0;
+  border-top: 0.5px solid var(--keyline-color);
+}
+
+.cs-prose__meta-row:last-child {
+  border-bottom: 0.5px solid var(--keyline-color);
+}
+
+.cs-prose__meta-label {
+  margin: 0;
+}
+
+.cs-prose__meta-value {
+  margin: 0.25rem 0 0;
+  color: var(--text-primary);
+}
+
+/* 06 · Figure — oversized display-metric figure + supporting prose. */
+.cs-prose__figure {
+  grid-column: 1 / -1;
+  container-type: inline-size; /* feeds display-metric's cqw sizing */
+}
+
+.cs-prose__body--figure {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 1024px) {
+  /* Stat bottom-aligned with supporting copy block. */
+  .cs-section--prose-figure .site-grid {
+    align-items: end;
+  }
+
+  .cs-prose__figure {
+    grid-column: 1 / 7;
+    align-self: end;
+  }
+
+  .cs-prose__body--figure {
+    grid-column: 7 / -1;
+    align-self: end;
+  }
+}
+
+.cs-prose__figure-value {
+  margin: 0;
+}
+
+/* Media beside prose — a visual the copy explains. */
+.cs-prose__media {
+  grid-column: 1 / -1;
+}
+
+.cs-prose__body--media {
+  grid-column: 1 / -1;
+}
+
+.cs-prose__heading--media {
+  margin: 0 0 clamp(0.75rem, 1.5vw, 1.25rem);
+}
+
+@media (min-width: 1024px) {
+  .cs-prose__media {
+    grid-column: 1 / 7;
+  }
+
+  .cs-prose__body--media {
+    grid-column: 7 / -1;
+    align-self: start;
+  }
+}
+
+/* Media band — full-measure media + centered caption/measure beneath. */
+.cs-prose__mediaband {
+  grid-column: 1 / -1;
+}
+
+.cs-prose__body--band {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 1024px) {
+  .cs-prose__body--band {
+    grid-column: 3 / 11; /* centered reading measure under the band */
+  }
+}
+
+
 /* Vignette section — generous vertical rhythm between header, gallery, caption. */
 .cs-vignette__grid {
   padding-top: var(--grid-row-gap);

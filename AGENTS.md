@@ -4,6 +4,19 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
+# Canonical layout references — one source, changes propagate
+
+`/layout-experiments` (`src/app/layout-experiments/page.tsx`) is the **living reference gallery** for the two reusable layout systems on this site: **prose layout variants** and **vignette panel types**. It is modeled as a synthetic case study and rendered through the exact same components the real case studies use, so the reference can never drift from production.
+
+**The rule: a layout change is made once, in the shared source, and shows up everywhere — the reference *and* every case study — automatically.** Never fork, copy, or re-implement these renderers to make a one-off tweak.
+
+Canonical sources (edit these; do not duplicate):
+- **Prose variants** — type: `ProseVariant`/`ProseSection` in `src/content/portfolio.ts` · renderer: `ProseBlock` (`src/components/case-studies/prose-block.tsx`) · styles: `.cs-prose__*` / `.cs-section--prose-*` in `globals.css`.
+- **Vignette panels** — renderer: `VignetteChapter` + `FrameContent` (`src/components/craft/vignette-chapter.tsx`) · panel authoring helpers (`cruiseBeat`/`cruiseMedia`/`cruiseStat` etc.) in `src/content/portfolio.ts` · styles: `.vframe*` / `.vchapter*` in `globals.css`.
+- **The detail deck** that hosts both — `CaseStudyDetail` (`src/components/case-studies/case-study-detail.tsx`), shared by `/case-studies/[slug]` and `/layout-experiments`.
+
+When you **add** a variant or panel type: extend the shared source above, then add one specimen to the synthetic study in `/layout-experiments` so the gallery stays complete. The layout-experiments page holds only placeholder *content/specimens* — no rendering logic lives there. (Throwaway harness: remove the page + its nav line once the systems are dialed in.)
+
 # Project backlog
 
 Prioritized work for this site. **Read before starting feature work**; update when items land or priorities shift. P0 = do next · P1 = soon · P2 = opportunistic.

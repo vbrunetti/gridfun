@@ -90,6 +90,7 @@ export const site = {
       { href: "/contact", label: "Contact" },
       { href: "/effects", label: "Effects" },
       { href: "/design-system", label: "Design System" },
+      { href: "/layout-experiments", label: "Layout Experiments" },
     ] satisfies MenuNavItem[],
     social: {
       linkedin: { href: "https://www.linkedin.com/in/brunetti/", label: "LinkedIn" },

@@ -124,13 +124,72 @@ export type CraftVignette = {
   images: VignetteImage[];
 };
 
+/**
+ * How a prose section allocates the master grid. Omit for the default `lede`
+ * split. Every variant lives on the same 12-column ruled grid and reuses the
+ * site type tokens — the layout changes, the vocabulary doesn't.
+ */
+export type ProseVariant =
+  /** Heading cols 1–4 · body cols 5–12. Connective glue between vignettes. */
+  | "lede"
+  /** One large single-measure line, no heading rail — a thesis / turning point. */
+  | "statement"
+  /** Full-width heading · body flowing across two columns — dense backstory. */
+  | "columns"
+  /** Oversized pull-quote + mono attribution — grounds the story in a real voice. */
+  | "epigraph"
+  /** Narrow mono-caps fact rail + body — annotated context (who / when / constraint). */
+  | "meta"
+  /** Oversized `display-metric` figure + supporting prose — land a number. */
+  | "figure"
+  /** Media beside prose — a visual the copy explains. */
+  | "media"
+  /** Full-measure media band + a centered caption beneath — a visual explainer. */
+  | "media-band";
+
+/** One row in a `meta`-variant context rail. */
+export type ProseMetaRow = { label: string; value: string };
+
+/** Figure for the `media` / `media-band` prose variants. */
+export type ProseMedia = {
+  /** Image / gif source. Use this OR `vimeo`; omit both for a placeholder ground. */
+  src?: string;
+  /** Vimeo id or URL — rendered as a borderless background loop. */
+  vimeo?: string;
+  /** Still shown behind Vimeo until the player is ready. */
+  poster?: string;
+  /** Frame shape; drives the aspect box. Default 16x9. */
+  ratio?: ImageRatio;
+  caption?: string;
+  /** Alt text for image sources; falls back to the caption. */
+  alt?: string;
+  /** Placeholder ground when no real source is provided. */
+  accent?: AccentKey;
+};
+
 export type ProseSection = {
   type: "prose";
   id: string;
+  /** Layout treatment; omit for the default `lede` split. */
+  variant?: ProseVariant;
   heading?: string;
   /** A paragraph or two — split on blank lines for multiple paragraphs. */
   body: string;
+  /** `epigraph` — attribution under the quote (e.g. "Kyle Vogt, CEO"). */
+  attribution?: string;
+  /** `figure` — oversized quantified figure locked huge (e.g. ">20%"). */
+  stat?: string;
+  /** `meta` — fact rows for the narrow context rail. */
+  meta?: ProseMetaRow[];
+  /** `media` / `media-band` — the figure the prose is built around. */
+  media?: ProseMedia;
 };
+
+/** Variant-specific extras a prose helper can forward onto its section. */
+export type ProseExtras = Omit<
+  ProseSection,
+  "type" | "id" | "heading" | "body"
+>;
 
 export type CaseStudySection = ProseSection | CraftVignette;
 
@@ -279,8 +338,9 @@ function cruiseProse(
   id: string,
   heading: string,
   body: string,
+  extras?: ProseExtras,
 ): ProseSection {
-  return { type: "prose", id, heading, body };
+  return { type: "prose", id, heading, body, ...extras };
 }
 
 /* ── Google content helpers (beats + glue prose) ───────────────── */
@@ -350,8 +410,13 @@ function googleVignette(
   };
 }
 
-function googleProse(id: string, heading: string, body: string): ProseSection {
-  return { type: "prose", id, heading, body };
+function googleProse(
+  id: string,
+  heading: string,
+  body: string,
+  extras?: ProseExtras,
+): ProseSection {
+  return { type: "prose", id, heading, body, ...extras };
 }
 
 /* ── Pearson content helpers (beats + glue prose) ──────────────── */
@@ -421,8 +486,13 @@ function pearsonVignette(
   };
 }
 
-function pearsonProse(id: string, heading: string, body: string): ProseSection {
-  return { type: "prose", id, heading, body };
+function pearsonProse(
+  id: string,
+  heading: string,
+  body: string,
+  extras?: ProseExtras,
+): ProseSection {
+  return { type: "prose", id, heading, body, ...extras };
 }
 
 export const caseStudies: CaseStudy[] = [
@@ -647,9 +717,9 @@ export const caseStudies: CaseStudy[] = [
     role: "Sr. UX Design Manager",
     tools: "Figma, Storybook",
     heroVideo: {
-      vimeo: "1205281684",
+      vimeo: "1207227235",
       opacity: 0.30,
-      poster: "/portfolio/cruise/cruise_title_poster.png",
+      poster: "/portfolio/cruise/cruise_title_poster2.png",
     },
     sections: [
       cruiseProse(
@@ -855,7 +925,7 @@ export const caseStudies: CaseStudy[] = [
         [
           cruiseBeat(
             "The old design",
-            "A plain rectangle with no front/back indication. A tiny spin icon above it — no orientation feedback, no rotation distance, no kinematic feasibility boundaries, poor hit targets, no affordance for drag-to-position.",
+            "A plain rectangle with no front/back indication. A tiny spin icon above it, with no orientation feedback, no rotation distance, no kinematic feasibility boundaries, poor hit targets, and no affordance for drag-to-position.",
           ),
           cruiseMedia(
             "The redesign",
@@ -864,12 +934,21 @@ export const caseStudies: CaseStudy[] = [
           ),
           cruiseBeat(
             "The deeper insight",
-            "Operators sent infeasible commands regularly — not from carelessness, but because the interface gave no way to know what was feasible. Every rejection created a round-trip. The redesign encoded physics upstream.",
+            "Operators sent infeasible commands regularly, not from carelessness, but because the interface gave no way to know what was feasible. Every rejection created a round-trip. The redesign encoded physics upstream.",
             "9x16",
           ),
           cruiseBeat(
+            "A second mode, built in",
+            "The ring wasn't the only way to use it. Leave it disengaged and simply move the mouse across the map instead, and a breadcrumb trail followed the cursor, with the vehicle loosely tracing it. To a user's eye, that looked almost identical to Assisted Pathing, a point dropped on the map. The difference was invisible and total: Assisted Pathing ran on the autonomy stack's own path solver, which is exactly what made it feel like a black box operators never fully trusted. This breadcrumb mode ran on Sudo's spatial solver instead, the same deterministic engine behind the ring itself. Same gesture from the user's side, a different brain underneath, and that's what earned the trust Assisted Pathing never did.",
+          ),
+          cruiseMedia(
+            "In practice",
+            "A real operator using the breadcrumb mode to navigate around a double-parked vehicle, without ever touching the ring.",
+            "16x9",
+          ),
+          cruiseBeat(
             "Outcome",
-            "Fewer round trips. Faster operations. Less operator frustration — validation moved from the AV's rejection loop into the interface itself.",
+            "Fewer round trips and faster operations for precise moves, plus a looser, quicker option for everything else. One widget, two grains of control: exact when the situation called for it, approximate when it didn't, both of them trusted because both finally ran on a solver operators could rely on.",
           ),
         ],
       ),
