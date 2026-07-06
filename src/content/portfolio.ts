@@ -731,6 +731,7 @@ export const caseStudies: CaseStudy[] = [
         "cruise-context-shift",
         "The design problem, restated",
         "Time was the stakes. Context was the mechanism. Once you accept that the AV already knows more than it shows, the design problem shifts from \"build a better display\" to \"translate machine perception into human-readable meaning.\" That's where the work below begins.",
+        { variant: "statement" },
       ),
       cruiseVignette(
         "reading-the-scene",
