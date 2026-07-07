@@ -860,7 +860,7 @@ export const caseStudies: CaseStudy[] = [
           ),
           cruiseStat(
             "Outcome",
-            "20%",
+            "~20%",
             "As a result of the improved map work, operators gained context about the scene ~20% faster and more accurately than before.",
             "1x1",
           ),

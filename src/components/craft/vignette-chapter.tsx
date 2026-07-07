@@ -119,6 +119,20 @@ function panelBgVar(bg: PanelBg, colorway: "dark" | "white" = "dark"): string {
   return "var(--panel-surface)";
 }
 
+/** Approximate em-width of a one-line display-metric string (no DOM measure). */
+function statEmWidth(stat: string): number {
+  let em = 0;
+  for (const ch of stat) {
+    if (ch === "%") em += 0.85;
+    else if (ch >= "0" && ch <= "9") em += 0.55;
+    else if (ch === ">" || ch === "<" || ch === "=") em += 0.48;
+    else if (ch === "~" || ch === "±") em += 0.42;
+    else em += 0.52;
+  }
+  // display-metric letter-spacing: -0.05em
+  return Math.max(em * 0.96, 1);
+}
+
 function FrameContent({
   vignette,
   frame,
@@ -146,7 +160,14 @@ function FrameContent({
           ) : null}
         </div>
         <footer className="vframe__foot vframe__foot--stat">
-          <p className="display-metric vframe__stat-figure">{frame.stat}</p>
+          <p
+            className="display-metric vframe__stat-figure"
+            style={
+              { "--stat-em": statEmWidth(frame.stat) } as React.CSSProperties
+            }
+          >
+            {frame.stat}
+          </p>
         </footer>
       </>
     );
@@ -459,7 +480,10 @@ export function VignetteChapter({
           : override.desktop
         : panelColSpan(kind, cols);
       const n = Math.max(1, Math.min(cols, span));
-      node.style.width = `${widthForCols(n)}px`;
+      const width = `${widthForCols(n)}px`;
+      if (node.style.width !== width) {
+        node.style.width = width;
+      }
     });
 
     // Expose the true 8-column master-grid width (measured off the ruler) so the
@@ -483,14 +507,24 @@ export function VignetteChapter({
     const stage = stageRef.current;
     if (!stage) return;
 
-    const observer = new ResizeObserver(() => applyLayout());
+    let rafId = 0;
+    const scheduleLayout = () => {
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = 0;
+        applyLayout();
+      });
+    };
+
+    const observer = new ResizeObserver(scheduleLayout);
     observer.observe(stage);
-    window.addEventListener("resize", applyLayout);
+    window.addEventListener("resize", scheduleLayout);
     applyLayout();
 
     return () => {
+      cancelAnimationFrame(rafId);
       observer.disconnect();
-      window.removeEventListener("resize", applyLayout);
+      window.removeEventListener("resize", scheduleLayout);
     };
   }, [applyLayout]);
 

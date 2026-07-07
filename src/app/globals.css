@@ -4966,6 +4966,12 @@ ul.cs-hero__subhead {
 
 .vframe__stat-figure {
   margin: 0;
+  align-self: stretch;
+  max-width: 100%;
+  min-width: 0;
+  /* Fill foot width on one line — no JS observers. --stat-em is the string's
+     approximate em-width; font-size = container ÷ em-width, capped by metric. */
+  font-size: min(var(--type-metric), calc(100cqw / var(--stat-em, 4)));
 }
 
 @media (max-width: 1023px) {
