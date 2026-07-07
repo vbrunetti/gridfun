@@ -114,6 +114,7 @@
   --type-display-lg: clamp(1.75rem, 4vw, 3.25rem);
   --type-display-md: clamp(1.375rem, 2.8vw, 2.65rem);
   --type-display-sm: clamp(1.125rem, 2vw, 1.75rem);
+  --type-display-sm-leading: 1.3;
 
   --type-heading-lg: clamp(1.25rem, 2vw, 1.5rem);
   --type-heading-md: clamp(1.0625rem, 1.5vw, 1.25rem);
@@ -1320,7 +1321,7 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
 .display-sm {
   font-size: var(--type-display-sm);
   font-weight: 700;
-  line-height: 1.15;
+  line-height: var(--type-display-sm-leading);
   letter-spacing: -0.02em;
 }
 
@@ -3925,6 +3926,18 @@ ul.cs-hero__subhead {
   }
 }
 
+/* Match the vignette panel type inset. On desktop a panel's content sits one
+   --panel-pad in from its left edge (grid col 1) — see .vframe__scroll /
+   .vchapter__pin. Inset prose content the same amount so prose type lines up
+   with panel type as the reader scrolls between them. Value mirrors the desktop
+   --panel-pad on .vchapter__pin. (Mobile already aligns: both sit at
+   --grid-margin, so no inset there.) */
+@media (min-width: 1024px) {
+  .cs-section--prose .site-grid > * {
+    padding-inline: clamp(1rem, 1.5vw, 1.5rem);
+  }
+}
+
 /* ─── Prose layout variants ─────────────────────────────────────────────
    Every variant lives on the master ruled grid and reuses the site type
    tokens; only the column allocation changes. See `ProseVariant` in
@@ -4735,6 +4748,97 @@ ul.cs-hero__subhead {
 
 .vchapter__tags {
   margin: 0;
+}
+
+/* ── Title-panel storytelling treatments (opt-in via CraftVignette.titleTreatment) ──
+   Opener as a "chapter cover": an oversized folio number over an accent color
+   field (`color`) or a full-bleed key image (`cover`). See the title panel in
+   vignette-chapter.tsx. */
+
+/* Oversized chapter folio — pinned to the TOP of the main band, title falls to
+   the BOTTOM (space-between), for maximum physical separation. Sized to rival
+   the display-metric stat figure. */
+.vchapter__index-big {
+  margin: 0;
+  font-weight: 700;
+  font-size: clamp(5rem, 15vw, 13rem);
+  line-height: 0.82;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
+.vframe--title[data-title-treatment] .vframe__main--title {
+  justify-content: space-between;
+}
+
+/* Both treatments run high-contrast light type over a saturated ground, and
+   bleed that ground LEFT past the panel edge to the chrome rail — the opener
+   reads as a full-bleed cover, not a boxed panel. The track is inset by
+   --grid-margin and the pin clips at the rail, so extending the ground left by
+   --grid-margin fills exactly to the rail. */
+.vframe--title[data-title-treatment="color"],
+.vframe--title[data-title-treatment="cover"] {
+  color: var(--color-paper);
+  overflow: visible; /* let the ground bleed left; the pin still clips at the rail */
+}
+
+/* Color field — accent ground from the inline --panel-bg (overrides the title
+   panel's default panel-surface background), extended left to the rail. */
+.vframe--title[data-title-treatment="color"] {
+  background: var(--panel-bg, var(--panel-surface));
+}
+
+.vframe--title[data-title-treatment="color"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 100%;
+  width: var(--title-bleed, var(--grid-margin));
+  background: var(--panel-bg, var(--panel-surface));
+}
+
+/* Cover — full-bleed key image + scrim behind the type, both extended left. */
+.vframe__title-cover {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.vframe__title-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.72) 0%,
+    rgba(0, 0, 0, 0.3) 48%,
+    rgba(0, 0, 0, 0.52) 100%
+  );
+  pointer-events: none;
+}
+
+/* next/image `fill` writes inline left/width, and a global img max-width:100%
+   clamps it — override both with !important so the cover spans rail→panel edge. */
+.vframe--title[data-title-treatment="cover"] .vframe__title-cover {
+  left: calc(-1 * var(--title-bleed, var(--grid-margin))) !important;
+  width: calc(100% + var(--title-bleed, var(--grid-margin))) !important;
+  max-width: none !important;
+}
+
+.vframe--title[data-title-treatment="cover"] .vframe__title-scrim {
+  left: calc(-1 * var(--title-bleed, var(--grid-margin)));
+  right: 0;
+}
+
+/* Type bands sit above the image/scrim. */
+.vframe--title[data-title-treatment] .vframe__kicker,
+.vframe--title[data-title-treatment] .vframe__main,
+.vframe--title[data-title-treatment] .vframe__foot {
+  position: relative;
+  z-index: 1;
 }
 
 .vchapter__track {

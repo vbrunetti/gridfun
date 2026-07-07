@@ -20,6 +20,7 @@ import {
   clientBrandColorVar,
   isClientBrandColor,
 } from "@/lib/client-brand-colors";
+import { palette } from "@/lib/colors";
 import { vignetteFrameSrc } from "@/lib/portfolio-assets";
 import { parseVimeoId } from "@/lib/vimeo";
 import { VimeoPlayer } from "@/components/media/vimeo-embed";
@@ -463,6 +464,12 @@ export function VignetteChapter({
       `${widthForCols(Math.min(8, cols))}px`,
     );
 
+    // Distance from the opener panel's left edge back to the pin (chrome rail).
+    // Title-panel treatments bleed their ground left by this to reach the rail —
+    // it grows with the centered grid's auto-margins, so a fixed --grid-margin
+    // isn't enough on wide viewports.
+    stage.style.setProperty("--title-bleed", `${insetRef.current}px`);
+
     applyOffset(offsetRef.current, false);
   }, [applyOffset, panelKinds, panelWidths]);
 
@@ -652,18 +659,63 @@ export function VignetteChapter({
             }}
             className={`vframe vframe--title${index === 0 ? " is-active" : ""}`}
             data-vframe-index={0}
-            style={panelWidthVars(
-              vignette.titlePanelWidth,
-              "--title-cols",
-              "--title-cols-mobile",
-            )}
+            data-title-treatment={vignette.titleTreatment}
+            style={{
+              ...panelWidthVars(
+                vignette.titlePanelWidth,
+                "--title-cols",
+                "--title-cols-mobile",
+              ),
+              ...(vignette.titleTreatment === "color"
+                ? {
+                    ["--panel-bg" as string]: isClientBrandColor(
+                      vignette.keyImageAccent,
+                    )
+                      ? clientBrandColorVar(vignette.keyImageAccent)
+                      : palette[vignette.keyImageAccent],
+                  }
+                : {}),
+            }}
           >
+            {vignette.titleTreatment === "cover" && vignette.keyImageSrc ? (
+              <>
+                <Image
+                  src={vignette.keyImageSrc}
+                  alt=""
+                  fill
+                  priority
+                  draggable={false}
+                  className="vframe__title-cover"
+                  sizes="(max-width: 767px) 92vw, min(100vw, 90rem)"
+                  style={{
+                    ...(vignette.titleCoverBlur
+                      ? {
+                          filter: `blur(${vignette.titleCoverBlur}px)`,
+                          // Overfill so the blur doesn't feather transparent edges.
+                          transform: "scale(1.06)",
+                        }
+                      : {}),
+                    ...(vignette.titleCoverAlpha != null
+                      ? { opacity: vignette.titleCoverAlpha }
+                      : {}),
+                  }}
+                />
+                <div className="vframe__title-scrim" aria-hidden />
+              </>
+            ) : null}
             <header className="vframe__kicker">
-              <p className="vframe__kicker-text text-meta vchapter__index">
-                {String(chapterNumber).padStart(2, "0")}
-              </p>
+              {!vignette.titleTreatment ? (
+                <p className="vframe__kicker-text text-meta vchapter__index">
+                  {String(chapterNumber).padStart(2, "0")}
+                </p>
+              ) : null}
             </header>
             <div className="vframe__main vframe__main--title">
+              {vignette.titleTreatment ? (
+                <p className="vchapter__index-big">
+                  {String(chapterNumber).padStart(2, "0")}
+                </p>
+              ) : null}
               <h2 className="display-2xl vchapter__title">{vignette.name}</h2>
             </div>
             <footer className="vframe__foot vframe__foot--title">

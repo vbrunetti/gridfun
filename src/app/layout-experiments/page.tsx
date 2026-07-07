@@ -108,7 +108,8 @@ const panelInventory: CraftVignette = {
   slug: "panel-inventory",
   name: "Panel Inventory",
   keyImageRatio: "16x9",
-  keyImageAccent: CRUISE,
+  keyImageAccent: "cruise", // vibrant ground for the color-field title treatment
+  titleTreatment: "color",
   tags: ["Title", "Beat", "Stat", "Media"],
   themeLine: "Every filmstrip panel type in one chapter",
   titlePanelWidth: { desktop: 8, mobile: 6 },
@@ -164,6 +165,38 @@ const panelInventory: CraftVignette = {
   ],
 };
 
+/** Second chapter — same filmstrip, but a full-bleed cover-image title panel. */
+const titleCoverDemo: CraftVignette = {
+  type: "vignette",
+  slug: "title-cover-demo",
+  name: "Reading the Scene",
+  keyImageRatio: "16x9",
+  keyImageAccent: CRUISE,
+  keyImageSrc: "/portfolio/cruise/cruise_v1_full.jpg",
+  titleTreatment: "cover",
+  titleCoverBlur: 4, // demo — sharpen by lowering/removing
+  titleCoverAlpha: 0.7, // demo — screen it back; raise toward 1 for a bolder photo
+  tags: ["Visual design", "Data visualization", "Human factors"],
+  themeLine: "Cover-image title treatment",
+  titlePanelWidth: { desktop: 8, mobile: 6 },
+  images: [
+    {
+      ratio: "16x9",
+      accent: CRUISE,
+      colorField: true,
+      label: "The problem",
+      body: "Operators viewed the AV scene entirely in orange-on-black — every object type rendered identically.",
+    },
+    {
+      ratio: "16x9",
+      accent: CRUISE,
+      label: "In scene",
+      caption: "Objects read at a glance once color + shape carried meaning.",
+      src: "/portfolio/cruise/cruise_v1_full.jpg",
+    },
+  ],
+};
+
 const experimentsStudy: CaseStudy = {
   slug: "layout-experiments",
   name: "Layout Experiments",
@@ -175,7 +208,7 @@ const experimentsStudy: CaseStudy = {
   role: "Reference",
   tools: "Source of truth",
   brand: { field: "cruise-primary" },
-  sections: [...proseVariants, panelInventory],
+  sections: [...proseVariants, panelInventory, titleCoverDemo],
 };
 
 export default function LayoutExperimentsPage() {

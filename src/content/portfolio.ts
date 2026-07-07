@@ -121,6 +121,16 @@ export type CraftVignette = {
   status?: string;
   /** Opener panel width in grid columns; omit to use the title-panel default. */
   titlePanelWidth?: PanelWidth;
+  /**
+   * Title-panel storytelling treatment (opener). Omit for the plain dark panel.
+   * `color` = accent color field + oversized chapter number.
+   * `cover` = full-bleed `keyImageSrc` with the number/title/tags overlaid.
+   */
+  titleTreatment?: "color" | "cover";
+  /** `cover` only — Gaussian blur radius (px) on the photo. Omit/0 for a sharp image. */
+  titleCoverBlur?: number;
+  /** `cover` only — photo opacity, 0–1 (screens it back over black). Omit = fully opaque. */
+  titleCoverAlpha?: number;
   images: VignetteImage[];
 };
 
@@ -313,6 +323,11 @@ function cruiseStat(
   };
 }
 
+type VignetteTitlePanel = Pick<
+  CraftVignette,
+  "titleTreatment" | "keyImageSrc" | "titleCoverBlur" | "titleCoverAlpha"
+>;
+
 function cruiseVignette(
   slug: string,
   name: string,
@@ -320,6 +335,7 @@ function cruiseVignette(
   themeLine: string,
   images: VignetteImage[],
   keyImageRatio: ImageRatio = "16x9",
+  titlePanel?: VignetteTitlePanel,
 ): CraftVignette {
   return {
     type: "vignette",
@@ -331,6 +347,7 @@ function cruiseVignette(
     themeLine,
     titlePanelWidth: TITLE_PANEL_WIDTH,
     images,
+    ...titlePanel,
   };
 }
 
@@ -719,18 +736,17 @@ export const caseStudies: CaseStudy[] = [
     heroVideo: {
       vimeo: "1207227235",
       opacity: 0.30,
-      poster: "/portfolio/cruise/cruise_title_poster2.png",
     },
     sections: [
       cruiseProse(
         "cruise-intro",
         "Tick Tock",
-        "Cruise's Terminal wasn't originally built for what it needed to become. In the early days, autonomous drives ran at night, when the streets were empty, there was no traffic to negotiate, and no police officers or emergency vehicles to manage. Terminal v1 was built for that world: get the remote operator's mental model of the scene to match ground truth as closely as possible, and record everything. Signal fidelity was the priority, which was a reasonable design for a testing program.\n\nThen the business needed to scale into real hours and real traffic on real streets, and the old model turned out to be solving the wrong problem. Signal fidelity didn't matter much if the vehicle was still sitting there ten seconds later. Our CEO at the time, Kyle Vogt, put a number on why: the risk of a Vehicle Recovery Event (a tow truck sent to retrieve a failed AV in the field) grew exponentially with every second the vehicle stayed stuck. Time wasn't one factor among many; it was the factor.\n\nThe counterintuitive part was that the exact right direction mattered less than simply moving. A vehicle correcting itself imperfectly but visibly in motion read as competent, like it was still working and on its way. A vehicle sitting dead still, even for a few extra seconds while an operator built the perfect plan, read as broken: an inert two-ton lump of batteries and computers, both to the rider inside and to everyone outside. Progress, not perfection, was the signal that mattered.\n\nThat reframing is the actual thesis behind everything below. Two numbers governed the redesign: time to first action, meaning how fast an operator could read a scene and issue any instruction at all, and time to resolution, meaning how fast the vehicle was actually moving again. Each vignette below is one move toward compressing one or both of those numbers, in service of one goal: get the car moving, now.",
+        `Cruise's Terminal wasn't built for 500 driverless rides per day. It was built for driving at night, when the streets were empty, and there was no traffic to negotiate, and no police officers or emergency vehicles to manage. Terminal v1 was built to answer a core question, "can we get the remote operator's mental model of the scene to match ground truth?" Signal fidelity was the priority, which was reasonable for a fledgling program.\n\nThen the business needed to scale into real hours and real traffic on real streets, and the old model turned out to be solving the wrong problem. Signal fidelity didn't matter much if the vehicle was still sitting there ten minutes later. Our CEO, Kyle Vogt, put it this way: the risk of a Vehicle Recovery Event (a tow truck being sent to retrieve a failed AV in the field) grew exponentially with every second the vehicle stayed stuck. Time wasn't one factor among many; it was the factor.\n\nThe counterintuitive part was that the exact right trajectory mattered less than simply moving. A vehicle correcting itself as it gained forward motion read as competent, like it was working and on its way. A vehicle sitting dead still read as broken, like an inert two-ton lump of batteries and computers, to the rider inside and to everyone outside. Progress, not perfection, was the signal that mattered.\n\nThat reframing is the actual thesis behind everything below. Two numbers governed the redesign: time to first action (TTFA), meaning how fast an operator could read a scene and issue any instruction at all, and time to resolution (TTR), meaning how fast the vehicle was back in autonomous mode with the operator disconnected. Each vignette below is in service of one goal: get the car moving, now.`,
       ),
       cruiseProse(
         "cruise-context-shift",
         "The design problem, restated",
-        "Time was the stakes. Context was the mechanism. Once you accept that the AV already knows more than it shows, the design problem shifts from \"build a better display\" to \"translate machine perception into human-readable meaning.\" That's where the work below begins.",
+        "Once you accepted that the AV already knew more than it was showing operators, the design problem became about translating machine perception into human-readable meaning.",
         { variant: "statement" },
       ),
       cruiseVignette(
@@ -826,8 +842,7 @@ export const caseStudies: CaseStudy[] = [
           ),
           cruiseBeat(
             "One more gap",
-            "Object classification and vehicle intent solved what was happening on the map right now. But operators arriving fresh on a vehicle were still starting from zero, context-blind to what had happened moments before they connected: what the previous operator had done, what the vehicle had tried autonomously, why the car was stopped at all. In a safety-critical system, that cold start could mean the wrong action, or critical seconds spent reconstructing a situation someone else already understood.",
-            "1x1",
+            "Object classification and vehicle intent solved for what was happening on the map at the time, but operators gaining context after freshly connecting to an AV were starting from zero, context-blind to what had happened moments before they connected. There was so much context lost: what the previous operator had done, what the vehicle had tried autonomously, why the car was stopped at all. In a safety-critical system, that cold start could mean the wrong action, or critical seconds spent by operators reconstructing a scene the vehicle already understood.",            "1x1",
           ),
           cruiseMedia(
             "The solution",
@@ -839,6 +854,13 @@ export const caseStudies: CaseStudy[] = [
             "What previously required a verbal debrief between operators, or an educated guess, became a 5-second visual scan. Three different signals, one throughline: surface what the machine already knew, in a form a human under stress could read in seconds.",
           ),
         ],
+        "16x9",
+        {
+          titleTreatment: "cover",
+          keyImageSrc: "/portfolio/cruise/Cruise_v1_cover.jpg",
+          titleCoverBlur: 0,
+          titleCoverAlpha: 0.7,
+        },
       ),
       cruiseProse(
         "cruise-ecosystem",
