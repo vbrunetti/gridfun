@@ -160,7 +160,7 @@ const panelInventory: CraftVignette = {
       label: "Stat",
       stat: "~20%",
       body: "Quantified impact: kicker + lede + oversized display-metric figure.",
-      width: { desktop: 8, mobile: 6 },
+      width: { desktop: 12, mobile: 6 },
     },
   ],
 };

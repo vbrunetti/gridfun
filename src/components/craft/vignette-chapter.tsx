@@ -161,7 +161,13 @@ function FrameContent({
           ) : null}
         </header>
         <div className="vframe__main vframe__main--field">
-          {frame.body ? <p className="display-sm vframe__beat">{frame.body}</p> : null}
+          {frame.body
+            ? frame.body.split("\n\n").map((paragraph, i) => (
+                <p key={i} className="display-sm vframe__beat">
+                  {paragraph}
+                </p>
+              ))
+            : null}
         </div>
         <footer className="vframe__foot" aria-hidden />
       </>
@@ -284,8 +290,8 @@ export function VignetteChapter({
   const panelKinds = useMemo<PanelKind[]>(
     () =>
       showTitlePanel
-        ? ["title", ...frames.map((f) => (f.colorField || f.stat ? "field" : f.ratio))]
-        : frames.map((f) => (f.colorField || f.stat ? "field" : f.ratio)),
+        ? ["title", ...frames.map((f) => (f.colorField ? "field" : f.ratio))]
+        : frames.map((f) => (f.colorField ? "field" : f.ratio)),
     [frames, showTitlePanel],
   );
 
@@ -738,7 +744,11 @@ export function VignetteChapter({
                   panelRefs.current[idx] = node;
                 }}
                 className={`vframe vframe--${frame.ratio}${
-                  frame.colorField || frame.stat ? " vframe--field" : " vframe--media"
+                  frame.colorField
+                    ? " vframe--field"
+                    : frame.stat
+                      ? ""
+                      : " vframe--media"
                 }${frame.stat ? " vframe--stat" : ""}${
                   idx === index ? " is-active" : ""
                 }`}

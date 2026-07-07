@@ -4947,8 +4947,15 @@ ul.cs-hero__subhead {
   grid-template-rows: var(--panel-kicker) 1fr auto;
 }
 
+.vframe__main--stat {
+  align-items: stretch;
+}
+
 .vframe__stat-lede {
-  max-width: 34ch;
+  margin: 0;
+  max-width: none;
+  width: 100%;
+  min-width: 0;
 }
 
 /* The foot band is the query container: its content box already excludes the
@@ -4996,6 +5003,10 @@ ul.cs-hero__subhead {
 /* ── Prose beat — lives in the main band ── */
 .vframe__beat {
   margin: 0;
+}
+
+.vframe__beat + .vframe__beat {
+  margin-top: 1.75rem;
 }
 
 /* ── Media — scale to the largest size that fits the main band (contain) ── */

@@ -259,6 +259,13 @@ export type CaseStudy = {
  */
 const TITLE_PANEL_WIDTH = { desktop: 8, mobile: 6 } as const satisfies PanelWidth;
 
+/** Default filmstrip width per aspect ratio — matches `panelColSpan` in vignette-chapter. */
+const RATIO_PANEL_WIDTH = {
+  "16x9": { desktop: 12, mobile: 6 },
+  "1x1": { desktop: 8, mobile: 6 },
+  "9x16": { desktop: 6, mobile: 6 },
+} as const satisfies Record<ImageRatio, PanelWidth>;
+
 /* ── Cruise content helpers (beats + glue prose) ───────────────── */
 const cruiseAccent = "charcoal" as const satisfies AccentKey;
 
@@ -316,9 +323,7 @@ function cruiseStat(
     label,
     stat,
     body,
-    // Stat panels run wider than a text beat so the figure can dominate;
-    // full-bleed on mobile. Override per-frame if a figure needs more/less room.
-    width: { desktop: 8, mobile: 6 },
+    width: RATIO_PANEL_WIDTH[ratio],
     ...(panelBg ? { panelBg } : {}),
   };
 }
@@ -741,7 +746,7 @@ export const caseStudies: CaseStudy[] = [
       cruiseProse(
         "cruise-intro",
         "Tick Tock",
-        `Cruise's Terminal wasn't built for 500 driverless rides per day. It was built for driving at night, when the streets were empty, and there was no traffic to negotiate, and no police officers or emergency vehicles to manage. Terminal v1 was built to answer a core question, "can we get the remote operator's mental model of the scene to match ground truth?" Signal fidelity was the priority, which was reasonable for a fledgling program.\n\nThen the business needed to scale into real hours and real traffic on real streets, and the old model turned out to be solving the wrong problem. Signal fidelity didn't matter much if the vehicle was still sitting there ten minutes later. Our CEO, Kyle Vogt, put it this way: the risk of a Vehicle Recovery Event (a tow truck being sent to retrieve a failed AV in the field) grew exponentially with every second the vehicle stayed stuck. Time wasn't one factor among many; it was the factor.\n\nThe counterintuitive part was that the exact right trajectory mattered less than simply moving. A vehicle correcting itself as it gained forward motion read as competent, like it was working and on its way. A vehicle sitting dead still read as broken, like an inert two-ton lump of batteries and computers, to the rider inside and to everyone outside. Progress, not perfection, was the signal that mattered.\n\nThat reframing is the actual thesis behind everything below. Two numbers governed the redesign: time to first action (TTFA), meaning how fast an operator could read a scene and issue any instruction at all, and time to resolution (TTR), meaning how fast the vehicle was back in autonomous mode with the operator disconnected. Each vignette below is in service of one goal: get the car moving, now.`,
+        `Cruise's Terminal wasn't built for 500 driverless rides per day. It was built for driving at night, when the streets were empty, and there was no traffic to negotiate, and no police officers or emergency vehicles to manage. Terminal v1 was built to answer a core question, "can we get the remote operator's mental model of the scene to match ground truth?" Signal fidelity was the priority, which was reasonable for a fledgling program. Then the business needed to scale into real hours and real traffic on real streets, and the old model turned out to be solving the wrong problem. Signal fidelity didn't matter much if the vehicle was still sitting there ten minutes later. Our CEO, Kyle Vogt, put it this way: the risk of a Vehicle Recovery Event (a tow truck being sent to retrieve a failed AV in the field) grew exponentially with every second the vehicle stayed stuck. Time wasn't one factor among many; it was the factor.\n\nThe counterintuitive part was that the exact right trajectory mattered less than simply moving. A vehicle correcting itself as it gained forward motion read as competent, like it was working and on its way. A vehicle sitting dead still read as broken, like an inert two-ton lump of batteries and computers, to the rider inside and to everyone outside. Progress, not perfection, was the signal that mattered.\n\nThat reframing is the actual thesis behind everything below. Two numbers governed the redesign: time to first action (TTFA), meaning how fast an operator could read a scene and issue any instruction at all, and time to resolution (TTR), meaning how fast the vehicle was back in autonomous mode with the operator disconnected. Each vignette below is in service of one goal: get the car moving, now.`,
       ),
       cruiseProse(
         "cruise-context-shift",
@@ -795,15 +800,9 @@ export const caseStudies: CaseStudy[] = [
             "16x9",
             "/portfolio/cruise/cruise_v1_full.jpg",
           ),
-          cruiseStat(
-            "Outcome",
-            "20%",
-            "As a result of the improved map work, operators gained context about the scene ~20% faster and more accurately than before.",
-            "16x9",
-          ),
           cruiseBeat(
             "The next layer",
-            "Color and shape solved what an object was. The next question was what the vehicle intended to do about it, a harder signal to surface. The AV is non-deterministic. A true ML ranker refreshing its decision-making potentially hundreds of times per second. When the vehicle decided what to do, it rendered for the operator as a single-color path spline projecting 50 meters ahead. No speed intent. Unreliable stop point visualizations. Little scene context explaining why the vehicle was behaving the way it was. Operators would watch the vehicle do anything, at any time, for any reason, and when it inexplicably stopped, they had no explanation and no obvious way to get it moving again.",
+            "Color and shape solved what an object was. The next question was what the vehicle intended to do about it, a harder signal to surface. The AV is non-deterministic. A true ML ranker refreshing its decision-making potentially hundreds of times per second. When the vehicle decided what to do, it rendered for the operator as a single-color path spline projecting 50 meters ahead. No speed intent. Unreliable stop point visualizations. Little scene context explaining why the vehicle was behaving the way it was.\n\nOperators would watch the vehicle do anything, at any time, for any reason, and when it inexplicably stopped, they had no explanation and no obvious way to get it moving again.",
           ),
           cruiseMedia(
             "The constraint",
@@ -842,16 +841,28 @@ export const caseStudies: CaseStudy[] = [
           ),
           cruiseBeat(
             "One more gap",
-            "Object classification and vehicle intent solved for what was happening on the map at the time, but operators gaining context after freshly connecting to an AV were starting from zero, context-blind to what had happened moments before they connected. There was so much context lost: what the previous operator had done, what the vehicle had tried autonomously, why the car was stopped at all. In a safety-critical system, that cold start could mean the wrong action, or critical seconds spent by operators reconstructing a scene the vehicle already understood.",            "1x1",
+            "Object classification and vehicle intent solved for what was happening on the map at the time, but operators gaining context after freshly connecting to an AV were starting from zero, context-blind to what had happened moments before they connected. There was so much context lost: what the previous operator had done, what the vehicle had tried autonomously, why the car was stopped at all, etc.\n\nIn a safety-critical system, that cold start could mean the wrong action, or critical seconds spent by operators reconstructing a scene the vehicle already understood.",
+            "1x1",
           ),
           cruiseMedia(
             "The solution",
             "A coarse-grained event timeline, pulling from vehicle event APIs already exposed but never rendered, gave incoming operators a readable history: stops, collisions, overrides, course changes. Paired with a \"what is the vehicle dealing with\" panel: big icons, color-coded, with timers showing how long each condition had been active, plus the sequential steps to resolve it.",
-            "16x9",
+            "1x1",
+            {
+              sources: [
+                "/portfolio/cruise/Cruise_v3_c1.jpg",
+                "/portfolio/cruise/Cruise_v3_c2.jpg",
+                "/portfolio/cruise/Cruise_v3_c3.jpg",
+                "/portfolio/cruise/Cruise_v3_c4.jpg",
+                "/portfolio/cruise/Cruise_v3_c5.jpg",
+              ],
+            },
           ),
-          cruiseBeat(
+          cruiseStat(
             "Outcome",
-            "What previously required a verbal debrief between operators, or an educated guess, became a 5-second visual scan. Three different signals, one throughline: surface what the machine already knew, in a form a human under stress could read in seconds.",
+            "20%",
+            "As a result of the improved map work, operators gained context about the scene ~20% faster and more accurately than before.",
+            "1x1",
           ),
         ],
         "16x9",
