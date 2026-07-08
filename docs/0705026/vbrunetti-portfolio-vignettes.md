@@ -3,35 +3,36 @@
 
 ---
 
-## SITE SYNC STATUS — updated 2026-07-05
+## SITE SYNC STATUS — updated 2026-07-06 (re-synced from live portfolio.ts)
 
-This doc is the unabridged capture of every vignette as dictated — it doesn't get rewritten to match the site. `src/content/portfolio.ts` is the edited, consolidated, public-facing version. This section tracks where the two currently stand relative to each other, so a morning-walk conversation always knows what's live.
+This doc is the unabridged capture of every vignette as dictated — it doesn't get rewritten to match the site. `src/content/portfolio.ts` is the edited, consolidated, public-facing version, and it is the single most accurate record of current content, since Victor also edits it directly and via Claude Code, outside of this thread. This section tracks where the two currently stand, re-synced by reading the live file rather than assumed from memory.
 
-**Sync convention going forward:** when a walk conversation produces a new vignette or a firm change to an existing one, it gets (1) added/updated here in full, dictated form, and (2) ported into `portfolio.ts` in the same session, in whatever edited/condensed form fits the site. This status block gets updated at the end of that session so the next one starts oriented.
+**Sync convention:** when a walk conversation produces a new vignette or a firm change to an existing one, it gets (1) added/updated here in full, dictated form, and (2) ported into `portfolio.ts` in the same session. Because Claude Code also edits `portfolio.ts` directly (layout/type work, copy tweaks), this doc should periodically be re-synced *from* the live file, not assumed current from the last session alone. This pass was one of those re-syncs.
 
-**Cruise — thesis locked, chapter reordered around it (2026-07-05 session):**
+**Cruise — thesis locked, chapter restructured, some further edits made outside this thread:**
 
-The chapter thesis is now: everything is in service of *time*. Origin story, VRE risk, and the "movement over perfection" insight (all below) reframed the intro from a pure "context gain" pitch to a time-to-first-action / time-to-resolution pitch. Intro is retitled **"Tick Tock"** and locked from a prose standpoint (visual/layout treatment still open, being handled with Claude Code directly, not in this thread).
+Current live order in `portfolio.ts`:
+1. **Tick Tock** (prose, intro) — rewritten again since last sync, now defines TTFA and TTR by name directly in the prose ("time to first action (TTFA)... time to resolution (TTR), meaning how fast the vehicle was back in autonomous mode with the operator disconnected"). Note: TTR is now defined as *operator disconnects, back to autonomous*, not simply "vehicle moving again" — a real definitional shift worth Victor confirming is intentional. Also flag: the line "signal fidelity didn't matter much if the vehicle was still sitting there ten minutes later" reads oddly against a chapter thesis built on *seconds* mattering — worth a sanity check, may be intentional emphasis, may be a slip.
+2. Bridge: "The design problem, restated" — shortened since last sync, now uses a new `variant: "statement"` field on the prose-section type (Claude Code addition, a bigger visual treatment for statement-style bridges).
+3. **Reading the Scene** (lead vignette) — locked content mostly intact. Since last sync: the event-timeline beat now has real media (`Cruise_v3_c1` through `c5.jpg`, previously placeholder), the ~20% stat moved from mid-vignette to the closing beat (replacing the old plain-text "Outcome" close), and the vignette now uses a new `titleTreatment: "cover"` option (Claude Code addition) with a real cover image (`Cruise_v1_cover.jpg`).
+4. Bridge: "The room around the operator" — unchanged, grounded in the real Users & Ecosystem personas.
+5. **Designing the Container** — unchanged, em dashes not yet cleaned (queued, one vignette at a time).
+6. **Who's Driving? — Control Handoff Visualization** — unchanged.
+7. **AV Positioning Control Ring** — expanded to six beats this session: added "A second mode, built in" and "In practice," covering the breadcrumb/Sudo-solver mode hiding in the same widget (this is where the previously-cut "Drop a Pin" material actually lives, no separate callout needed). "In practice" is a placeholder pending the real testing-footage video from Victor. Position still provisional relative to items 8-10.
+8. **AV State Module** — unchanged.
+9. **Coordination** — unchanged.
+10. **The Camera Array Redesign That Didn't Work** — unchanged, still deliberately placed after a run of wins.
+11. **New Maneuver Types (Speculative)** — unchanged. *(Analyzed this session: bundling Control Ring + Spring-Loaded Splines + Alternate Intents into one "three ways to provide direct spatial input" vignette was discussed at length and reads as a strong idea, escalating from full manual control to zero manual control, but has NOT been executed. Still two separate vignettes on the live site.)*
 
-Current live order:
-1. **Tick Tock** (prose, intro) — the time thesis, origin story, Kyle Vogt/VRE framing
-2. Bridge: "The design problem, restated" — houses Victor's favorite line ("once you accept that the AV already knows more than it shows...")
-3. **Reading the Scene** (lead vignette) — merge of V1+V2+V3, rewritten em-dash-free, locked. Reordered to be the very first vignette a reader sees, since it's the fullest, most direct proof of the thesis (ends on "one click, car moves").
-4. Bridge: "The room around the operator" — new, introduces the user ecosystem (Remote Assistant Advisor, Customer Service, Subject-Matter Expert, Supervisor, Customer), grounded in the real "Users & Their Ecosystem" section from the old live site. Pivots into container/layout.
-5. **Designing the Container** — merge of V5+V13, unchanged content, em dashes not yet cleaned (queued, going one vignette at a time per Victor's preference)
-6. **Who's Driving? — Control Handoff Visualization** — standalone, unchanged
-7. AV Positioning Control Ring — standalone, unchanged. *(Provisional position — Victor specified vignettes 1-4 above explicitly; 7-10 are Claude's best-guess placement for the remainder, pending confirmation.)*
-8. AV State Module — standalone, unchanged
-9. **Coordination** — merge of V8+V10, unchanged
-10. The Camera Array Redesign That Didn't Work — standalone, unchanged, still deliberately placed after a run of wins
-11. **New Maneuver Types (Speculative)** — pairing of V11+V12, closes the chapter
-
-Retired bridges (content superseded, not lost): "cruise-scene-legibility" (its best line moved to bridge #2 above), "cruise-vehicle-state" (orphaned once Reading the Scene stopped being adjacent to AV State Module), "cruise-layout" (its idea folded into the tail of bridge #4 above).
+The hero video for this case study also changed since last sync (new Vimeo ID, no poster set currently).
 
 **Open items:**
-- Confirm the provisional order of items 7-10 above, or rework.
-- Decide whether to fold the real TTFA/AHT/TiRA numbers (see new section below) into Tick Tock's prose or save them for a future stat-card visual moment.
-- Layout/visual treatment of Tick Tock (stat cards, b-roll) is being handled directly with Claude Code, not here.
+- Confirm final order of items 7-10.
+- Decide: execute the Control Ring / Spring-Loaded Splines / Alternate Intents bundle, or leave as two vignettes.
+- Confirm the TTR redefinition and the "ten minutes" line in Tick Tock are intentional.
+- Decide whether to fold TTFA/AHT/TiRA into Tick Tock's prose (partially done — TTFA/TTR now named, AHT/TiRA still not mentioned) or save for a stat-card visual.
+- Get the real Control Ring testing video (double-parked-vehicle breadcrumb clip) for the "In practice" beat.
+- Layout/visual work (stat cards, b-roll, cover treatments) continues with Claude Code; the two new type fields it introduced (`variant` on prose sections, `titleTreatment`/`keyImageSrc`/`titleCoverBlur`/`titleCoverAlpha` on vignettes) are now in the live schema.
 
 **Google — no structural changes.** Code Yellow vignette has its "ads team carries unusual weight" setup line in place. Copy refinements still TBD.
 

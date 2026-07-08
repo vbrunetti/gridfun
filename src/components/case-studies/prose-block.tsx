@@ -64,18 +64,15 @@ function ProseFigure({
       />
     );
   } else if (media.src) {
-    const dims = ratioDims(ratio);
     frame = (
-      <div
-        className="cs-prose__media-frame media-frame-ground relative w-full overflow-hidden"
-        style={{ aspectRatio: aspect } as CSSProperties}
-      >
+      <div className="cs-prose__media-frame">
         <Image
           src={media.src}
           alt={media.alt ?? media.caption ?? ""}
-          width={dims.width}
-          height={dims.height}
+          width={0}
+          height={0}
           className="h-auto w-full"
+          style={{ width: "100%", height: "auto" }}
           sizes="(max-width: 1023px) 100vw, 60vw"
         />
       </div>

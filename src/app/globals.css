@@ -3953,6 +3953,12 @@ ul.cs-hero__subhead {
   width: 100%;
 }
 
+/* Prose media is full-bleed content — no placeholder chrome border. */
+.cs-prose__figure-wrap .media-frame-ground {
+  border: none;
+  background-color: transparent;
+}
+
 .cs-prose__media-caption {
   margin-top: 0.75rem;
 }
@@ -4114,7 +4120,7 @@ ul.cs-hero__subhead {
   }
 }
 
-/* Media band — full-measure media + centered caption/measure beneath. */
+/* Media band — full-measure media + left-aligned 8-col body beneath. */
 .cs-prose__mediaband {
   grid-column: 1 / -1;
 }
@@ -4125,7 +4131,7 @@ ul.cs-hero__subhead {
 
 @media (min-width: 1024px) {
   .cs-prose__body--band {
-    grid-column: 3 / 11; /* centered reading measure under the band */
+    grid-column: 1 / 9; /* left-aligned 8-column measure under the band */
   }
 }
 
