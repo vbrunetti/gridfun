@@ -36,6 +36,13 @@ export type CaseStudyDetailScrollState = {
   steps: CaseStudyDetailStep[];
   activeStep: number;
   scrollToStep: (index: number) => void;
+  /** Scroll to a specific panel within a vignette row (per-panel dot nav). */
+  scrollToPanel: (stepIndex: number, panelIndex: number) => void;
+  /**
+   * Dot granularity. false (default, case-study detail) = one dot per section/
+   * vignette. true (single-vignette craft detail) = one dot per panel.
+   */
+  panelDots: boolean;
   visible: boolean;
   vignetteProgress: VignettePanelProgress | null;
   hoverStep: number | null;
@@ -95,13 +102,17 @@ export function useCaseStudyDetailScrollRegister(
   steps: CaseStudyDetailStep[],
   activeStep: number,
   scrollToStep: (index: number) => void,
+  scrollToPanel: (stepIndex: number, panelIndex: number) => void,
   visible: boolean,
   hoverStep: number | null,
   setHoverStep: (step: number | null) => void,
+  panelDots = false,
 ) {
   const { setState } = useCaseStudyDetailScrollContext();
   const scrollRef = useRef(scrollToStep);
   scrollRef.current = scrollToStep;
+  const scrollPanelRef = useRef(scrollToPanel);
+  scrollPanelRef.current = scrollToPanel;
   const setHoverRef = useRef(setHoverStep);
   setHoverRef.current = setHoverStep;
 
@@ -119,6 +130,9 @@ export function useCaseStudyDetailScrollRegister(
       steps,
       activeStep: activeRef.current,
       scrollToStep: (index) => scrollRef.current(index),
+      scrollToPanel: (stepIndex, panelIndex) =>
+        scrollPanelRef.current(stepIndex, panelIndex),
+      panelDots,
       visible,
       vignetteProgress: null,
       hoverStep: null,
@@ -126,7 +140,7 @@ export function useCaseStudyDetailScrollRegister(
     });
 
     return () => setState(null);
-  }, [enabled, steps, visible, setState]);
+  }, [enabled, steps, visible, panelDots, setState]);
 
   // Active row + hover preview — update without unregistering the rail.
   useEffect(() => {

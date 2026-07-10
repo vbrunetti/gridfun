@@ -24,7 +24,6 @@ import {
 } from "@/lib/chrome-surface";
 import { isMobileChromeBand } from "@/lib/chrome-band-sample";
 import { useCaseStudyDeck } from "@/components/case-studies/use-case-study-deck";
-import { VignetteSwipeHint } from "@/components/case-studies/vignette-swipe-hint";
 
 const PEEK_DESKTOP_QUERY = "(min-width: 768px)";
 
@@ -75,6 +74,11 @@ function resetVignettesBelowStep(
 type CaseStudyDetailScrollProps = {
   steps: CaseStudyDetailStep[];
   children: ReactNode;
+  /**
+   * Dot granularity. Omit (case-study detail) for one dot per section/vignette;
+   * set for a single-vignette craft detail to get one dot per panel.
+   */
+  panelDots?: boolean;
 };
 
 /**
@@ -85,6 +89,7 @@ type CaseStudyDetailScrollProps = {
 export function CaseStudyDetailScroll({
   steps,
   children,
+  panelDots = false,
 }: CaseStudyDetailScrollProps) {
   const rootRef = useRef<HTMLElement>(null);
   const [hoverStep, setHoverStep] = useState<number | null>(null);
@@ -106,14 +111,24 @@ export function CaseStudyDetailScroll({
     [steps, goToStep],
   );
 
+  const scrollToPanel = useCallback(
+    (stepIndex: number, panelIndex: number) => {
+      resetVignettesBelowStep(steps, stepIndex);
+      goToPanel(stepIndex, panelIndex);
+    },
+    [steps, goToPanel],
+  );
+
   useCaseStudyDetailScrollRegister(
     true,
     steps,
     activeIndex,
     scrollToStep,
+    scrollToPanel,
     true,
     hoverStep,
     setHoverStep,
+    panelDots,
   );
 
   // Pre-paint surface sync — avoids a flash of the wrong chrome color on step change.
@@ -247,7 +262,6 @@ export function CaseStudyDetailScroll({
   return (
     <article ref={rootRef} className="cs-detail">
       {children}
-      <VignetteSwipeHint />
       {peekTarget ? (
         <div
           className="cs-peek-cursor"

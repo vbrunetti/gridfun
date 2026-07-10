@@ -770,15 +770,15 @@ html:has(.cs-detail) {
     scroll-padding-top: 0;
   }
 
-  /* A long prose row can exceed the viewport (min-height: var(--app-vh) + copy).
-     Mandatory snapping traps that overflow — the middle of a tall row can't rest
-     under the scroll, so it fights the swipe-to-next-section gesture. Proximity
-     still snaps the full-height hero/vignette rows but lets a tall prose row
-     scroll through freely. The selector specificity matches the shared mandatory
-     rule above and is scoped to detail (which always contains prose rows) so it
-     wins here without touching home / case-studies index. */
+  /* Detail stays MANDATORY on mobile so the vertical vignette stack snaps one
+     panel per swipe (full-viewport panels + scroll-snap-stop:always). A long
+     prose row can exceed the viewport, but because that row is itself a snap
+     target larger than the snapport, the browser's oversized-snap-area handling
+     still lets it scroll through and rest mid-row under mandatory (verified) —
+     so the old proximity workaround is no longer needed. Kept as an explicit,
+     detail-scoped statement of intent (matches the base rule's specificity). */
   html:has(.cs-detail .cs-section--prose) {
-    scroll-snap-type: y proximity;
+    scroll-snap-type: y mandatory;
   }
 }
 
@@ -4570,14 +4570,21 @@ ul.cs-hero__subhead {
      the fixed header + dot rail; chrome keeps a stable surface colour instead of
      sampling colourful panel pixels. */
   .vchapter {
-    height: var(--app-vh);
+    /* Vertical stack: the section is as tall as its stacked panels (one --app-vh
+       each), not a single pinned viewport. Each .vframe is its own snap stop, so
+       the page never arbitrates between horizontal + vertical swipe intent. */
+    height: auto;
     min-height: var(--app-vh);
   }
 
   .vchapter__pin {
-    top: var(--chrome-top-inset);
-    height: var(--panel-h);
+    /* Non-sticky in vertical mode — a plain static wrapper; panels flow past like
+       any other full-height row rather than pinning while a track translates. */
+    position: static;
+    top: auto;
+    height: auto;
     min-height: 0;
+    overflow: visible;
     --panel-kicker: clamp(2.5rem, 6vh, 3.25rem);
     /* No pin padding — panels fill the full pin width so colored backgrounds
        bleed to the viewport edge. --panel-pad (inherited from base) insets text. */
@@ -4596,107 +4603,12 @@ ul.cs-hero__subhead {
     );
   }
 
-  /* Short rows (hero, prose) must fill the viewport so the next full-height
-     vignette chapter never peeks up under the fixed bottom dot rail. The
-     filmstrip is already var(--app-vh); the footer is last so nothing peeks
-     below it. */
-  .cs-detail .cs-hero,
-  .cs-detail .cs-section--prose {
+  /* The hero (case-study title) fills the viewport — a full-screen masthead. Prose
+     rows are NOT forced full-height: they size to their content and snap to the top
+     rest line like vignette panels, so a short prose beat lets the next section peek
+     below (matching the content-driven vignette model). */
+  .cs-detail .cs-hero {
     min-height: var(--app-vh);
-  }
-}
-
-/* ── Mobile vignette swipe hint ───────────────────────────────────────────
-   A small looping arrow cueing the next swipe: points RIGHT while there are more
-   panels in the active vignette, DOWN otherwise. Touch-only (hidden ≥1024px). */
-.swipe-hint {
-  display: none;
-}
-
-@media (max-width: 1023px) {
-  .swipe-hint {
-    display: grid;
-    place-items: center;
-    position: fixed;
-    left: 50%;
-    bottom: calc(
-      var(--chrome-dots-inset, var(--chrome-mobile-dots-height)) + 0.85rem
-    );
-    width: 2.25rem;
-    height: 2.25rem;
-    transform: translateX(-50%);
-    z-index: 100;
-    pointer-events: none;
-    /* Difference blend auto-inverts against whatever panel colour is behind it, so
-       the arrow stays visible on dark, light, and brand-coloured panels without
-       relying on the (mobile-unreliable) body[data-chrome-surface] flag. */
-    color: #fff;
-    mix-blend-mode: difference;
-    /* Per-panel lifecycle (element is remounted via `key` on each panel): fade in,
-       hold, fade out — cue on arrival, then clear. `forwards` keeps it cleared. */
-    opacity: 0;
-    animation: swipe-hint-life 4.5s ease forwards;
-  }
-
-  .swipe-hint__chevron {
-    width: 1.5rem;
-    height: 1.5rem;
-    animation: swipe-hint-down 1.5s ease-in-out infinite;
-  }
-
-  .swipe-hint--right .swipe-hint__chevron {
-    animation-name: swipe-hint-right;
-  }
-}
-
-@keyframes swipe-hint-down {
-  0%,
-  100% {
-    transform: translateY(-22%);
-    opacity: 0.4;
-  }
-  50% {
-    transform: translateY(22%);
-    opacity: 1;
-  }
-}
-
-/* rotate(-90deg) points the down chevron rightward; translateY then bounces it
-   along that rotated axis (i.e. horizontally). */
-@keyframes swipe-hint-right {
-  0%,
-  100% {
-    transform: rotate(-90deg) translateY(-22%);
-    opacity: 0.4;
-  }
-  50% {
-    transform: rotate(-90deg) translateY(22%);
-    opacity: 1;
-  }
-}
-
-/* Wrapper opacity envelope — fast fade-in, hold, fade-out (~4.5s total). */
-@keyframes swipe-hint-life {
-  0% {
-    opacity: 0;
-  }
-  4% {
-    opacity: 0.9;
-  }
-  72% {
-    opacity: 0.9;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .swipe-hint__chevron {
-    animation: none;
-  }
-  .swipe-hint--right .swipe-hint__chevron {
-    transform: rotate(-90deg);
   }
 }
 
@@ -5088,6 +5000,78 @@ ul.cs-hero__subhead {
   }
 }
 
+/* ── Mobile vignette — vertical stack (one panel = one snap stop) ──────────────
+   Replaces the horizontal filmstrip + JS gesture model on touch. The track is a
+   vertical column; each .vframe is a full-viewport snap target with
+   scroll-snap-stop:always, so one swipe advances exactly one panel and the page
+   never has to arbitrate horizontal vs. vertical intent. Desktop keeps the
+   scroll-driven horizontal pin (see the min-width:1024 block above).
+   NB: placed after the base .vchapter__track / .vframe rules so it wins on source
+   order (media queries add no specificity). */
+@media (max-width: 1023px) {
+  .vchapter__track {
+    flex-direction: column;
+    height: auto;
+    width: 100%;
+    will-change: auto;
+  }
+
+  .vframe {
+    width: 100%;
+    /* Content-driven height: a panel is as tall as its content (+ a chrome-clearing
+       top pad and a bottom breathing band), NOT forced to a full viewport. Quiet
+       panels stay short so the next one peeks below — dimmed — inviting the swipe.
+       Tall content (portrait media, long quotes) exceeds the viewport, and the
+       oversized-snap-area handling lets it scroll through before the next snap. */
+    height: auto;
+    min-height: 0;
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    /* Every panel snaps its top to the same rest line (scroll-padding-top = 0), so
+       the in-focus panel always lands at the same Y regardless of its height. The
+       colored ground fills the top pad too, bleeding up behind the translucent
+       chrome; content clears the chrome via padding-top. */
+    box-sizing: border-box;
+    padding-top: var(--chrome-top-inset);
+    padding-bottom: var(--vframe-stack-foot, clamp(2.5rem, 8vh, 4.5rem));
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    /* Horizontal divider between stacked panels; no filmstrip right seam. */
+    border-right: none;
+    /* Focus dim inherited: inactive .vframe = 0.45, .vframe.is-active = 1, driven
+       by the scroll tracker. Bright panel = where you are; dim peek = what's next. */
+  }
+
+  /* A vignette TITLE panel is always a full-viewport opener — a chapter masthead,
+     like the case-study hero — rather than content-driven. Reverts to the grid
+     layout (kicker · 1fr · tags) so the title distributes over the whole screen. */
+  .vframe--title {
+    display: grid;
+    height: var(--app-vh);
+    min-height: var(--app-vh);
+  }
+
+  /* Trailing spacer belongs to the horizontal filmstrip only; the last stacked
+     panel paints its own ground. */
+  .vchapter__trail {
+    display: none;
+  }
+
+  /* The section stops being its own snap target so only its child panels snap —
+     no doubled snap-stop at the chapter boundary. */
+  .cs-detail .vchapter[data-cs-detail-row] {
+    scroll-snap-align: none;
+    scroll-snap-stop: normal;
+  }
+}
+
+@media (max-width: 1023px) and (prefers-reduced-motion: reduce) {
+  .vframe {
+    scroll-snap-stop: normal;
+  }
+}
+
 /* Client brand panels — paper text on saturated grounds. */
 .vframe[data-panel-bg="brand"],
 .vframe[data-panel-bg^="pearson-"],
@@ -5362,6 +5346,48 @@ ul.cs-hero__subhead {
 @media (max-width: 1023px) {
   .vframe__caption {
     max-width: none;
+  }
+}
+
+/* ── Mobile vignette model B — content-driven media sizing ────────────────────
+   Panels are auto-height (see the vertical-stack block above), so media can't size
+   against a fixed panel height (cqh). Each media box is a full-width aspect box
+   whose HEIGHT derives from its width — the panel grows to fit. A wide 16:9 stays
+   short (big peek of the next panel); a 9:16 portrait is tall. Placed after the
+   base media/carousel rules so these win on source order. */
+@media (max-width: 1023px) {
+  /* Media body flows with the panel (no internal scroll); the page scrolls. */
+  .vframe__scroll,
+  .vframe--media.is-active .vframe__scroll {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    container-type: normal;
+  }
+
+  /* Still / video / placeholder: full-width aspect box, height derived from width. */
+  .vframe--media .vframe__media-box {
+    width: 100%;
+    height: auto;
+    max-height: none;
+    aspect-ratio: var(--media-ar-w, 16) / var(--media-ar-h, 9);
+  }
+
+  .vframe__media--video,
+  .vframe__media--placeholder {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    left: auto;
+    translate: none;
+    aspect-ratio: auto;
+  }
+
+  /* Carousel figure: full width; its viewport already derives height from aspect. */
+  .vframe__figure {
+    width: 100%;
   }
 }
 

@@ -85,7 +85,17 @@ export function useCaseStudyDeck({
     if (!el) return 0;
     const top = el.getBoundingClientRect().top + window.scrollY - getTopInset();
     if (stop.panelIndex === null || step!.panelCount <= 1) return top;
-    // Tall scroll-pin vignette: one viewport of scroll per panel.
+    // Mobile: panels are a variable-height vertical stack — snap to the real panel
+    // element's top (offsetHeight/panelCount would be wrong now that heights vary).
+    if (!window.matchMedia(DECK_DESKTOP_QUERY).matches) {
+      const panelEl = el.querySelector<HTMLElement>(
+        `.vframe[data-vframe-index="${stop.panelIndex}"]`,
+      );
+      if (panelEl) {
+        return panelEl.getBoundingClientRect().top + window.scrollY - getTopInset();
+      }
+    }
+    // Desktop scroll-pin vignette: one viewport of scroll per panel.
     const perPanel = el.offsetHeight / step!.panelCount;
     return top + stop.panelIndex * perPanel;
   }, []);

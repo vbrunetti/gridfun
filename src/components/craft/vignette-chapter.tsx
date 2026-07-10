@@ -32,6 +32,8 @@ import { attachHorizontalGestures } from "@/components/deck/gestures";
 const GRID_LAYOUT_QUERY = "(min-width: 1024px)";
 /** Horizontal filmstrip gestures — active on all viewports. */
 const HORIZONTAL_TRACK_QUERY = "all";
+/** Below this, the filmstrip becomes a vertical scroll-snap stack (no JS gestures). */
+const VERTICAL_STACK_QUERY = "(max-width: 1023px)";
 
 /**
  * Map a content `PanelWidth` to the CSS column vars the `.vframe` width calc reads.
@@ -361,6 +363,10 @@ export function VignetteChapter({
   const [index, setIndex] = useState(0);
   const [translate, setTranslate] = useState(0);
   const [chapterActive, setChapterActive] = useState(false);
+  // True on touch/mobile, where panels are a vertical scroll-snap stack rather
+  // than a horizontal filmstrip. Starts false so SSR matches the desktop markup;
+  // the effect flips it on mount (no hydration mismatch).
+  const [verticalMode, setVerticalMode] = useState(false);
 
   const indexRef = useRef(0);
   const insetRef = useRef(0);
@@ -390,6 +396,14 @@ export function VignetteChapter({
   );
 
   useCaseStudyVignetteProgressRegister(vignetteProgress);
+
+  useEffect(() => {
+    const mq = window.matchMedia(VERTICAL_STACK_QUERY);
+    const sync = () => setVerticalMode(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   const panelOffsets = useCallback(() => {
     return panelRefs.current
@@ -572,15 +586,66 @@ export function VignetteChapter({
     let detachGestures: (() => void) | null = null;
     let rafId = 0;
 
+    let verticalActive = false;
+
     const onPanelJump = (event: Event) => {
-      // In scroll-pin mode the native scroll position owns the track, so ignore
-      // imperative jumps (the deck scrolls to the panel instead).
-      if (scrollPinActive) return;
+      // In scroll-pin mode the native scroll position owns the track, and in
+      // vertical-stack mode native page scroll does — so ignore imperative jumps
+      // in both (the deck scrolls to the panel instead).
+      if (scrollPinActive || verticalActive) return;
       const detail = (event as CustomEvent<VchapterPanelEventDetail>).detail;
       if (!detail || !Number.isFinite(detail.panelIndex)) return;
       goToPanel(detail.panelIndex, detail.smooth ?? true);
     };
     section.addEventListener(VCHAPTER_PANEL_EVENT, onPanelJump);
+
+    // Vertical-stack mode (mobile): panels are full-viewport snap targets in normal
+    // flow. A rAF-throttled scroll listener marks the panel nearest the viewport
+    // centre active — driving the dot-rail radial, is-active brightness, and lazy
+    // media mount. This fires continuously through the swipe AND on snap-resolve
+    // (the scroll settle), where a collapsed-band IntersectionObserver instead
+    // defers its callback until the next touch on iOS (brightness stuck until tap).
+    let verticalRaf = 0;
+    const syncVerticalActive = () => {
+      // Panels have variable heights but all snap their top to the same rest line
+      // (the content line just under the fixed chrome = a panel's padding-top).
+      // The focused panel is the TOPMOST one whose top has reached that line — the
+      // one filling from the top — not the one nearest centre, which for a short
+      // bright panel over a tall dim peek would wrongly hand focus to the peek.
+      const panels = panelRefs.current;
+      const first = panels.find(Boolean) ?? null;
+      const anchor = first
+        ? parseFloat(getComputedStyle(first).paddingTop) || 0
+        : 0;
+      let best = indexRef.current;
+      for (let i = 0; i < panels.length; i++) {
+        const panel = panels[i];
+        if (!panel) continue;
+        if (panel.getBoundingClientRect().top <= anchor + 1) best = i;
+      }
+      if (best !== indexRef.current) {
+        indexRef.current = best;
+        setIndex(best);
+      }
+    };
+    const onVerticalScroll = () => {
+      if (verticalRaf) return;
+      verticalRaf = requestAnimationFrame(() => {
+        verticalRaf = 0;
+        syncVerticalActive();
+      });
+    };
+    const attachVerticalTracker = () => {
+      window.addEventListener("scroll", onVerticalScroll, { passive: true });
+      window.addEventListener("resize", onVerticalScroll, { passive: true });
+      syncVerticalActive();
+    };
+    const detachVerticalTracker = () => {
+      window.removeEventListener("scroll", onVerticalScroll);
+      window.removeEventListener("resize", onVerticalScroll);
+      if (verticalRaf) cancelAnimationFrame(verticalRaf);
+      verticalRaf = 0;
+    };
 
     // Scroll-driven horizontal pin (controlled + desktop). The section is tall and
     // the filmstrip pin sticks; native vertical scroll progress maps 1:1 to the
@@ -648,26 +713,36 @@ export function VignetteChapter({
           ) ?? null,
       });
 
+    // Three input modes, chosen by breakpoint + controlled:
+    //   • mobile (<1024)            → vertical scroll-snap stack, IO tracks active
+    //   • desktop + controlled      → scroll-driven horizontal pin (case study)
+    //   • desktop + standalone      → horizontal gesture filmstrip (craft detail)
+    // Tear everything down and rebuild for the target mode — simpler than diffing,
+    // and mode changes only fire when crossing the 1024px breakpoint.
     const evaluateInput = () => {
-      const wantPin = controlled && controlMq.matches;
-      if (wantPin === scrollPinActive) {
-        if (!wantPin && !detachGestures) detachGestures = attachGestures();
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (detachGestures) {
+        detachGestures();
+        detachGestures = null;
+      }
+      detachVerticalTracker();
+      scrollPinActive = false;
+      verticalActive = false;
+
+      if (!controlMq.matches) {
+        verticalActive = true;
+        attachVerticalTracker();
         return;
       }
-      scrollPinActive = wantPin;
-      if (wantPin) {
-        if (detachGestures) {
-          detachGestures();
-          detachGestures = null;
-        }
+      if (controlled) {
+        scrollPinActive = true;
         window.addEventListener("scroll", onScroll, { passive: true });
         window.addEventListener("resize", onScroll, { passive: true });
         applyFromScroll();
-      } else {
-        window.removeEventListener("scroll", onScroll);
-        window.removeEventListener("resize", onScroll);
-        if (!detachGestures) detachGestures = attachGestures();
+        return;
       }
+      detachGestures = attachGestures();
     };
 
     evaluateInput();
@@ -679,6 +754,7 @@ export function VignetteChapter({
       controlMq.removeEventListener("change", evaluateInput);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
+      detachVerticalTracker();
       if (rafId) cancelAnimationFrame(rafId);
       if (detachGestures) detachGestures();
     };
@@ -817,7 +893,7 @@ export function VignetteChapter({
                   ["--panel-bg" as string]: panelBgVar(panelBg, colorway),
                   ...panelWidthVars(frame.width, "--frame-cols", "--frame-cols-mobile"),
                 }}
-                aria-hidden={idx !== index}
+                aria-hidden={verticalMode ? undefined : idx !== index}
               >
                 <FrameContent
                   vignette={vignette}

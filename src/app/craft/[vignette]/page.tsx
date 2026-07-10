@@ -72,7 +72,7 @@ export default async function VignettePage({ params }: PageProps) {
   ] as const;
 
   return (
-    <CaseStudyDetailScroll steps={detailSteps}>
+    <CaseStudyDetailScroll steps={detailSteps} panelDots>
       <div className="theme-dark" data-chrome-surface="dark">
         <section
           id="craft-hero"
