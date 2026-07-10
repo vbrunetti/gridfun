@@ -12,7 +12,7 @@ export default function ContactPage() {
   const { contact } = site;
 
   return (
-    <div className="theme-light" data-chrome-surface="light">
+    <div className="theme-white min-h-[100dvh]" data-chrome-surface="light">
       <header className="keyline-b">
         <RuledGrid className="py-12">
           <SiteGridSubgrid className="lg:items-end">

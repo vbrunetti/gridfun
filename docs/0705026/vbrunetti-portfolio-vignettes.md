@@ -3,7 +3,7 @@
 
 ---
 
-## SITE SYNC STATUS — updated 2026-07-06 (re-synced from live portfolio.ts)
+## SITE SYNC STATUS — updated 2026-07-08 (re-synced from live portfolio.ts)
 
 This doc is the unabridged capture of every vignette as dictated — it doesn't get rewritten to match the site. `src/content/portfolio.ts` is the edited, consolidated, public-facing version, and it is the single most accurate record of current content, since Victor also edits it directly and via Claude Code, outside of this thread. This section tracks where the two currently stand, re-synced by reading the live file rather than assumed from memory.
 
@@ -18,17 +18,16 @@ Current live order in `portfolio.ts`:
 4. Bridge: "The room around the operator" — unchanged, grounded in the real Users & Ecosystem personas.
 5. **Designing the Container** — unchanged, em dashes not yet cleaned (queued, one vignette at a time).
 6. **Who's Driving? — Control Handoff Visualization** — unchanged.
-7. **AV Positioning Control Ring** — expanded to six beats this session: added "A second mode, built in" and "In practice," covering the breadcrumb/Sudo-solver mode hiding in the same widget (this is where the previously-cut "Drop a Pin" material actually lives, no separate callout needed). "In practice" is a placeholder pending the real testing-footage video from Victor. Position still provisional relative to items 8-10.
-8. **AV State Module** — unchanged.
-9. **Coordination** — unchanged.
-10. **The Camera Array Redesign That Didn't Work** — unchanged, still deliberately placed after a run of wins.
-11. **New Maneuver Types (Speculative)** — unchanged. *(Analyzed this session: bundling Control Ring + Spring-Loaded Splines + Alternate Intents into one "three ways to provide direct spatial input" vignette was discussed at length and reads as a strong idea, escalating from full manual control to zero manual control, but has NOT been executed. Still two separate vignettes on the live site.)*
+7. **AV State Module** — unchanged.
+8. **Coordination** — restored two details that were lost in the original V8+V10 merge: the sidebar card rail beat now names the stowaway/live-cabin-camera and recovery-dispatch/live-map card examples, and a new "Design grounding" beat credits the telephony craft to Victor's earlier Google contact-center telephony UX work. Em dashes cleaned in the beats touched.
+9. **The Camera Array Redesign That Didn't Work** — unchanged, still deliberately placed after a run of wins.
+10. Bridge: "Three seconds" — reworded, no longer claims "two speculative maneuver types below" since the vignette that follows now includes one real, shipped tool alongside the speculative ones.
+11. **Taking the Wheel** — EXECUTED this session. Merges what were three separate things into one closing vignette: AV Positioning Control Ring (now Act one, all six beats intact, including the breadcrumb/Sudo-solver mode and the "In practice" placeholder awaiting real video), Spring-Loaded Splines, and Alternate Intents. Framed as three escalating ways to move the vehicle: full manual pose (Control Ring), quicker partial-manual paths (Splines, explicitly its lineage descendant), and zero-manual selection from AI-precomputed paths (Alternate Intents). Old slugs `av-positioning-control-ring` and `new-maneuver-types` are retired, replaced by `taking-the-wheel`. Em dashes cleaned across the whole thing as part of this merge, since the Splines/Alternate Intents material hadn't been stepped through yet. Closes the chapter, still ending on the "ships real, dreams bigger" note the original design wanted.
 
 The hero video for this case study also changed since last sync (new Vimeo ID, no poster set currently).
 
 **Open items:**
-- Confirm final order of items 7-10.
-- Decide: execute the Control Ring / Spring-Loaded Splines / Alternate Intents bundle, or leave as two vignettes.
+- Confirm the "Taking the Wheel" merge and title land the way you want, and that closing the chapter there (rather than keeping Control Ring adjacent to Who's Driving) is the right call.
 - Confirm the TTR redefinition and the "ten minutes" line in Tick Tock are intentional.
 - Decide whether to fold TTFA/AHT/TiRA into Tick Tock's prose (partially done — TTFA/TTR now named, AHT/TiRA still not mentioned) or save for a stat-card visual.
 - Get the real Control Ring testing video (double-parked-vehicle breadcrumb clip) for the "In practice" beat.
@@ -38,7 +37,13 @@ The hero video for this case study also changed since last sync (new Vimeo ID, n
 
 **Pearson — complete, no changes this session.**
 
-**McKinsey, Facebook credential entries — not yet ported to the site.**
+**McKinsey, Facebook — ported as standalone craft vignettes, not case studies.** Per Victor's call: these live on `/craft` as individual vignettes but have no case-study page and no index card. New `standalone?: boolean` field on `CaseStudy` powers this (excluded from `visibleCaseStudies`, `/case-studies/[slug]` 404s for these slugs, and the vignette detail page drops the "Case study" hero fact rather than linking to a dead page).
+
+- **McKinsey** (slug `mckinsey`, role "Executive Experience Design Director," 2015–2017, New York, from Victor's resume) — three vignettes: `beyond-the-pill` (MS drug digital ecosystem), `sprint-commodity-utility` (three produced commercials), `qed-quantified-experience-design` (closes on the real resume stat: 22% patient NPS lift, 26% more market share on a Fortune 500 pharma engagement).
+- **Facebook** (slug `facebook`, role "Product Designer," 2013–2014, New York) — one vignette: `questions-and-answers` ("The Quora Killer," Compose/Contribute/Consume framework, 1% live test, later shipped by another team).
+- Brand tokens added: `mckinsey-primary` (#051C2C) and `facebook-primary` (#3B579D, both hex values from Victor), wired into `client-brand-colors.ts` and `globals.css`.
+- All beats are placeholder color-field panels for now — no real media/assets yet, same starting state the other three chapters had before real images/video were dropped in.
+- Tools/location for both are inferred (Sketch/Illustrator/InVision/Keynote for McKinsey, Photoshop/Illustrator/OmniGraffle for Facebook, both New York), confirmed by Victor.
 
 ---
 

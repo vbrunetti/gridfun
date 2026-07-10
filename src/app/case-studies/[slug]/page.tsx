@@ -23,7 +23,7 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const study = getCaseStudy(slug);
-  if (!study || isGatedAway(study, await isUnlocked())) {
+  if (!study || study.standalone || isGatedAway(study, await isUnlocked())) {
     return { title: "Case study" };
   }
   return { title: study.name };
@@ -34,7 +34,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
   const study = getCaseStudy(slug);
   const unlocked = await isUnlocked();
 
-  if (!study || isGatedAway(study, unlocked)) {
+  if (!study || study.standalone || isGatedAway(study, unlocked)) {
     notFound();
   }
 

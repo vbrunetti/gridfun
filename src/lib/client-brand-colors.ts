@@ -16,6 +16,12 @@ export const clientBrandColors = {
   cruise: {
     primary: "#FE4A35",
   },
+  mckinsey: {
+    primary: "#051C2C",
+  },
+  facebook: {
+    primary: "#3B579D",
+  },
 } as const;
 
 /** Flat registry — single source for design system, panelBg, and TS lookups. */
@@ -74,6 +80,22 @@ export const clientBrandColorEntries = [
     role: "Primary",
     token: "--color-cruise-primary",
     hex: clientBrandColors.cruise.primary,
+    textOn: "paper",
+  },
+  {
+    id: "mckinsey-primary",
+    client: "McKinsey",
+    role: "Primary",
+    token: "--color-mckinsey-primary",
+    hex: clientBrandColors.mckinsey.primary,
+    textOn: "paper",
+  },
+  {
+    id: "facebook-primary",
+    client: "Facebook",
+    role: "Primary",
+    token: "--color-facebook-primary",
+    hex: clientBrandColors.facebook.primary,
     textOn: "paper",
   },
 ] as const;
@@ -138,7 +160,7 @@ export function clientBrandSurfaceClass(id: ClientBrandColorId): string {
 
 /** Grouped for /design-system swatches. */
 export const clientBrandColorGroups = (
-  ["Pearson", "Google", "Cruise"] as const
+  ["Pearson", "Google", "Cruise", "McKinsey", "Facebook"] as const
 ).map((client) => ({
   client,
   colors: clientBrandColorEntries

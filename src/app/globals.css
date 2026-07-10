@@ -37,6 +37,8 @@
   --color-google-secondary: #00ab3d;
   --color-google-tertiary: #f62d1b;
   --color-google-quaternary: #ffba00;
+  --color-mckinsey-primary: #051c2c;
+  --color-facebook-primary: #3b579d;
 
   /* Text on light surfaces */
   --text-primary: var(--color-ink);
@@ -187,7 +189,9 @@
 .theme-google-primary,
 .theme-google-secondary,
 .theme-google-tertiary,
-.theme-cruise-primary {
+.theme-cruise-primary,
+.theme-mckinsey-primary,
+.theme-facebook-primary {
   --text-primary: var(--color-paper);
   --text-secondary: color-mix(in srgb, var(--color-paper) 80%, transparent);
   --text-tertiary: color-mix(in srgb, var(--color-paper) 60%, transparent);
@@ -214,6 +218,12 @@
 }
 .theme-cruise-primary {
   background: var(--color-cruise-primary);
+}
+.theme-mckinsey-primary {
+  background: var(--color-mckinsey-primary);
+}
+.theme-facebook-primary {
+  background: var(--color-facebook-primary);
 }
 
 /* Google quaternary — ink text on yellow */
@@ -245,6 +255,8 @@
   --color-google-tertiary: #f62d1b;
   --color-google-quaternary: #ffba00;
   --color-cruise-primary: #fe4a35;
+  --color-mckinsey-primary: #051c2c;
+  --color-facebook-primary: #3b579d;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2097,6 +2109,10 @@ body:has(.cs-detail):not([data-chrome-surface="light"]):not([data-chrome-surface
   body:has(.cs-index-route) .floating-chrome {
     color: var(--color-paper);
   }
+
+  body:has(.craft-route) .floating-chrome {
+    color: var(--color-paper);
+  }
 }
 
 /* Mobile — dark surface: hamburger + dots must be paper so they show on dark bands. */
@@ -2180,12 +2196,11 @@ body[data-chrome-surface="dark"] .floating-chrome .rail-label-vertical {
   }
 }
 
-/* —— Craft impact index —— */
-/* Mobile: bleed paper behind fixed logo/menu (main keeps chrome offset for layout) */
+/* —— Craft impact index — dark page, light left rail —— */
 @media (max-width: 1023px) {
   html:has(.craft-route),
   body:has(.craft-route) {
-    background: var(--color-paper);
+    background: var(--section-dark-bg);
   }
 
   .site-main:has(.craft-route) {
@@ -2194,7 +2209,18 @@ body[data-chrome-surface="dark"] .floating-chrome .rail-label-vertical {
 
   .craft-route {
     padding-top: var(--chrome-top-offset);
-    background: var(--color-paper);
+    background: var(--section-dark-bg);
+  }
+}
+
+@media (min-width: 1024px) {
+  html:has(.craft-route),
+  body:has(.craft-route) {
+    background: var(--section-dark-bg);
+  }
+
+  .craft-route {
+    background: var(--section-dark-bg);
   }
 }
 
@@ -2211,7 +2237,7 @@ body[data-chrome-surface="dark"] .floating-chrome .rail-label-vertical {
   position: relative;
   margin-inline-start: calc(-1 * var(--grid-margin));
   margin-inline-end: calc(-1 * var(--grid-margin-inline-end));
-  background: var(--color-paper);
+  background: var(--section-dark-bg);
   box-sizing: border-box;
 }
 
@@ -2386,7 +2412,7 @@ body[data-chrome-surface="dark"] .floating-chrome .rail-label-vertical {
   padding-right: var(--grid-margin-inline-end);
   padding-bottom: 0.65rem;
   padding-left: var(--grid-margin);
-  background: var(--color-paper);
+  background: var(--section-dark-bg);
   box-sizing: border-box;
   overflow: hidden;
   opacity: 0;
@@ -2697,8 +2723,8 @@ body[data-chrome-surface="dark"] .floating-chrome .rail-label-vertical {
   left: 0;
   background: linear-gradient(
     to right,
-    var(--color-paper),
-    color-mix(in srgb, var(--color-paper) 0%, transparent)
+    var(--section-dark-bg),
+    color-mix(in srgb, var(--section-dark-bg) 0%, transparent)
   );
 }
 
@@ -2706,8 +2732,8 @@ body[data-chrome-surface="dark"] .floating-chrome .rail-label-vertical {
   right: 0;
   background: linear-gradient(
     to left,
-    var(--color-paper),
-    color-mix(in srgb, var(--color-paper) 0%, transparent)
+    var(--section-dark-bg),
+    color-mix(in srgb, var(--section-dark-bg) 0%, transparent)
   );
 }
 
@@ -2720,7 +2746,7 @@ body[data-chrome-surface="dark"] .floating-chrome .rail-label-vertical {
   height: 1.65rem;
   border: 1px solid var(--rule-light);
   border-radius: 999px;
-  background: var(--color-paper);
+  background: var(--section-dark-bg);
   color: var(--text-primary);
   font-size: 1rem;
   line-height: 1;
@@ -2967,13 +2993,6 @@ a.craft-card:focus-visible {
 
   .cs-index-route {
     background: var(--section-dark-bg);
-  }
-}
-
-/* Dark left rail labels on the case studies index */
-@media (min-width: 1024px) {
-  body:has(.cs-index-route) .chrome-rail .rail-label-vertical {
-    color: color-mix(in srgb, var(--color-paper) 70%, transparent);
   }
 }
 
@@ -4978,6 +4997,75 @@ ul.cs-hero__subhead {
   /* Fill foot width on one line — no JS observers. --stat-em is the string's
      approximate em-width; font-size = container ÷ em-width, capped by metric. */
   font-size: min(var(--type-metric), calc(100cqw / var(--stat-em, 4)));
+}
+
+/* Quote panel — a verbatim pull-quote as a proof point; the pull-quote sibling
+   of the stat panel. A giant cropped quotation mark sits behind the type as a
+   graphical field (Vignelli type-as-graphic); the quote + attribution lock up
+   as one unit centered on top. */
+.vframe--quote {
+  grid-template-rows: var(--panel-kicker) 1fr;
+}
+
+/* Main band is the query container (quote scales with panel width) and clips the
+   oversized background mark where it bleeds past the panel. */
+.vframe__main--quote {
+  justify-content: center;
+  container-type: inline-size;
+  overflow: hidden;
+}
+
+/* Quote + attribution lockup — also the anchor + stacking context for the mark,
+   so the mark tracks the (vertically centered) type rather than the band top. */
+.vframe__quote {
+  position: relative;
+  z-index: 0;
+  margin: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.75rem, 2.5cqw, 1.75rem);
+}
+
+/* Giant background quotation mark — anchored behind the first line of the quote
+   and bleeding up-left, cropped by the panel. Full type-as-graphic. */
+.vframe__quote-mark {
+  position: absolute;
+  top: -0.46em;
+  left: -0.05em;
+  z-index: -1;
+  font-weight: 700;
+  line-height: 0.8;
+  letter-spacing: -0.04em;
+  opacity: 0.18;
+  pointer-events: none;
+  font-size: min(95cqw, 30rem);
+}
+
+.vframe__quote-text {
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  min-width: 0;
+  /* Scales with the panel like the stat figure, capped smaller so multi-line
+     quotes stay legible. cqw tracks panel width; vw fallback below. */
+  font-size: min(var(--type-display-lg), calc(8cqw + 0.6rem));
+}
+
+.vframe__quote-cite {
+  margin: 0;
+}
+
+@supports not (font-size: 1cqi) {
+  .vframe__quote-text {
+    font-size: var(--type-display-md);
+  }
+
+  .vframe__quote-mark {
+    font-size: 18rem;
+  }
 }
 
 @media (max-width: 1023px) {

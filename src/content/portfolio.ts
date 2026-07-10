@@ -101,6 +101,16 @@ export type VignetteImage = {
    * and this figure locked huge to the footer (`.display-metric`). Type-as-graphic.
    */
   stat?: string;
+  /**
+   * Verbatim pull-quote as a proof point. Presence turns the frame into a
+   * *quote panel*: optional `label` kicker on top, this quote set large as the
+   * hero, and `quoteCite` locked to the footer as attribution. The pull-quote
+   * sibling of the stat panel — evidence in the subject's own words. Pass the
+   * quote text *without* surrounding quotation marks; the panel supplies its own.
+   */
+  quote?: string;
+  /** Attribution for a `quote` panel, e.g. "Advisor · T2 usability study". */
+  quoteCite?: string;
 };
 
 export type CraftVignette = {
@@ -108,10 +118,14 @@ export type CraftVignette = {
   /** Unique across the whole site — powers /craft/[vignette]. */
   slug: string;
   name: string;
-  /** Portrait (9×16), landscape (16×9), or square (1×1); default key-image shape. */
+  /**
+   * Key-image shape — portrait (9×16), landscape (16×9), or square (1×1).
+   * Drives the `/craft` index card thumbnail.
+   */
   keyImageRatio: ImageRatio;
   /** Placeholder key-image fill until a real source is provided. */
   keyImageAccent: AccentKey;
+  /** Key-image / thumbnail source; also the `/craft` card thumbnail. */
   keyImageSrc?: string;
   /** Free-form, ~1–3 words each, unlimited. */
   tags: string[];
@@ -230,6 +244,13 @@ export type CaseStudy = {
    * session (via `?p=true`). Its vignettes inherit the gate. See `src/lib/gate.ts`.
    */
   gated?: boolean;
+  /**
+   * A content container, not a published case study — its vignettes still
+   * surface on /craft, but the study itself is excluded from the case-studies
+   * index and its own /case-studies/[slug] page 404s. Use for credential-style
+   * work that's one or two vignettes, not a full narrative arc.
+   */
+  standalone?: boolean;
   /** One-line deck under the hero title. */
   subhead: string;
   /** Display date, e.g. "2024" or "Mar 2024". */
@@ -269,14 +290,18 @@ const RATIO_PANEL_WIDTH = {
 /* ── Cruise content helpers (beats + glue prose) ───────────────── */
 const cruiseAccent = "charcoal" as const satisfies AccentKey;
 
+/**
+ * A color-field text beat. Always spans the "field" column width and has no
+ * media box, so it carries no author-facing aspect ratio — `ratio` is set to a
+ * fixed inert value only to satisfy the shared `VignetteImage` shape.
+ */
 function cruiseBeat(
   label: string,
   body: string,
-  ratio: ImageRatio = "16x9",
   panelBg?: PanelBg,
 ): VignetteImage {
   return {
-    ratio,
+    ratio: "16x9",
     accent: cruiseAccent,
     colorField: true,
     label,
@@ -323,6 +348,30 @@ function cruiseStat(
     label,
     stat,
     body,
+    width: RATIO_PANEL_WIDTH[ratio],
+    ...(panelBg ? { panelBg } : {}),
+  };
+}
+
+/**
+ * A pull-quote proof-point panel — the testimonial sibling of `cruiseStat`.
+ * `label` is the kicker, `quote` the verbatim hero line (no surrounding quote
+ * marks — the panel adds its own), `cite` the footer attribution. Defaults to a
+ * square (`1x1`) block, which reads best for a testimonial.
+ */
+function cruiseQuote(
+  label: string,
+  quote: string,
+  cite?: string,
+  ratio: ImageRatio = "1x1",
+  panelBg?: PanelBg,
+): VignetteImage {
+  return {
+    ratio,
+    accent: cruiseAccent,
+    label,
+    quote,
+    ...(cite ? { quoteCite: cite } : {}),
     width: RATIO_PANEL_WIDTH[ratio],
     ...(panelBg ? { panelBg } : {}),
   };
@@ -516,6 +565,164 @@ function pearsonProse(
 ): ProseSection {
   return { type: "prose", id, heading, body, ...extras };
 }
+
+/* ── McKinsey content helpers (beats + glue prose) ─────────────── */
+const mckinseyAccent = "mediumBlue" as const satisfies AccentKey;
+
+function mckinseyBeat(
+  label: string,
+  body: string,
+  ratio: ImageRatio = "16x9",
+  panelBg?: PanelBg,
+): VignetteImage {
+  return {
+    ratio,
+    accent: mckinseyAccent,
+    colorField: true,
+    label,
+    body,
+    ...(panelBg ? { panelBg } : {}),
+  };
+}
+
+function mckinseyMedia(
+  label: string,
+  caption: string,
+  ratio: ImageRatio = "16x9",
+  media?:
+    | string
+    | Pick<
+        VignetteImage,
+        "src" | "sources" | "autoplayMs" | "vimeo" | "vimeoBackground" | "poster"
+      >,
+  panelBg?: PanelBg,
+): VignetteImage {
+  const mediaFields =
+    typeof media === "string" ? { src: media } : (media ?? {});
+
+  return {
+    ratio,
+    accent: mckinseyAccent,
+    label,
+    caption,
+    ...mediaFields,
+    ...(panelBg ? { panelBg } : {}),
+  };
+}
+
+function mckinseyStat(
+  label: string,
+  stat: string,
+  body: string,
+  ratio: ImageRatio = "16x9",
+  panelBg?: PanelBg,
+): VignetteImage {
+  return {
+    ratio,
+    accent: mckinseyAccent,
+    label,
+    stat,
+    body,
+    width: RATIO_PANEL_WIDTH[ratio],
+    ...(panelBg ? { panelBg } : {}),
+  };
+}
+
+function mckinseyVignette(
+  slug: string,
+  name: string,
+  tags: string[],
+  themeLine: string,
+  images: VignetteImage[],
+  keyImageRatio: ImageRatio = "16x9",
+  status?: string,
+): CraftVignette {
+  return {
+    type: "vignette",
+    slug,
+    name,
+    keyImageRatio,
+    keyImageAccent: mckinseyAccent,
+    tags,
+    themeLine,
+    ...(status ? { status } : {}),
+    titlePanelWidth: TITLE_PANEL_WIDTH,
+    images,
+  };
+}
+
+// Note: no mckinseyProse — this is a standalone vignette container, no
+// connective narrative between entries.
+
+/* ── Facebook content helpers (beats + glue prose) ──────────────── */
+const facebookAccent = "neonLime" as const satisfies AccentKey;
+
+function facebookBeat(
+  label: string,
+  body: string,
+  ratio: ImageRatio = "16x9",
+  panelBg?: PanelBg,
+): VignetteImage {
+  return {
+    ratio,
+    accent: facebookAccent,
+    colorField: true,
+    label,
+    body,
+    ...(panelBg ? { panelBg } : {}),
+  };
+}
+
+function facebookMedia(
+  label: string,
+  caption: string,
+  ratio: ImageRatio = "16x9",
+  media?:
+    | string
+    | Pick<
+        VignetteImage,
+        "src" | "sources" | "autoplayMs" | "vimeo" | "vimeoBackground" | "poster"
+      >,
+  panelBg?: PanelBg,
+): VignetteImage {
+  const mediaFields =
+    typeof media === "string" ? { src: media } : (media ?? {});
+
+  return {
+    ratio,
+    accent: facebookAccent,
+    label,
+    caption,
+    ...mediaFields,
+    ...(panelBg ? { panelBg } : {}),
+  };
+}
+
+function facebookVignette(
+  slug: string,
+  name: string,
+  tags: string[],
+  themeLine: string,
+  images: VignetteImage[],
+  keyImageRatio: ImageRatio = "16x9",
+  status?: string,
+): CraftVignette {
+  return {
+    type: "vignette",
+    slug,
+    name,
+    keyImageRatio,
+    keyImageAccent: facebookAccent,
+    tags,
+    themeLine,
+    ...(status ? { status } : {}),
+    titlePanelWidth: TITLE_PANEL_WIDTH,
+    images,
+  };
+}
+
+// Note: no facebookProse — this is a standalone vignette container, no
+// connective narrative between entries.
 
 export const caseStudies: CaseStudy[] = [
   {
@@ -777,7 +984,6 @@ export const caseStudies: CaseStudy[] = [
           cruiseBeat(
             "The insight",
             "The legacy system was informed by human factors but not by semantic color theory. Meanwhile, the AV's AI could already classify nearly everything it perceived, it just wasn't surfaced. The machine knew what was there, but the human didn't.",
-            "1x1",
           ),
           cruiseMedia(
             "The solution",
@@ -817,7 +1023,6 @@ export const caseStudies: CaseStudy[] = [
           cruiseBeat(
             "The insight",
             "Even a coarse signal, stop or go, faster or slower, was dramatically more useful than nothing. And since we had speed deltas and the vehicle's perception of surrounding objects, we could build a scene that told a coherent story. So that if and when the vehicle stopped, the Remote Advisor already understood why.",
-            "9x16",
           ),
           cruiseMedia(
             "The solution",
@@ -842,7 +1047,6 @@ export const caseStudies: CaseStudy[] = [
           cruiseBeat(
             "One more gap",
             "Object classification and vehicle intent solved for what was happening on the map at the time, but Remote Advisorss gaining context after freshly connecting to an AV were starting from zero, context-blind to what had happened moments before they connected. There was so much context lost: what the previous Remote Advisor had done, what the vehicle had tried autonomously, why the car was stopped at all, etc.\n\nIn a safety-critical system, that cold start could mean the wrong action, or critical seconds spent by Remote Advisorss reconstructing a scene the vehicle already understood.",
-            "1x1",
           ),
           cruiseMedia(
             "The solution",
@@ -865,7 +1069,7 @@ export const caseStudies: CaseStudy[] = [
             "1x1",
           ),
         ],
-        "16x9",
+        "1x1",
         {
           titleTreatment: "cover",
           keyImageSrc: "/portfolio/cruise/Cruise_v1_cover.jpg",
@@ -887,51 +1091,93 @@ export const caseStudies: CaseStudy[] = [
         [
           cruiseBeat(
             "The problem",
-            "The previous terminal put the most important thing in the center of the screen. In practice, the center became a wildcard — a maneuver control, an object classification, a collision workflow. Predictable where to look, unpredictable what you'd find.",
+            "The previous terminal grew organically over time. As requirements changed from those of a fledgeling AV start-up, to needing to support 500+ rides per day in SF, new features were added with the idea that the most important ones would occupy as close to the centerline of the Remote Assistant's field of view as possible. This is solid human factor's thinking, but very bad information architecture design.\n\nThe net result was a completely wildcard screen where functionality an Advisor needed could be anywhere, with the main organizing principle not being UX axioms like Proximity and Uniform Connectedness, but usefulness during severe moments. Predictable where to look, unpredictable what you'd find there.",
           ),
-          cruiseBeat(
-            "The result",
+          cruiseMedia(
+            "Before",
             "Remote Advisorss had to read and classify UI elements before they could act. Even if you knew to look in the center, you still spent cognitive cycles figuring out what kind of thing you were looking at.",
-            "1x1",
+            "16x9",
+            {
+              sources: [
+                "/portfolio/cruise/Cruise Bento Before.png",
+              ],
+            },
           ),
           cruiseMedia(
             "The solution",
-            "A bentable box model — content types in predictable regions. Controls here. Status there. Workflows in a defined place. The centerline intentionally kept clear: no chrome competing with the vehicle, cameras, and map.",
+            "A bento-box-style model where content types are grouped in predictable regions. Controls here. Status there. Workflows in a defined place. The centerline intentionally kept clear: no chrome competing with the vehicle, cameras, and map.",
+            "16x9",
+            {
+              sources: [
+                "/portfolio/cruise/Cruise_v4_c2.jpg",
+                "/portfolio/cruise/Cruise_v4_c3.jpg",
+                "/portfolio/cruise/Cruise_v4_c4.jpg",
+                "/portfolio/cruise/Cruise_v4_c6.jpg",
+                "/portfolio/cruise/Cruise_v4_c7.jpg",
+                "/portfolio/cruise/Cruise_v4_c1.jpg",
+                "/portfolio/cruise/Cruise_v4_c5.jpg",
+              ],
+            },
+          ),
+          cruiseQuote(
+            "Proof It Worked",
+            "[This] gives me information in a much more intuitive way.",
+            "Remote Advisor Research Participant",
           ),
           cruiseBeat(
             "The principle",
             "Knowing where to look for a certain type of information — before you even read it — is itself a form of speed. Type-based regionalization over importance-based centering.",
-            "9x16",
           ),
           cruiseBeat(
             "The same idea, applied to controls",
-            "Regions solved where information lived on screen. Controls were the other half of the same problem. Human factors had a sound rule here too: keep the upper half of the screen — the Remote Advisor's's threat cone — completely free of UI. The vehicle points up, center screen. Everything else had to live in the lower half.",
-            "1x1",
+            "Regions solved where information lived on screen, however controls were the other half of the same problem. Human factors had a sound rule here though, one that we were wise to retain: keep the upper half of the screen (the Remote Advisor's's threat cone) completely free of UI. In the Terminal, the vehicle points up in the center of the screen. This is the vehicles' forward path. To prevent object occlusion, everything else had to live in the lower half.",
           ),
-          cruiseBeat(
+          cruiseMedia(
             "The problem",
-            "HF built maneuver controls in a fly-out drawer, far bottom-right. Hidden by default. Remote Advisorss connecting to a stuck vehicle need to read the scene, choose a maneuver, and engage — within three seconds. A drawer could cost a full second.",
+            "The Terminal was built with maneuver controls housed in a fly-out drawer at the far bottom-right. These were hidden by default. Remote Advisorss connecting to a stuck vehicle need to read the scene, choose a maneuver, and engage — within three seconds. A drawer could cost a full second.",
             "1x1",
+            { sources: [
+              "/portfolio/cruise/Cruise_maneuver_fly-out.jpg"
+            ] },
           ),
           cruiseMedia(
             "The solution",
-            "Floating toolbar at bottom center, permanently visible, clear iconography with color and shape language. Hotkeys for experienced Remote Advisorss — eyes stay on the scene.",
-            "16x9",
+            "A floating toolbar at bottom center, permanently visible, with clear iconography and a color/shape language. With hotkeys for experienced Remote Advisors, all eyes could remain on the scene.",
+            "1x1",
+            { sources: [
+              "/portfolio/cruise/Cruise_v5_c1.jpg",
+              "/portfolio/cruise/Cruise_v5_c2.jpg",
+            ] },
+          ),
+          cruiseQuote(
+            "Proof It Worked",
+            "Clear and easier to use...",
+            "Remote Advisor Research Participant",
           ),
           cruiseBeat(
-            "The insight — and the one that reframes the whole terminal",
-            "Cruise's remote Advisorss weren't trained specialists — not air traffic controllers, not engineers, not safety professionals. They were regular people, many coming from food service, retail, or other hourly work, making a little above minimum wage. They played video games. They used iPhones. A floating action toolbar at the bottom of the screen with hotkey support is a video game pattern — one these Advisorss already knew in their hands. Meeting them there, rather than forcing an enterprise mental model on them, was the correct decision. The three-second target wasn't just a product requirement. It was only achievable if the interface spoke the user's native language.",
-            "9x16",
+            "A critical insight",
+            "Cruise's remote Advisorss weren't trained specialists. They weren't air traffic controllers, engineers, or safety professionals. They were regular people, they played video games, they used iPhones, etc. A floating action toolbar at the bottom of the screen with hotkey support is a video game pattern, and one these Advisorss already knew. Meeting them there was the correct decision and helped us achieve our 3 seconds TTFA.",
+          ),
+          cruiseQuote(
+            "Proof It Worked",
+            "There is a lot more information placed logically in T2.",
+            "Remote Advisor Research Participant",
           ),
         ],
         "16x9",
         {
           titleTreatment: "cover",
-          keyImageSrc: "/portfolio/cruise/Cruise_v1_cover.jpg",
+          keyImageSrc: "/portfolio/cruise/Cruise_v2_cover.jpg",
           titleCoverBlur: 0,
           titleCoverAlpha: 0.7,
         },
       ),
+
+
+
+
+
+      
       cruiseVignette(
         "control-handoff-visualization",
         "Who's Driving? — Control Handoff Visualization",
@@ -945,7 +1191,6 @@ export const caseStudies: CaseStudy[] = [
           cruiseBeat(
             "The insight",
             "If we could visualize where the control handoff would happen on the forward path, we could pre-authorize the switch. The vehicle wouldn't need to stop — it could approach the handoff point with authorization already in place.",
-            "1x1",
           ),
           cruiseMedia(
             "The solution",
@@ -955,7 +1200,6 @@ export const caseStudies: CaseStudy[] = [
           cruiseBeat(
             "Outcome",
             "Control handoffs could be pre-authorized without stopping the vehicle. The visualization made the transition legible enough that Remote Advisorss trusted it. The car stayed in motion.",
-            "9x16",
           ),
         ],
       ),
@@ -977,7 +1221,6 @@ export const caseStudies: CaseStudy[] = [
           cruiseBeat(
             "Inline controls",
             "The module became a lightweight control surface — lights, horn, exterior audio — without leaving context. Below 15mph, live lidar returns around the module showed proximity without cluttering the main view.",
-            "9x16",
           ),
           cruiseBeat(
             "Outcome",
@@ -1002,37 +1245,37 @@ export const caseStudies: CaseStudy[] = [
           ),
           cruiseBeat(
             "Two teams, one blind spot",
-            "Cruise used Chevy Bolts — stock cars retrofitted in-house, not purpose-built AVs. Communication with the outside world had to be creative within those limits. Worse, the org had split communication itself: customer service could call passengers, but had no idea what the Remote Advisor was doing — moving, stopping, clearing a collision. Remote Advisorss could move the vehicle and manage every system, but had no channel to speak to a passenger or an officer outside the car. The business kept these roles cleanly siloed. The real world kept crossing that line.",
-            "1x1",
+            "Cruise used Chevy Bolts, stock cars retrofitted in-house, not purpose-built AVs. Communication with the outside world had to be creative within those limits. Worse, the org had split communication itself: customer service could call passengers, but had no idea what the Remote Advisor was doing, moving, stopping, clearing a collision. Remote Advisorss could move the vehicle and manage every system, but had no channel to speak to a passenger or an officer outside the car. The business kept these roles cleanly siloed. The real world kept crossing that line.",
           ),
           cruiseBeat(
             "The principle",
             "Automate first. Whatever still requires human intervention gets condensed and surfaced inside the terminal itself. No tab-switching. Everything the Remote Advisor needs, in one window, in the right moment.",
-            "9x16",
           ),
           cruiseMedia(
             "Sidebar card rail",
-            "Workflows requiring human action appeared as cards in a sidebar rail — text, rich media, or interactive controls depending on scenario.",
+            "Workflows requiring human action appeared as cards in a sidebar rail, text, rich media, or interactive controls depending on scenario. A recovery dispatch showed up as a live map of the recovery team's position. A stowaway concern showed up as a live stream from the interior cabin camera, fed straight into the card. Critical actions, close the doors, fail the vehicle, trigger physical security, sat one tap away without ever leaving the card.",
             "16x9",
           ),
           cruiseMedia(
             "Telephony, wired in",
-            "Full telephony wired into the terminal — passenger cabin, front interior, exterior speakers, inter-Advisor channels. First-class feature, not an external tool.",
+            "Full telephony wired into the terminal, passenger cabin, front interior, exterior speakers, inter-Advisor channels. First-class feature, not an external tool.",
             "9x16",
           ),
           cruiseBeat(
             "Dual-channel audio",
-            "Borrowed from 911 dispatch: left ear for Advisor-to-Advisor, right ear for scene audio. The ear told you the source — no visual lookup required.",
-            "1x1",
+            "Borrowed from 911 dispatch: left ear for Advisor-to-Advisor, right ear for scene audio. The ear told you the source, no visual lookup required.",
+          ),
+          cruiseBeat(
+            "Design grounding",
+            "The telephony craft here wasn't invented from scratch. It drew on earlier work designing call-status clarity and audio-energy visualization for Google's contact center products, plus the physical reality of an operator running one ear on a colleague and one ear on the scene. Standard telephony UX principles, applied to a car.",
           ),
           cruiseBeat(
             "Police pullover",
-            "The showcase scenario, tying both threads together: passenger notification, exterior voice comms, safety overrides, vehicle movement, and telephony channels — orchestrated into a single guided workflow inside the sidebar rail, surfacing the right controls in order.",
-            "9x16",
+            "The showcase scenario, tying both threads together: passenger notification, exterior voice comms, safety overrides, vehicle movement, and telephony channels, orchestrated into a single guided workflow inside the sidebar rail, surfacing the right controls in order.",
           ),
           cruiseBeat(
             "Outcome",
-            "Research and dogfooding confirmed what the org structure denied: the people moving the vehicle needed to speak, and the people speaking needed operational visibility. The sidebar rail and telephony service were two answers to the same question — how do you bring the right human into the loop without making the Remote Advisor leave the scene. Shipped in a partially-built form before Cruise shut down; the polished vision exists in Figma. The innovation here was never invention. It was orchestration.",
+            "Research and dogfooding confirmed what the org structure denied: the people moving the vehicle needed to speak, and the people speaking needed operational visibility. The sidebar rail and telephony service were two answers to the same question, how do you bring the right human into the loop without making the Remote Advisor leave the scene. Shipped in a partially-built form before Cruise shut down; the polished vision exists in Figma. The innovation here was never invention. It was orchestration.",
           ),
         ],
       ),
@@ -1059,12 +1302,10 @@ export const caseStudies: CaseStudy[] = [
           cruiseBeat(
             "The pushback",
             "Human factors researchers were appalled. Remote Advisorss in safety-critical environments need spatial muscle memory. Left is left. Right is right. Always. The T-shape was a trusted spatial anchor under stress.",
-            "1x1",
           ),
           cruiseBeat(
             "The result",
             "Motion prototypes performed poorly. Scrolling introduced spatial disorientation. The muscle memory disruption was real. The T-shape stayed — awkward for layout, correct for cognition.",
-            "9x16",
           ),
           cruiseBeat(
             "What was learned",
@@ -1090,17 +1331,14 @@ export const caseStudies: CaseStudy[] = [
           cruiseBeat(
             "What fell short",
             "Pivot (a lane-preference nudge) and Assisted Pathing (breadcrumb control points) were non-deterministic. The car could ignore the input or sit there saying \"executing\" while doing nothing. Remote Advisorss stopped trusting them, and stopped using them.",
-            "1x1",
           ),
           cruiseBeat(
             "What they trusted",
             "Sudo was fully deterministic: drag, drop, and rotate a vehicle icon to the end-state pose, hold go, and the car closed the gap. Basic collision avoidance aside, it just executed. Remote Advisorss loved it: you said where, it went there. That trust wasn't automatic, it was earned through iteration.",
-            "9x16",
           ),
           cruiseBeat(
             "The old design",
             "The earliest version was a plain rectangle with no front/back indication. A tiny spin icon above it, with no orientation feedback, no rotation distance, no kinematic feasibility boundaries, poor hit targets, and no affordance for drag-to-position.",
-            "1x1",
           ),
           cruiseMedia(
             "The redesign",
@@ -1110,12 +1348,10 @@ export const caseStudies: CaseStudy[] = [
           cruiseBeat(
             "The deeper insight",
             "Remote Advisorss sent infeasible commands regularly, not from carelessness, but because the interface gave no way to know what was feasible. Every rejection created a round-trip. The redesign encoded physics upstream.",
-            "9x16",
           ),
           cruiseBeat(
             "A second mode, built in",
             "The ring wasn't the only way to use it. Leave it disengaged and simply move the mouse across the map instead, and a breadcrumb trail followed the cursor, with the vehicle loosely tracing it. To a user's eye, that looked almost identical to Assisted Pathing, a point dropped on the map. The difference was invisible and total: Assisted Pathing ran on the autonomy stack's own path solver, which is exactly what made it feel like a black box Remote Advisorss never fully trusted. This breadcrumb mode ran on Sudo's spatial solver instead, the same deterministic engine behind the ring itself. Same gesture from the user's side, a different brain underneath, and that's what earned the trust Assisted Pathing never did.",
-            "1x1",
           ),
           cruiseMedia(
             "In practice",
@@ -1125,7 +1361,6 @@ export const caseStudies: CaseStudy[] = [
           cruiseBeat(
             "Outcome",
             "Fewer round trips and faster operations for precise moves, plus a looser, quicker option for everything else. One widget, two grains of control: exact when the situation called for it, approximate when it didn't, both of them trusted because both finally ran on a solver Remote Advisorss could rely on.",
-            "9x16",
           ),
           cruiseMedia(
             "Spring-loaded splines",
@@ -1135,7 +1370,6 @@ export const caseStudies: CaseStudy[] = [
           cruiseBeat(
             "A different kind of new",
             "Spring-loaded splines made a trusted paradigm faster. Alternate Intents asked a different question: what if the Remote Advisor didn't have to instruct the vehicle at all? At any moment the AV's planning stack has already solved multiple paths forward, it just picks one and discards the rest. That solved intelligence is invisible to the Remote Advisor. Alternate Intents surfaces the unchosen, already-computed routes as selectable ghost paths on the map. Click one to preference it.",
-            "1x1",
           ),
           cruiseMedia(
             "Select, don't instruct",
@@ -1145,12 +1379,10 @@ export const caseStudies: CaseStudy[] = [
           cruiseBeat(
             "When the human sees more",
             "Sometimes a person perceives what the sensors can't, a pedestrian waving the car through, a construction worker's gesture, social context the ML ranker has no access to. In those moments the AV's second-best path is the correct one, and the Remote Advisor can redirect toward a route the vehicle had already validated.",
-            "9x16",
           ),
           cruiseBeat(
             "The stability problem",
             "Ghost paths flicker. The AV re-plans constantly, so alternates appear and vanish as the scene changes, and you can't reliably click a path that might disappear in half a second. The tool only exposes alternates that hold past a stability threshold, scoped to conditions where stable options are likely.",
-            "1x1",
           ),
           cruiseBeat(
             "Artifact status",
@@ -1366,7 +1598,160 @@ export const caseStudies: CaseStudy[] = [
         "16x9",
       ),
     ],
-  }
+  },
+  {
+    slug: "mckinsey",
+    standalone: true,
+    name: "McKinsey & Co. — Experience Design",
+    subhead:
+      "Three engagements in finding, filming, and quantifying value where none seemed to exist.",
+    date: "2015–2017",
+    client: "McKinsey & Co.",
+    location: "New York, NY",
+    role: "Executive Experience Design Director",
+    tools: "Sketch, Illustrator, InVision, Keynote",
+    brand: {
+      field: "mckinsey-primary",
+    },
+    sections: [
+      mckinseyVignette(
+        "beyond-the-pill",
+        "Beyond the Pill — MS Drug Digital Ecosystem",
+        ["Design research", "Health outcomes", "Executive storytelling"],
+        "Design research as clinical intervention / ethnography at scale / executive storytelling",
+        [
+          mckinseyBeat(
+            "The hypothesis",
+            "Give MS patients a digital ecosystem that supports their treatment protocol, tracking symptoms, managing their care team, staying adherent to the drug, and the drug's clinical efficacy improves. Not a marketing project. A product design project with health outcomes as the success metric.",
+          ),
+          mckinseyBeat(
+            "The research",
+            "Ethnographic fieldwork with patients and their doctors: disease progression, treatment adherence, family dynamics, the emotional weight of a relapsing condition. On the provider side, mapping a doctor's full knowledge and social graph, how they learn about new drugs, coordinate with nurse practitioners, and monitor patients between appointments to catch a relapse before it happens.",
+            "1x1",
+          ),
+          mckinseyMedia(
+            "Patient journey books",
+            "Physically printed, richly designed narrative books telling individual patients' stories, disease progression, treatment protocol, family and lifestyle needs. Built to give executives an emotional connection to the patient experience, not just the business case.",
+            "9x16",
+          ),
+          mckinseyMedia(
+            "Provider ecosystem map",
+            "A visual map of a doctor's knowledge network: information sources, patient touchpoints, and where clinical knowledge flowed or broke down. Used to find where a digital product could actually intervene.",
+            "16x9",
+          ),
+          mckinseyBeat(
+            "Outcome",
+            "A menu of product ideas, each scored for likely impact, handed back with an honest frame: here is what we found and what we think it's worth, committing to it is your call.",
+          ),
+        ],
+      ),
+      mckinseyVignette(
+        "sprint-commodity-utility",
+        "Sprint — Differentiating a Commodity Utility",
+        ["Strategy", "Video", "Speculative design"],
+        "Value creation in commodity markets / speculative product design / video as design artifact",
+        [
+          mckinseyBeat(
+            "The brief",
+            "Sprint was hemorrhaging money competing on price as a utility. Cell coverage lagged competitors. Texts and data were commoditized, dumb-pipe economics with no margin. McKinsey was brought in to restructure the business. The harder question handed to the experience design team: how do you build a value proposition for a commodity?",
+          ),
+          mckinseyBeat(
+            "The approach",
+            "Not marketing, not a brand refresh, that was the agency of record's lane. Product-level value adds that could genuinely differentiate the service: family data pooling, a bundled Spotify partnership, smart data management for gig economy workers, and a device service ecosystem, repair coordination, replacement recommendations, cross-device management, run by a conversational AI agent. This was before Siri, before AI agents were a mainstream idea.",
+            "1x1",
+          ),
+          mckinseyMedia(
+            "Three commercials",
+            "Three fully produced video commercials, scripts written, actors hired, filmed and edited. A family sharing a data pool and starting a shared Spotify session in the living room. An Uber driver toggling background app data on and off mid-shift. A customer breaking a device and a smart agent coordinating repair or replacement across their whole device footprint.",
+            "16x9",
+          ),
+          mckinseyBeat(
+            "Outcome",
+            "The videos carried the pitch on their own: three lived-in human moments standing in for a value proposition Sprint couldn't otherwise put into words.",
+          ),
+        ],
+      ),
+      mckinseyVignette(
+        "qed-quantified-experience-design",
+        "QED — Quantified Experience Design",
+        ["Methodology", "Data + design", "Strategy"],
+        "Methodology invention / quantitative and qualitative synthesis / design as a business decision tool",
+        [
+          mckinseyBeat(
+            "What it is",
+            "A framework co-invented with McKinsey's Advanced Journey Analytics team that runs statistical analysis alongside human-centered design, not just at the start as segmentation or the end as measurement, but continuously, as a design partner to qualitative thinking.",
+          ),
+          mckinseyBeat(
+            "How it works",
+            "Population models identify what matters most to which customer segments, statistically. Designers do the usual work: research, ideation, concept development. Instead of handing finished concepts to the business and hoping they land, those concepts get run back through the population models and scored, not one at a time, but as a basket of ideas working together.",
+            "1x1",
+          ),
+          mckinseyBeat(
+            "The output",
+            "An answer to a question most design processes can't give: if the target is a 28 percent NPS improvement, which combination of ideas gets there? One breakthrough idea might do it alone. A handful of smaller ideas might close the gap collectively. Either way, the client commits with statistical confidence instead of intuition.",
+            "9x16",
+          ),
+          mckinseyStat(
+            "Outcome",
+            "22%",
+            "Applied on a Fortune 500 pharmaceutical engagement: a 22 percent increase in patient NPS while the client captured 26 percent more market share. Named, packaged, and sold into engagements across McKinsey's practice from there.",
+          ),
+        ],
+      ),
+    ],
+  },
+  {
+    slug: "facebook",
+    standalone: true,
+    name: "Facebook — Questions & Answers",
+    subhead:
+      "Where a social graph and a knowledge graph collide: keeping questions, and their answers, inside Facebook.",
+    date: "2013–2014",
+    client: "Facebook",
+    location: "New York, NY",
+    role: "Product Designer",
+    tools: "Photoshop, Illustrator, OmniGraffle",
+    brand: {
+      field: "facebook-primary",
+    },
+    sections: [
+      facebookVignette(
+        "questions-and-answers",
+        "Questions & Answers — The Quora Killer",
+        ["Social graph", "Structured data", "Platform-scale design"],
+        "Social graph and knowledge graph intersection / structured data design / feature development at platform scale",
+        [
+          facebookBeat(
+            "The context",
+            "Joined Facebook via the acquisition of Hot Studio. Co-founded the New York UX team, building design culture in an office that wasn't yet fully embedded in the West Coast product culture.",
+          ),
+          facebookBeat(
+            "The problem",
+            "Users constantly left Facebook to search Google or Quora for answers their own social graph could have given them. Facebook's Q&A infrastructure was weak. The opportunity: keep users in the ecosystem by making questions and structured answers a native part of the platform.",
+            "1x1",
+          ),
+          facebookBeat(
+            "Compose",
+            "A classifier detected question phrasing as a user typed in the Facebook composer and surfaced a prompt: are you asking a question? Accepting it tagged the post with structured data in the knowledge graph.",
+          ),
+          facebookBeat(
+            "Contribute",
+            "When friends answered, the bar for knowledge graph entity resolution dropped. Structured answers, a restaurant, a dentist, a location, snapped to real entities more readily than an ordinary comment.",
+            "9x16",
+          ),
+          facebookMedia(
+            "Consume",
+            "Rendering experiments for the answer set: a map view for location questions, a mosaic of images, or a structured comment thread. The thread format kept context around lower-quality answers so other users could weigh them.",
+            "16x9",
+          ),
+          facebookBeat(
+            "Outcome",
+            "Ran at 1 percent live; the lift wasn't enough to clear the bar for a full rollout at the time. Another team picked up the idea, refined it, and shipped a version of it years later.",
+          ),
+        ],
+      ),
+    ],
+  },
 ];
 
 /* ------------------------------------------------------------------ *
@@ -1411,9 +1796,14 @@ export function getAllVignettes(): VignetteWithStudy[] {
  * usable from any runtime. See AGENTS.md backlog + gate.ts.
  * ------------------------------------------------------------------ */
 
-/** Case studies visible to this visitor — drops gated studies when locked. */
+/**
+ * Case studies visible to this visitor — drops gated studies when locked, and
+ * always drops standalone containers (they never get an index card).
+ */
 export function visibleCaseStudies(unlocked: boolean): CaseStudy[] {
-  return unlocked ? caseStudies : caseStudies.filter((study) => !study.gated);
+  return caseStudies.filter(
+    (study) => !study.standalone && (unlocked || !study.gated),
+  );
 }
 
 /** Vignettes visible to this visitor — drops gated studies' vignettes when locked. */

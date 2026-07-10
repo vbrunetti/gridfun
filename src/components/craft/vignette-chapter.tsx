@@ -173,6 +173,31 @@ function FrameContent({
     );
   }
 
+  if (frame.quote) {
+    return (
+      <>
+        <header className="vframe__kicker">
+          {frame.label ? (
+            <p className="vframe__kicker-text text-meta">{frame.label}</p>
+          ) : null}
+        </header>
+        <div className="vframe__main vframe__main--quote">
+          <blockquote className="vframe__quote">
+            <span className="vframe__quote-mark" aria-hidden>
+              &ldquo;
+            </span>
+            <p className="vframe__quote-text">{frame.quote}</p>
+            {frame.quoteCite ? (
+              <footer className="vframe__quote-cite text-label-sm text-mono-label">
+                {frame.quoteCite}
+              </footer>
+            ) : null}
+          </blockquote>
+        </div>
+      </>
+    );
+  }
+
   if (frame.colorField) {
     return (
       <>
@@ -777,15 +802,15 @@ export function VignetteChapter({
                 ref={(node) => {
                   panelRefs.current[idx] = node;
                 }}
-                className={`vframe vframe--${frame.ratio}${
+                className={`vframe vframe--${frame.ratio} ${
                   frame.colorField
-                    ? " vframe--field"
+                    ? "vframe--field"
                     : frame.stat
-                      ? ""
-                      : " vframe--media"
-                }${frame.stat ? " vframe--stat" : ""}${
-                  idx === index ? " is-active" : ""
-                }`}
+                      ? "vframe--stat"
+                      : frame.quote
+                        ? "vframe--quote"
+                        : "vframe--media"
+                }${idx === index ? " is-active" : ""}`}
                 data-vframe-index={idx}
                 data-panel-bg={panelBg}
                 style={{

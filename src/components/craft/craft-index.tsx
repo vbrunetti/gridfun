@@ -12,7 +12,7 @@ import {
 import { createPortal } from "react-dom";
 import { GhostButton } from "@/components/chrome/cta-button";
 import { CraftMasonry } from "@/components/craft/craft-masonry";
-import { VignetteKeyImage, craftCardRatio } from "@/components/craft/vignette-media";
+import { VignetteKeyImage } from "@/components/craft/vignette-media";
 import { RuledGrid } from "@/components/layout/ruled-grid";
 import { type VignetteWithStudy } from "@/content/portfolio";
 
@@ -411,11 +411,7 @@ function VignetteCard({ entry }: { entry: VignetteWithStudy }) {
 
   return (
     <Link href={`/craft/${vignette.slug}`} className="craft-card">
-      <VignetteKeyImage
-        vignette={vignette}
-        className="craft-portrait"
-        displayRatio={craftCardRatio(vignette.slug)}
-      />
+      <VignetteKeyImage vignette={vignette} className="craft-portrait" />
       <div className="craft-card-copy">
         <h2 className="craft-card-title">{vignette.name}</h2>
         <p className="text-meta mt-2">{caseStudy.client}</p>

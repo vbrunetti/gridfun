@@ -37,6 +37,10 @@ export function ChromeThemeWatcher() {
         return;
       }
 
+      if (document.querySelector(".craft-route")) {
+        return;
+      }
+
       const surfaces = [
         ...document.querySelectorAll<Element>(`[${CHROME_SURFACE_ATTR}]`),
       ].filter((el) => !el.closest(IGNORE));
@@ -79,7 +83,7 @@ export function ChromeThemeWatcher() {
       for (const el of document.querySelectorAll<Element>(
         `[${CHROME_SURFACE_ATTR}]`,
       )) {
-        if (el.closest(IGNORE) || el.closest(".home-scroll") || el.closest(".cs-index-route")) {
+        if (el.closest(IGNORE) || el.closest(".home-scroll") || el.closest(".cs-index-route") || el.closest(".craft-route")) {
           continue;
         }
         observer.observe(el);
@@ -94,6 +98,7 @@ export function ChromeThemeWatcher() {
       if (
         !document.querySelector(".home-scroll") &&
         !document.querySelector(".cs-index-route") &&
+        !document.querySelector(".craft-route") &&
         !document.querySelector(".cs-detail")
       ) {
         delete body.dataset.chromeSurface;

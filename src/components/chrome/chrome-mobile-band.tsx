@@ -91,7 +91,9 @@ function pathnameDarkDefault(pathname: string): boolean {
   return (
     pathname === "/" ||
     pathname === "/case-studies" ||
-    pathname.startsWith("/case-studies/")
+    pathname.startsWith("/case-studies/") ||
+    pathname === "/craft" ||
+    pathname.startsWith("/craft/")
   );
 }
 

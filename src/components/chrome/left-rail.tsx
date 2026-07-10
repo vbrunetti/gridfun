@@ -33,7 +33,8 @@ function SocialIconButton({
 export function LeftRail() {
   const pathname = usePathname();
   const { menuOpen } = useChrome();
-  const railTheme = pathname === "/case-studies" ? "theme-dark" : "theme-light";
+  const railTheme =
+    pathname === "/about" || pathname === "/contact" ? "theme-dark" : "theme-light";
 
   return (
     <aside

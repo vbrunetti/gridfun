@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import type { CraftVignette, ImageRatio } from "@/content/portfolio";
+import type { CraftVignette } from "@/content/portfolio";
 import { craftTagFilterHref } from "@/content/portfolio";
 import {
   vignetteKeyImageSrc,
@@ -9,19 +9,6 @@ import {
 } from "@/lib/portfolio-assets";
 
 export { VignetteImageScroll } from "@/components/craft/vignette-carousel";
-
-/** Craft index cards — square, landscape, or portrait (stable per slug). */
-export type CraftCardRatio = PortfolioImageRatio;
-
-const CRAFT_CARD_RATIOS: CraftCardRatio[] = ["1x1", "16x9", "9x16"];
-
-export function craftCardRatio(slug: string): CraftCardRatio {
-  let hash = 0;
-  for (let i = 0; i < slug.length; i++) {
-    hash = (hash * 31 + slug.charCodeAt(i)) >>> 0;
-  }
-  return CRAFT_CARD_RATIOS[hash % CRAFT_CARD_RATIOS.length];
-}
 
 function ratioValue(ratio: PortfolioImageRatio): string {
   if (ratio === "16x9") return "16 / 9";
@@ -42,20 +29,17 @@ function resolveKeySrc(vignette: CraftVignette, ratio: PortfolioImageRatio): str
   return vignetteKeyImageSrc(vignette.keyImageAccent, ratio);
 }
 
-/** Vignette key image — portrait, landscape, or square. */
+/** Vignette key image — portrait, landscape, or square (set by `keyImageRatio`). */
 export function VignetteKeyImage({
   vignette,
   className = "",
   priority = false,
-  displayRatio,
 }: {
   vignette: CraftVignette;
   className?: string;
   priority?: boolean;
-  /** Override aspect ratio for presentation (craft index masonry). */
-  displayRatio?: PortfolioImageRatio;
 }) {
-  const ratio = displayRatio ?? vignette.keyImageRatio;
+  const ratio = vignette.keyImageRatio;
   const src = resolveKeySrc(vignette, ratio);
   const { width, height } = ratioDimensions(ratio);
 

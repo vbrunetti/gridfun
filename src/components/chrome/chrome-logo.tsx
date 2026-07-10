@@ -8,7 +8,7 @@ import { LogoMark } from "./logo-mark";
 
 /**
  * Single fixed logo slot — same coordinates when the menu opens; only variant changes.
- * Desktop: always default on the light left rail (case-studies index uses dark rail).
+ * Desktop: default on the light rail; reversed on routes with a dark rail (/about, /contact).
  * Mobile: follows the sampled chrome band over the hero.
  */
 export function ChromeLogo() {
@@ -27,7 +27,9 @@ export function ChromeLogo() {
 
   const darkRail =
     menuOpen ||
-    (desktop ? pathname === "/case-studies" : mobileSurface === "dark");
+    (desktop
+      ? pathname === "/about" || pathname === "/contact"
+      : mobileSurface === "dark");
 
   return (
     <div

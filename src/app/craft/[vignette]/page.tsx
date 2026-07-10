@@ -57,22 +57,28 @@ export default async function VignettePage({ params }: PageProps) {
     { key: "client", label: "Client", value: caseStudy.client },
     { key: "date", label: "Date", value: caseStudy.date },
     { key: "role", label: "Role", value: caseStudy.role },
-    {
-      key: "study",
-      label: "Case study",
-      value: caseStudy.name,
-      href: `/case-studies/${caseStudy.slug}`,
-    },
+    // Standalone containers (credential-style vignettes) don't get a real
+    // case-study page, so skip the "Case study" fact rather than link to a 404.
+    ...(caseStudy.standalone
+      ? []
+      : [
+          {
+            key: "study",
+            label: "Case study",
+            value: caseStudy.name,
+            href: `/case-studies/${caseStudy.slug}`,
+          },
+        ]),
   ] as const;
 
   return (
     <CaseStudyDetailScroll steps={detailSteps}>
-      <div className="theme-white" data-chrome-surface="light">
+      <div className="theme-dark" data-chrome-surface="dark">
         <section
           id="craft-hero"
           data-cs-detail-row
           className="cs-focus-section cs-hero keyline-b is-focused"
-          data-chrome-surface="light"
+          data-chrome-surface="dark"
         >
           <RuledGrid className="cs-hero__grid">
             <div className="cs-hero__facts">
@@ -117,7 +123,6 @@ export default async function VignettePage({ params }: PageProps) {
           vignette={vignette}
           chapterNumber={chapterNumber}
           showTitlePanel={false}
-          colorway="white"
           controlled
         />
 

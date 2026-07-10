@@ -17,8 +17,8 @@ export default async function CraftPage({ searchParams }: PageProps) {
 
   return (
     <div
-      className="craft-route theme-light min-h-[100dvh] w-full min-w-0"
-      data-chrome-surface="light"
+      className="craft-route theme-dark min-h-[100dvh] w-full min-w-0"
+      data-chrome-surface="dark"
     >
       <CraftIndex
         vignettes={visibleVignettes(unlocked)}

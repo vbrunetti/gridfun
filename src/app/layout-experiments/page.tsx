@@ -110,7 +110,7 @@ const panelInventory: CraftVignette = {
   keyImageRatio: "16x9",
   keyImageAccent: "cruise", // vibrant ground for the color-field title treatment
   titleTreatment: "color",
-  tags: ["Title", "Beat", "Stat", "Media"],
+  tags: ["Title", "Beat", "Stat", "Quote", "Media"],
   themeLine: "Every filmstrip panel type in one chapter",
   titlePanelWidth: { desktop: 8, mobile: 6 },
   images: [
@@ -161,6 +161,14 @@ const panelInventory: CraftVignette = {
       stat: "~20%",
       body: "Quantified impact: kicker + lede + oversized display-metric figure.",
       width: { desktop: 12, mobile: 6 },
+    },
+    {
+      ratio: "1x1",
+      accent: CRUISE,
+      label: "Quote",
+      quote: "There is a lot more information placed logically in T2.",
+      quoteCite: "Advisor · T2 usability study",
+      width: { desktop: 8, mobile: 6 },
     },
   ],
 };
