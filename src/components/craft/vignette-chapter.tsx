@@ -20,8 +20,9 @@ import {
   clientBrandColorVar,
   isClientBrandColor,
 } from "@/lib/client-brand-colors";
-import { palette } from "@/lib/colors";
 import { vignetteFrameSrc } from "@/lib/portfolio-assets";
+import { vignetteTitleColor } from "@/lib/vignette-title";
+import { VignetteTitleBackdrop } from "@/components/craft/vignette-title-backdrop";
 import { parseVimeoId } from "@/lib/vimeo";
 import { VimeoPlayer } from "@/components/media/vimeo-embed";
 import { useCaseStudyVignetteProgressRegister } from "@/components/case-studies/case-study-detail-scroll-context";
@@ -808,42 +809,15 @@ export function VignetteChapter({
                 "--title-cols-mobile",
               ),
               ...(vignette.titleTreatment === "color"
-                ? {
-                    ["--panel-bg" as string]: isClientBrandColor(
-                      vignette.keyImageAccent,
-                    )
-                      ? clientBrandColorVar(vignette.keyImageAccent)
-                      : palette[vignette.keyImageAccent],
-                  }
+                ? { ["--panel-bg" as string]: vignetteTitleColor(vignette) }
                 : {}),
             }}
           >
-            {vignette.titleTreatment === "cover" && vignette.keyImageSrc ? (
-              <>
-                <Image
-                  src={vignette.keyImageSrc}
-                  alt=""
-                  fill
-                  priority
-                  draggable={false}
-                  className="vframe__title-cover"
-                  sizes="(max-width: 767px) 92vw, min(100vw, 90rem)"
-                  style={{
-                    ...(vignette.titleCoverBlur
-                      ? {
-                          filter: `blur(${vignette.titleCoverBlur}px)`,
-                          // Overfill so the blur doesn't feather transparent edges.
-                          transform: "scale(1.06)",
-                        }
-                      : {}),
-                    ...(vignette.titleCoverAlpha != null
-                      ? { opacity: vignette.titleCoverAlpha }
-                      : {}),
-                  }}
-                />
-                <div className="vframe__title-scrim" aria-hidden />
-              </>
-            ) : null}
+            <VignetteTitleBackdrop
+              vignette={vignette}
+              coverClassName="vframe__title-cover"
+              scrimClassName="vframe__title-scrim"
+            />
             <header className="vframe__kicker">
               {!vignette.titleTreatment ? (
                 <p className="vframe__kicker-text text-meta vchapter__index">

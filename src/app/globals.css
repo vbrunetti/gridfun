@@ -7,6 +7,16 @@
 }
 
 :root {
+  /* Darkening scrim behind a vignette's `cover` title treatment — shared by the
+     filmstrip opener panel (.vframe__title-scrim) and the craft hero
+     (.cs-hero__scrim) so both key-image openers read with identical contrast. */
+  --vignette-title-scrim: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.72) 0%,
+    rgba(0, 0, 0, 0.3) 48%,
+    rgba(0, 0, 0, 0.52) 100%
+  );
+
   /* Brand palette — neutral ramp + neon accents */
   --color-white: #ffffff;
   --color-off-white: #efefef;
@@ -1929,6 +1939,16 @@ body.cs-detail-nav-hover .floating-chrome .chrome-nav-dot-ring {
   line-height: 0;
 }
 
+/* Desktop rail shrink-wraps around the dot buttons. The -0.5rem hit-target margin
+   only needs to collapse the vertical padding; leaving it on the inline axis makes
+   the flex cross-centering land the dot (and its progress ring) ~8px off the
+   rail/menu axis. Zero the inline margin so every dot stays centered on the axis. */
+@media (min-width: 1024px) {
+  .chrome-nav-dot-btn {
+    margin-inline: 0;
+  }
+}
+
 .chrome-nav-dot-btn:hover .chrome-nav-dot-wrap {
   transform: scale(1.28);
 }
@@ -3712,6 +3732,26 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
   pointer-events: none;
 }
 
+/* Title-treatment backdrop on the standalone craft hero — the same key image +
+   scrim (or accent ground) the filmstrip opener panel paints, so viewing a
+   vignette via /craft opens on its cover. Layers sit behind the grid (z-index 1);
+   the `color` accent is painted as an inline section background from the page. */
+.cs-hero__cover {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.cs-hero__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--vignette-title-scrim);
+  pointer-events: none;
+}
+
 .cs-hero__grid {
   position: relative;
   z-index: 1;
@@ -4748,12 +4788,7 @@ ul.cs-hero__subhead {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.72) 0%,
-    rgba(0, 0, 0, 0.3) 48%,
-    rgba(0, 0, 0, 0.52) 100%
-  );
+  background: var(--vignette-title-scrim);
   pointer-events: none;
 }
 

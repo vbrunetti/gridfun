@@ -5,6 +5,7 @@ import { CaseStudyDetailScroll } from "@/components/case-studies/case-study-deta
 import { DetailNavFooter } from "@/components/case-studies/detail-nav-footer";
 import { CraftTagList } from "@/components/craft/vignette-media";
 import { VignetteChapter } from "@/components/craft/vignette-chapter";
+import { VignetteTitleBackdrop } from "@/components/craft/vignette-title-backdrop";
 import { RuledGrid } from "@/components/layout/ruled-grid";
 import {
   getVignette,
@@ -12,6 +13,7 @@ import {
 } from "@/content/portfolio";
 import { isUnlocked } from "@/lib/gate";
 import { buildCraftDetailSteps } from "@/lib/craft-detail-steps";
+import { vignetteTitleColor } from "@/lib/vignette-title";
 
 type PageProps = {
   params: Promise<{ vignette: string }>;
@@ -52,6 +54,10 @@ export default async function VignettePage({ params }: PageProps) {
   const next = allVignettes[index + 1];
   const chapterNumber = index >= 0 ? index + 1 : 1;
   const detailSteps = buildCraftDetailSteps(vignette);
+  const titleColor =
+    vignette.titleTreatment === "color"
+      ? vignetteTitleColor(vignette)
+      : undefined;
 
   const heroFacts = [
     { key: "client", label: "Client", value: caseStudy.client },
@@ -77,9 +83,17 @@ export default async function VignettePage({ params }: PageProps) {
         <section
           id="craft-hero"
           data-cs-detail-row
-          className="cs-focus-section cs-hero keyline-b is-focused"
+          className={`cs-focus-section cs-hero keyline-b is-focused${
+            vignette.titleTreatment ? ` cs-hero--title-${vignette.titleTreatment}` : ""
+          }`}
           data-chrome-surface="dark"
+          style={titleColor ? { background: titleColor } : undefined}
         >
+          <VignetteTitleBackdrop
+            vignette={vignette}
+            coverClassName="cs-hero__cover"
+            scrimClassName="cs-hero__scrim"
+          />
           <RuledGrid className="cs-hero__grid">
             <div className="cs-hero__facts">
               {heroFacts.map((fact) => (
