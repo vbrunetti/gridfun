@@ -1172,36 +1172,62 @@ export const caseStudies: CaseStudy[] = [
           titleCoverAlpha: 0.7,
         },
       ),
-
-
-
-
-
-      
       cruiseVignette(
         "control-handoff-visualization",
-        "Who's Driving? — Control Handoff Visualization",
+        "Who's Driving This Anyway?",
         ["Motion", "Interaction design", "Workflow & ops"],
         "State legibility / handoff smoothness / animation as communication",
         [
           cruiseBeat(
             "The context",
-            "The AV could be autonomous, remotely operated, human-driven, or failed — communicated via AV icon color. Switching control states required a complete stop: safe, but slow and costly in a commercial robotaxi operation.",
+            "It's important to realize that humans never remotely drove a Cruise AV. Remote assistance consisted of simply providing suggestions and instructions to the AV. Whether or not the AV followed them depended upon its interal planning stack.\n\nThe AV had 3 main states: Fully Autonomous, Remotely Assisted, and Manual. The former two were the only modes the AV could proceed autonomously.\n\nWhat mode the AV was in dictated the kinds of instructions Remote Assistants could provide it, how likely the AV was to follow those instructions without deviation, and whether or not the AV needed to come to a complete stop to switch modes. So communicating the AV's state to the Remote Operator, along with the tools available to them to instruct the AV, was critical.",
+          ),
+          cruiseMedia(
+            "State Visualization",
+            "The AV could only be in one of the following states: Fully Autonomous, Remotely Assisted, and Manual. We needed to visualize this so Remote Operators could understand the AV's capabilities and limitations.",
+            "1x1",
+            {
+              sources: [
+                "/portfolio/cruise/Cruise_v6_c1.jpg",
+              ],
+            },
           ),
           cruiseBeat(
             "The insight",
-            "If we could visualize where the control handoff would happen on the forward path, we could pre-authorize the switch. The vehicle wouldn't need to stop — it could approach the handoff point with authorization already in place.",
+            "If we could visualize where the control handoff would happen on the forward path, we could implicitly pre-authorize the switch, and the vehicle wouldn't need to stop. The AV could approach the handoff point with authorization already in place and keep its forward motion, saving precious seconds and not further disrupt traffic.",
           ),
           cruiseMedia(
-            "The solution",
-            "Forward path spline as a double line: outer line matches current control state; inner stripe gradients into the incoming entity's color, anchored to a waypoint. Colors intensify as the AV approaches — a visual countdown.",
-            "16x9",
+            "[...]",
+            "[...]",
+            "1x1",
+            {
+              sources: [
+                "/portfolio/cruise/Cruise_v7_c1.jpg",
+                "/portfolio/cruise/Cruise_v7_c2.jpg",
+                "/portfolio/cruise/Cruise_v7_c3.jpg",
+                "/portfolio/cruise/Cruise_v7_c4.jpg",
+                "/portfolio/cruise/Cruise_v7_c5.jpg",
+              ],
+            },
           ),
-          cruiseBeat(
-            "Outcome",
-            "Control handoffs could be pre-authorized without stopping the vehicle. The visualization made the transition legible enough that Remote Advisorss trusted it. The car stayed in motion.",
+          cruiseMedia(
+            "Live Prototype",
+            "Here you can see the AV approaching the handoff point and the Remote Operator implicitly authorizing the switch to autonomous mode.",
+            "1x1",
+            {
+              vimeo: "1209263346",
+              vimeoBackground: true,
+              poster: "/portfolio/cruise/ap-to-autonomous.jpg",
+            },
           ),
         ],
+        "1x1",
+        {
+          titleTreatment: "cover",
+          keyImageSrc: "/portfolio/cruise/Cruise_v3_cover.jpg",
+          titleCoverBlur: 0,
+          titleCoverAlpha: 0.4,
+        },
       ),
       cruiseVignette(
         "av-state-module",

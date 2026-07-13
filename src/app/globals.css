@@ -4908,9 +4908,11 @@ ul.cs-hero__subhead {
   width: calc(100cqw * var(--frame-cols, 6) / 12);
 }
 
-/* Text beat — 6 cols; wins over its ratio class via source order. */
+/* Text beat — 6 cols; wins over its ratio class via source order. No foot band:
+   copy fills kicker + scroll only (same two-row model as media/quote). */
 .vframe--field {
   width: calc(100cqw * var(--frame-cols, 6) / 12);
+  grid-template-rows: var(--panel-kicker) 1fr;
 }
 
 /* Stat panel — supporting lede up top, oversized figure locked to the foot.
@@ -4919,11 +4921,8 @@ ul.cs-hero__subhead {
   grid-template-rows: var(--panel-kicker) 1fr auto;
 }
 
-.vframe__main--stat {
-  align-items: stretch;
-}
-
-.vframe__stat-lede {
+/* Stat lede scrolls inside .vframe__scroll--prose when copy overflows. */
+.vframe__scroll--prose .vframe__stat-lede {
   margin: 0;
   max-width: none;
   width: 100%;
@@ -4956,10 +4955,9 @@ ul.cs-hero__subhead {
 
 /* Main band is the query container (quote scales with panel width) and clips the
    oversized background mark where it bleeds past the panel. */
-.vframe__main--quote {
-  justify-content: center;
+.vframe--quote .vframe__scroll {
+  justify-content: safe center;
   container-type: inline-size;
-  overflow: hidden;
 }
 
 /* Quote + attribution lockup — also the anchor + stacking context for the mark,
@@ -5142,26 +5140,16 @@ ul.cs-hero__subhead {
   object-position: top center;
 }
 
-/* ── Media panel — image atop a caption in normal document flow ──────────────
-   The panel body scrolls as a unit: the image is sized to fit the panel width
-   and the height budget left after reserving room for the first lines of the
-   caption; the caption flows directly beneath it. Longer captions push the body
-   past the panel and the band scrolls; once that scroll bottoms out, the wheel
-   chains to the page (scroll-pin mode) or the gesture module releases (gesture
-   mode) and the filmstrip advances to the next panel. */
-.vframe--media {
-  grid-template-rows: var(--panel-kicker) 1fr;
-  /* Vertical room held for the caption to peek before the body needs to scroll. */
-  --vframe-caption-reserve: clamp(4.5rem, 12vh, 7.5rem);
-}
-
+/* ── In-panel scroll — any focused panel whose body can overflow ─────────────
+   Inactive panels never capture scroll; only the focused panel scrolls. Once the
+   inner scroll reaches its edge, wheel/touch chains to the page (scroll-pin) or
+   the gesture module advances the filmstrip. Media, beat, quote, and stat panels
+   all share this band. */
 .vframe__scroll {
   display: flex;
   flex-direction: column;
-  /* Left edge shared by the media, dots, kicker, and caption — a clean column. */
   align-items: flex-start;
   min-height: 0;
-  /* Inactive panels never capture scroll; only the focused panel scrolls. */
   overflow: hidden;
   container-type: size;
   padding-inline: var(--panel-pad);
@@ -5169,10 +5157,27 @@ ul.cs-hero__subhead {
   padding-bottom: calc(var(--panel-foot-pad) + 3px);
 }
 
-.vframe--media.is-active .vframe__scroll {
+.vframe.is-active .vframe__scroll {
+  overflow-x: hidden;
   overflow-y: auto;
-  /* Default (auto) overscroll so bottoming out chains to the page and advances
-     the filmstrip — do NOT set `contain` here. */
+  /* Default (auto) overscroll so bottoming out chains to the page — do NOT set
+     `contain` here. */
+}
+
+/* ── Media panel — image atop a caption in normal document flow ──────────────
+   The panel body scrolls as a unit: the image is sized to fit the panel width
+   and the height budget left after reserving room for the first lines of the
+   caption; the caption flows directly beneath it. Longer captions push the body
+   past the panel and the band scrolls. */
+.vframe--media {
+  grid-template-rows: var(--panel-kicker) 1fr;
+  /* Vertical room held for the caption to peek before the body needs to scroll. */
+  --vframe-caption-reserve: clamp(4.5rem, 12vh, 7.5rem);
+}
+
+/* Media scroll band — left edge shared by media, kicker, and caption. */
+.vframe--media .vframe__scroll {
+  align-items: flex-start;
 }
 
 /* Media box sized to contain within the panel width × (height − caption reserve).
@@ -5391,9 +5396,9 @@ ul.cs-hero__subhead {
    short (big peek of the next panel); a 9:16 portrait is tall. Placed after the
    base media/carousel rules so these win on source order. */
 @media (max-width: 1023px) {
-  /* Media body flows with the panel (no internal scroll); the page scrolls. */
+  /* Panel body flows with the page (no internal scroll); the page scrolls. */
   .vframe__scroll,
-  .vframe--media.is-active .vframe__scroll {
+  .vframe.is-active .vframe__scroll {
     height: auto;
     min-height: 0;
     overflow: visible;

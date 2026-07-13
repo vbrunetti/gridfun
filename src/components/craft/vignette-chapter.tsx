@@ -157,7 +157,7 @@ function FrameContent({
             <p className="vframe__kicker-text text-meta">{frame.label}</p>
           ) : null}
         </header>
-        <div className="vframe__main vframe__main--stat">
+        <div className="vframe__scroll vframe__scroll--prose">
           {frame.body ? (
             <p className="body-md vframe__stat-lede text-secondary">{frame.body}</p>
           ) : null}
@@ -184,7 +184,7 @@ function FrameContent({
             <p className="vframe__kicker-text text-meta">{frame.label}</p>
           ) : null}
         </header>
-        <div className="vframe__main vframe__main--quote">
+        <div className="vframe__scroll vframe__scroll--quote">
           <blockquote className="vframe__quote">
             <span className="vframe__quote-mark" aria-hidden>
               &ldquo;
@@ -209,7 +209,7 @@ function FrameContent({
             <p className="vframe__kicker-text text-meta">{frame.label}</p>
           ) : null}
         </header>
-        <div className="vframe__main vframe__main--field">
+        <div className="vframe__scroll vframe__scroll--prose">
           {frame.body
             ? frame.body.split("\n\n").map((paragraph, i) => (
                 <p key={i} className="display-sm vframe__beat">
@@ -218,7 +218,6 @@ function FrameContent({
               ))
             : null}
         </div>
-        <footer className="vframe__foot" aria-hidden />
       </>
     );
   }
