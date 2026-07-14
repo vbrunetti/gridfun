@@ -10,6 +10,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { usePathname } from "next/navigation";
 
 type ChromeContextValue = {
   menuOpen: boolean;
@@ -27,12 +28,17 @@ const SKELETON_KEY = "gridfun-skeleton";
 export function ChromeProvider({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [skeletonVisible, setSkeletonVisible] = useState(false);
+  const pathname = usePathname();
 
+  /* /about ships with the overlay on (route default, not written to the
+     stored preference); everywhere else follows the persisted toggle. */
   useEffect(() => {
     startTransition(() => {
-      setSkeletonVisible(localStorage.getItem(SKELETON_KEY) === "1");
+      setSkeletonVisible(
+        pathname === "/about" || localStorage.getItem(SKELETON_KEY) === "1",
+      );
     });
-  }, []);
+  }, [pathname]);
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
