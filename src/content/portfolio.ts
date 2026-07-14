@@ -1197,8 +1197,8 @@ export const caseStudies: CaseStudy[] = [
             "If we could visualize where the control handoff would happen on the forward path, we could implicitly pre-authorize the switch, and the vehicle wouldn't need to stop. The AV could approach the handoff point with authorization already in place and keep its forward motion, saving precious seconds and not further disrupt traffic.",
           ),
           cruiseMedia(
-            "[...]",
-            "[...]",
+            "Our solution",
+            "Concepts for control handover, dropping crumbs for the vehicle to follow, and then implicit control handover near the maneuver end point.",
             "1x1",
             {
               sources: [
@@ -1207,6 +1207,11 @@ export const caseStudies: CaseStudy[] = [
                 "/portfolio/cruise/Cruise_v7_c3.jpg",
                 "/portfolio/cruise/Cruise_v7_c4.jpg",
                 "/portfolio/cruise/Cruise_v7_c5.jpg",
+                "/portfolio/cruise/Cruise_v7_c6.jpg",
+                "/portfolio/cruise/Cruise_v7_c7.jpg",
+                "/portfolio/cruise/Cruise_v7_c8.jpg",
+                "/portfolio/cruise/Cruise_v7_c9.jpg",
+                "/portfolio/cruise/Cruise_v7_c10.jpg",
               ],
             },
           ),
