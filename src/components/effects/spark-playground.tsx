@@ -196,7 +196,7 @@ export function SparkPlayground() {
                   href="/effects/hero-atmosphere"
                   className="border-b border-current text-primary"
                 >
-                  Atmosphere playground
+                  Secondary background lab
                 </Link>
                 {" · "}
                 <button

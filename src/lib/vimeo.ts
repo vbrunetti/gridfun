@@ -14,6 +14,12 @@ export function parseVimeoId(input: string): string | null {
   }
 }
 
+/**
+ * Start ABR at a low rung so playback begins quickly, then let Vimeo ramp up.
+ * Requires a paid Vimeo plan (Starter+); ignored otherwise.
+ */
+const INITIAL_QUALITY = "360p";
+
 /** Embed URL with metadata chrome hidden; native playback controls stay on. */
 export function vimeoEmbedUrl(videoId: string): string {
   const params = new URLSearchParams({
@@ -24,6 +30,7 @@ export function vimeoEmbedUrl(videoId: string): string {
     dnt: "1",
     autopause: "1",
     playsinline: "1",
+    initial_quality: INITIAL_QUALITY,
   });
 
   return `https://player.vimeo.com/video/${videoId}?${params.toString()}`;
@@ -39,6 +46,7 @@ export function vimeoBackgroundUrl(videoId: string, playerId?: string): string {
     api: "1",
     muted: "1",
     playsinline: "1",
+    initial_quality: INITIAL_QUALITY,
   });
 
   if (playerId) {

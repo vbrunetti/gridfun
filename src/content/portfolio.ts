@@ -197,7 +197,10 @@ export type ProseSection = {
   /** Layout treatment; omit for the default `lede` split. */
   variant?: ProseVariant;
   heading?: string;
-  /** A paragraph or two — split on blank lines for multiple paragraphs. */
+  /**
+   * A paragraph or two — split on blank lines for multiple paragraphs.
+   * Inline markup: `*italic*` and `**bold**` (same in `heading` / captions).
+   */
   body: string;
   /** `epigraph` — attribution under the quote (e.g. "Kyle Vogt, CEO"). */
   attribution?: string;
@@ -953,12 +956,12 @@ export const caseStudies: CaseStudy[] = [
       cruiseProse(
         "cruise-intro",
         "Tick Tock",
-        `Cruise's Terminal wasn't built for 500 driverless rides per day. It was built for driving at night, when the streets were empty, and there was no traffic to negotiate, and no police officers or emergency vehicles to manage. Terminal v1 was built to answer a core question, "can we get the remote Remote Advisor's's mental model of the scene to match ground truth?" Signal fidelity was the priority, which was reasonable for a fledgling program. Then the business needed to scale into real hours and real traffic on real streets, and the old model turned out to be solving the wrong problem. Signal fidelity didn't matter much if the vehicle was still sitting there ten minutes later. Our CEO, Kyle Vogt, put it this way: the risk of a Vehicle Recovery Event (a tow truck being sent to retrieve a failed AV in the field) grew exponentially with every second the vehicle stayed stuck. Time wasn't one factor among many; it was the factor.\n\nThe counterintuitive part was that the exact right trajectory mattered less than simply moving. A vehicle correcting itself as it gained forward motion read as competent, like it was working and on its way. A vehicle sitting dead still read as broken, like an inert two-ton lump of batteries and computers, to the rider inside and to everyone outside. Progress, not perfection, was the signal that mattered.\n\nThat reframing is the actual thesis behind everything below. Two numbers governed the redesign: time to first action (TTFA), meaning how fast an Remote Advisor could read a scene and issue any instruction at all, and time to resolution (TTR), meaning how fast the vehicle was back in autonomous mode with the Remote Advisor disconnected. Each vignette below is in service of one goal: get the car moving, now.`,
+        `Cruise's Terminal wasn't built for 500 driverless rides per day. It was built for driving at night, when the streets were empty, and there was no traffic to negotiate, and no police officers or emergency vehicles to manage. Terminal v1 was built to answer a core question, "can we get the remote Remote Advisor's's mental model of the scene to match ground truth?" Signal fidelity was the priority, which was reasonable for a fledgling program. Then the business needed to scale into real hours and real traffic on real streets, and the old model turned out to be solving the wrong problem. Signal fidelity didn't matter much if the vehicle was still sitting there ten minutes later. Our CEO, Kyle Vogt, put it this way: the risk of a Vehicle Recovery Event (a tow truck being sent to retrieve a failed AV in the field) grew exponentially with every second the vehicle stayed stuck. Time wasn't one factor among many; it was *the* factor.\n\nThe counterintuitive part was that the exact right trajectory mattered less than simply moving. A vehicle correcting itself as it gained forward motion read as competent, like it was working and on its way. A vehicle sitting dead still read as broken, like an inert two-ton lump of batteries and computers, to the rider inside and to everyone outside. *Progress, not perfection, was the signal that mattered.*\n\nThat reframing is the actual thesis behind everything below. Two numbers governed the redesign: time to first action (TTFA), meaning how fast an Remote Advisor could read a scene and issue any instruction at all, and time to resolution (TTR), meaning how fast the vehicle was back in autonomous mode with the Remote Advisor disconnected. Each vignette below is in service of one goal: **get the car moving, now.**`,
       ),
       cruiseProse(
         "cruise-context-shift",
         "The design problem, restated",
-        "Once you accepted that the AV already knew more than it was showing Remote Advisorss, the design problem became about translating machine perception into human-readable meaning.",
+        "Once you accepted that the AV already knew more than it was showing Remote Advisors, the design problem became about translating machine perception into human-readable meaning.",
         { variant: "statement" },
       ),
       cruiseVignette(
@@ -969,7 +972,7 @@ export const caseStudies: CaseStudy[] = [
         [
           cruiseBeat(
             "The problem",
-            "Remote Advisorss viewed the AV scene entirely in orange-on-black. Every object type, pedestrian, cyclist, vehicle, immovable obstacle, rendered identically. Legitimate human-factors science, but every object in the scene was visually equivalent.",
+            "Remote Advisors viewed the AV scene entirely in orange-on-black. Every object type, pedestrian, cyclist, vehicle, immovable obstacle, rendered identically. Legitimate human-factors science, but every object in the scene was visually equivalent.",
           ),
           cruiseMedia(
             "Before",
@@ -1008,7 +1011,7 @@ export const caseStudies: CaseStudy[] = [
           ),
           cruiseBeat(
             "The next layer",
-            "Color and shape solved what an object was. The next question was what the vehicle intended to do about it, a harder signal to surface. The AV is non-deterministic. A true ML ranker refreshing its decision-making potentially hundreds of times per second. When the vehicle decided what to do, it rendered for the Remote Advisor as a single-color path spline projecting 50 meters ahead. No speed intent. Unreliable stop point visualizations. Little scene context explaining why the vehicle was behaving the way it was.\n\nRemote Advisorss would watch the vehicle do anything, at any time, for any reason, and when it inexplicably stopped, they had no explanation and no obvious way to get it moving again.",
+            "Color and shape solved what an object was. The next question was what the vehicle intended to do about it, a harder signal to surface. The AV is non-deterministic. A true ML ranker refreshing its decision-making potentially hundreds of times per second. When the vehicle decided what to do, it rendered for the Remote Advisor as a single-color path spline projecting 50 meters ahead. No speed intent. Unreliable stop point visualizations. Little scene context explaining why the vehicle was behaving the way it was.\n\nRemote Advisors would watch the vehicle do anything, at any time, for any reason, and when it inexplicably stopped, they had no explanation and no obvious way to get it moving again.",
           ),
           cruiseMedia(
             "The constraint",
@@ -1026,7 +1029,7 @@ export const caseStudies: CaseStudy[] = [
           ),
           cruiseMedia(
             "The solution",
-            "We attacked the problem on three fronts. First, we color-coded the projected path (red/green) to communicate speed deltas and intent: slow, stop, go, so the path itself told a story. Second, we visualized the scene objects the vehicle was actually perceiving and responding to, so Remote Advisorss could see why the vehicle was behaving the way it was. Third, and most importantly for getting stuck vehicles moving again, we made stop points interactive. When a stop point appeared on the path, the Remote Advisor could lift it with a single click, signaling to the vehicle that it was safe to proceed. A police officer waving the car through a stop sign. A construction worker clearing an obstruction. Whatever the case: one click, car moves.",
+            "We attacked the problem on three fronts. First, we color-coded the projected path (red/green) to communicate speed deltas and intent: slow, stop, go, so the path itself told a story. Second, we visualized the scene objects the vehicle was actually perceiving and responding to, so Remote Advisors could see why the vehicle was behaving the way it was. Third, and most importantly for getting stuck vehicles moving again, we made stop points interactive. When a stop point appeared on the path, the Remote Advisor could lift it with a single click, signaling to the vehicle that it was safe to proceed. A police officer waving the car through a stop sign. A construction worker clearing an obstruction. Whatever the case: one click, car moves.",
             "1x1",
             {
               sources: [
@@ -1040,23 +1043,23 @@ export const caseStudies: CaseStudy[] = [
               ],
             },
           ),
-          cruiseBeat(
-            "Outcome",
-            "Remote Advisorss went from watching a black box to reading a scene. They understood why the vehicle stopped, and they had a discoverable, single-action control to get it moving again. The terminal became something Remote Advisorss could act on.",
-          ),
+          //cruiseBeat(
+          //  "Outcome",
+          //  "Remote Advisors went from watching a black box to reading a scene. They understood why the vehicle stopped, and they had a discoverable, single-action control to get it moving again. The terminal became something Remote Advisors could act on.",
+          //),
           cruiseBeat(
             "One more gap",
-            "Object classification and vehicle intent solved for what was happening on the map at the time, but Remote Advisorss gaining context after freshly connecting to an AV were starting from zero, context-blind to what had happened moments before they connected. There was so much context lost: what the previous Remote Advisor had done, what the vehicle had tried autonomously, why the car was stopped at all, etc.\n\nIn a safety-critical system, that cold start could mean the wrong action, or critical seconds spent by Remote Advisorss reconstructing a scene the vehicle already understood.",
+            "Object classification and vehicle intent solved for what was happening on the map at the time, but Remote Advisors gaining context after freshly connecting to an AV were starting from zero, context-blind to what had happened moments before they connected. There was so much context lost: what the previous Remote Advisor had done, what the vehicle had tried autonomously, why the car was stopped at all, etc.\n\nIn a safety-critical system, that cold start could mean the wrong action, or critical seconds spent by Remote Advisors reconstructing a scene the vehicle already understood.",
           ),
           cruiseMedia(
             "The solution",
-            "A coarse-grained event timeline, pulling from vehicle event APIs already exposed but never rendered, gave incoming Remote Advisorss a readable history: stops, collisions, overrides, course changes. Paired with a \"what is the vehicle dealing with\" panel: big icons, color-coded, with timers showing how long each condition had been active, plus the sequential steps to resolve it.",
+            "A *what is the vehicle dealing with* panel: big icons, color-coded, with timers showing how long each condition had been active, plus the sequential steps to resolve it, plus a coarse-grained event timeline, pulling from vehicle event APIs (exposed but not rendered), gave incoming Remote Advisors a readable history: stops, collisions, overrides, course changes.",
             "1x1",
             {
               sources: [
+                "/portfolio/cruise/Cruise_v3_c3.jpg",
                 "/portfolio/cruise/Cruise_v3_c1.jpg",
                 "/portfolio/cruise/Cruise_v3_c2.jpg",
-                "/portfolio/cruise/Cruise_v3_c3.jpg",
                 "/portfolio/cruise/Cruise_v3_c4.jpg",
                 "/portfolio/cruise/Cruise_v3_c5.jpg",
               ],
@@ -1065,7 +1068,7 @@ export const caseStudies: CaseStudy[] = [
           cruiseStat(
             "Outcome",
             "~20%",
-            "As a result of the improved context-awareness work, Remote Advisorss improved their time to first action (TTFA) by about twenty percent, with greater accuracy than before.",
+            "As a result of the improved context-awareness work, Remote Advisors improved their time to first action (TTFA) by about twenty percent, with greater accuracy than before.",
             "1x1",
           ),
         ],
@@ -1091,11 +1094,11 @@ export const caseStudies: CaseStudy[] = [
         [
           cruiseBeat(
             "The problem",
-            "The previous terminal grew organically over time. As requirements changed from those of a fledgeling AV start-up, to needing to support 500+ rides per day in SF, new features were added with the idea that the most important ones would occupy as close to the centerline of the Remote Assistant's field of view as possible. This is solid human factor's thinking, but very bad information architecture design.\n\nThe net result was a completely wildcard screen where functionality an Advisor needed could be anywhere, with the main organizing principle not being UX axioms like Proximity and Uniform Connectedness, but usefulness during severe moments. Predictable where to look, unpredictable what you'd find there.",
+            "The previous terminal grew organically over time. As requirements changed from those of a fledgeling AV start-up, to needing to support 500+ rides per day in SF, new features were added with the idea that the most important ones would occupy as close to the centerline of the Remote Assistant's field of view as possible. This is solid human factor's thinking, but very bad information architecture design.\n\nThe net result was a completely wildcard screen where functionality an Advisor needed could be anywhere, with the main organizing principle not being UX axioms like *Proximity* and *Uniform Connectedness*, but usefulness during severe moments.\n\nPredictable where to look, unpredictable what you'd find there.",
           ),
           cruiseMedia(
             "Before",
-            "Remote Advisorss had to read and classify UI elements before they could act. Even if you knew to look in the center, you still spent cognitive cycles figuring out what kind of thing you were looking at.",
+            "Remote Advisors had to read and classify UI elements before they could act. Even if you knew to look in the center, you still spent cognitive cycles figuring out what kind of thing you were looking at.",
             "16x9",
             {
               sources: [
@@ -1109,12 +1112,12 @@ export const caseStudies: CaseStudy[] = [
             "16x9",
             {
               sources: [
+                "/portfolio/cruise/Cruise_v4_c1.jpg",
                 "/portfolio/cruise/Cruise_v4_c2.jpg",
                 "/portfolio/cruise/Cruise_v4_c3.jpg",
                 "/portfolio/cruise/Cruise_v4_c4.jpg",
                 "/portfolio/cruise/Cruise_v4_c6.jpg",
                 "/portfolio/cruise/Cruise_v4_c7.jpg",
-                "/portfolio/cruise/Cruise_v4_c1.jpg",
                 "/portfolio/cruise/Cruise_v4_c5.jpg",
               ],
             },
@@ -1126,15 +1129,15 @@ export const caseStudies: CaseStudy[] = [
           ),
           cruiseBeat(
             "The principle",
-            "Knowing where to look for a certain type of information — before you even read it — is itself a form of speed. Type-based regionalization over importance-based centering.",
+            "Knowing where to look for a certain type of information *before you even read it* is itself a form of speed.\n\nFitts Law in action.",
           ),
           cruiseBeat(
             "The same idea, applied to controls",
-            "Regions solved where information lived on screen, however controls were the other half of the same problem. Human factors had a sound rule here though, one that we were wise to retain: keep the upper half of the screen (the Remote Advisor's's threat cone) completely free of UI. In the Terminal, the vehicle points up in the center of the screen. This is the vehicles' forward path. To prevent object occlusion, everything else had to live in the lower half.",
+            "Regions solved where information lived on screen, however controls were the other half of the same problem. In the Terminal, the vehicle points up in the center of the screen. This is the vehicles' forward path. Human factors had a sound rule here - one that we were wise to retain: keep the upper-center-half of the screen (the Remote Advisor's's threat cone) completely free of UI to prevent object occlusion. Everything else had to live in the lower half off to the sides.",
           ),
           cruiseMedia(
             "The problem",
-            "The Terminal was built with maneuver controls housed in a fly-out drawer at the far bottom-right. These were hidden by default. Remote Advisorss connecting to a stuck vehicle need to read the scene, choose a maneuver, and engage — within three seconds. A drawer could cost a full second.",
+            "The Terminal was built with maneuver controls housed in a fly-out drawer at the far bottom-right. These were hidden by default. Remote Advisors connecting to a stuck vehicle needed to read the scene, choose a maneuver, and engage *within three seconds.*\n\nA drawer could cost a full second.",
             "1x1",
             { sources: [
               "/portfolio/cruise/Cruise_maneuver_fly-out.jpg"
@@ -1142,21 +1145,21 @@ export const caseStudies: CaseStudy[] = [
           ),
           cruiseMedia(
             "The solution",
-            "A floating toolbar at bottom center, permanently visible, with clear iconography and a color/shape language. With hotkeys for experienced Remote Advisors, all eyes could remain on the scene.",
+            "With a floating toolbar at bottom center, permanently visible, clear iconography and a semantic color language, and hotkeys for experienced Remote Advisors, all eyes could remain on the scene.",
             "1x1",
             { sources: [
               "/portfolio/cruise/Cruise_v5_c1.jpg",
               "/portfolio/cruise/Cruise_v5_c2.jpg",
             ] },
           ),
-          cruiseQuote(
-            "Proof It Worked",
-            "Clear and easier to use...",
-            "Remote Advisor Research Participant",
-          ),
+          //cruiseQuote(
+          //"Proof It Worked",
+          //  "Clear and easier to use...",
+          //  "Remote Advisor Research Participant",
+          //),
           cruiseBeat(
             "A critical insight",
-            "Cruise's remote Advisorss weren't trained specialists. They weren't air traffic controllers, engineers, or safety professionals. They were regular people, they played video games, they used iPhones, etc. A floating action toolbar at the bottom of the screen with hotkey support is a video game pattern, and one these Advisorss already knew. Meeting them there was the correct decision and helped us achieve our 3 seconds TTFA.",
+            "Cruise's remote Advisors weren't trained specialists. They weren't air traffic controllers, engineers, or safety professionals. They were regular people, they played video games, they used iPhones, etc.\n\nA floating action toolbar at the bottom of the screen with hotkey support is a video game pattern, and one these Advisors already knew.",
           ),
           cruiseQuote(
             "Proof It Worked",
@@ -1180,7 +1183,7 @@ export const caseStudies: CaseStudy[] = [
         [
           cruiseBeat(
             "The context",
-            "It's important to realize that humans never remotely drove a Cruise AV. Remote assistance consisted of simply providing suggestions and instructions to the AV. Whether or not the AV followed them depended upon its interal planning stack.\n\nThe AV had 3 main states: Fully Autonomous, Remotely Assisted, and Manual. The former two were the only modes the AV could proceed autonomously.\n\nWhat mode the AV was in dictated the kinds of instructions Remote Assistants could provide it, how likely the AV was to follow those instructions without deviation, and whether or not the AV needed to come to a complete stop to switch modes. So communicating the AV's state to the Remote Operator, along with the tools available to them to instruct the AV, was critical.",
+            "It's important to realize that humans never remotely drove a Cruise AV. Remote assistance consisted of simply providing suggestions to the AV. Whether or not the AV followed them depended upon its interal planning stack.\n\nThe AV had 3 main states: Fully Autonomous, Remotely Assisted, and Manual. The former two were the only modes the AV could proceed autonomously.\n\nWhat mode the AV was in dictated the kinds of instructions Remote Assistants could provide it, how likely the AV was to follow those instructions without deviation, and whether or not the AV needed to come to a complete stop to switch modes. So communicating the AV's state to the Remote Operator, along with the tools available to them to instruct the AV, was critical.",
           ),
           cruiseMedia(
             "State Visualization",
@@ -1225,6 +1228,12 @@ export const caseStudies: CaseStudy[] = [
               poster: "/portfolio/cruise/ap-to-autonomous.jpg",
             },
           ),
+          cruiseStat(
+            "Outcome",
+            "5-10 sec.",
+            "By removing the need for the AV to stop at the handoff point, we were able to shave 5-10 seconds off of the time to resolution (TTR).",
+            "1x1",
+          ),
         ],
         "1x1",
         {
@@ -1234,35 +1243,88 @@ export const caseStudies: CaseStudy[] = [
           titleCoverAlpha: 0.4,
         },
       ),
+      // cruiseProse(
+      //   "x-media",
+      //   "One encoding for everything",
+      //   "Operators viewed the entire AV scene in orange-on-black. Every object type — pedestrian, cyclist, vehicle, immovable obstacle — rendered identically. Legitimate human-factors science, but every object in the scene was visually equivalent, and the machine's own classification never reached the human.",
+      //   {
+      //     variant: "media",
+      //     media: {
+      //       src: "/portfolio/cruise/Cruise_Journey.png",
+      //       ratio: "16x9",
+      //       accent: cruiseAccent,
+      //     },
+      //   },
+      // ),
+      cruiseProse(
+        "x-meta",
+        "A Critical Step",
+        "The first 5 seconds of a scene were critical. Operators needed to know what was happening, what state the vehicle was in, whether there were passengers in the vehicle, and what they needed to do next.\n\nThe *AV State Module* was a critical feature providing this context.",
+        {
+          variant: "meta",
+          meta: [
+            { label: "Step 1", value: "Connect" },
+            { label: "Step 2", value: "Gain Context" },
+            { label: "Step 3", value: "Take Action" },
+            { label: "Step 4", value: "Resolve" },
+            { label: "Step 5", value: "Disconnect" },
+          ],
+        },
+      ),
       cruiseVignette(
         "av-state-module",
-        "AV State Module",
+        "Show Don't Tell",
         ["Visual design", "Interaction design"],
         "Context gain / picture over words / eye-scan reduction",
         [
-          cruiseBeat(
-            "The old design",
-            "Colored pills scattered across four corners. The highest-priority pill would \"zit\" to center while others orbited. Remote Advisorss scanned four regions to understand what the car was dealing with — words everywhere, no coherent picture.",
+          cruiseMedia(
+            "The Legacy Design",
+            "The legacy Terminal had little colorful skittles scattered across the four corners of the app. Due to pill component over-use, Advisors became blind to the message and severity the pills were trying to convey, and had to look around the interface to collect similar information - particularly information about the AV, it's state, and passenger status. Words everywhere with no coherent picture.",
+            "16x9",
+            {
+              sources: [
+                "/portfolio/cruise/Cruise_v8_c1.jpg",
+              ],
+            },
           ),
           cruiseMedia(
-            "The redesign",
-            "A persistent AV State Module — vehicle graphic fixed bottom-left. Doors, lights, passengers, seatbelts, collisions, and lidar footprints rendered on the illustration itself.",
+            "Show Don't Tell",
+            "Rather than describe the AV state, status, and passenger occupancy - *with skittles,* we decided to show an image of the AV representing it's current state. Some features included occupancy status, vehicle lights and cabin state, parking cameras for when ultrasound triggered, etc.",
             "1x1",
-          ),
-          cruiseBeat(
-            "Inline controls",
-            "The module became a lightweight control surface — lights, horn, exterior audio — without leaving context. Below 15mph, live lidar returns around the module showed proximity without cluttering the main view.",
+            {
+              sources: [
+                "/portfolio/cruise/Cruise_v9_c1.jpg",
+                "/portfolio/cruise/Cruise_v9_c2.jpg",
+                "/portfolio/cruise/Cruise_v9_c3.jpg",
+                "/portfolio/cruise/Cruise_v9_c4.jpg",
+                "/portfolio/cruise/Cruise_v9_c5.jpg",
+                "/portfolio/cruise/Cruise_v9_c6.jpg",
+              ],
+            },
           ),
           cruiseBeat(
             "Outcome",
-            "Three problems collapsed into one module: where to look (fixed), how to interpret (pictures not words), how to act (inline controls). Eye-scan reduced to a single anchor.",
+            "Three problems collapsed into one module: where to look (fixed), how to interpret the signal (pictures not words), and where & how to act (inline controls).",
+          ),
+          cruiseStat(
+            "Outcome",
+            "3 → 1",
+            "By removing the need for the AV to stop at the handoff point, we were able to shave 5-10 seconds off of the time to resolution (TTR).",
+            "1x1",
           ),
         ],
+        "16x9",
+        {
+          titleTreatment: "cover",
+          keyImageSrc: "/portfolio/cruise/Cruise_v4-3_cover.jpg",
+          titleCoverBlur: 0,
+          titleCoverAlpha: 0.7,
+        },
       ),
       cruiseProse(
         "cruise-one-window",
-        "One window, many roles",
-        "The terminal was never just a driving interface. It was the coordination layer for a small city of teams — recovery, security, customer service, tele-ops — who had been working in parallel tools and parallel rooms. Everything below is a variation on the same mandate: bring the right human into the loop at the right moment, without making the Remote Advisor leave the scene.",
+        "One role, many windows",
+        "The terminal was just one application surface our ops teams used to resolve a myriad of customer issues. In order to shave time we needed to bring the right human into the loop at the right moment, without making the Remote Advisor leave the scene.",
       ),
       cruiseVignette(
         "coordination",
@@ -1272,11 +1334,11 @@ export const caseStudies: CaseStudy[] = [
         [
           cruiseBeat(
             "The before state",
-            "Remote Advisorss juggling tabs, Slack, Google Sheets, and Google Meet. Tele-ops and customer service in adjacent rooms at Phoenix — separated by a wall, not coordinating. They weren't even on a first-name basis. Recovery, security, and support all in parallel channels.",
+            "Remote Advisors juggling tabs, Slack, Google Sheets, and Google Meet. Tele-ops and customer service in adjacent rooms at Phoenix — separated by a wall, not coordinating. They weren't even on a first-name basis. Recovery, security, and support all in parallel channels.",
           ),
           cruiseBeat(
             "Two teams, one blind spot",
-            "Cruise used Chevy Bolts, stock cars retrofitted in-house, not purpose-built AVs. Communication with the outside world had to be creative within those limits. Worse, the org had split communication itself: customer service could call passengers, but had no idea what the Remote Advisor was doing, moving, stopping, clearing a collision. Remote Advisorss could move the vehicle and manage every system, but had no channel to speak to a passenger or an officer outside the car. The business kept these roles cleanly siloed. The real world kept crossing that line.",
+            "Cruise used Chevy Bolts, stock cars retrofitted in-house, not purpose-built AVs. Communication with the outside world had to be creative within those limits. Worse, the org had split communication itself: customer service could call passengers, but had no idea what the Remote Advisor was doing, moving, stopping, clearing a collision. Remote Advisors could move the vehicle and manage every system, but had no channel to speak to a passenger or an officer outside the car. The business kept these roles cleanly siloed. The real world kept crossing that line.",
           ),
           cruiseBeat(
             "The principle",
@@ -1332,7 +1394,7 @@ export const caseStudies: CaseStudy[] = [
           ),
           cruiseBeat(
             "The pushback",
-            "Human factors researchers were appalled. Remote Advisorss in safety-critical environments need spatial muscle memory. Left is left. Right is right. Always. The T-shape was a trusted spatial anchor under stress.",
+            "Human factors researchers were appalled. Remote Advisors in safety-critical environments need spatial muscle memory. Left is left. Right is right. Always. The T-shape was a trusted spatial anchor under stress.",
           ),
           cruiseBeat(
             "The result",
@@ -1357,15 +1419,15 @@ export const caseStudies: CaseStudy[] = [
         [
           cruiseBeat(
             "The trust problem",
-            "The old intervention stack assumed safety drivers in seat and engineers in close coordination. At 500+ autonomous rides a day in San Francisco, that model was a liability, interventions had to complete in three seconds. And Remote Advisorss only trusted what was deterministic.",
+            "The old intervention stack assumed safety drivers in seat and engineers in close coordination. At 500+ autonomous rides a day in San Francisco, that model was a liability, interventions had to complete in three seconds. And Remote Advisors only trusted what was deterministic.",
           ),
           cruiseBeat(
             "What fell short",
-            "Pivot (a lane-preference nudge) and Assisted Pathing (breadcrumb control points) were non-deterministic. The car could ignore the input or sit there saying \"executing\" while doing nothing. Remote Advisorss stopped trusting them, and stopped using them.",
+            "Pivot (a lane-preference nudge) and Assisted Pathing (breadcrumb control points) were non-deterministic. The car could ignore the input or sit there saying \"executing\" while doing nothing. Remote Advisors stopped trusting them, and stopped using them.",
           ),
           cruiseBeat(
             "What they trusted",
-            "Sudo was fully deterministic: drag, drop, and rotate a vehicle icon to the end-state pose, hold go, and the car closed the gap. Basic collision avoidance aside, it just executed. Remote Advisorss loved it: you said where, it went there. That trust wasn't automatic, it was earned through iteration.",
+            "Sudo was fully deterministic: drag, drop, and rotate a vehicle icon to the end-state pose, hold go, and the car closed the gap. Basic collision avoidance aside, it just executed. Remote Advisors loved it: you said where, it went there. That trust wasn't automatic, it was earned through iteration.",
           ),
           cruiseBeat(
             "The old design",
@@ -1378,11 +1440,11 @@ export const caseStudies: CaseStudy[] = [
           ),
           cruiseBeat(
             "The deeper insight",
-            "Remote Advisorss sent infeasible commands regularly, not from carelessness, but because the interface gave no way to know what was feasible. Every rejection created a round-trip. The redesign encoded physics upstream.",
+            "Remote Advisors sent infeasible commands regularly, not from carelessness, but because the interface gave no way to know what was feasible. Every rejection created a round-trip. The redesign encoded physics upstream.",
           ),
           cruiseBeat(
             "A second mode, built in",
-            "The ring wasn't the only way to use it. Leave it disengaged and simply move the mouse across the map instead, and a breadcrumb trail followed the cursor, with the vehicle loosely tracing it. To a user's eye, that looked almost identical to Assisted Pathing, a point dropped on the map. The difference was invisible and total: Assisted Pathing ran on the autonomy stack's own path solver, which is exactly what made it feel like a black box Remote Advisorss never fully trusted. This breadcrumb mode ran on Sudo's spatial solver instead, the same deterministic engine behind the ring itself. Same gesture from the user's side, a different brain underneath, and that's what earned the trust Assisted Pathing never did.",
+            "The ring wasn't the only way to use it. Leave it disengaged and simply move the mouse across the map instead, and a breadcrumb trail followed the cursor, with the vehicle loosely tracing it. To a user's eye, that looked almost identical to Assisted Pathing, a point dropped on the map. The difference was invisible and total: Assisted Pathing ran on the autonomy stack's own path solver, which is exactly what made it feel like a black box Remote Advisors never fully trusted. This breadcrumb mode ran on Sudo's spatial solver instead, the same deterministic engine behind the ring itself. Same gesture from the user's side, a different brain underneath, and that's what earned the trust Assisted Pathing never did.",
           ),
           cruiseMedia(
             "In practice",
@@ -1391,11 +1453,11 @@ export const caseStudies: CaseStudy[] = [
           ),
           cruiseBeat(
             "Outcome",
-            "Fewer round trips and faster operations for precise moves, plus a looser, quicker option for everything else. One widget, two grains of control: exact when the situation called for it, approximate when it didn't, both of them trusted because both finally ran on a solver Remote Advisorss could rely on.",
+            "Fewer round trips and faster operations for precise moves, plus a looser, quicker option for everything else. One widget, two grains of control: exact when the situation called for it, approximate when it didn't, both of them trusted because both finally ran on a solver Remote Advisors could rely on.",
           ),
           cruiseMedia(
             "Spring-loaded splines",
-            "An ergonomic evolution of Sudo. Moving the mouse generates a Bezier spline in real time between the vehicle and the cursor, previewing the most efficient feasible path. Kinematically infeasible positions are disallowed by design, since the spring-loaded curves resist impossible configurations. For the common case (back up, assert around something, small adjustment) precise pose-and-place was overkill; splines handled short maneuvers faster and with less cognitive load, while preserving the determinism Remote Advisorss trusted.",
+            "An ergonomic evolution of Sudo. Moving the mouse generates a Bezier spline in real time between the vehicle and the cursor, previewing the most efficient feasible path. Kinematically infeasible positions are disallowed by design, since the spring-loaded curves resist impossible configurations. For the common case (back up, assert around something, small adjustment) precise pose-and-place was overkill; splines handled short maneuvers faster and with less cognitive load, while preserving the determinism Remote Advisors trusted.",
             "16x9",
           ),
           cruiseBeat(

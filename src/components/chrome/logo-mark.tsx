@@ -8,17 +8,10 @@ type LogoMarkProps = {
   variant?: LogoMarkVariant;
 };
 
-/**
- * Square logo — add `/public/logo-light.png` and `/public/logo-dark.png`.
- */
-const placeholderClasses: Record<LogoMarkVariant, string> = {
-  default: "logo-mark-placeholder logo-mark-placeholder--default",
-  reversed: "logo-mark-placeholder logo-mark-placeholder--reversed",
-};
+/** Site mark — white-on-transparent PNG, tinted per chrome colorway. */
+const LOGO_SRC = "/portfolio/logos/vb_logo.png";
 
 export function LogoMark({ onNavigate, variant = "default" }: LogoMarkProps) {
-  const hasAssets = false;
-
   return (
     <Link
       href="/"
@@ -26,23 +19,16 @@ export function LogoMark({ onNavigate, variant = "default" }: LogoMarkProps) {
       className="chrome-hit-target block transition-opacity hover:opacity-70"
       aria-label="Home"
     >
-      {hasAssets ? (
-        <Image
-          src={variant === "reversed" ? "/logo-dark.png" : "/logo-light.png"}
-          alt=""
-          width={44}
-          height={44}
-          className="aspect-square h-full w-full object-contain"
-          priority
-        />
-      ) : (
-        <div
-          className={`logo-mark-placeholder ${placeholderClasses[variant]}`}
-          aria-hidden
-        >
-          LOGO
-        </div>
-      )}
+      <Image
+        src={LOGO_SRC}
+        alt=""
+        width={44}
+        height={49}
+        className={`logo-mark h-full w-full object-contain ${
+          variant === "reversed" ? "logo-mark--reversed" : "logo-mark--default"
+        }`}
+        priority
+      />
     </Link>
   );
 }

@@ -20,6 +20,7 @@ import {
   clientBrandColorVar,
   isClientBrandColor,
 } from "@/lib/client-brand-colors";
+import { InlineText, stripInlineMarkup } from "@/lib/inline-text";
 import { vignetteFrameSrc } from "@/lib/portfolio-assets";
 import { vignetteTitleColor } from "@/lib/vignette-title";
 import { VignetteTitleBackdrop } from "@/components/craft/vignette-title-backdrop";
@@ -154,12 +155,16 @@ function FrameContent({
       <>
         <header className="vframe__kicker">
           {frame.label ? (
-            <p className="vframe__kicker-text text-meta">{frame.label}</p>
+            <p className="vframe__kicker-text text-meta">
+              <InlineText text={frame.label} />
+            </p>
           ) : null}
         </header>
         <div className="vframe__scroll vframe__scroll--prose">
           {frame.body ? (
-            <p className="body-md vframe__stat-lede text-secondary">{frame.body}</p>
+            <p className="body-md vframe__stat-lede text-secondary">
+              <InlineText text={frame.body} />
+            </p>
           ) : null}
         </div>
         <footer className="vframe__foot vframe__foot--stat">
@@ -181,7 +186,9 @@ function FrameContent({
       <>
         <header className="vframe__kicker">
           {frame.label ? (
-            <p className="vframe__kicker-text text-meta">{frame.label}</p>
+            <p className="vframe__kicker-text text-meta">
+              <InlineText text={frame.label} />
+            </p>
           ) : null}
         </header>
         <div className="vframe__scroll vframe__scroll--quote">
@@ -189,10 +196,12 @@ function FrameContent({
             <span className="vframe__quote-mark" aria-hidden>
               &ldquo;
             </span>
-            <p className="vframe__quote-text">{frame.quote}</p>
+            <p className="vframe__quote-text">
+              <InlineText text={frame.quote} />
+            </p>
             {frame.quoteCite ? (
               <footer className="vframe__quote-cite text-label-sm text-mono-label">
-                {frame.quoteCite}
+                <InlineText text={frame.quoteCite} />
               </footer>
             ) : null}
           </blockquote>
@@ -206,14 +215,16 @@ function FrameContent({
       <>
         <header className="vframe__kicker">
           {frame.label ? (
-            <p className="vframe__kicker-text text-meta">{frame.label}</p>
+            <p className="vframe__kicker-text text-meta">
+              <InlineText text={frame.label} />
+            </p>
           ) : null}
         </header>
         <div className="vframe__scroll vframe__scroll--prose">
           {frame.body
             ? frame.body.split("\n\n").map((paragraph, i) => (
                 <p key={i} className="display-sm vframe__beat">
-                  {paragraph}
+                  <InlineText text={paragraph} />
                 </p>
               ))
             : null}
@@ -223,7 +234,10 @@ function FrameContent({
   }
 
   const caption = frame.caption?.trim() || frame.body?.trim() || "";
-  const title = caption || frame.label || `${vignette.name} — frame ${index + 1}`;
+  const title =
+    stripInlineMarkup(caption) ||
+    frame.label ||
+    `${vignette.name} — frame ${index + 1}`;
   const { w: arW, h: arH } = ratioAspectNumbers(frame.ratio);
   const mediaBoxStyle = {
     "--media-ar-w": arW,
@@ -238,7 +252,9 @@ function FrameContent({
     <>
       <header className="vframe__kicker">
         {frame.label ? (
-          <p className="vframe__kicker-text text-meta">{frame.label}</p>
+          <p className="vframe__kicker-text text-meta">
+            <InlineText text={frame.label} />
+          </p>
         ) : null}
       </header>
       <div className="vframe__scroll">
@@ -294,7 +310,9 @@ function FrameContent({
           </div>
         )}
         {caption ? (
-          <p className="text-caption vframe__caption text-secondary">{caption}</p>
+          <p className="text-caption vframe__caption text-secondary">
+            <InlineText text={caption} />
+          </p>
         ) : null}
       </div>
     </>

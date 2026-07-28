@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import Image from "next/image";
 import { RuledGrid } from "@/components/layout/ruled-grid";
 import { VimeoEmbed } from "@/components/media/vimeo-embed";
+import { InlineText } from "@/lib/inline-text";
 import { portfolioPlaceholderDataUrl } from "@/lib/portfolio-assets";
 import type {
   ImageRatio,
@@ -35,7 +36,7 @@ function Paragraphs({
     <>
       {body.split("\n\n").map((paragraph, i) => (
         <p key={i} className={`${size} cs-prose__paragraph text-secondary`}>
-          {paragraph}
+          <InlineText text={paragraph} />
         </p>
       ))}
     </>
@@ -102,7 +103,7 @@ function ProseFigure({
       {frame}
       {media.caption ? (
         <figcaption className="text-caption cs-prose__media-caption text-secondary">
-          {media.caption}
+          <InlineText text={media.caption} />
         </figcaption>
       ) : null}
     </figure>
@@ -122,7 +123,7 @@ export function ProseBlock({ section }: { section: ProseSection }) {
       return (
         <RuledGrid>
           <p className="display-md cs-prose__statement text-balance">
-            {section.body}
+            <InlineText text={section.body} />
           </p>
         </RuledGrid>
       );
@@ -132,7 +133,7 @@ export function ProseBlock({ section }: { section: ProseSection }) {
         <RuledGrid>
           {section.heading ? (
             <h2 className="cs-prose__heading cs-prose__heading--wide display-lg">
-              {section.heading}
+              <InlineText text={section.heading} />
             </h2>
           ) : null}
           <div className="cs-prose__body cs-prose__body--columns">
@@ -146,11 +147,11 @@ export function ProseBlock({ section }: { section: ProseSection }) {
         <RuledGrid>
           <figure className="cs-prose__epigraph">
             <blockquote className="cs-prose__quote display-md text-balance">
-              {section.body}
+              <InlineText text={section.body} />
             </blockquote>
             {section.attribution ? (
               <figcaption className="cs-prose__attribution text-label-sm text-mono-label">
-                {section.attribution}
+                <InlineText text={section.attribution} />
               </figcaption>
             ) : null}
           </figure>
@@ -164,8 +165,12 @@ export function ProseBlock({ section }: { section: ProseSection }) {
             <dl className="cs-prose__meta-list">
               {(section.meta ?? []).map((row) => (
                 <div key={row.label} className="cs-prose__meta-row">
-                  <dt className="text-meta cs-prose__meta-label">{row.label}</dt>
-                  <dd className="body-sm cs-prose__meta-value">{row.value}</dd>
+                  <dt className="text-meta cs-prose__meta-label">
+                    <InlineText text={row.label} />
+                  </dt>
+                  <dd className="body-sm cs-prose__meta-value">
+                    <InlineText text={row.value} />
+                  </dd>
                 </div>
               ))}
             </dl>
@@ -197,7 +202,7 @@ export function ProseBlock({ section }: { section: ProseSection }) {
           <div className="cs-prose__body cs-prose__body--media">
             {section.heading ? (
               <h2 className="cs-prose__heading cs-prose__heading--media display-md">
-                {section.heading}
+                <InlineText text={section.heading} />
               </h2>
             ) : null}
             <Paragraphs body={section.body} />
@@ -210,7 +215,7 @@ export function ProseBlock({ section }: { section: ProseSection }) {
         <RuledGrid>
           {section.heading ? (
             <h2 className="cs-prose__heading cs-prose__heading--wide display-lg">
-              {section.heading}
+              <InlineText text={section.heading} />
             </h2>
           ) : null}
           <div className="cs-prose__mediaband">
@@ -228,7 +233,9 @@ export function ProseBlock({ section }: { section: ProseSection }) {
       return (
         <RuledGrid>
           {section.heading ? (
-            <h2 className="cs-prose__heading display-lg">{section.heading}</h2>
+            <h2 className="cs-prose__heading display-lg">
+              <InlineText text={section.heading} />
+            </h2>
           ) : null}
           <div className="cs-prose__body">
             <Paragraphs body={section.body} />

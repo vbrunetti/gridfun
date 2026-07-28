@@ -101,60 +101,60 @@ export const site = {
     heroSlates: [
       {
         id: "slate-1",
-        eyebrow: "Hello — I'm Victor",
-        headline: "Change is constant. Growth is inevitable.",
+        eyebrow: "Hello! I'm Victor.",
+        headline: "When change is constant, growth is inevitable.",
         supporting:
-          "My whole career has been a study in change — two decades of watching our craft reinvent itself, and learning to love every shift.",
+          "My whole career has been a study in change. I've seen over two decades of our craft reinventing itself, and me along with it. No time to stop now.",
       },
       {
         id: "slate-2",
         eyebrow: "Where it started",
-        headline: "I began in Flash — designing, coding, and animating the early web.",
+        headline: "I began in Flash designing, coding, and animating the early web.",
         supporting:
-          "One person, three disciplines, a blank timeline. The web was a canvas and the tools were wide open.",
+          "At that time, one person could span three disciplines. The web was a canvas and we were all experimenting on every build. Everything felt wide open.",
       },
       {
         id: "slate-3",
-        eyebrow: "The web grows up",
-        headline: "Then websites became web applications.",
+        eyebrow: "The web grew up",
+        headline: "Web sites became web applications.",
         supporting:
-          "Static pages turned into software. Interaction design stopped being decoration and became the product.",
+          "Flash sites turned into data-driven web pages which in-turn became software. Experimentation gave way to impact, and we learned to love optimization.",
       },
       {
         id: "slate-4",
         eyebrow: "Mobile-first",
-        headline: "The screen shrank, and everything had to be rethought.",
+        headline: "Then screens shrank, and everything had to be rethought.",
         supporting:
-          "Touch, constraints, context. Designing for the device in everyone's pocket rewrote the rules again.",
+          "Designing for a device in your pocket rewrote the rules again, and I embraced this new medium.",
       },
       {
         id: "slate-5",
         eyebrow: "New tools, again",
-        headline: "Photoshop to Sketch to Figma — and design moved into code.",
+        headline: "Flash and Photoshop became Sketch and InVision became Figma and Framer.",
         supporting:
-          "Every few years, a new tool and a new way to prototype. The craft kept reinventing how it gets made.",
+          "Every few years, a new tool and a new way to prototype, and a tweak to how I practiced my craft.",
       },
       {
         id: "slate-6",
         eyebrow: "Systems",
-        headline: "Then we learned to build design as infrastructure.",
+        headline: "Then design became infrastructure.",
         supporting:
-          "Design systems turned one-off screens into shared, scalable foundations — design maturing the way engineering did.",
+          "Design systems turned one-off screens into shared, scalable foundations. Infrastructure businesses relied on.",
       },
-      {
-        id: "slate-7",
-        eyebrow: "AI-native",
-        headline: "Now I'm bringing AI into every part of my practice.",
-        supporting:
-          "Designing with it, prototyping through it, and shaping the interfaces where people will meet it.",
-      },
+      //{
+        //id: "slate-7",
+        //eyebrow: "AI-native",
+        //headline: "Now I'm bringing AI into every part of my practice.",
+        //supporting:
+        //  "Designing with it, prototyping through it, and shaping the interfaces where people will meet it.",
+      //},
     ] satisfies HeroSlate[],
     coverSections: [{ id: "home-secondary", label: "What's next" }] satisfies HomeCoverSection[],
     secondary: {
       eyebrow: "What's next",
-      headline: "I've seen enough change to be excited for the next chapter.",
+      headline: "Now I'm bringing AI into every part of my practice.",
       subhead:
-        "I don't just adapt to what's coming — I look forward to it. Start with the work: Cruise, Google, Pearson.",
+        "New ways of designing, prototyping, and building. I look forward to it all.",
       cta: {
         href: "/case-studies",
         label: "View case studies",
