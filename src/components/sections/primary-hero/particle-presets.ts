@@ -128,11 +128,15 @@ export function blendPresets(
     a.shape,
     baseR * a.boundaryScale,
     (a.rotationDeg * Math.PI) / 180,
+    width * a.boundaryScale * shapeScale,
+    height * a.boundaryScale * shapeScale,
   );
   const profileB = buildShapeProfile(
     b.shape,
     baseR * b.boundaryScale,
     (b.rotationDeg * Math.PI) / 180,
+    width * b.boundaryScale * shapeScale,
+    height * b.boundaryScale * shapeScale,
   );
   const shapeProfile = blendShapeProfiles(profileA, profileB, t);
 
@@ -351,7 +355,12 @@ export const PRESET_PARAM_META: Record<
 > = {
   label: { min: 0, max: 0, step: 0 },
   shape: { min: 0, max: 0, step: 0 },
-  boundaryScale: { min: 0.12, max: 0.4, step: 0.01, hint: "~0.25 = 50% viewport" },
+  boundaryScale: {
+    min: 0.12,
+    max: 1,
+    step: 0.01,
+    hint: "~0.25 = 50% frame · 1.0 = full viewport (secondary)",
+  },
   rotationDeg: { min: -180, max: 180, step: 1 },
   count: {
     min: 80,

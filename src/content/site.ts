@@ -130,7 +130,7 @@ export const site = {
       {
         id: "slate-5",
         eyebrow: "New tools, again",
-        headline: "Flash and Photoshop became Sketch and InVision became Figma and Framer.",
+        headline: "Flash & Photoshop to Sketch & InVision to Figma & Framer to Cursor & Claude.",
         supporting:
           "Every few years, a new tool and a new way to prototype, and a tweak to how I practiced my craft.",
       },

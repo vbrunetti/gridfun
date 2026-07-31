@@ -1,5 +1,6 @@
 import { RuledGrid } from "@/components/layout/ruled-grid";
 import { CtaButton } from "@/components/chrome/cta-button";
+import { HomeSecondaryAurora } from "./home-secondary-aurora";
 import { HeroSlateCopy } from "./hero-chapter-copy";
 
 type HomeSecondaryFixedProps = {
@@ -28,6 +29,7 @@ export function HomeSecondaryFixed({
       data-chrome-surface="dark"
       aria-label={label}
     >
+      <HomeSecondaryAurora />
       <RuledGrid className="home-secondary-stage w-full h-full">
         <div className="home-secondary-copy col-1-to-end lg:grid-span-8">
           <HeroSlateCopy

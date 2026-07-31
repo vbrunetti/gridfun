@@ -1114,6 +1114,7 @@ body:has(.home-scroll:not(.home-scroll--static)) {
   transform: translateY(var(--home-secondary-translate, var(--home-peek-translate)));
   will-change: transform;
   pointer-events: none;
+  isolation: isolate;
 }
 
 @media (min-width: 1024px) {
@@ -1134,6 +1135,32 @@ body:has(.home-scroll:not(.home-scroll--static)) {
 .home-scroll.home-secondary-settled .home-secondary-panel {
   z-index: 5;
   pointer-events: auto;
+}
+
+/* Hero ↔ secondary handoff — spark and aurora never overlap */
+@media (prefers-reduced-motion: no-preference) {
+  .home-spark-pin {
+    opacity: 1;
+    transition: opacity 140ms ease-out;
+  }
+
+  .home-scroll.home-secondary-covering .home-spark-pin {
+    opacity: 0;
+    transition: opacity 140ms ease-out;
+  }
+
+  .home-secondary-aurora {
+    opacity: 0;
+    transition: opacity 120ms ease-out;
+  }
+
+  /* Fade in as soon as the secondary panel starts covering — short beat after
+     hero spark clears, then a quick reveal while the panel is still sliding. */
+  .home-scroll.home-secondary-covering .home-secondary-aurora,
+  .home-scroll.home-secondary-settled .home-secondary-aurora {
+    opacity: 1;
+    transition: opacity 380ms ease-out 100ms;
+  }
 }
 
 /* Home — no focus dimming between hero / secondary panels */
@@ -1161,6 +1188,8 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
   min-height: 0;
   grid-template-rows: minmax(0, 1fr);
   align-items: stretch;
+  position: relative;
+  z-index: 1;
 }
 
 .home-secondary-stage > .home-secondary-copy {
@@ -1696,34 +1725,217 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
   border-block-color: color-mix(in srgb, var(--color-paper) 12%, transparent);
 }
 
-/* Secondary background lab — full-viewport canvas below header */
-.atmosphere-playground-route__page {
-  display: flex;
-  min-height: 100dvh;
-  flex-direction: column;
+/* Secondary background lab — header + bottom viewport band (rail → right edge) */
+.atmosphere-playground-route {
+  --home-cover-peek: 20dvh;
+  --atmosphere-playground-band-height: calc(var(--app-vh) - var(--home-cover-peek));
+}
+
+.atmosphere-playground-header {
+  position: relative;
+  z-index: 2;
 }
 
 .atmosphere-playground-workspace {
-  flex: 1;
-  min-height: var(--home-secondary-band-height);
+  width: 100%;
+  height: var(--atmosphere-playground-band-height);
+  pointer-events: none;
 }
 
-.atmosphere-playground-canvas {
-  position: relative;
+.atmosphere-playground-band {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  width: auto;
+  height: var(--atmosphere-playground-band-height);
+  min-height: var(--atmosphere-playground-band-height);
+  overflow: hidden;
+  border-block: 1px solid var(--rule-light);
+  background: var(--section-dark-bg);
+  pointer-events: none;
+}
+
+@media (min-width: 1024px) {
+  .atmosphere-playground-band {
+    left: var(--rail-width);
+    width: calc(100vw - var(--rail-width));
+    right: auto;
+  }
+}
+
+.atmosphere-playground-canvas,
+.home-secondary-aurora {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
   width: 100%;
   height: 100%;
-  min-height: var(--home-secondary-band-height);
+  min-height: 100%;
   overflow: hidden;
-  background: var(--section-dark-bg);
+  background: transparent;
+  pointer-events: none;
 }
 
-.atmosphere-playground-canvas__surface {
+/* Secondary spark field (v2) — full-bleed particle layer */
+.secondary-spark-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
+  background: transparent;
+  pointer-events: none;
+}
+
+.secondary-spark-layer canvas {
+  position: absolute;
+  display: block;
+}
+
+.secondary-spark-playground-workspace {
+  width: 100%;
+}
+
+.secondary-spark-playground-band {
+  --home-cover-peek: 20dvh;
+  --secondary-spark-playground-band-height: calc(
+    var(--app-vh) - var(--home-cover-peek)
+  );
+  position: relative;
+  min-height: var(--secondary-spark-playground-band-height);
+  overflow: hidden;
+  border-block: 1px solid color-mix(in srgb, var(--color-paper) 12%, transparent);
+  background: var(--section-dark-bg);
+  color: var(--color-paper);
+}
+
+.secondary-spark-playground-viz {
+  z-index: 0;
+}
+
+.secondary-spark-playground-band__layout {
+  position: relative;
+  z-index: 1;
+  min-height: var(--secondary-spark-playground-band-height);
+  align-items: stretch;
+  pointer-events: none;
+}
+
+.secondary-spark-playground-rail {
+  grid-column: 1 / -1;
+  min-width: 0;
+  max-height: var(--secondary-spark-playground-band-height);
+  overflow: auto;
+  padding-block: 1.25rem;
+  padding-inline: 0;
+  background: color-mix(in srgb, var(--section-dark-bg) 82%, transparent);
+  backdrop-filter: blur(10px);
+  pointer-events: auto;
+}
+
+.secondary-spark-playground-save {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-paper) 14%, transparent);
+  background: color-mix(in srgb, var(--section-dark-bg) 92%, transparent);
+}
+
+.secondary-spark-playground-save__btn {
   display: block;
   width: 100%;
-  height: 100%;
+  border: 1px solid var(--color-neon-lime, #d8ff00);
+  border-radius: 2px;
+  background: var(--color-neon-lime, #d8ff00);
+  color: #000;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  padding: 0.85rem 1rem;
+  text-align: center;
+  cursor: pointer;
+}
+
+.secondary-spark-playground-save__btn:hover {
+  filter: brightness(1.06);
+}
+
+.secondary-spark-playground-save__hint {
+  margin-top: 0.55rem;
+  font-size: 0.7rem;
+  line-height: 1.4;
+  color: color-mix(in srgb, var(--color-paper) 62%, transparent);
+}
+
+.secondary-spark-playground-spacer {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .secondary-spark-playground-rail {
+    grid-column: 1 / span 5;
+    padding-inline-end: 1rem;
+  }
+
+  .secondary-spark-playground-spacer {
+    display: block;
+    grid-column: 6 / -1;
+  }
 }
 
 @media (max-width: 1023px) {
+  .secondary-spark-playground-band {
+    --secondary-spark-playground-band-height: calc(
+      var(--app-vh) - var(--home-cover-peek) - var(--chrome-top-inset)
+    );
+  }
+}
+
+.chroma-aurora-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
+  background: var(--section-dark-bg);
+  pointer-events: none;
+}
+
+.chroma-aurora-canvas__svg {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.chroma-aurora-canvas__vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 72% 68% at 50% 50%,
+    rgb(0 0 0 / 0.55) 0%,
+    rgb(0 0 0 / 0.12) 36%,
+    rgb(0 0 0 / 0) 58%
+  );
+  pointer-events: none;
+}
+
+@media (max-width: 1023px) {
+  .atmosphere-playground-route {
+    --atmosphere-playground-band-height: calc(
+      var(--app-vh) - var(--home-cover-peek) - var(--chrome-top-inset)
+    );
+  }
+
   .spark-playground-band {
     --spark-playground-band-height: calc(
       var(--app-vh) - var(--home-cover-peek) - var(--chrome-top-inset)

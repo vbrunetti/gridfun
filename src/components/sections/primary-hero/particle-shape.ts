@@ -12,7 +12,9 @@ export type ParticleShape =
   | "trefoil"
   | "clover"
   | "chevron"
-  | "portrait";
+  | "portrait"
+  /** Full frame rectangle — used by secondary-background spark fill. */
+  | "viewport";
 
 /** Home hero — one shape per scroll chapter (trefoil family). */
 export const HERO_CHAPTER_SHAPES: ParticleShape[] = [
@@ -42,6 +44,7 @@ export const TREFOIL_FAMILY_SHAPES: ParticleShape[] = [
 /** All shapes available in the tuner (deduped). */
 export const PARTICLE_SHAPES: ParticleShape[] = [
   ...new Set<ParticleShape>([
+    "viewport",
     ...HERO_CHAPTER_SHAPES,
     "square",
     "circle",
@@ -241,6 +244,16 @@ function fillPortraitRectPoints(
 ) {
   const hw = R * PORTRAIT_HALF_WIDTH_RATIO;
   const hh = R * PORTRAIT_HALF_HEIGHT_RATIO;
+  fillAxisAlignedRectPoints(localPoints, radii, hw, hh, rotation);
+}
+
+function fillAxisAlignedRectPoints(
+  localPoints: Float32Array,
+  radii: Float32Array,
+  halfW: number,
+  halfH: number,
+  rotation: number,
+) {
   const c = Math.cos(rotation);
   const s = Math.sin(rotation);
   const rotate = (x: number, y: number): [number, number] => [
@@ -248,10 +261,10 @@ function fillPortraitRectPoints(
     x * s + y * c,
   ];
   const corners: [number, number][] = [
-    [-hw, -hh],
-    [hw, -hh],
-    [hw, hh],
-    [-hw, hh],
+    [-halfW, -halfH],
+    [halfW, -halfH],
+    [halfW, halfH],
+    [-halfW, halfH],
   ].map(([x, y]) => rotate(x, y));
   fillPolygonPoints(localPoints, radii, corners);
 }
@@ -349,6 +362,9 @@ export function buildShapeProfile(
   shape: ParticleShape,
   R: number,
   rotation = 0,
+  /** Full-frame extents for `viewport` shape (ignored by other shapes). */
+  frameWidth = 0,
+  frameHeight = 0,
 ): ShapeProfile {
   const radii = new Float32Array(SHAPE_SAMPLES);
   const localPoints = new Float32Array(SHAPE_SAMPLES * 2);
@@ -362,6 +378,10 @@ export function buildShapeProfile(
     fillChevronPoints(localPoints, radii, R, rotation);
   } else if (shape === "portrait") {
     fillPortraitRectPoints(localPoints, radii, R, rotation);
+  } else if (shape === "viewport") {
+    const halfW = Math.max(1, (frameWidth > 0 ? frameWidth : R * 2) * 0.5);
+    const halfH = Math.max(1, (frameHeight > 0 ? frameHeight : R * 2) * 0.5);
+    fillAxisAlignedRectPoints(localPoints, radii, halfW, halfH, rotation);
   } else {
     fillPolarPoints(localPoints, radii, R, rotation, (theta) =>
       shapeRadiusAtAngle(shape, theta, R, rotation),

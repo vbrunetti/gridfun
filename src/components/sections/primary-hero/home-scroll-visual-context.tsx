@@ -7,12 +7,16 @@ export type HomeScrollVisualState = {
   activeChapter: number;
   sparkBlend: SparkBlend;
   sparkPaused: boolean;
+  secondaryCovering: boolean;
+  secondarySettled: boolean;
 };
 
 const defaultState: HomeScrollVisualState = {
   activeChapter: 0,
   sparkBlend: { from: 0, to: 0, t: 0 },
   sparkPaused: false,
+  secondaryCovering: false,
+  secondarySettled: false,
 };
 
 const HomeScrollVisualContext = createContext<HomeScrollVisualState>(defaultState);

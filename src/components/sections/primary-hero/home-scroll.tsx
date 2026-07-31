@@ -81,6 +81,8 @@ export function HomeScroll({
     activeChapter: 0,
     sparkBlend: { from: 0, to: 0, t: 0 },
     sparkPaused: false,
+    secondaryCovering: false,
+    secondarySettled: false,
   });
 
   const scrollSteps = useMemo(
@@ -258,14 +260,18 @@ export function HomeScroll({
     const nextVisualState: HomeScrollVisualState = {
       activeChapter: clamp(best, 0, lastHeroIndex),
       sparkBlend,
-      // Keep animating while hero panels are in view; pause only after leaving hero band
-      sparkPaused: best >= slateCount || !sparkInView,
+      sparkPaused:
+        best >= slateCount || !sparkInView || secondaryCovering,
+      secondaryCovering,
+      secondarySettled,
     };
 
     setVisualState((prev) => {
       if (
         prev.activeChapter === nextVisualState.activeChapter &&
         prev.sparkPaused === nextVisualState.sparkPaused &&
+        prev.secondaryCovering === nextVisualState.secondaryCovering &&
+        prev.secondarySettled === nextVisualState.secondarySettled &&
         prev.sparkBlend.from === nextVisualState.sparkBlend.from &&
         prev.sparkBlend.to === nextVisualState.sparkBlend.to &&
         prev.sparkBlend.t === nextVisualState.sparkBlend.t

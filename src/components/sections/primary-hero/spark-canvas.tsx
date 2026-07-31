@@ -65,6 +65,13 @@ type SparkCanvasProps = {
   shapeScale?: number;
   /** Extra draw margin as a fraction of frame min dimension (glow extends past the frame). */
   canvasBleed?: number;
+  /**
+   * Skip shape silhouette — spawn/move across the full frame.
+   * Used by secondary spark field.
+   */
+  unbounded?: boolean;
+  /** Override accent list for colorMode "palette" (random color at spawn). */
+  accentPalette?: readonly string[];
 };
 
 type SparkParticle = {
@@ -85,22 +92,40 @@ function spawnParticle(
   params: ResolvedParticleParams,
   cx: number,
   cy: number,
+  bounds?: { left: number; top: number; width: number; height: number },
 ): SparkParticle {
-  const spread = params.spawnSpread;
   let x = cx;
   let y = cy;
-  let attempts = 0;
 
-  while (attempts < 12) {
-    const angle = Math.random() * Math.PI * 2;
-    const r =
-      Math.sqrt(Math.random()) *
-      radiusAtAngle(params.shapeProfile, angle) *
-      spread;
-    x = cx + Math.cos(angle) * r;
-    y = cy + Math.sin(angle) * r;
-    if (isInsideShape(x, y, cx, cy, params.shapeProfile)) break;
-    attempts++;
+  if (bounds) {
+    const spread = Math.max(0.05, Math.min(1, params.spawnSpread));
+    if (spread >= 0.98) {
+      x = bounds.left + Math.random() * bounds.width;
+      y = bounds.top + Math.random() * bounds.height;
+    } else {
+      // Lower spawnSpread clusters toward center; still stays in-frame.
+      const u = Math.pow(Math.random(), 1 / (spread * 2.2));
+      const angle = Math.random() * Math.PI * 2;
+      x = cx + Math.cos(angle) * u * bounds.width * 0.5;
+      y = cy + Math.sin(angle) * u * bounds.height * 0.5;
+      x = Math.min(bounds.left + bounds.width, Math.max(bounds.left, x));
+      y = Math.min(bounds.top + bounds.height, Math.max(bounds.top, y));
+    }
+  } else {
+    const spread = params.spawnSpread;
+    let attempts = 0;
+
+    while (attempts < 12) {
+      const angle = Math.random() * Math.PI * 2;
+      const r =
+        Math.sqrt(Math.random()) *
+        radiusAtAngle(params.shapeProfile, angle) *
+        spread;
+      x = cx + Math.cos(angle) * r;
+      y = cy + Math.sin(angle) * r;
+      if (isInsideShape(x, y, cx, cy, params.shapeProfile)) break;
+      attempts++;
+    }
   }
 
   const dx = x - cx;
@@ -173,13 +198,14 @@ function resolveParticleRgb(
   colorOffset: number,
   cyclePhase: number,
   fixedRgb: Rgb | null,
+  accents: readonly string[] = sparkPalette,
 ): Rgb {
   if (colorMode === "fixed" && fixedRgb) return fixedRgb;
   if (colorMode === "ink") return INK_RGB;
   if (colorMode === "palette") {
-    const index =
-      Math.floor(colorOffset * sparkPalette.length) % sparkPalette.length;
-    return hexToRgb(sparkPalette[index]!);
+    const colors = accents.length > 0 ? accents : sparkPalette;
+    const index = Math.floor(colorOffset * colors.length) % colors.length;
+    return hexToRgb(colors[index]!);
   }
   return sampleSparkPaletteRgb(cyclePhase + colorOffset);
 }
@@ -197,6 +223,62 @@ function resolveCompositeMode(
   return compositeMode;
 }
 
+/** Uniform grid for near-neighbor link queries — O(n × k) instead of O(n²). */
+function buildSpatialIndex(
+  particles: SparkParticle[],
+  cellSize: number,
+): { cols: number; cells: Map<number, number[]> } {
+  const cells = new Map<number, number[]>();
+  const inv = 1 / Math.max(cellSize, 1);
+  // Large stride keeps gx/gy packing collision-free for typical canvas sizes.
+  const cols = 4096;
+
+  for (let i = 0; i < particles.length; i++) {
+    const p = particles[i]!;
+    const gx = Math.floor(p.x * inv);
+    const gy = Math.floor(p.y * inv);
+    const key = gy * cols + gx;
+    const bucket = cells.get(key);
+    if (bucket) bucket.push(i);
+    else cells.set(key, [i]);
+  }
+
+  return { cols, cells };
+}
+
+function forEachNeighborPair(
+  particles: SparkParticle[],
+  cellSize: number,
+  maxDist: number,
+  visit: (i: number, j: number) => void,
+) {
+  if (particles.length < 2) return;
+  const { cols, cells } = buildSpatialIndex(particles, cellSize);
+  const inv = 1 / Math.max(cellSize, 1);
+  const maxDistSq = maxDist * maxDist;
+
+  for (let i = 0; i < particles.length; i++) {
+    const a = particles[i]!;
+    const gx = Math.floor(a.x * inv);
+    const gy = Math.floor(a.y * inv);
+
+    for (let oy = -1; oy <= 1; oy++) {
+      for (let ox = -1; ox <= 1; ox++) {
+        const bucket = cells.get((gy + oy) * cols + (gx + ox));
+        if (!bucket) continue;
+        for (let b = 0; b < bucket.length; b++) {
+          const j = bucket[b]!;
+          if (j <= i) continue;
+          const other = particles[j]!;
+          const dx = a.x - other.x;
+          const dy = a.y - other.y;
+          if (dx * dx + dy * dy < maxDistSq) visit(i, j);
+        }
+      }
+    }
+  }
+}
+
 export function SparkCanvas({
   presets,
   blend,
@@ -209,6 +291,8 @@ export function SparkCanvas({
   colorCycleSpeed = 0.08,
   shapeScale = 1,
   canvasBleed = 0,
+  unbounded = false,
+  accentPalette,
 }: SparkCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<SparkParticle[]>([]);
@@ -225,6 +309,10 @@ export function SparkCanvas({
   const colorCycleSpeedRef = useRef(colorCycleSpeed);
   const shapeScaleRef = useRef(shapeScale);
   const canvasBleedRef = useRef(canvasBleed);
+  const unboundedRef = useRef(unbounded);
+  const accentPaletteRef = useRef<readonly string[]>(
+    accentPalette ?? sparkPalette,
+  );
   const cycleTimeRef = useRef(0);
   const rafRef = useRef(0);
   const sizeRef = useRef({
@@ -249,6 +337,8 @@ export function SparkCanvas({
   colorCycleSpeedRef.current = colorCycleSpeed;
   shapeScaleRef.current = shapeScale;
   canvasBleedRef.current = canvasBleed;
+  unboundedRef.current = unbounded;
+  accentPaletteRef.current = accentPalette ?? sparkPalette;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -260,7 +350,10 @@ export function SparkCanvas({
     const resize = () => {
       const parent = canvas.parentElement;
       if (!parent) return;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(
+        window.devicePixelRatio || 1,
+        unboundedRef.current ? 1.5 : 2,
+      );
       const frameWidth = parent.clientWidth;
       const frameHeight = parent.clientHeight;
       const bleed = Math.round(
@@ -307,6 +400,13 @@ export function SparkCanvas({
 
       const cx = bleed + frameWidth / 2;
       const cy = bleed + frameHeight / 2;
+      const frameBounds = {
+        left: bleed,
+        top: bleed,
+        width: frameWidth,
+        height: frameHeight,
+      };
+      const spawnBounds = unboundedRef.current ? frameBounds : undefined;
       const currentBlend = blendRef.current;
       const params = resolveParams(
         presetsRef.current,
@@ -330,7 +430,7 @@ export function SparkCanvas({
       const targetCount = params.count;
 
       while (particles.length < targetCount) {
-        particles.push(spawnParticle(params, cx, cy));
+        particles.push(spawnParticle(params, cx, cy, spawnBounds));
       }
       if (particles.length > targetCount + 40) {
         particles = particles.slice(0, targetCount);
@@ -338,7 +438,7 @@ export function SparkCanvas({
 
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-      if (showBoundaryRef.current) {
+      if (showBoundaryRef.current && !unboundedRef.current) {
         const profile = params.shapeProfile;
         const n = profile.radii.length;
         ctx.beginPath();
@@ -359,11 +459,15 @@ export function SparkCanvas({
       }
 
       const next: SparkParticle[] = [];
+      const left = frameBounds.left;
+      const top = frameBounds.top;
+      const right = left + frameBounds.width;
+      const bottom = top + frameBounds.height;
 
       for (const p of particles) {
         p.age += dt;
         if (p.age >= p.maxAge) {
-          next.push(spawnParticle(params, cx, cy));
+          next.push(spawnParticle(params, cx, cy, spawnBounds));
           continue;
         }
 
@@ -387,21 +491,47 @@ export function SparkCanvas({
         p.x += p.vx;
         p.y += p.vy;
 
-        const constrained = constrainToShape(
-          p.x,
-          p.y,
-          cx,
-          cy,
-          params.shapeProfile,
-        );
-        if (constrained.x !== p.x || constrained.y !== p.y) {
-          p.x = constrained.x;
-          p.y = constrained.y;
-          p.vx *= -0.35;
-          p.vy *= -0.35;
-          if (p.age > p.maxAge * 0.65) {
-            next.push(spawnParticle(params, cx, cy));
+        if (unboundedRef.current) {
+          let bounced = false;
+          if (p.x < left) {
+            p.x = left;
+            p.vx *= -0.35;
+            bounced = true;
+          } else if (p.x > right) {
+            p.x = right;
+            p.vx *= -0.35;
+            bounced = true;
+          }
+          if (p.y < top) {
+            p.y = top;
+            p.vy *= -0.35;
+            bounced = true;
+          } else if (p.y > bottom) {
+            p.y = bottom;
+            p.vy *= -0.35;
+            bounced = true;
+          }
+          if (bounced && p.age > p.maxAge * 0.65) {
+            next.push(spawnParticle(params, cx, cy, spawnBounds));
             continue;
+          }
+        } else {
+          const constrained = constrainToShape(
+            p.x,
+            p.y,
+            cx,
+            cy,
+            params.shapeProfile,
+          );
+          if (constrained.x !== p.x || constrained.y !== p.y) {
+            p.x = constrained.x;
+            p.y = constrained.y;
+            p.vx *= -0.35;
+            p.vy *= -0.35;
+            if (p.age > p.maxAge * 0.65) {
+              next.push(spawnParticle(params, cx, cy));
+              continue;
+            }
           }
         }
 
@@ -409,53 +539,68 @@ export function SparkCanvas({
       }
 
       while (next.length < targetCount) {
-        next.push(spawnParticle(params, cx, cy));
+        next.push(spawnParticle(params, cx, cy, spawnBounds));
       }
 
       particlesRef.current = next;
 
-      if (params.linkDistance > 0 && params.linkOpacity > 0) {
-        const linkRgb =
-          mode === "fixed" && fixedRgbRef.current
-            ? fixedRgbRef.current
-            : mode === "ink"
-              ? INK_RGB
-              : sampleSparkPaletteRgb(
-                  mode === "cycle"
-                    ? cyclePhase
-                    : next[0]?.colorOffset ?? 0,
-                );
-        ctx.strokeStyle = rgbaFromRgb(linkRgb, params.linkOpacity);
+      const accents = accentPaletteRef.current;
+      const lives = new Float32Array(next.length);
+      const rgbs: Rgb[] = new Array(next.length);
+      for (let i = 0; i < next.length; i++) {
+        const p = next[i]!;
+        lives[i] = lifeAlpha(p.age, p.maxAge);
+        rgbs[i] = resolveParticleRgb(
+          mode,
+          p.colorOffset,
+          cyclePhase,
+          fixedRgbRef.current,
+          accents,
+        );
+      }
+
+      if (params.linkDistance > 0 && params.linkOpacity > 0 && next.length > 1) {
         ctx.lineWidth = params.linkLineWidth;
-        for (let i = 0; i < next.length; i++) {
-          for (let j = i + 1; j < next.length; j++) {
-            const a = next[i]!;
-            const b = next[j]!;
-            const d = Math.hypot(a.x - b.x, a.y - b.y);
-            if (d < params.linkDistance) {
-              ctx.beginPath();
-              ctx.moveTo(a.x, a.y);
-              ctx.lineTo(b.x, b.y);
-              ctx.stroke();
-            }
+        const useFixedHue = mode === "fixed" || mode === "ink";
+        const fixedHue = mode === "ink" ? INK_RGB : (fixedRgbRef.current ?? INK_RGB);
+
+        forEachNeighborPair(next, params.linkDistance, params.linkDistance, (i, j) => {
+          const alpha = params.linkOpacity * Math.min(lives[i]!, lives[j]!);
+          if (alpha <= 0.002) return;
+
+          const a = next[i]!;
+          const b = next[j]!;
+
+          if (useFixedHue) {
+            ctx.strokeStyle = rgbaFromRgb(fixedHue, alpha);
+          } else {
+            // Midpoint mix keeps Multi connectors matched to dots without per-link gradients.
+            const rgbA = rgbs[i]!;
+            const rgbB = rgbs[j]!;
+            const mixed: Rgb = [
+              (rgbA[0] + rgbB[0]) >> 1,
+              (rgbA[1] + rgbB[1]) >> 1,
+              (rgbA[2] + rgbB[2]) >> 1,
+            ];
+            ctx.strokeStyle = rgbaFromRgb(mixed, alpha);
           }
-        }
+
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        });
       }
 
       ctx.globalCompositeOperation = resolveCompositeMode(
         mode,
         compositeModeRef.current,
       );
-      for (const p of next) {
-        const life = lifeAlpha(p.age, p.maxAge);
-        const alpha = params.alpha * life;
+      for (let i = 0; i < next.length; i++) {
+        const p = next[i]!;
+        const alpha = params.alpha * lives[i]!;
         if (alpha <= 0.002) continue;
-        const rgb = resolveParticleRgb(
-          mode,
-          p.colorOffset,
-          cyclePhase,
-          fixedRgbRef.current,
-        );
+        const rgb = rgbs[i]!;
         const glow = p.radius * params.glowScale;
         const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glow);
         grad.addColorStop(0, rgbaFromRgb(rgb, alpha));

@@ -3,7 +3,7 @@
   "presets": [
     {
       "label": "Ch 1 · Hello — I'm Victor",
-      "shape": "trefoil",
+      "shape": "circle",
       "boundaryScale": 0.4,
       "rotationDeg": 45,
       "count": 720,
@@ -113,7 +113,7 @@
     },
     {
       "label": "Ch 6 · Systems",
-      "shape": "clover",
+      "shape": "circle",
       "boundaryScale": 0.4,
       "rotationDeg": 45,
       "count": 720,
@@ -135,7 +135,7 @@
     },
     {
       "label": "Ch 7 · AI-native",
-      "shape": "trefoil",
+      "shape": "circle",
       "boundaryScale": 0.4,
       "rotationDeg": 45,
       "count": 720,

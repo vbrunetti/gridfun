@@ -196,7 +196,14 @@ export function SparkPlayground() {
                   href="/effects/hero-atmosphere"
                   className="border-b border-current text-primary"
                 >
-                  Secondary background lab
+                  Secondary v1 · Edge aurora
+                </Link>
+                {" · "}
+                <Link
+                  href="/effects/secondary-spark"
+                  className="border-b border-current text-primary"
+                >
+                  Secondary v2 · Spark field
                 </Link>
                 {" · "}
                 <button
