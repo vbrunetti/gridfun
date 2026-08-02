@@ -2,7 +2,6 @@
 
 import { SparkChapterStyles } from "@/components/effects/spark-chapter-styles";
 import type { ParticlePreset } from "@/components/sections/primary-hero/particle-presets";
-import { HERO_SPARK_SHAPE_SCALE } from "@/components/sections/primary-hero/spark-hero-config";
 
 type SparkPlaygroundControlsProps = {
   presets: ParticlePreset[];
@@ -61,7 +60,7 @@ export function SparkPlaygroundControls({
           Show shape boundary
         </label>
         <label className="block text-xs text-secondary">
-          Shape scale {shapeScale.toFixed(2)}× (home {HERO_SPARK_SHAPE_SCALE}×)
+          Shape scale {shapeScale.toFixed(2)}× (home 1×)
           <input
             type="range"
             min={0.8}

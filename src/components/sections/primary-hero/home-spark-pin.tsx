@@ -1,7 +1,6 @@
 "use client";
 
 import type { ParticlePreset } from "./particle-presets";
-import { HOME_DESKTOP_SPARK_SHAPE_SCALE } from "./spark-hero-config";
 import { useHomeScrollVisual } from "./home-scroll-visual-context";
 import { PrimaryHeroSparkStage } from "./primary-hero-spark-stage";
 
@@ -20,7 +19,7 @@ export function HomeSparkPin({ presets }: HomeSparkPinProps) {
         presets={presets}
         blend={sparkBlend}
         paused={sparkPaused}
-        shapeScale={HOME_DESKTOP_SPARK_SHAPE_SCALE}
+        shapeScale={1}
       />
     </div>
   );

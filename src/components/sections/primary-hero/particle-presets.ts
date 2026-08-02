@@ -391,6 +391,6 @@ export const PRESET_PARAM_META: Record<
   alpha: { min: 0.05, max: 1, step: 0.01 },
   glowScale: { min: 0.5, max: 4, step: 0.05 },
   linkDistance: { min: 0, max: 120, step: 1 },
-  linkOpacity: { min: 0, max: 0.4, step: 0.01 },
+  linkOpacity: { min: 0, max: 1, step: 0.01 },
   spawnSpread: { min: 0, max: 1, step: 0.01 },
 };

@@ -5,7 +5,6 @@ import { PRESET_REFERENCE_MIN_DIM } from "./particle-presets";
 import {
   HERO_SPARK_COLOR,
   HERO_SPARK_SHAPE_SCALE,
-  HOME_DESKTOP_SPARK_SIZE_SCALE,
   HOME_SPARK_COLOR,
 } from "./spark-hero-config";
 import {
@@ -19,7 +18,7 @@ import type { ParticlePreset } from "./particle-presets";
 const DESKTOP_QUERY = "(min-width: 1024px)";
 /** Home mobile — large square centered in the hero band (ambient bg). */
 const MOBILE_HOME_SPARK_FILL = 0.96;
-const MOBILE_HOME_SPARK_SHAPE_SCALE = 2.55;
+const MOBILE_HOME_SPARK_SHAPE_SCALE = 1;
 /** Playground / non-home mobile — cap square frame by stage height in grid zone. */
 const MOBILE_SPARK_HEIGHT_RATIO = 0.75;
 const MOBILE_SPARK_SHAPE_SCALE = 1.15;
@@ -27,6 +26,8 @@ const MOBILE_SPARK_SHAPE_SCALE = 1.15;
 const DESKTOP_SPARK_ZONE_COLS = 6;
 const DESKTOP_SPARK_ZONE_START_COL = 12 - DESKTOP_SPARK_ZONE_COLS + 1;
 const MOBILE_SPARK_ZONE_START_COL = 4;
+/** Home desktop — particle field origin sits on this column’s centerline. */
+const HOME_DESKTOP_SPARK_CENTER_COL = 9;
 
 function columnMetrics(
   gridWidth: number,
@@ -168,36 +169,66 @@ export function PrimaryHeroSparkLayer({
         anchorCol,
       );
       const zoneWidth = Math.max(0, zoneRight - zoneLeft);
-
-      const homeDesktopScale = desktop && isHomeSpark ? HOME_DESKTOP_SPARK_SIZE_SCALE : 1;
-      const sparkSize =
-        (desktop ? zoneWidth : Math.min(stageHeight * MOBILE_SPARK_HEIGHT_RATIO, zoneWidth)) *
-        homeDesktopScale;
-      const sparkLeftOnGrid = zoneRight - sparkSize;
       const stageOffset =
         stage === metricGrid
           ? 0
           : stage.getBoundingClientRect().left -
             metricGrid.getBoundingClientRect().left;
 
+      let sparkSize: number;
+      let sparkLeft: number;
+
+      if (desktop && isHomeSpark) {
+        /* Animation origin is the frame center (spark-canvas cx/cy). Pin that
+           to column 9’s centerline; size the square so it still reaches the
+           content edges instead of clipping mid-band. */
+        const centerX =
+          (columnLeftEdge(
+            metricGrid.clientWidth,
+            paddingStart,
+            paddingEnd,
+            columnGap,
+            columnCount,
+            HOME_DESKTOP_SPARK_CENTER_COL,
+          ) +
+            columnRightEdge(
+              metricGrid.clientWidth,
+              paddingStart,
+              paddingEnd,
+              columnGap,
+              columnCount,
+              HOME_DESKTOP_SPARK_CENTER_COL,
+            )) /
+          2;
+        const reach = Math.max(centerX - paddingStart, zoneRight - centerX);
+        sparkSize = Math.max(reach * 2, stageHeight);
+        sparkLeft = centerX - sparkSize / 2 - stageOffset;
+      } else {
+        sparkSize = desktop
+          ? zoneWidth
+          : Math.min(stageHeight * MOBILE_SPARK_HEIGHT_RATIO, zoneWidth);
+        sparkLeft = zoneRight - sparkSize - stageOffset;
+      }
+
       stage.style.setProperty("--hero-spark-h", `${sparkSize}px`);
       stage.style.setProperty("--hero-spark-w", `${sparkSize}px`);
-      stage.style.setProperty(
-        "--hero-spark-left",
-        `${sparkLeftOnGrid - stageOffset}px`,
-      );
+      stage.style.setProperty("--hero-spark-left", `${sparkLeft}px`);
 
-      const sizeT = Math.min(
-        1,
-        Math.max(0, sparkSize / PRESET_REFERENCE_MIN_DIM),
-      );
-      const responsiveShapeScale =
-        MOBILE_SPARK_SHAPE_SCALE +
-        (shapeScale - MOBILE_SPARK_SHAPE_SCALE) * sizeT;
+      const nextShapeScale =
+        desktop && isHomeSpark
+          ? shapeScale
+          : (() => {
+              const sizeT = Math.min(
+                1,
+                Math.max(0, sparkSize / PRESET_REFERENCE_MIN_DIM),
+              );
+              return (
+                MOBILE_SPARK_SHAPE_SCALE +
+                (shapeScale - MOBILE_SPARK_SHAPE_SCALE) * sizeT
+              );
+            })();
       setFrameShapeScale((prev) =>
-        Math.abs(prev - responsiveShapeScale) < 0.02
-          ? prev
-          : responsiveShapeScale,
+        Math.abs(prev - nextShapeScale) < 0.02 ? prev : nextShapeScale,
       );
     };
 

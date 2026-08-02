@@ -1030,14 +1030,18 @@ body:has(.home-scroll:not(.home-scroll--static)) {
   height: var(--home-hero-band-height);
   margin-bottom: calc(-1 * var(--home-hero-band-height));
   pointer-events: none;
-  /* Clip horizontally only: the oversized ambient spark bleeds well past the
-     viewport on mobile; left unclipped it widens the layout viewport and pushes
-     the fixed chrome (hamburger + dot rail) off-screen. clip (not hidden) keeps
-     vertical glow bleed and does not create a scroll container, so sticky/snap
-     are unaffected. */
-  overflow-x: clip;
-  overflow-y: visible;
+  overflow: visible;
   isolation: isolate;
+}
+
+/* Mobile only — oversized ambient spark bleeds past the viewport; left unclipped
+   it widens the layout viewport and pushes fixed chrome off-screen. clip (not
+   hidden) keeps vertical glow bleed and does not create a scroll container. */
+@media (max-width: 1023px) {
+  .home-spark-pin {
+    overflow-x: clip;
+    overflow-y: visible;
+  }
 }
 
 .home-spark-pin__stage {
@@ -4706,6 +4710,41 @@ ul.cs-hero__subhead {
   height: 100%;
   border: 0;
   background: transparent;
+}
+
+.vimeo-player__mute {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--color-paper) 22%, transparent);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--section-dark-bg) 78%, transparent);
+  color: var(--color-paper);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  pointer-events: auto;
+}
+
+.vimeo-player__mute:hover {
+  border-color: color-mix(in srgb, var(--color-paper) 42%, transparent);
+  background: color-mix(in srgb, var(--section-dark-bg) 88%, transparent);
+}
+
+.vimeo-player__mute:focus-visible {
+  outline: 2px solid var(--color-neon-lime, #d8ff00);
+  outline-offset: 2px;
+}
+
+.vimeo-player__mute-label {
+  line-height: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -158,7 +158,8 @@ function spawnParticle(
     radius:
       params.particleRadiusMin +
       Math.random() * (params.particleRadiusMax - params.particleRadiusMin),
-    age: 0,
+    // Random phase so the field doesn't blink in unison on first fill / resize.
+    age: Math.random() * maxAge,
     maxAge,
     colorOffset: Math.random(),
   };

@@ -55,3 +55,33 @@ export function vimeoBackgroundUrl(videoId: string, playerId?: string): string {
 
   return `https://player.vimeo.com/video/${videoId}?${params.toString()}`;
 }
+
+/**
+ * Chromeless autoplay loop that can be unmuted (unlike `background=1`, which
+ * permanently mutes). Starts muted so browsers allow autoplay; pair with a
+ * custom mute control that calls `setMuted` via the player API.
+ */
+export function vimeoAmbientUrl(videoId: string, playerId?: string): string {
+  const params = new URLSearchParams({
+    autoplay: "1",
+    loop: "1",
+    muted: "1",
+    controls: "0",
+    autopause: "0",
+    badge: "0",
+    dnt: "1",
+    api: "1",
+    playsinline: "1",
+    title: "0",
+    byline: "0",
+    portrait: "0",
+    pip: "0",
+    initial_quality: INITIAL_QUALITY,
+  });
+
+  if (playerId) {
+    params.set("player_id", playerId);
+  }
+
+  return `https://player.vimeo.com/video/${videoId}?${params.toString()}`;
+}

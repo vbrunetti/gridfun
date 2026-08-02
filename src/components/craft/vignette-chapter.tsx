@@ -278,6 +278,7 @@ function FrameContent({
                   title={title}
                   aspectRatio={aspect}
                   background={frame.vimeoBackground}
+                  hasAudio={frame.vimeoHasAudio}
                   poster={frame.poster}
                   className="vframe__media vframe__media--video"
                 />

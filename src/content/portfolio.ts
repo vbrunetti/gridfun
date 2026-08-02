@@ -80,6 +80,11 @@ export type VignetteImage = {
   vimeo?: string;
   /** Borderless looping embed (no player chrome) instead of interactive controls. */
   vimeoBackground?: boolean;
+  /**
+   * Chromeless autoplay loop with a visible mute toggle — for clips that have
+   * sound. Starts muted (autoplay policy); ignores permanent `vimeoBackground` mute.
+   */
+  vimeoHasAudio?: boolean;
   /** Still shown behind Vimeo until the player is ready; also used on inactive panels. */
   poster?: string;
   /** Render as a type-driven color field instead of media. */
@@ -321,7 +326,7 @@ function cruiseMedia(
     | string
     | Pick<
         VignetteImage,
-        "src" | "sources" | "autoplayMs" | "vimeo" | "vimeoBackground" | "poster"
+        "src" | "sources" | "autoplayMs" | "vimeo" | "vimeoBackground" | "vimeoHasAudio" | "poster"
       >,
   panelBg?: PanelBg,
 ): VignetteImage {
@@ -444,7 +449,7 @@ function googleMedia(
     | string
     | Pick<
         VignetteImage,
-        "src" | "sources" | "autoplayMs" | "vimeo" | "vimeoBackground" | "poster"
+        "src" | "sources" | "autoplayMs" | "vimeo" | "vimeoBackground" | "vimeoHasAudio" | "poster"
       >,
   panelBg?: PanelBg,
 ): VignetteImage {
@@ -520,7 +525,7 @@ function pearsonMedia(
     | string
     | Pick<
         VignetteImage,
-        "src" | "sources" | "autoplayMs" | "vimeo" | "vimeoBackground" | "poster"
+        "src" | "sources" | "autoplayMs" | "vimeo" | "vimeoBackground" | "vimeoHasAudio" | "poster"
       >,
   panelBg?: PanelBg,
 ): VignetteImage {
@@ -596,7 +601,7 @@ function mckinseyMedia(
     | string
     | Pick<
         VignetteImage,
-        "src" | "sources" | "autoplayMs" | "vimeo" | "vimeoBackground" | "poster"
+        "src" | "sources" | "autoplayMs" | "vimeo" | "vimeoBackground" | "vimeoHasAudio" | "poster"
       >,
   panelBg?: PanelBg,
 ): VignetteImage {
@@ -684,7 +689,7 @@ function facebookMedia(
     | string
     | Pick<
         VignetteImage,
-        "src" | "sources" | "autoplayMs" | "vimeo" | "vimeoBackground" | "poster"
+        "src" | "sources" | "autoplayMs" | "vimeo" | "vimeoBackground" | "vimeoHasAudio" | "poster"
       >,
   panelBg?: PanelBg,
 ): VignetteImage {
@@ -1161,10 +1166,20 @@ export const caseStudies: CaseStudy[] = [
             "A critical insight",
             "Cruise's remote Advisors weren't trained specialists. They weren't air traffic controllers, engineers, or safety professionals. They were regular people, they played video games, they used iPhones, etc.\n\nA floating action toolbar at the bottom of the screen with hotkey support is a video game pattern, and one these Advisors already knew.",
           ),
-          cruiseQuote(
-            "Proof It Worked",
-            "There is a lot more information placed logically in T2.",
-            "Remote Advisor Research Participant",
+          //cruiseQuote(
+          //  "Proof It Worked",
+          //  "There is a lot more information placed logically in T2.",
+          //  "Remote Advisor Research Participant",
+          //),
+          cruiseMedia(
+            "Alpha Test",
+            "An early alpha test of the new Terminal bento-box design.",
+            "16x9",
+            {
+              vimeo: "1214738786",
+              vimeoBackground: true,
+              poster: "/portfolio/cruise/Bento-alpha.jpg",
+            },
           ),
         ],
         "16x9",
@@ -1302,15 +1317,15 @@ export const caseStudies: CaseStudy[] = [
               ],
             },
           ),
-          cruiseBeat(
-            "Outcome",
-            "Three problems collapsed into one module: where to look (fixed), how to interpret the signal (pictures not words), and where & how to act (inline controls).",
-          ),
           cruiseStat(
             "Outcome",
             "3 → 1",
-            "By removing the need for the AV to stop at the handoff point, we were able to shave 5-10 seconds off of the time to resolution (TTR).",
+            "Three problems collapsed into one module: where to look (fixed), how to interpret the signal (pictures not words), and where & how to act (inline controls).",
             "1x1",
+          ),
+          cruiseBeat(
+            "Outcome",
+            "By removing the need for the AV to stop at the handoff point, we were able to shave 5-10 seconds off of the time to resolution (TTR).",
           ),
         ],
         "16x9",
@@ -1334,41 +1349,37 @@ export const caseStudies: CaseStudy[] = [
         [
           cruiseBeat(
             "The before state",
-            "Remote Advisors juggling tabs, Slack, Google Sheets, and Google Meet. Tele-ops and customer service in adjacent rooms at Phoenix — separated by a wall, not coordinating. They weren't even on a first-name basis. Recovery, security, and support all in parallel channels.",
+            "Remote Advisors managing a stuck vehicle had to coordinate across four separate tools: Slack for team comms, Google Meet to speak with other Advisors or Customer Service, Halo to speak with the car and passengers, and whatever tab they happened to be on for vehicle controls. Every tool switch was a moment of lost focus on the scene.",
           ),
-          cruiseBeat(
+          cruiseMedia(
             "Two teams, one blind spot",
-            "Cruise used Chevy Bolts, stock cars retrofitted in-house, not purpose-built AVs. Communication with the outside world had to be creative within those limits. Worse, the org had split communication itself: customer service could call passengers, but had no idea what the Remote Advisor was doing, moving, stopping, clearing a collision. Remote Advisors could move the vehicle and manage every system, but had no channel to speak to a passenger or an officer outside the car. The business kept these roles cleanly siloed. The real world kept crossing that line.",
+            "The org had split communication cleanly: Customer Service could call passengers, but had no visibility into what the Remote Advisor was doing — moving, stopping, clearing a collision. Remote Advisors could manage every vehicle system, but had no voice channel to speak to a passenger or an officer outside the car. The business kept the roles siloed. The real world kept crossing that line.",
+            "16x9",
+            {
+              vimeo: "1214897067",
+              vimeoHasAudio: true,
+              poster: "/portfolio/cruise/CEDS_Icebreaker_Poster.jpg",
+            },
           ),
           cruiseBeat(
             "The principle",
             "Automate first. Whatever still requires human intervention gets condensed and surfaced inside the terminal itself. No tab-switching. Everything the Remote Advisor needs, in one window, in the right moment.",
           ),
-          cruiseMedia(
-            "Sidebar card rail",
-            "Workflows requiring human action appeared as cards in a sidebar rail, text, rich media, or interactive controls depending on scenario. A recovery dispatch showed up as a live map of the recovery team's position. A stowaway concern showed up as a live stream from the interior cabin camera, fed straight into the card. Critical actions, close the doors, fail the vehicle, trigger physical security, sat one tap away without ever leaving the card.",
-            "16x9",
-          ),
-          cruiseMedia(
-            "Telephony, wired in",
-            "Full telephony wired into the terminal, passenger cabin, front interior, exterior speakers, inter-Advisor channels. First-class feature, not an external tool.",
-            "9x16",
+          cruiseBeat(
+            "MEDIA: Sidebar card rail",
+            "Asset: Figma frames / graphics of the sidebar card UI across multiple workflow scenarios. Caption: Workflows requiring human action appeared as cards in a sidebar rail — text, rich media, or interactive controls depending on the scenario. A recovery dispatch showed the recovery team's live position on a map. A stowaway concern streamed the interior cabin camera directly into the card. Critical actions — close the doors, fail the vehicle, trigger physical security — sat one tap away. Workflows included collision recovery, police pullover, stowaway check, and post-ride return to service, among others. Aspect ratio: 16x9.",
           ),
           cruiseBeat(
-            "Dual-channel audio",
-            "Borrowed from 911 dispatch: left ear for Advisor-to-Advisor, right ear for scene audio. The ear told you the source, no visual lookup required.",
+            "MEDIA: Telephony, wired in",
+            "Asset: Telephony UI screenshot/video from Terminal. Caption: We replaced two external tools — Google Meet and Halo — with a single integrated telephony service inside Terminal. Passenger cabin, front interior, exterior speakers, inter-Advisor channels. One interface, all channels. Borrowed from 911 dispatch: left ear for Advisor-to-Advisor, right ear for the scene. The ear told you the source — no visual lookup required.Aspect ratio: 9x16",
           ),
           cruiseBeat(
-            "Design grounding",
-            "The telephony craft here wasn't invented from scratch. It drew on earlier work designing call-status clarity and audio-energy visualization for Google's contact center products, plus the physical reality of an operator running one ear on a colleague and one ear on the scene. Standard telephony UX principles, applied to a car.",
-          ),
-          cruiseBeat(
-            "Police pullover",
-            "The showcase scenario, tying both threads together: passenger notification, exterior voice comms, safety overrides, vehicle movement, and telephony channels, orchestrated into a single guided workflow inside the sidebar rail, surfacing the right controls in order.",
+            "MEDIA: Police pullover",
+            "Asset: Loom walkthrough video of police pullover workflow in Figma. Caption: The police pullover scenario tied both systems together: passenger notification, officer comms via exterior speakers, safety overrides, and vehicle movement controls — orchestrated into a single guided workflow inside the sidebar rail, surfacing the right controls in sequence.",
           ),
           cruiseBeat(
             "Outcome",
-            "Research and dogfooding confirmed what the org structure denied: the people moving the vehicle needed to speak, and the people speaking needed operational visibility. The sidebar rail and telephony service were two answers to the same question, how do you bring the right human into the loop without making the Remote Advisor leave the scene. Shipped in a partially-built form before Cruise shut down; the polished vision exists in Figma. The innovation here was never invention. It was orchestration.",
+            "Research and dogfooding confirmed what the org structure had denied: the people moving the vehicle needed to speak, and the people speaking needed operational visibility. The innovation here was never invention. It was orchestration.",
           ),
         ],
       ),

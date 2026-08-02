@@ -65,13 +65,12 @@ export const HERO_SPARK_PRESETS = normalizeHeroChapterPresets(
 );
 export { HERO_CHAPTER_SHAPES };
 
-/** Fills the hero spark frame — tuned for zone-capped square (cols 7–12). */
+/** Playground default — fills a zone-capped square (cols 7–12). Home uses 1. */
 export const HERO_SPARK_SHAPE_SCALE = 2.85;
 
-/** Desktop home hero — 30% larger than playground / default spark frame. */
-export const HOME_DESKTOP_SPARK_SIZE_SCALE = 1.3;
-export const HOME_DESKTOP_SPARK_SHAPE_SCALE =
-  HERO_SPARK_SHAPE_SCALE * HOME_DESKTOP_SPARK_SIZE_SCALE;
+/** @deprecated Home no longer inflates; kept for playground copy references. */
+export const HOME_DESKTOP_SPARK_SIZE_SCALE = 1;
+export const HOME_DESKTOP_SPARK_SHAPE_SCALE = 1;
 
 /** Home hero — neon lime spark on dark-lift ground (mobile + desktop). */
 export const HOME_SPARK_COLOR = {
