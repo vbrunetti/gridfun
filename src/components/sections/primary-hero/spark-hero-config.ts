@@ -78,3 +78,7 @@ export const HOME_SPARK_COLOR = {
   fixedColor: palette.neonLime,
   compositeMode: "source-over" as const,
 };
+
+/** Mobile-only presence — dots/field read faint on small screens. */
+export const MOBILE_SPARK_SIZE_BOOST = 1.2;
+export const MOBILE_SPARK_BRIGHTNESS_BOOST = 1.5;

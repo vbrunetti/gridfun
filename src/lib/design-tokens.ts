@@ -408,6 +408,7 @@ export const vignettePanelWidths = [
   { kind: "Field beat · portrait 9×16", cols: "6 / 12", className: ".vframe--field · .vframe--9x16" },
   { kind: "Square 1×1", cols: "8 / 12", className: ".vframe--1x1" },
   { kind: "Landscape 16×9", cols: "12 / 12", className: ".vframe--16x9" },
+  { kind: "Thesis (billboard)", cols: "8 / 12", className: ".vframe--thesis" },
 ] as const;
 
 export const vignetteClientBrandPanels = clientBrandColorEntries.map(

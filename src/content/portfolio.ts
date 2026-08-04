@@ -116,6 +116,13 @@ export type VignetteImage = {
   quote?: string;
   /** Attribution for a `quote` panel, e.g. "Advisor · T2 usability study". */
   quoteCite?: string;
+  /**
+   * Few-word billboard line (e.g. "Automate first."). Presence turns the frame
+   * into a *thesis panel*: optional `label` kicker on top, this line as the
+   * hero at display scale (wraps — not metric-locked), and optional `body` as a
+   * short supporting lede under it. The word-as-graphic sibling of `stat`.
+   */
+  thesis?: string;
 };
 
 export type CraftVignette = {
@@ -380,6 +387,29 @@ function cruiseQuote(
     label,
     quote,
     ...(cite ? { quoteCite: cite } : {}),
+    width: RATIO_PANEL_WIDTH[ratio],
+    ...(panelBg ? { panelBg } : {}),
+  };
+}
+
+/**
+ * A few-word billboard panel — the word-as-graphic sibling of `cruiseStat`.
+ * `label` is the kicker, `thesis` the short hero line (2–6 words, wraps),
+ * optional `body` a short supporting lede under it. Defaults to square (`1x1`).
+ */
+function cruiseThesis(
+  label: string,
+  thesis: string,
+  body?: string,
+  ratio: ImageRatio = "1x1",
+  panelBg?: PanelBg,
+): VignetteImage {
+  return {
+    ratio,
+    accent: cruiseAccent,
+    label,
+    thesis,
+    ...(body ? { body } : {}),
     width: RATIO_PANEL_WIDTH[ratio],
     ...(panelBg ? { panelBg } : {}),
   };
@@ -1361,27 +1391,64 @@ export const caseStudies: CaseStudy[] = [
               poster: "/portfolio/cruise/CEDS_Icebreaker_Poster.jpg",
             },
           ),
-          cruiseBeat(
+          cruiseThesis(
             "The principle",
-            "Automate first. Whatever still requires human intervention gets condensed and surfaced inside the terminal itself. No tab-switching. Everything the Remote Advisor needs, in one window, in the right moment.",
+            "Automate first.",
+            "Whatever still needs a human gets condensed into the terminal — one window, right moment.",
+            "1x1",
           ),
-          cruiseBeat(
-            "MEDIA: Sidebar card rail",
-            "Asset: Figma frames / graphics of the sidebar card UI across multiple workflow scenarios. Caption: Workflows requiring human action appeared as cards in a sidebar rail — text, rich media, or interactive controls depending on the scenario. A recovery dispatch showed the recovery team's live position on a map. A stowaway concern streamed the interior cabin camera directly into the card. Critical actions — close the doors, fail the vehicle, trigger physical security — sat one tap away. Workflows included collision recovery, police pullover, stowaway check, and post-ride return to service, among others. Aspect ratio: 16x9.",
+          cruiseMedia(
+            "Modular card rail",
+            "Workflows requiring human action appeared as cards in a sidebar rail — text, rich media, or interactive controls depending on the scenario. A recovery dispatch showed the recovery team's live position on a map. A stowaway concern streamed the interior cabin camera directly into the card. Critical actions — close the doors, fail the vehicle, trigger physical security — sat one tap away. Workflows included collision recovery, police pullover, stowaway check, and post-ride return to service, among others.",
+            "9x16",
+            {
+              sources: [
+                "/portfolio/cruise/Cruise_v10_c1.png",
+                "/portfolio/cruise/Cruise_v10_c2.png",
+                "/portfolio/cruise/Cruise_v10_c3.png",
+                "/portfolio/cruise/Cruise_v10_c4.png",
+                "/portfolio/cruise/Cruise_v10_c5.png",
+              ],
+            },
           ),
-          cruiseBeat(
-            "MEDIA: Telephony, wired in",
-            "Asset: Telephony UI screenshot/video from Terminal. Caption: We replaced two external tools — Google Meet and Halo — with a single integrated telephony service inside Terminal. Passenger cabin, front interior, exterior speakers, inter-Advisor channels. One interface, all channels. Borrowed from 911 dispatch: left ear for Advisor-to-Advisor, right ear for the scene. The ear told you the source — no visual lookup required.Aspect ratio: 9x16",
+          cruiseMedia(
+            "In-app telephony",
+            "We replaced two external tools — Google Meet and Halo — with a single integrated telephony service inside Terminal. Passenger cabin, front interior, exterior speakers, inter-Advisor channels. One interface, all channels. Borrowed from 911 dispatch: left ear for Advisor-to-Advisor, right ear for the scene. The ear told you the source — no visual lookup required.",
+            "9x16",
+            {
+              sources: [
+                "/portfolio/cruise/Cruise_v11_c1.jpg",
+                "/portfolio/cruise/Cruise_v11_c2.jpg",
+                "/portfolio/cruise/Cruise_v11_c3.jpg",
+                "/portfolio/cruise/Cruise_v11_c4.jpg",
+                "/portfolio/cruise/Cruise_v11_c5.jpg",
+                "/portfolio/cruise/Cruise_v11_c6.jpg",
+              ],
+            },
           ),
-          cruiseBeat(
-            "MEDIA: Police pullover",
-            "Asset: Loom walkthrough video of police pullover workflow in Figma. Caption: The police pullover scenario tied both systems together: passenger notification, officer comms via exterior speakers, safety overrides, and vehicle movement controls — orchestrated into a single guided workflow inside the sidebar rail, surfacing the right controls in sequence.",
+          cruiseMedia(
+            "Police pullover",
+            "The police pullover scenario tied both systems together: passenger notification, officer comms via exterior speakers, safety overrides, and vehicle movement controls — orchestrated into a single guided workflow inside the sidebar rail, surfacing the right controls in sequence.",
+            "16x9",
+            {
+              vimeo: "1215345982",
+              vimeoHasAudio: true,
+              poster: "/portfolio/cruise/LEO_Pullover.jpg",
+            },
           ),
-          cruiseBeat(
+          cruiseThesis(
             "Outcome",
-            "Research and dogfooding confirmed what the org structure had denied: the people moving the vehicle needed to speak, and the people speaking needed operational visibility. The innovation here was never invention. It was orchestration.",
+            "The innovation here wasn't invention, it was orchestration.",
+            "The people moving the vehicle needed to speak, and the people speaking needed operational visibility.",
           ),
         ],
+        "16x9",
+        {
+          titleTreatment: "cover",
+          keyImageSrc: "/portfolio/cruise/Cruise_v10_cover.jpg",
+          titleCoverBlur: 0,
+          titleCoverAlpha: 0.7,
+        },
       ),
       cruiseProse(
         "cruise-camera-bridge",

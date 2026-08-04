@@ -5352,6 +5352,50 @@ ul.cs-hero__subhead {
   }
 }
 
+/* Thesis panel — few-word billboard; word-as-graphic sibling of the stat panel.
+   Kicker on top, short hero line top-aligned in the main band (wraps — not
+   metric-locked), optional supporting lede under it. Matches beat/media
+   vertical rhythm rather than quote's centered lockup. */
+.vframe--thesis {
+  grid-template-rows: var(--panel-kicker) 1fr;
+}
+
+.vframe--thesis .vframe__scroll {
+  justify-content: flex-start;
+  container-type: inline-size;
+}
+
+.vframe__thesis {
+  margin: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.75rem, 2.5cqw, 1.75rem);
+}
+
+.vframe__thesis-text {
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+  min-width: 0;
+  /* Larger than quote (display-lg) — short slogans can afford more scale. */
+  font-size: min(var(--type-display-xl), calc(11cqw + 0.5rem));
+}
+
+.vframe__thesis-lede {
+  margin: 0;
+  max-width: 36ch;
+  min-width: 0;
+}
+
+@supports not (font-size: 1cqi) {
+  .vframe__thesis-text {
+    font-size: var(--type-display-xl);
+  }
+}
+
 @media (max-width: 1023px) {
   .vframe.vframe--title {
     /* --title-cols-mobile set inline from content; full-bleed (6 of 6) default. */

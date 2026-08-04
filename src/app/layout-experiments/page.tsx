@@ -110,7 +110,7 @@ const panelInventory: CraftVignette = {
   keyImageRatio: "16x9",
   keyImageAccent: "cruise", // vibrant ground for the color-field title treatment
   titleTreatment: "color",
-  tags: ["Title", "Beat", "Stat", "Quote", "Media"],
+  tags: ["Title", "Beat", "Stat", "Quote", "Thesis", "Media"],
   themeLine: "Every filmstrip panel type in one chapter",
   titlePanelWidth: { desktop: 8, mobile: 6 },
   images: [
@@ -168,6 +168,14 @@ const panelInventory: CraftVignette = {
       label: "Quote",
       quote: "There is a lot more information placed logically in T2.",
       quoteCite: "Advisor · T2 usability study",
+      width: { desktop: 8, mobile: 6 },
+    },
+    {
+      ratio: "1x1",
+      accent: CRUISE,
+      label: "Thesis",
+      thesis: "Automate first.",
+      body: "Few-word billboard: kicker + display-scale line + optional lede.",
       width: { desktop: 8, mobile: 6 },
     },
   ],

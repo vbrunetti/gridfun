@@ -6,6 +6,8 @@ import {
   HERO_SPARK_COLOR,
   HERO_SPARK_SHAPE_SCALE,
   HOME_SPARK_COLOR,
+  MOBILE_SPARK_BRIGHTNESS_BOOST,
+  MOBILE_SPARK_SIZE_BOOST,
 } from "./spark-hero-config";
 import {
   SparkCanvas,
@@ -105,6 +107,7 @@ export function PrimaryHeroSparkLayer({
   const slotRef = useRef<HTMLDivElement>(null);
   const [frameShapeScale, setFrameShapeScale] = useState(shapeScale);
   const [homeSparkColor, setHomeSparkColor] = useState(false);
+  const [mobilePresence, setMobilePresence] = useState(false);
 
   useEffect(() => {
     const slot = slotRef.current;
@@ -123,6 +126,7 @@ export function PrimaryHeroSparkLayer({
       const desktop = window.matchMedia(DESKTOP_QUERY).matches;
       const isHomeSpark = stage.closest(".home-spark-pin") !== null;
       setHomeSparkColor(isHomeSpark);
+      setMobilePresence(isHomeSpark && !desktop);
 
       if (!desktop && isHomeSpark) {
         const stageWidth = stage.clientWidth;
@@ -261,6 +265,8 @@ export function PrimaryHeroSparkLayer({
         compositeMode={resolvedColor?.compositeMode ?? compositeMode}
         colorCycleSpeed={colorCycleSpeed}
         canvasBleed={0.14}
+        sizeBoost={mobilePresence ? MOBILE_SPARK_SIZE_BOOST : 1}
+        brightnessBoost={mobilePresence ? MOBILE_SPARK_BRIGHTNESS_BOOST : 1}
       />
     </div>
   );

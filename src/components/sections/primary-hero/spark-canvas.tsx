@@ -72,6 +72,10 @@ type SparkCanvasProps = {
   unbounded?: boolean;
   /** Override accent list for colorMode "palette" (random color at spawn). */
   accentPalette?: readonly string[];
+  /** Multiplies particle radius, glow, and link stroke (e.g. mobile 1.2). */
+  sizeBoost?: number;
+  /** Multiplies particle + link alpha, clamped to 1 (e.g. mobile 1.5). */
+  brightnessBoost?: number;
 };
 
 type SparkParticle = {
@@ -294,6 +298,8 @@ export function SparkCanvas({
   canvasBleed = 0,
   unbounded = false,
   accentPalette,
+  sizeBoost = 1,
+  brightnessBoost = 1,
 }: SparkCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<SparkParticle[]>([]);
@@ -311,6 +317,8 @@ export function SparkCanvas({
   const shapeScaleRef = useRef(shapeScale);
   const canvasBleedRef = useRef(canvasBleed);
   const unboundedRef = useRef(unbounded);
+  const sizeBoostRef = useRef(sizeBoost);
+  const brightnessBoostRef = useRef(brightnessBoost);
   const accentPaletteRef = useRef<readonly string[]>(
     accentPalette ?? sparkPalette,
   );
@@ -339,6 +347,8 @@ export function SparkCanvas({
   shapeScaleRef.current = shapeScale;
   canvasBleedRef.current = canvasBleed;
   unboundedRef.current = unbounded;
+  sizeBoostRef.current = sizeBoost;
+  brightnessBoostRef.current = brightnessBoost;
   accentPaletteRef.current = accentPalette ?? sparkPalette;
 
   useEffect(() => {
@@ -415,8 +425,19 @@ export function SparkCanvas({
         directRef.current,
         frameWidth,
         frameHeight,
-        shapeScaleRef.current,
+        shapeScaleRef.current * sizeBoostRef.current,
       );
+      const sizeBoost = sizeBoostRef.current;
+      const brightnessBoost = brightnessBoostRef.current;
+      if (sizeBoost !== 1 || brightnessBoost !== 1) {
+        params.particleRadiusMin *= sizeBoost;
+        params.particleRadiusMax *= sizeBoost;
+        params.linkLineWidth *= sizeBoost;
+        // Glow carries most of the “brighter” read once alpha is near 1.
+        params.glowScale *= sizeBoost * brightnessBoost;
+        params.alpha = Math.min(1, params.alpha * brightnessBoost);
+        params.linkOpacity = Math.min(1, params.linkOpacity * brightnessBoost);
+      }
       const mode = colorModeRef.current;
       const cyclePhase =
         mode === "cycle"

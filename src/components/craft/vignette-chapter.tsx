@@ -210,6 +210,32 @@ function FrameContent({
     );
   }
 
+  if (frame.thesis) {
+    return (
+      <>
+        <header className="vframe__kicker">
+          {frame.label ? (
+            <p className="vframe__kicker-text text-meta">
+              <InlineText text={frame.label} />
+            </p>
+          ) : null}
+        </header>
+        <div className="vframe__scroll vframe__scroll--thesis">
+          <div className="vframe__thesis">
+            <p className="vframe__thesis-text">
+              <InlineText text={frame.thesis} />
+            </p>
+            {frame.body ? (
+              <p className="body-md vframe__thesis-lede text-secondary">
+                <InlineText text={frame.body} />
+              </p>
+            ) : null}
+          </div>
+        </div>
+      </>
+    );
+  }
+
   if (frame.colorField) {
     return (
       <>
@@ -877,7 +903,9 @@ export function VignetteChapter({
                       ? "vframe--stat"
                       : frame.quote
                         ? "vframe--quote"
-                        : "vframe--media"
+                        : frame.thesis
+                          ? "vframe--thesis"
+                          : "vframe--media"
                 }${idx === index ? " is-active" : ""}`}
                 data-vframe-index={idx}
                 data-panel-bg={panelBg}
