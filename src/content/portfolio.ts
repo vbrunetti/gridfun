@@ -984,14 +984,15 @@ export const caseStudies: CaseStudy[] = [
     role: "Sr. UX Design Manager",
     tools: "Figma, Storybook",
     heroVideo: {
-      vimeo: "1207227235",
+      vimeo: "1216284642",
       opacity: 0.30,
+      poster: "/portfolio/cruise/Cruise_hero_poster.jpg",
     },
     sections: [
       cruiseProse(
         "cruise-intro",
         "Tick Tock",
-        `Cruise's Terminal wasn't built for 500 driverless rides per day. It was built for driving at night, when the streets were empty, and there was no traffic to negotiate, and no police officers or emergency vehicles to manage. Terminal v1 was built to answer a core question, "can we get the remote Remote Advisor's's mental model of the scene to match ground truth?" Signal fidelity was the priority, which was reasonable for a fledgling program. Then the business needed to scale into real hours and real traffic on real streets, and the old model turned out to be solving the wrong problem. Signal fidelity didn't matter much if the vehicle was still sitting there ten minutes later. Our CEO, Kyle Vogt, put it this way: the risk of a Vehicle Recovery Event (a tow truck being sent to retrieve a failed AV in the field) grew exponentially with every second the vehicle stayed stuck. Time wasn't one factor among many; it was *the* factor.\n\nThe counterintuitive part was that the exact right trajectory mattered less than simply moving. A vehicle correcting itself as it gained forward motion read as competent, like it was working and on its way. A vehicle sitting dead still read as broken, like an inert two-ton lump of batteries and computers, to the rider inside and to everyone outside. *Progress, not perfection, was the signal that mattered.*\n\nThat reframing is the actual thesis behind everything below. Two numbers governed the redesign: time to first action (TTFA), meaning how fast an Remote Advisor could read a scene and issue any instruction at all, and time to resolution (TTR), meaning how fast the vehicle was back in autonomous mode with the Remote Advisor disconnected. Each vignette below is in service of one goal: **get the car moving, now.**`,
+        `Cruise's Terminal wasn't built for 500 driverless rides per day. It was built for driving at night, when the streets were empty, and there was no traffic to negotiate, and no police officers or emergency vehicles to manage. Terminal v1 was built to answer a core question, "can we get the remote Remote Advisor's's mental model of the scene to match ground truth?" Signal fidelity was the priority, which was reasonable for a fledgling program. Then the business needed to scale into real hours and real traffic on real streets, and the old model turned out to be solving the wrong problem. Signal fidelity didn't matter much if the vehicle was still sitting there ten minutes later. Our CEO, Kyle Vogt, put it this way: the risk of a Vehicle Recovery Event (a tow truck being sent to retrieve a failed AV in the field) grew exponentially with every second the vehicle stayed stuck. Time wasn't one factor among many; it was *the* factor.\n\nThe counterintuitive part was that the exact right trajectory mattered less than simply moving. A vehicle correcting itself as it gained forward motion read as competent, like it was working and on its way. A vehicle sitting dead still read as broken, like an inert two-ton lump of batteries and computers, to the rider inside and to everyone outside. *Progress, not perfection, was the signal that mattered.*\n\nThat reframing is the actual thesis behind everything below. Two numbers governed the redesign: time to first action (TTFA), meaning how fast an Remote Advisor could read a scene and issue any instruction at all, and time to resolution (TTR), meaning how fast the vehicle was back in autonomous mode with the Remote Advisor disconnected. Each vignette below is in service of one goal: **get the car moving.**`,
       ),
       cruiseProse(
         "cruise-context-shift",
@@ -1388,6 +1389,7 @@ export const caseStudies: CaseStudy[] = [
             {
               vimeo: "1214897067",
               vimeoHasAudio: true,
+              vimeoBackground: true,
               poster: "/portfolio/cruise/CEDS_Icebreaker_Poster.jpg",
             },
           ),
@@ -1433,6 +1435,7 @@ export const caseStudies: CaseStudy[] = [
             {
               vimeo: "1215345982",
               vimeoHasAudio: true,
+              vimeoBackground: true,
               poster: "/portfolio/cruise/LEO_Pullover.jpg",
             },
           ),
@@ -1442,7 +1445,7 @@ export const caseStudies: CaseStudy[] = [
             "The people moving the vehicle needed to speak, and the people speaking needed operational visibility.",
           ),
         ],
-        "16x9",
+        "1x1",
         {
           titleTreatment: "cover",
           keyImageSrc: "/portfolio/cruise/Cruise_v10_cover.jpg",
@@ -1452,42 +1455,59 @@ export const caseStudies: CaseStudy[] = [
       ),
       cruiseProse(
         "cruise-camera-bridge",
-        "Not every idea worked",
-        "Not every idea worked. Some of the most valuable lessons came from the ones that didn't.",
+        "Not every idea worked", // rail label only; statement hides it
+        "🛩️🔥 Not every idea worked.",
+        { variant: "statement" },
       ),
+      
       cruiseVignette(
         "camera-array-redesign",
-        "The Camera Array Redesign That Didn't Work",
-        ["Research", "Human factors", "Motion"],
+        "The Camera Array Redesign",
+        ["Research", "Human factors"],
         "Craft humility / safety-critical constraints / when HF research beats design intuition",
         [
           cruiseBeat(
             "The inspiration",
-            "A glimpse of what appeared to be a Waymo tele-ops interface — a single horizontal filmstrip that shifted based on area of interest. Compared to our T-shaped array, it looked elegant, responsive, and spatially smart.",
-          ),
+            "Trying to make better use of space, we wanted to explore a horizontal filmstrip approach to the camera array. Doing so would allow us to do a few things: keep the camera array local to one box of the bento (as opposed to rear-camera overflow into the tile map), allow the Remote Advisor to make the camera array bigger / smaller by dragging the border of the module down / up, and center whichever directional view was most important (like glance left / right in Mario Kart).",          ),
           cruiseMedia(
-            "The hypothesis",
-            "Replace the T-shape with a scrollable filmstrip that auto-centers the area of interest — cleaner layout, better spatial correlation between map and cameras.",
+            "The concept",
+            "Various states of the redesigned camera array.",
             "16x9",
+            {
+              sources: [
+                "/portfolio/cruise/Cruise_v12_c1.jpg",
+                "/portfolio/cruise/Cruise_v12_c2.jpg",
+                "/portfolio/cruise/Cruise_v12_c3.jpg",
+                "/portfolio/cruise/Cruise_v12_c4.jpg",
+                "/portfolio/cruise/Cruise_v12_c5.jpg",
+                "/portfolio/cruise/Cruise_v12_c6.jpg",
+              ],
+            },
           ),
           cruiseBeat(
-            "The pushback",
-            "Human factors researchers were appalled. Remote Advisors in safety-critical environments need spatial muscle memory. Left is left. Right is right. Always. The T-shape was a trusted spatial anchor under stress.",
+            "Reality-check",
+            "Human factors researchers were appalled. Remote Advisors in safety-critical environments need spatial muscle memory. Left is left. Right is right. Always. The T-shape was a trusted spatial anchor under stress and we were proposing scrambling that. No amount of interface tidiness, or new-feature gains could compensate for the lost immutable spatial relationship. Motion prototypes performed poorly. We needed to scrap the new approach, the T-shape stayed - awkward for layout, correct for cognition",
           ),
-          cruiseBeat(
-            "The result",
-            "Motion prototypes performed poorly. Scrolling introduced spatial disorientation. The muscle memory disruption was real. The T-shape stayed — awkward for layout, correct for cognition.",
-          ),
-          cruiseBeat(
-            "What was learned",
-            "Elegance is not always correct. A design that looks cleaner can be cognitively more dangerous. Pushing on the T-shape was the right instinct — understanding why it needed to stay was the right outcome.",
+          cruiseThesis(
+            "Learnings",
+            "Elegance is not always correct.",
+            "A design that looks cleaner can be cognitively more dangerous. Pushing on the T-shape was the right instinct, but understanding why it needed to stay was the right outcome.",
           ),
         ],
+        "1x1",
+        {
+          titleTreatment: "cover",
+          keyImageSrc: "/portfolio/cruise/Cruise_v12_cover.jpg",
+          titleCoverBlur: 0,
+          titleCoverAlpha: 0.7,
+        },
       ),
       cruiseProse(
         "cruise-intervention",
-        "Three seconds",
-        "By the time Cruise was running 500+ autonomous rides daily in San Francisco, human interventions had to complete in three seconds or less: connect, understand the blockage, issue an instruction, get moving. Everything below, what shipped and what didn't, only makes sense against that clock.",
+        "3 seconds.", // heading / rail label
+        "",
+        //"By the time Cruise was running 500+ autonomous rides daily in San Francisco, human interventions had to complete in three seconds or less: connect, understand the blockage, issue an instruction, get moving. Everything below, what shipped and what didn't, only makes sense against that clock.",
+        { variant: "figure", stat: "3 seconds" },
       ),
       cruiseVignette(
         "taking-the-wheel",
@@ -1496,69 +1516,100 @@ export const caseStudies: CaseStudy[] = [
         "Three ways to move the vehicle / determinism as trust signal / from full manual control to trusting the machine",
         [
           cruiseBeat(
-            "The trust problem",
-            "The old intervention stack assumed safety drivers in seat and engineers in close coordination. At 500+ autonomous rides a day in San Francisco, that model was a liability, interventions had to complete in three seconds. And Remote Advisors only trusted what was deterministic.",
+            "The problem",
+            "By the time Cruise was running 500+ autonomous rides daily in San Francisco, human interventions had to complete in three seconds or less: connect, understand the blockage, issue an instruction, and get moving. Due to a lack of feedback from the vehicle to Remote Assistants, our operators only trusted controls that were deterministic.",
           ),
-          cruiseBeat(
-            "What fell short",
-            "Pivot (a lane-preference nudge) and Assisted Pathing (breadcrumb control points) were non-deterministic. The car could ignore the input or sit there saying \"executing\" while doing nothing. Remote Advisors stopped trusting them, and stopped using them.",
-          ),
-          cruiseBeat(
-            "What they trusted",
-            "Sudo was fully deterministic: drag, drop, and rotate a vehicle icon to the end-state pose, hold go, and the car closed the gap. Basic collision avoidance aside, it just executed. Remote Advisors loved it: you said where, it went there. That trust wasn't automatic, it was earned through iteration.",
-          ),
-          cruiseBeat(
-            "The old design",
-            "The earliest version was a plain rectangle with no front/back indication. A tiny spin icon above it, with no orientation feedback, no rotation distance, no kinematic feasibility boundaries, poor hit targets, and no affordance for drag-to-position.",
-          ),
+
           cruiseMedia(
-            "The redesign",
-            "Clear front/back directionality, a generous circular grab-ring for drag-and-rotate, kinematic feasibility boundaries visualized, and pre-send validation for infeasible poses.",
-            "16x9",
+            "Non-determinism in action",
+            "2 of our 3 input control methods, Pivot (a lane-preference nudge) and Assisted Pathing (breadcrumb control points), were non-deterministic. The car could ignore the input or sit there saying \"executing\" while doing nothing and our Remote Advisors stopped trusting them, and stopped using them.",
+            "9x16",
+            {
+              vimeo: "1216718523",
+              vimeoBackground: true,
+              poster: "/portfolio/cruise/Cruise_v13_flicker.jpg",
+            },
           ),
-          cruiseBeat(
-            "The deeper insight",
-            "Remote Advisors sent infeasible commands regularly, not from carelessness, but because the interface gave no way to know what was feasible. Every rejection created a round-trip. The redesign encoded physics upstream.",
-          ),
-          cruiseBeat(
-            "A second mode, built in",
-            "The ring wasn't the only way to use it. Leave it disengaged and simply move the mouse across the map instead, and a breadcrumb trail followed the cursor, with the vehicle loosely tracing it. To a user's eye, that looked almost identical to Assisted Pathing, a point dropped on the map. The difference was invisible and total: Assisted Pathing ran on the autonomy stack's own path solver, which is exactly what made it feel like a black box Remote Advisors never fully trusted. This breadcrumb mode ran on Sudo's spatial solver instead, the same deterministic engine behind the ring itself. Same gesture from the user's side, a different brain underneath, and that's what earned the trust Assisted Pathing never did.",
-          ),
+
           cruiseMedia(
-            "In practice",
-            "A real Remote Advisor using the breadcrumb mode to navigate around a double-parked vehicle, without ever touching the ring.",
-            "16x9",
+            "Everybody loves Sudo",
+            "The other input method, Sudo, was as deterministic as you could get without remote driving: drag, drop, and rotate a vehicle icon to the end-state, hold go, and the car went. Basic collision avoidance aside, it just executed. Remote Advisors loved it - you just pointed it and it went.",
+            "9x16",
+            {
+              vimeo: "1216720040",
+              vimeoBackground: true,
+              poster: "/portfolio/cruise/Cruise_v13_old_school_sudo.jpg",
+            },
           ),
+
           cruiseBeat(
-            "Outcome",
-            "Fewer round trips and faster operations for precise moves, plus a looser, quicker option for everything else. One widget, two grains of control: exact when the situation called for it, approximate when it didn't, both of them trusted because both finally ran on a solver Remote Advisors could rely on.",
+            "Hunting for seconds",
+            "We began hunting for seconds by improving the usability and ergonomics of inputting a Sudo end-pose. Clearer affordances and better visual feedback is where we began.",
           ),
+
           cruiseMedia(
-            "Spring-loaded splines",
-            "An ergonomic evolution of Sudo. Moving the mouse generates a Bezier spline in real time between the vehicle and the cursor, previewing the most efficient feasible path. Kinematically infeasible positions are disallowed by design, since the spring-loaded curves resist impossible configurations. For the common case (back up, assert around something, small adjustment) precise pose-and-place was overkill; splines handled short maneuvers faster and with less cognitive load, while preserving the determinism Remote Advisors trusted.",
-            "16x9",
+            "Sudo crumbs",
+            "Setting a single end-pose wasn't the only way to use this, the Remote Advisor could string together many control points in a more complex sequence. To a user's eye, that looked almost identical to Assisted Pathing, a point dropped on the map. But the difference was this ran on the autonomy stack's spatial solver which was more predictable in determining the vehicle's outcome. Same gestures from the user's side, but a more predictable outcome.",
+            "9x16",
+            {
+              vimeo: "1216766854",
+              vimeoBackground: true,
+              poster: "/portfolio/cruise/Cruise_v13_Sudo_crumbs.jpg",
+            },
           ),
+
           cruiseBeat(
-            "A different kind of new",
-            "Spring-loaded splines made a trusted paradigm faster. Alternate Intents asked a different question: what if the Remote Advisor didn't have to instruct the vehicle at all? At any moment the AV's planning stack has already solved multiple paths forward, it just picks one and discards the rest. That solved intelligence is invisible to the Remote Advisor. Alternate Intents surfaces the unchosen, already-computed routes as selectable ghost paths on the map. Click one to preference it.",
+            "What if?",
+            "What if the proposed bezier path of the vehicle was always visible, and always kinematically feasible? Then you could set the vehicles solution with one click.",
           ),
+
           cruiseMedia(
-            "Select, don't instruct",
-            "Every other intervention made the Remote Advisor tell the vehicle what to do: specify a pose, draw a path, define an end state. This inverts the model: the vehicle already did the planning, so the Remote Advisor just says that one. Nothing to re-solve, so execution is near-immediate, with no latency, no re-planning cycle, no waiting.",
+            "Springloaded splines",
+            "Spring-loaded splines made it much easier and faster for Remote Assistants to make small, short movements that needed to be taken quickly upon joining a scene. Back up just a bit, yield to one side to let an EMV through, etc.",
             "16x9",
+            {
+              vimeo: "1216988787",
+              vimeoBackground: true,
+              poster: "/portfolio/cruise/Cruise_v13_Springloaded.jpg",
+            },
           ),
+
           cruiseBeat(
-            "When the human sees more",
-            "Sometimes a person perceives what the sensors can't, a pedestrian waving the car through, a construction worker's gesture, social context the ML ranker has no access to. In those moments the AV's second-best path is the correct one, and the Remote Advisor can redirect toward a route the vehicle had already validated.",
+            "First principles",
+            "*Trust the AV.* What if the Remote Advisor didn't have to instruct the vehicle at all? At any moment the AV's planning stack has already solved multiple paths forward, it just picks one and discards the rest. Could we use that?",
           ),
-          cruiseBeat(
-            "The stability problem",
-            "Ghost paths flicker. The AV re-plans constantly, so alternates appear and vanish as the scene changes, and you can't reliably click a path that might disappear in half a second. The tool only exposes alternates that hold past a stability threshold, scoped to conditions where stable options are likely.",
+
+          cruiseMedia(
+            "Alternate intents",
+            "This inverts the model: the vehicle already did the planning, so the Remote Advisor just says that one. Nothing to re-solve, so execution is near-immediate, with no latency, no re-planning cycle, no waiting.",
+            "1x1",
+            {
+              sources: [
+                "/portfolio/cruise/Cruise_v13_alt_intents_1.jpg",
+                "/portfolio/cruise/Cruise_v13_alt_intents_2.jpg",
+                "/portfolio/cruise/Cruise_v13_alt_intents_3.jpg",
+                "/portfolio/cruise/Cruise_v13_alt_intents_4.jpg",
+                "/portfolio/cruise/Cruise_v13_alt_intents_5.jpg",
+                "/portfolio/cruise/Cruise_v13_alt_intents_6.jpg",
+              ],
+            },
           ),
-          cruiseBeat(
-            "Artifact status",
-            "Neither shipped. Cruise shut down before the behaviors-engineering collaboration needed to wire either into the AV stack could be completed. Figma prototypes exist for both, spring-loaded splines and Alternate Intents were the last ideas on the table when the lights went out, two ideas for what the ring might have become next.",
-          ),
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          
         ],
         "1x1",
       ),

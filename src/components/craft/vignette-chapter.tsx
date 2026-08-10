@@ -29,6 +29,7 @@ import { VimeoPlayer } from "@/components/media/vimeo-embed";
 import { useCaseStudyVignetteProgressRegister } from "@/components/case-studies/case-study-detail-scroll-context";
 import { CraftTagList } from "@/components/craft/vignette-media";
 import { VignettePanelCarousel } from "@/components/craft/vignette-panel-carousel";
+import { VframeScroll } from "@/components/craft/vframe-scroll";
 import { attachHorizontalGestures } from "@/components/deck/gestures";
 /** Grid-width panel layout — lg+ only; mobile uses CSS widths + pin padding. */
 const GRID_LAYOUT_QUERY = "(min-width: 1024px)";
@@ -160,13 +161,13 @@ function FrameContent({
             </p>
           ) : null}
         </header>
-        <div className="vframe__scroll vframe__scroll--prose">
+        <VframeScroll className="vframe__scroll--prose">
           {frame.body ? (
             <p className="body-md vframe__stat-lede text-secondary">
               <InlineText text={frame.body} />
             </p>
           ) : null}
-        </div>
+        </VframeScroll>
         <footer className="vframe__foot vframe__foot--stat">
           <p
             className="display-metric vframe__stat-figure"
@@ -191,7 +192,7 @@ function FrameContent({
             </p>
           ) : null}
         </header>
-        <div className="vframe__scroll vframe__scroll--quote">
+        <VframeScroll className="vframe__scroll--quote">
           <blockquote className="vframe__quote">
             <span className="vframe__quote-mark" aria-hidden>
               &ldquo;
@@ -205,7 +206,7 @@ function FrameContent({
               </footer>
             ) : null}
           </blockquote>
-        </div>
+        </VframeScroll>
       </>
     );
   }
@@ -220,7 +221,7 @@ function FrameContent({
             </p>
           ) : null}
         </header>
-        <div className="vframe__scroll vframe__scroll--thesis">
+        <VframeScroll className="vframe__scroll--thesis">
           <div className="vframe__thesis">
             <p className="vframe__thesis-text">
               <InlineText text={frame.thesis} />
@@ -231,7 +232,7 @@ function FrameContent({
               </p>
             ) : null}
           </div>
-        </div>
+        </VframeScroll>
       </>
     );
   }
@@ -246,7 +247,7 @@ function FrameContent({
             </p>
           ) : null}
         </header>
-        <div className="vframe__scroll vframe__scroll--prose">
+        <VframeScroll className="vframe__scroll--prose">
           {frame.body
             ? frame.body.split("\n\n").map((paragraph, i) => (
                 <p key={i} className="display-sm vframe__beat">
@@ -254,7 +255,7 @@ function FrameContent({
                 </p>
               ))
             : null}
-        </div>
+        </VframeScroll>
       </>
     );
   }
@@ -283,7 +284,7 @@ function FrameContent({
           </p>
         ) : null}
       </header>
-      <div className="vframe__scroll">
+      <VframeScroll>
         {isCarousel ? (
           // Carousel owns its own figure (image viewport + dot rail below it), so
           // the dots sit under the media instead of overlaying it.
@@ -341,7 +342,7 @@ function FrameContent({
             <InlineText text={caption} />
           </p>
         ) : null}
-      </div>
+      </VframeScroll>
     </>
   );
 }
