@@ -80,7 +80,7 @@ export const clientBrandColorEntries = [
     role: "Primary",
     token: "--color-cruise-primary",
     hex: clientBrandColors.cruise.primary,
-    textOn: "paper",
+    textOn: "ink",
   },
   {
     id: "mckinsey-primary",

@@ -3,7 +3,17 @@
 
 ---
 
-## SITE SYNC STATUS — updated 2026-07-08 (re-synced from live portfolio.ts)
+## SITE SYNC STATUS — updated 2026-07-09 (re-synced from live portfolio.ts)
+
+**Cruise — Victor inputted full final content, real media, real Vimeo IDs across every vignette. Editorial pass done this session:**
+- Removed a duplicated/wrong "Outcome" panel in Show Don't Tell (AV State Module) that had Who's Driving's TTR copy stapled onto it.
+- Terminology aligned to "Remote Advisor" throughout (was mixed with "Remote Operator" and "Remote Assistant" in several places), plus fixed a doubled-possessive artifact ("Advisor's's"), "an Remote Advisor" → "a Remote Advisor", "Remote Assistant Advisors" → "Remote Advisors", and typos (interal → internal, fledgeling → fledgling, it's state → its state, human factor's → human factors).
+- Added a real case-study closer after Taking the Wheel: a new `cruise-outro` prose section ("The clock ran out") that lands the TTFA/TTR throughline against Cruise's shutdown, rather than ending the whole chapter on Taking the Wheel's "A missed opportunity" panel (which stays, it's still the right close for that specific vignette).
+- De-AI pass: removed the em dashes that had crept back into Victor's own new copy (7 instances), cut a "First/Second/Third" enumerated-prose passage in Reading the Scene's solution beat, removed an isolated italicized "X, not Y" soundbite and a bolded closing line in Tick Tock, cut an "It's important to realize that..." throat-clearer in Who's Driving, and reworded a jargon-abstract line in the context-shift bridge ("translating machine perception into human-readable meaning" → "turning what the machine saw into something a person could read at a glance").
+- Confirmed via `tsc`/`eslint`: every image and Vimeo poster path referenced in the Cruise chapter resolves to a real file in `public/portfolio/cruise/`, zero broken references.
+- Still open: the emoji body text in the "Not every idea worked" bridge is intentional per Victor (confirmed, not a bug). The "3 seconds." bridge before Taking the Wheel intentionally has an empty body, Victor hasn't found a layout he likes for stat + body together there. The "ten minutes" line in Tick Tock (vs. the chapter's seconds-based thesis) is still unconfirmed either way, not touched this pass.
+- Every vignette's last filmstrip panel is now 1x1 (was mixed 16x9/1x1 across designing-the-container, av-state-module, coordination, camera-array-redesign, taking-the-wheel). Same pass not yet applied to Google/Pearson/McKinsey/Facebook, offered, not requested yet.
+- Final chapter close is now three beats in order: "The clock ran out" (reflection) → two AHT/TiRA metric figures (real numbers from Victor's original live case study, resolves the old open item about where AHT/TiRA would live) → Jessica Inman epigraph quote (new `epigraph` prose variant, first live use of that component). AHT: 24s baseline, 17s target, 21s achieved (~11% reduction). TiRA: 2.47% baseline, <2% target, 2.24% achieved (~7% reduction). Placement was a deliberate call, metrics before the quote so the case study ends on the external validation, not on "not there yet."
 
 This doc is the unabridged capture of every vignette as dictated — it doesn't get rewritten to match the site. `src/content/portfolio.ts` is the edited, consolidated, public-facing version, and it is the single most accurate record of current content, since Victor also edits it directly and via Claude Code, outside of this thread. This section tracks where the two currently stand, re-synced by reading the live file rather than assumed from memory.
 

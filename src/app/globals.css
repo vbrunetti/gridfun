@@ -5496,15 +5496,28 @@ ul.cs-hero__subhead {
   }
 }
 
-/* Client brand panels — paper text on saturated grounds. */
-.vframe[data-panel-bg="brand"],
+/* Client brand panels — paper or ink per brand `textOn`. */
 .vframe[data-panel-bg^="pearson-"],
 .vframe[data-panel-bg^="google-"]:not([data-panel-bg="google-quaternary"]),
-.vframe[data-panel-bg^="cruise-"] {
+.vframe[data-panel-bg^="mckinsey-"],
+.vframe[data-panel-bg^="facebook-"] {
   color: var(--color-paper);
 }
 
-.vframe[data-panel-bg="google-quaternary"] {
+.vframe[data-panel-bg="google-quaternary"],
+.vframe[data-panel-bg="brand"],
+.vframe[data-panel-bg^="cruise-"] {
+  color: var(--color-ink);
+  --text-primary: var(--color-ink);
+  --text-secondary: color-mix(in srgb, var(--color-ink) 75%, transparent);
+  --text-tertiary: color-mix(in srgb, var(--color-ink) 60%, transparent);
+  --rule-light: color-mix(in srgb, var(--color-ink) 18%, transparent);
+}
+
+/* Kickers use .text-meta → --text-tertiary; force full ink on Cruise brand panels
+   so the mono label matches the thesis (not a washed gray on the orange). */
+.vframe[data-panel-bg="brand"] .vframe__kicker-text,
+.vframe[data-panel-bg^="cruise-"] .vframe__kicker-text {
   color: var(--color-ink);
 }
 
