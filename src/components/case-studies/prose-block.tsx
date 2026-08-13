@@ -193,6 +193,18 @@ export function ProseBlock({ section }: { section: ProseSection }) {
         </RuledGrid>
       );
 
+    case "figure-stack":
+      return (
+        <RuledGrid>
+          <div className="cs-prose__figure cs-prose__figure--stack">
+            <p className="display-metric cs-prose__figure-value">{section.stat}</p>
+          </div>
+          <div className="cs-prose__body cs-prose__body--figure-stack">
+            <Paragraphs body={section.body} />
+          </div>
+        </RuledGrid>
+      );
+
     case "media":
       return (
         <RuledGrid>

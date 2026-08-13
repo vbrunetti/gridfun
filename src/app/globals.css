@@ -4467,6 +4467,32 @@ ul.cs-hero__subhead {
   margin: 0;
 }
 
+/* 06b · Figure stack — metric on top, supporting prose below (avoids side collision
+   when the display-metric is wide). */
+.cs-prose__figure--stack {
+  grid-column: 1 / -1;
+}
+
+.cs-prose__body--figure-stack {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 1024px) {
+  .cs-section--prose-figure-stack .site-grid {
+    align-items: start;
+  }
+
+  /* Keep the metric on a mid-width band so cqw sizing stays in the same ballpark
+     as the side-by-side figure (cols 1–7), not full-bleed enormous. */
+  .cs-prose__figure--stack {
+    grid-column: 1 / 8;
+  }
+
+  .cs-prose__body--figure-stack {
+    grid-column: 1 / 7;
+  }
+}
+
 /* Media beside prose — a visual the copy explains. */
 .cs-prose__media {
   grid-column: 1 / -1;

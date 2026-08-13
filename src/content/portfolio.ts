@@ -178,6 +178,8 @@ export type ProseVariant =
   | "meta"
   /** Oversized `display-metric` figure + supporting prose — land a number. */
   | "figure"
+  /** Same as `figure`, but the supporting prose sits under the number (no side collision). */
+  | "figure-stack"
   /** Media beside prose — a visual the copy explains. */
   | "media"
   /** Full-measure media band + a centered caption beneath — a visual explainer. */
@@ -1503,9 +1505,8 @@ export const caseStudies: CaseStudy[] = [
       cruiseProse(
         "cruise-intervention",
         "3 seconds.", // heading / rail label
-        "",
-        //"By the time Cruise was running 500+ autonomous rides daily in San Francisco, human interventions had to complete in three seconds or less: connect, understand the blockage, issue an instruction, get moving. Everything below, what shipped and what didn't, only makes sense against that clock.",
-        { variant: "figure", stat: "3 seconds" },
+        "By the time Cruise was running 500+ autonomous rides daily in San Francisco, human interventions had to complete in three seconds or less: connect, understand the blockage, issue an instruction, get moving. Everything below, what shipped and what didn't, only makes sense against that clock.",
+        { variant: "figure-stack", stat: "3 seconds" },
       ),
       cruiseVignette(
         "taking-the-wheel",
@@ -1625,13 +1626,13 @@ export const caseStudies: CaseStudy[] = [
         "cruise-metric-aht",
         "Average Handle Time",
         "Baseline was 24 seconds. Target was a 30 percent reduction, 17 seconds. First month after launch landed at 21 seconds, about an 11 percent reduction. Trending the right direction, not there yet.",
-        { variant: "figure", stat: "21 sec." },
+        { variant: "figure-stack", stat: "21 sec." },
       ),
       cruiseProse(
         "cruise-metric-tira",
         "Time in Remote Assistance",
         "Target was under 2 percent of total on-road time. First month after launch landed at 2.24 percent, down from a 2.47 percent baseline, about a 7 percent reduction. Same story: moving, not there yet.",
-        { variant: "figure", stat: "2.24%" },
+        { variant: "figure-stack", stat: "2.24%" },
       ),
       cruiseProse(
         "cruise-quote-inman",

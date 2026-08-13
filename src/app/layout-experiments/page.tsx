@@ -78,6 +78,14 @@ const proseVariants: ProseSection[] = [
   },
   {
     type: "prose",
+    id: "x-figure-stack",
+    variant: "figure-stack",
+    heading: "Figure stack",
+    stat: "21 sec.",
+    body: "Same figure vocabulary, supporting prose stacked under the number so wide metrics never collide with the copy.",
+  },
+  {
+    type: "prose",
     id: "x-media",
     variant: "media",
     heading: "One encoding for everything",
