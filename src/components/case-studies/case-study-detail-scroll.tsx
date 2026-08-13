@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -13,10 +12,6 @@ import {
   useCaseStudyDetailScrollRegister,
   type CaseStudyDetailStep,
 } from "@/components/case-studies/case-study-detail-scroll-context";
-import {
-  VCHAPTER_PANEL_EVENT,
-  type VchapterPanelEventDetail,
-} from "@/components/craft/vignette-chapter";
 import {
   CHROME_SURFACE_ATTR,
   type ChromeSurface,
@@ -51,26 +46,6 @@ function syncChromeSurfaceFromStep(
   document.body.dataset.chromeDotsSurface = surface;
 }
 
-/** Dot-nav jumps: vignette filmstrips below the target start reset to panel 1. */
-function resetVignettesBelowStep(
-  steps: CaseStudyDetailStep[],
-  targetIndex: number,
-) {
-  for (let i = targetIndex + 1; i < steps.length; i++) {
-    const step = steps[i];
-    if (!step || step.kind !== "vignette") continue;
-
-    const section = document.getElementById(step.id);
-    if (!section?.classList.contains("vchapter")) continue;
-
-    section.dispatchEvent(
-      new CustomEvent<VchapterPanelEventDetail>(VCHAPTER_PANEL_EVENT, {
-        detail: { panelIndex: 0, smooth: false },
-      }),
-    );
-  }
-}
-
 type CaseStudyDetailScrollProps = {
   steps: CaseStudyDetailStep[];
   children: ReactNode;
@@ -103,28 +78,12 @@ export function CaseStudyDetailScroll({
     },
   });
 
-  const scrollToStep = useCallback(
-    (index: number) => {
-      resetVignettesBelowStep(steps, index);
-      goToStep(index);
-    },
-    [steps, goToStep],
-  );
-
-  const scrollToPanel = useCallback(
-    (stepIndex: number, panelIndex: number) => {
-      resetVignettesBelowStep(steps, stepIndex);
-      goToPanel(stepIndex, panelIndex);
-    },
-    [steps, goToPanel],
-  );
-
   useCaseStudyDetailScrollRegister(
     true,
     steps,
     activeIndex,
-    scrollToStep,
-    scrollToPanel,
+    goToStep,
+    goToPanel,
     true,
     hoverStep,
     setHoverStep,
@@ -246,7 +205,7 @@ export function CaseStudyDetailScroll({
         return;
       }
 
-      scrollToStep(stepIndex);
+      goToStep(stepIndex);
     };
 
     document.addEventListener("pointermove", onPointerMove, { passive: true });
@@ -257,7 +216,7 @@ export function CaseStudyDetailScroll({
       root.removeEventListener("click", onClick);
       root.classList.remove("is-peek-cursor");
     };
-  }, [scrollToStep, goToPanel, steps]);
+  }, [goToStep, goToPanel, steps]);
 
   return (
     <article ref={rootRef} className="cs-detail">

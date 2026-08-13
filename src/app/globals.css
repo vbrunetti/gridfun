@@ -884,24 +884,22 @@ html:has(.home-scroll:not(.home-scroll--static), .cs-index-scroll, .cs-detail) {
   overscroll-behavior-y: none;
 }
 
-html:has(.cs-detail) {
-  scroll-padding-top: var(--chrome-top-inset);
-}
-
 @media (max-width: 1023px) {
   html:has(.home-scroll:not(.home-scroll--static), .cs-index-scroll) {
     scroll-padding-top: 0;
   }
 
-  /* Detail stays MANDATORY on mobile so the vertical vignette stack snaps one
-     panel per swipe (full-viewport panels + scroll-snap-stop:always). A long
-     prose row can exceed the viewport, but because that row is itself a snap
-     target larger than the snapport, the browser's oversized-snap-area handling
-     still lets it scroll through and rest mid-row under mandatory (verified) —
-     so the old proximity workaround is no longer needed. Kept as an explicit,
-     detail-scoped statement of intent (matches the base rule's specificity). */
-  html:has(.cs-detail .cs-section--prose) {
-    scroll-snap-type: y mandatory;
+  /* Detail relaxes to PROXIMITY on mobile. Rows and stacked vignette panels
+     have content-driven heights, and several (long prose, tall media, long
+     quotes) exceed the viewport. Under MANDATORY, a swipe from deep inside an
+     oversized row snaps to the next target on real devices — iOS ignores the
+     oversized covering range at gesture end when neighbors carry
+     scroll-snap-stop:always — so the bottom of long content is unreachable.
+     Proximity keeps clean panel-top landings for viewport-sized panels while
+     letting oversized content scroll through and rest anywhere. (Selector depth
+     matches the base rule's specificity so source order wins.) */
+  html:has(.cs-detail [data-cs-detail-row]) {
+    scroll-snap-type: y proximity;
   }
 }
 

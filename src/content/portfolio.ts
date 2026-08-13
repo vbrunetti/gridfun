@@ -1207,7 +1207,7 @@ export const caseStudies: CaseStudy[] = [
           cruiseMedia(
             "Alpha Test",
             "An early alpha test of the new Terminal bento-box design.",
-            "1x1",
+            "16x9",
             {
               vimeo: "1214738786",
               vimeoBackground: true,
@@ -1505,7 +1505,7 @@ export const caseStudies: CaseStudy[] = [
       cruiseProse(
         "cruise-intervention",
         "3 seconds.", // heading / rail label
-        "By the time Cruise was running 500+ autonomous rides daily in San Francisco, human interventions had to complete in three seconds or less: connect, understand the blockage, issue an instruction, get moving. Everything below, what shipped and what didn't, only makes sense against that clock.",
+        "By the time Cruise was running 500+ autonomous rides daily in San Francisco, human interventions had to complete in three seconds or less: connect, understand the blockage, issue an instruction, get moving.",
         { variant: "figure-stack", stat: "3 seconds" },
       ),
       cruiseVignette(
@@ -1516,7 +1516,7 @@ export const caseStudies: CaseStudy[] = [
         [
           cruiseBeat(
             "The problem",
-            "By the time Cruise was running 500+ autonomous rides daily in San Francisco, human interventions had to complete in three seconds or less: connect, understand the blockage, issue an instruction, and get moving. Due to a lack of feedback from the vehicle, our Remote Advisors only trusted controls that were deterministic.",
+            "Due to a lack of feedback from the vehicle, our Remote Advisors only trusted controls that were deterministic.",
           ),
 
           cruiseMedia(
@@ -1586,7 +1586,7 @@ export const caseStudies: CaseStudy[] = [
 
           cruiseBeat(
             "First principles",
-            "*Trust the AV.* What if the Remote Advisor didn't have to instruct the vehicle at all? At any moment the AV's planning stack has already solved multiple paths forward, it just picks one and discards the rest. Could we use that?",
+            "*Trust the AV.*\n\nWhat if the Remote Advisor didn't have to instruct the vehicle at all? At any moment the AV's planning stack has already solved multiple paths forward, it just picks one and discards the rest. Could we use that?",
           ),
 
           cruiseMedia(

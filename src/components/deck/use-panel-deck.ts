@@ -40,7 +40,12 @@ function panelSnapY(el: HTMLElement): number {
  * Active = panel whose snap-start is the greatest position ≤ (scrollY + topInset).
  */
 export function computeActiveIndex(panelIds: string[], topInset: number): number {
-  const anchorAbs = window.scrollY + topInset;
+  /* Tolerance for fractional layout: row heights (and so row tops) can be
+     fractional while snapped scroll positions quantize to integer/half pixels,
+     leaving a rest a fraction of a px above a row's snap-start. Without slack
+     the row filling the viewport fails the comparison and the previous row
+     keeps the dot + focus. */
+  const anchorAbs = window.scrollY + topInset + 2;
   const maxScroll =
     document.documentElement.scrollHeight - window.innerHeight;
 

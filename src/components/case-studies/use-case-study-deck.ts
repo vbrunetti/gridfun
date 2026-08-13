@@ -202,11 +202,17 @@ export function useCaseStudyDeck({
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
+    // Post-settle sync: scroll-snap can adjust the rest position after the last
+    // scroll event's rAF tick (e.g. the correction at the end of a smooth
+    // dot-nav jump). scrollend fires once the position is final; where the
+    // event is unsupported the rAF path above still covers it.
+    window.addEventListener("scrollend", syncActive, { passive: true });
     window.addEventListener("resize", onScroll, { passive: true });
     window.addEventListener("keydown", onKeyDown);
 
     return () => {
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scrollend", syncActive);
       window.removeEventListener("resize", onScroll);
       window.removeEventListener("keydown", onKeyDown);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);

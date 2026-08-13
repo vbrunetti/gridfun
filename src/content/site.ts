@@ -129,17 +129,17 @@ export const site = {
       },
       {
         id: "slate-5",
-        eyebrow: "New tools, again",
-        headline: "Flash & Photoshop to Sketch & InVision to Figma & Framer to Cursor & Claude.",
+        eyebrow: "Systems",
+        headline: "Then design became infrastructure",
         supporting:
-          "Every few years, a new tool and a new way to prototype, and a tweak to how I practiced my craft.",
+          "Design systems turned one-off screens into shared, scalable foundations which was infrastructure businesses relied on.",
       },
       {
         id: "slate-6",
-        eyebrow: "Systems",
-        headline: "Then design became infrastructure.",
+        eyebrow: "New tools, again",
+        headline: "Flash & Photoshop, to Sketch & InVision, to Figma & Framer, to Cursor & Claude.",
         supporting:
-          "Design systems turned one-off screens into shared, scalable foundations. Infrastructure businesses relied on.",
+          "Every few years, a new tool and a new way to prototype, and a tweak to how I practiced my craft.",
       },
       //{
         //id: "slate-7",
