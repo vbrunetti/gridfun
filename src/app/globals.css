@@ -453,11 +453,12 @@ body {
   --keyline-color: var(--color-paper);
 }
 
-/* Element already spans the viewport (fixed/full-bleed shells) */
+/* Element already spans the viewport (fixed/full-bleed shells).
+   Prefer 100% over 100vw so classic scrollbar gutters don't overflow. */
 .keyline-b--viewport::after,
 .keyline-t--viewport::before {
   left: 0;
-  width: 100vw;
+  width: 100%;
 }
 
 .keyline-b::after,
@@ -930,6 +931,8 @@ html:has(.cs-detail) {
 html:has(.home-scroll:not(.home-scroll--static)),
 body:has(.home-scroll:not(.home-scroll--static)) {
   background: var(--section-dark-lift);
+  /* Clip any residual full-bleed bleed (keylines / spark) instead of scrolling. */
+  overflow-x: clip;
 }
 
 @media (max-width: 1023px) {
@@ -1104,12 +1107,15 @@ body:has(.home-scroll:not(.home-scroll--static)) {
   --home-beat-gap: clamp(0.75rem, 2vh, 1.25rem);
 }
 
-/* Fixed secondary — off-screen during hero, full viewport when settled */
+/* Fixed secondary — off-screen during hero, full viewport when settled.
+   Use left/right (not 100vw): 100vw includes the classic scrollbar gutter and
+   widens the document past the layout viewport → horizontal scrollbar. */
 .home-secondary-panel {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
+  right: 0;
+  width: auto;
   height: var(--home-secondary-band-height);
   min-height: var(--home-secondary-band-height);
   z-index: 3;
@@ -1119,12 +1125,14 @@ body:has(.home-scroll:not(.home-scroll--static)) {
   will-change: transform;
   pointer-events: none;
   isolation: isolate;
+  overflow-x: clip;
 }
 
 @media (min-width: 1024px) {
   .home-secondary-panel {
     left: var(--rail-width);
-    width: calc(100vw - var(--rail-width));
+    right: 0;
+    width: auto;
   }
 }
 

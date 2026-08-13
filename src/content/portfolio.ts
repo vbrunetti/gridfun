@@ -1548,6 +1548,17 @@ export const caseStudies: CaseStudy[] = [
           ),
 
           cruiseMedia(
+            "Control ring",
+            "A generous circular grab-ring for drag-and-rotate, kinematic feasibility boundaries visualized, and pre-send validation for infeasible poses.",
+            "16x9",
+            {
+              vimeo: "1217818785",
+              vimeoBackground: true,
+              poster: "/portfolio/cruise/Cruise_v13_ring.jpg",
+            },
+          ),
+
+          cruiseMedia(
             "Sudo crumbs",
             "Setting a single end-pose wasn't the only way to use this, the Remote Advisor could string together many control points in a more complex sequence. To a user's eye, that looked almost identical to Assisted Pathing, a point dropped on the map. But the difference was this ran on the autonomy stack's spatial solver which was more predictable in determining the vehicle's outcome. Same gestures from the user's side, but a more predictable outcome.",
             "9x16",
@@ -1595,23 +1606,21 @@ export const caseStudies: CaseStudy[] = [
             },
           ),
 
+          cruiseThesis(
+            "A missed opportunity",
+            "Transformative input controls never shipped.",
+            "Cruise shut down before the behaviors-engineering collaboration could land these features. Spring-loaded Splines and Alternate Intents were the last ideas on the table when the lights went out.",
+          ),
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-          
+         
         ],
         "1x1",
+        {
+          titleTreatment: "cover",
+          keyImageSrc: "/portfolio/cruise/Cruise_v13_cover.jpg",
+          titleCoverBlur: 0,
+          titleCoverAlpha: 0.7,
+        },
       ),
     ],
   },
