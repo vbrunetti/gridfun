@@ -889,18 +889,13 @@ html:has(.home-scroll:not(.home-scroll--static), .cs-index-scroll, .cs-detail) {
     scroll-padding-top: 0;
   }
 
-  /* Detail relaxes to PROXIMITY on mobile. Rows and stacked vignette panels
-     have content-driven heights, and several (long prose, tall media, long
-     quotes) exceed the viewport. Under MANDATORY, a swipe from deep inside an
-     oversized row snaps to the next target on real devices — iOS ignores the
-     oversized covering range at gesture end when neighbors carry
-     scroll-snap-stop:always — so the bottom of long content is unreachable.
-     Proximity keeps clean panel-top landings for viewport-sized panels while
-     letting oversized content scroll through and rest anywhere. (Selector depth
-     matches the base rule's specificity so source order wins.) */
-  html:has(.cs-detail [data-cs-detail-row]) {
-    scroll-snap-type: y proximity;
-  }
+  /* Detail stays MANDATORY on mobile — and every mobile snap area is kept ≤ one
+     viewport tall so mandatory is always exact. Rows/panels whose content
+     overflows clamp to --app-vh and scroll INSIDE (see the .cs-section--prose
+     clamp and the .vframe max-height in the vertical-stack block): land on the
+     row top, read through the overflow, and the gesture chains to the page when
+     the inner scroll bottoms out. Never let a snap area exceed the snapport —
+     iOS yanks/bounces on oversized areas under every snap strictness. */
 }
 
 @media (min-width: 1024px) {
@@ -1457,6 +1452,35 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
 @media (prefers-reduced-motion: reduce) {
   .cs-detail [data-cs-detail-row] {
     scroll-snap-stop: normal;
+  }
+}
+
+@media (max-width: 1023px) {
+  /* Mobile overflow model: a prose row is never taller than the viewport — it
+     clamps to --app-vh and its copy scrolls INSIDE the row (long-form like
+     Cruise "Tick Tock"). The page's mandatory snap lands the row top exactly;
+     the reader consumes the overflow in place; when the inner scroll bottoms
+     out the gesture chains back to the page and the next row snaps in. Only the
+     focused row is scrollable — a peeked row must hand its touches to the page,
+     or iOS gives the gesture to the innermost scroller under the finger. */
+  .cs-detail .cs-section--prose {
+    max-height: var(--app-vh);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* The grid CHILD is the scroller, not the section: the section's keyline-b
+     ::after must stay pinned at the row's visual bottom (an abspos pseudo
+     inside a scroller scrolls with the content and paints mid-prose), and the
+     section's own padding then frames the scroll window top and bottom.
+     .site-grid keeps width:100% so flex-item sizing leaves it untouched. */
+  .cs-detail .cs-section--prose > .site-grid {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .cs-detail .cs-section--prose.is-focused > .site-grid {
+    overflow-y: auto;
   }
 }
 
@@ -5341,6 +5365,13 @@ ul.cs-hero__subhead {
   display: flex;
   flex-direction: column;
   gap: clamp(0.75rem, 2.5cqw, 1.75rem);
+  /* Clip the giant background mark HERE rather than letting the scroll band do
+     it: browsers count the glyph's layout extent as the band's scrollable
+     overflow, which gave active quote panels a phantom ~50px inner scroll and
+     a bottom fade. overflow:clip zeroes that contribution. (No clip margin —
+     Chrome counts scrollable overflow up to the margin edge, resurrecting the
+     phantom; the mark now crops at the lockup box instead of the band edge.) */
+  overflow: clip;
 }
 
 /* Giant background quotation mark — anchored behind the first line of the quote
@@ -5466,13 +5497,16 @@ ul.cs-hero__subhead {
 
   .vframe {
     width: 100%;
-    /* Content-driven height: a panel is as tall as its content (+ a chrome-clearing
-       top pad and a bottom breathing band), NOT forced to a full viewport. Quiet
-       panels stay short so the next one peeks below — dimmed — inviting the swipe.
-       Tall content (portrait media, long quotes) exceeds the viewport, and the
-       oversized-snap-area handling lets it scroll through before the next snap. */
+    /* Content-driven height with a viewport CAP: a panel is as tall as its
+       content (+ a chrome-clearing top pad and a bottom breathing band), so
+       quiet panels stay short and the next one peeks below — dimmed — inviting
+       the swipe. Tall content (portrait media, long quotes/beats) clamps to one
+       viewport and scrolls INSIDE the panel via the base .vframe__scroll band.
+       No snap area ever exceeds the snapport — that keeps the page's mandatory
+       snap exact on iOS (oversized areas get yanked/bounced at gesture end). */
     height: auto;
     min-height: 0;
+    max-height: var(--app-vh);
     flex: none;
     display: flex;
     flex-direction: column;
@@ -5892,22 +5926,14 @@ ul.cs-hero__subhead {
    short (big peek of the next panel); a 9:16 portrait is tall. Placed after the
    base media/carousel rules so these win on source order. */
 @media (max-width: 1023px) {
-  /* Panel body flows with the page (no internal scroll); the page scrolls. */
-  .vframe__scroll-shell {
-    height: auto;
-    overflow: visible;
-  }
-
-  .vframe__scroll,
-  .vframe.is-active .vframe__scroll {
-    height: auto;
-    min-height: 0;
-    overflow: visible;
+  /* Panels clamp to the viewport (vertical-stack block above), so the base
+     in-panel scroll band handles overflow just like desktop: hidden while
+     peeked, scrollable when the panel is active, directional edge fades when
+     there's more. Only container-type changes here — mobile panels are
+     auto-height (size containment would collapse them), so media sizes by
+     width below, not cqh. */
+  .vframe__scroll {
     container-type: normal;
-  }
-
-  .vframe__scroll-fade {
-    display: none;
   }
 
   /* Still / video / placeholder: full-width aspect box, height derived from width. */

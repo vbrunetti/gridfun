@@ -189,9 +189,10 @@ export function CaseStudyDetailScroll({
       root.classList.add("is-peek-cursor");
     };
 
+    // Click/tap on a dimmed section or peeked panel jumps to it — ALL pointer
+    // types (the hover peek-cursor above stays desktop-only): on touch, tapping
+    // the peeked next panel is the expected way to advance it into view.
     const onClick = (event: MouseEvent) => {
-      if (!canPeek()) return;
-
       const target = resolvePeekTarget(event.target);
       if (!target || suppressesPeekCursor(event.target)) return;
 
