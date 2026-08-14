@@ -193,13 +193,14 @@
   color: var(--text-primary);
 }
 
-/* Client brand section surfaces — paper text */
+/* Client brand section surfaces — paper text on dark / saturated grounds.
+   Ink exceptions (Cruise, Google yellow) live below; keep in sync with
+   `textOn` in client-brand-colors.ts. */
 .theme-pearson-primary,
 .theme-pearson-secondary,
 .theme-google-primary,
 .theme-google-secondary,
 .theme-google-tertiary,
-.theme-cruise-primary,
 .theme-mckinsey-primary,
 .theme-facebook-primary {
   --text-primary: var(--color-paper);
@@ -226,9 +227,6 @@
 .theme-google-tertiary {
   background: var(--color-google-tertiary);
 }
-.theme-cruise-primary {
-  background: var(--color-cruise-primary);
-}
 .theme-mckinsey-primary {
   background: var(--color-mckinsey-primary);
 }
@@ -236,8 +234,10 @@
   background: var(--color-facebook-primary);
 }
 
-/* Google quaternary — ink text on yellow */
-.theme-google-quaternary {
+/* Ink text on high-chroma brand grounds — contrast over convention.
+   Cruise orange and Google yellow fail WCAG with paper type. */
+.theme-google-quaternary,
+.theme-cruise-primary {
   --text-primary: var(--color-ink);
   --text-secondary: color-mix(in srgb, var(--color-ink) 75%, transparent);
   --text-tertiary: color-mix(
@@ -248,8 +248,14 @@
   --foreground: var(--text-primary);
   --rule-light: color-mix(in srgb, var(--color-ink) 14%, transparent);
   --rule-strong: var(--color-ink);
-  background: var(--color-google-quaternary);
   color: var(--text-primary);
+}
+
+.theme-google-quaternary {
+  background: var(--color-google-quaternary);
+}
+.theme-cruise-primary {
+  background: var(--color-cruise-primary);
 }
 
 @theme inline {
@@ -6021,7 +6027,6 @@ ul.cs-hero__subhead {
   .cs-detail-footer__title--solo {
     grid-column: 1 / -1;
     grid-row: 2;
-    text-align: right;
   }
 
   .cs-detail-footer__fallback--end {

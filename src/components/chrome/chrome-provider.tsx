@@ -15,19 +15,31 @@ import { usePathname } from "next/navigation";
 type ChromeContextValue = {
   menuOpen: boolean;
   skeletonVisible: boolean;
+  labNavVisible: boolean;
   openMenu: () => void;
   closeMenu: () => void;
   toggleMenu: () => void;
   toggleSkeleton: () => void;
+  toggleLabNav: () => void;
 };
 
 const ChromeContext = createContext<ChromeContextValue | null>(null);
 
 const SKELETON_KEY = "gridfun-skeleton";
+const LAB_NAV_KEY = "gridfun-lab-nav";
+
+function isTypingTarget(target: EventTarget | null) {
+  return Boolean(
+    (target as HTMLElement | null)?.closest(
+      "input, textarea, select, [contenteditable='true']",
+    ),
+  );
+}
 
 export function ChromeProvider({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [skeletonVisible, setSkeletonVisible] = useState(false);
+  const [labNavVisible, setLabNavVisible] = useState(false);
   const pathname = usePathname();
 
   /* /about ships with the overlay on (route default, not written to the
@@ -39,6 +51,12 @@ export function ChromeProvider({ children }: { children: ReactNode }) {
       );
     });
   }, [pathname]);
+
+  useEffect(() => {
+    startTransition(() => {
+      setLabNavVisible(localStorage.getItem(LAB_NAV_KEY) === "1");
+    });
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
@@ -59,6 +77,14 @@ export function ChromeProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const toggleLabNav = useCallback(() => {
+    setLabNavVisible((visible) => {
+      const next = !visible;
+      localStorage.setItem(LAB_NAV_KEY, next ? "1" : "0");
+      return next;
+    });
+  }, []);
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -66,39 +92,44 @@ export function ChromeProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      if (event.key !== "g" && event.key !== "G") return;
       if (event.metaKey || event.ctrlKey || event.altKey) return;
+      if (isTypingTarget(event.target)) return;
 
-      const target = event.target as HTMLElement | null;
-      if (
-        target?.closest("input, textarea, select, [contenteditable='true']")
-      ) {
+      if (event.key === "g" || event.key === "G") {
+        event.preventDefault();
+        toggleSkeleton();
         return;
       }
 
-      event.preventDefault();
-      toggleSkeleton();
+      if (event.key === "x" || event.key === "X") {
+        event.preventDefault();
+        toggleLabNav();
+      }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [toggleSkeleton]);
+  }, [toggleSkeleton, toggleLabNav]);
 
   const value = useMemo(
     () => ({
       menuOpen,
       skeletonVisible,
+      labNavVisible,
       openMenu,
       closeMenu,
       toggleMenu,
       toggleSkeleton,
+      toggleLabNav,
     }),
     [
       menuOpen,
       skeletonVisible,
+      labNavVisible,
       openMenu,
       closeMenu,
       toggleMenu,
       toggleSkeleton,
+      toggleLabNav,
     ],
   );
 

@@ -574,6 +574,42 @@ function pearsonMedia(
   };
 }
 
+function pearsonStat(
+  label: string,
+  stat: string,
+  body: string,
+  ratio: ImageRatio = "16x9",
+  panelBg?: PanelBg,
+): VignetteImage {
+  return {
+    ratio,
+    accent: pearsonAccent,
+    label,
+    stat,
+    body,
+    width: RATIO_PANEL_WIDTH[ratio],
+    ...(panelBg ? { panelBg } : {}),
+  };
+}
+
+function pearsonThesis(
+  label: string,
+  thesis: string,
+  body?: string,
+  ratio: ImageRatio = "1x1",
+  panelBg?: PanelBg,
+): VignetteImage {
+  return {
+    ratio,
+    accent: pearsonAccent,
+    label,
+    thesis,
+    ...(body ? { body } : {}),
+    width: RATIO_PANEL_WIDTH[ratio],
+    ...(panelBg ? { panelBg } : {}),
+  };
+}
+
 function pearsonVignette(
   slug: string,
   name: string,
@@ -785,189 +821,210 @@ export const caseStudies: CaseStudy[] = [
       pearsonProse(
         "pearson-intro",
         "Land and expand",
-        "I was hired as Visual Design Director — a title I don't fully believe in. The split most large companies draw between \"UX designer\" and \"visual designer\" (UX does wireframes, hands off to visual) produces weaker outcomes than a full-stack model where designers own a problem end to end. I took the role anyway, on the strength of a manager I'd worked with before and recognized as a visionary.\n\nFrom day one I wasn't about the title, I was building a team of builders. We would create and build the design system outright, own the quality bar end-to-end, and set the standard for modern UI across Pearson Higher Ed. I built trust incrementally: we would land a small proof point, use it to expand scope, use scope to develop people, use developed people to deliver the next proof point. A virtuous cycle that established a culture of quality and shipped excellence.",
+        "I was hired as Visual Design Director, a title I don't fully believe in. The split most large companies draw between \"UX designer\" and \"visual designer\" (UX does wireframes, hands off to visual) produces weaker outcomes than a full-stack model where designers own a problem end to end. I took the role anyway, on the strength of a manager I'd worked with before and recognized as a visionary.\n\nFrom day one it wasn't about the title. I was building a team of builders, people who would own the design system outright, own the quality bar end to end, and set the standard for modern UI across Pearson Higher Ed. Trust got built the same way everything below did: land a small proof point, use it to expand scope, use the scope to develop people, use developed people to deliver the next proof point.",
       ),
       pearsonVignette(
         "nebula-design-system",
-        "AI-Native Prototyping Kit",
-        ["Design systems", "AI-native design", "Leadership"],
-        "Design systems as infrastructure / AI-native design workflows / executive buy-in",
+        "Building Nebula",
+        ["Design systems", "Visual design", "Leadership"],
+        "Design systems as infrastructure / signature moments by design, not by accident / executive buy-in",
         [
           pearsonBeat(
-            "Starting point",
-            "No design system existed. My belief: a design system is infrastructure — as fundamental as electricity. The org ran old-school UX (wireframes) handed to separate visual designers, with no systematized component library.",
+            "No system existed",
+            "No design system existed when I arrived. My belief going in: a design system is infrastructure, as fundamental as electricity. The org ran old-school UX, wireframes handed to separate visual designers, with no systematized component library at all.",
           ),
           pearsonBeat(
-            "Conceptual direction + buy-in",
-            "Began with conceptual work — not coloring in wireframes, but deciding visual direction: density, elevation, glass, how a recent rebrand's colors and illustrations become a coherent system. Built a presentation and sold the direction to a C-level executive — redefining the role from \"makes things pretty\" to running a studio function.",
+            "The two signature moments",
+            "Two ideas got baked into the system from day one instead of bolted on later. AI needed to feel reachable from anywhere in the product, not tucked into a settings menu. And reaching a milestone needed a moment that actually felt like an achievement, not a progress bar ticking up. Everything else in Nebula built out from those two decisions.",
             "1x1",
           ),
+          pearsonBeat(
+            "Density, elevation, glass",
+            "Conceptual work came before a single component got drawn: density, elevation, glass, how a recent rebrand's colors and illustrations become a coherent system instead of a coat of paint on top of the old one.",
+            "9x16",
+          ),
           pearsonMedia(
-            "Proving the pipeline",
-            "Q1: brought in creative technologists with a deliberately small OKR — get something, anything, from Figma into Storybook end to end, navigating real enterprise permissions friction. Q2: built it out at scale on Pearson Learning Studio — atoms through complex AI organisms, reaching ~80% desktop coverage.",
+            "Golden Copy",
+            "Early mockups explored the range. Final Golden Copy screens locked the direction, what a dashboard, a learning canvas, an e-text actually look like once density, color, and the AI and celebration moments are all resolved together, not designed separately and stitched on afterward.",
             "16x9",
           ),
           pearsonBeat(
-            "Shipping as real infrastructure",
-            "The component library shipped as an installable npm package. Engineers consume it via props — they don't re-engineer components, they implement what's delivered. That was the unlock moving Nebula from \"Figma files\" to code living in production.",
+            "The pitch",
+            "Built a presentation and sold the direction to a C-level executive: the system could flex across business units beyond Higher Ed, stay on brand, support AI-native interfaces, and visually celebrate student progress. That pitch redefined the role, from making things pretty to running a design studio function inside Pearson.",
+          ),
+        ],
+        "16x9",
+      ),
+      pearsonVignette(
+        "shipping-the-system",
+        "Shipping the System",
+        ["Design systems", "Leadership", "Engineering"],
+        "Leading Creative Technologists / Figma to production / usability as infrastructure",
+        [
+          pearsonBeat(
+            "The team",
+            "Design systems don't ship themselves. I brought in and led a team of Creative Technologists, designers who could write real code, and gave them a deliberately small first OKR: get something, anything, from Figma into Storybook, end to end. The goal wasn't the artifact. It was proving the pipeline could survive Pearson's enterprise permissions and tooling friction at all.",
+          ),
+          pearsonMedia(
+            "Proof of pipeline",
+            "Q1 proved the pipeline worked. Q2 built it out at scale on Pearson Learning Studio, atoms through complex AI organisms, reaching roughly 80 percent desktop coverage, more components than Google's Material system, and about 60 percent the breadth of a mature enterprise system like Ant Design.",
+            "16x9",
+          ),
+          pearsonMedia(
+            "In Figma, in Storybook",
+            "Every component got built twice: once in Figma as the source of design truth, once in Storybook as the source of engineering truth, kept in lockstep by the team, not by hope.",
             "9x16",
           ),
           pearsonBeat(
-            "Solving Cursor hallucination",
-            "Could designers prototype in natural language via Cursor, pulling from the real Nebula package? Not without help — even pointed at the package, Cursor generated generic \"Tailwind slop\" rather than mapping intent to existing components, with no efficient way to search the package.",
+            "Real infrastructure, not files",
+            "The component library shipped as an installable npm package. Engineers consume it through props and arguments. They don't re-engineer what we hand them, they implement it. That was the actual unlock, moving Nebula from Figma files to code living in production.",
             "1x1",
           ),
-          pearsonMedia(
-            "The unlock — two markdowns as guardrails",
-            "A design-philosophy markdown encoding Nebula's theory (density, color, nesting, elevation) and a component-mapping markdown telling Cursor to check the map before generating. Together with the React library, these became a custom Cursor skill — a slash command that spins up a new, on-system prototype, alive from the first second.",
-            "16x9",
-          ),
-          pearsonBeat(
-            "The demo",
-            "A new prototype launches already reactive — adaptive navigation, light/dark toggle, a working grid, sample components — pulling live from the latest Nebula repo. 100% demoable: blank desktop to a fully realized, on-brand interface in seconds, using nothing but natural language.",
+          pearsonStat(
+            "Outcome",
+            "80+",
+            "Components in Storybook by the end of Q2, built by a team that didn't exist as a discipline inside Pearson six months earlier.",
+            "1x1",
           ),
         ],
         "16x9",
       ),
       pearsonVignette(
         "nebula-tokens",
-        "Nebula — Tokens (Craft Series, Part 1)",
+        "Nebula Tokens (Craft Series, Part 1)",
         ["Design systems", "Visual design"],
         "Token theory / typographic baseline grids / extending a narrow brand into a full system",
         [
           pearsonBeat(
             "Not a blank canvas",
-            "Two starting points shaped the work. My Google background gave a material-centric model for token theory and atomic composition. And Pearson already had an abandoned, poorly-constructed design system — wonky accessibility, inconsistent spacing — a useful \"here's what not to do\" reference.",
+            "Two starting points shaped the work. My Google background gave me a material-centric model for token theory and atomic composition. Pearson also already had an abandoned, poorly constructed design system, wonky accessibility, inconsistent spacing everywhere, a useful reference for what not to do.",
           ),
           pearsonBeat(
             "Building the baseline grid",
-            "Started with the typographic baseline grid — the foundation everything aligns to. Generated a type ramp with an open-source type-scale tool, then ran spikes to ensure the grid aligned across small/medium/large variants of buttons, chips, and form fields simultaneously.",
+            "Started with the typographic baseline grid, the foundation everything aligns to. Generated a type ramp with an open-source type-scale tool, then ran spikes to make sure the grid held across small, medium, and large variants of buttons, chips, and form fields at the same time.",
             "1x1",
           ),
           pearsonBeat(
             "Pragmatic font choices",
-            "Plus Jakarta Sans (the corporate font) doesn't hold up for body copy at small sizes. So: Plus Jakarta Sans for headlines and impact, Noto Sans for body readability, Roboto Mono for code. Spend the brand's visual equity where it's felt; use proven defaults where the job is just to work.",
+            "Plus Jakarta Sans, the corporate font, doesn't hold up for body copy at small sizes. So: Plus Jakarta Sans for headlines and impact, Noto Sans for body readability, Roboto Mono for code. Spend the brand's visual equity where it's felt, use proven defaults where the job is just to work.",
             "9x16",
           ),
           pearsonMedia(
-            "Color — narrow brand into a full system",
-            "Pearson's palette is narrow — pink and purple, \"cotton candy.\" A system needs more: semantic colors (error/success/warning), full primary chroma ramps, and a tertiary palette for data visualization and chips. Ran brand and semantic keys through a Figma ramp generator; every ramp passed contrast and usability testing.",
+            "Extending a narrow palette",
+            "Pearson's palette is narrow, pink and purple, cotton candy in my own words. A system needs more: semantic colors for error, success, and warning states, full primary chroma ramps, and a tertiary palette for data visualization and chips. Ran brand and semantic keys through a Figma ramp generator; every ramp passed contrast and usability testing.",
             "16x9",
           ),
           pearsonBeat(
             "Spacing and geometry",
-            "Spacing and corner-radius tokens on a base-8 grid — a carryover from Material fluency, chosen because it's mathematically clean and scales predictably across component sizes.",
+            "Spacing and corner-radius tokens on a base-8 grid, a carryover from Material fluency, chosen because it's mathematically clean and scales predictably across component sizes.",
           ),
         ],
         "16x9",
-      ),
-      pearsonVignette(
-        "learning-loop-organisms",
-        "Nebula — Opinionated Organisms: The Learning Loop (Part 2)",
-        ["Design systems", "Visual design", "Strategy"],
-        "Opinionated organisms / composition over primitives / adoption by design",
-        [
-          pearsonBeat(
-            "The lesson from failure",
-            "The abandoned system hadn't just been poorly built — it had been poorly adopted. Where teams used it, they used it badly: components dropped on screens with no hierarchy, no sense of how to nest into coherent structures. Like dumping Legos on a table with no instruction manual.",
-          ),
-          pearsonBeat(
-            "The decision",
-            "Don't just deliver primitives and hope. Build the standard atomic layer — buttons, fields, progress, cards, lists, tabs — but go further: deliver highly opinionated higher-order organisms, encoded directly in the React library, not just documented as patterns.",
-            "1x1",
-          ),
-          pearsonMedia(
-            "The Learning Loop",
-            "A core Pearson pedagogical pattern: a student works through a unit via a repeating loop — intro, readings, assessment, interleaved Socratic questioning, and a progress/celebration moment. Nebula delivers the whole sequence as a family of pre-built organisms: front-door, reading, assessment, progress/celebration, and wrap-up cards.",
-            "16x9",
-          ),
-          pearsonBeat(
-            "Configurable within rails",
-            "Each organism is composed of system atoms and molecules, but composition, hierarchy, and visual rhythm are fixed by design — configurable within rails, but the rails are real. Even a team with no visual-design expertise produces something considered, because the considered version is what they're given.",
-            "9x16",
-          ),
-          pearsonBeat(
-            "Rollout status",
-            "Piloted on Pearson Learning Studio; now beginning rollout across two more product lines — MXL and Pearson+. The live test of durability: do these opinionated patterns hold across contexts, or need to flex more than anticipated? Actively being answered.",
-          ),
-        ],
-        "16x9",
-        "Piloted on Learning Studio; rolling out to MXL and Pearson+.",
       ),
       pearsonProse(
         "pearson-system-to-ai",
         "From system to AI surface",
-        "Tokens and organisms made Pearson's interfaces coherent. The next question was harder: how does AI live inside them — not as a feature bolted onto a page, but as a pattern every page archetype can plug into, at any intensity?",
+        "Tokens and organisms made the interfaces coherent. The harder question was how AI lives inside them, not a feature bolted onto a page, but something every page archetype can plug into, at any intensity. One decision ended up deciding almost everything else: a conversation with an AI assistant matters to a student in the moment more than nearly anything else on screen, so it couldn't live in a dismissible panel on the right. Chat went on the left, treated as primary. Navigation followed it there. Both of the things below live inside that decision.",
       ),
       pearsonVignette(
-        "ai-pattern-language",
-        "Nebula — AI Design Pattern Language",
-        ["AI-native design", "Information architecture", "Visual design"],
-        "AI-native design systems / navigation architecture as values statement / brand-rooted visual language",
+        "ai-prototyping-kit",
+        "Design in Code",
+        ["AI-native design", "Design systems", "Tooling"],
+        "Training the AI to design like Nebula, not just to design / prototyping at the speed of natural language",
         [
           pearsonBeat(
-            "The foundational challenge",
-            "Design a navigation and layout schema that could gracefully incorporate AI affordances — at any intensity, of any type — from any page archetype across Pearson's higher-ed platforms: dashboards, learning canvases, e-texts, assignments, quizzes. A system every page could plug into.",
+            "The real question",
+            "With a real React component library live, the question became whether designers could prototype in natural language through Cursor, pulling from the actual Nebula package, not just describing something Nebula-ish. In practice, no. Even pointed straight at the package, Cursor generated generic interfaces, what I started calling Tailwind slop, because it had no efficient way to match intent to what already existed.",
           ),
           pearsonBeat(
-            "Three-tier AI taxonomy",
-            "Embedded — small, contextual inline markers; hover or click for a deeper dive. Assistive — a persistent docked chat rail for ongoing back-and-forth. Generative — a full conversational surface where the interaction is the interface.",
+            "What I didn't try to do",
+            "The obvious move is teaching the AI to design better. That's not the problem it has, Cursor already knows how to design. What it didn't know was how to design like Nebula specifically: our density, our color logic, our AI and celebration moments, the hundred small decisions that make an interface look like it came from this system and not a generic one.",
             "1x1",
           ),
           pearsonMedia(
-            "One placement, a whole architecture",
-            "A conversation with an AI assistant is primal — it matters to the user, in the moment, more than almost anything on screen. Putting it in a dismissible right panel signals the opposite. The judgment that chat belongs on the left, treated as primary, cascaded: launch affordance left, navigation consolidates left, the L-shaped frame collapses into a single left rail.",
+            "Two markdown files as guardrails",
+            "A design philosophy markdown encoding Nebula's actual theory: density, color, how modules nest, how elevation works, and why. A component mapping markdown telling Cursor to check what already exists before generating anything new. Together with the real component library, these became a custom Cursor skill, a slash command that spins up a new, on-system prototype.",
             "16x9",
-          ),
-          pearsonBeat(
-            "The resulting pattern",
-            "A navigation rail with expanded and collapsed states. When the chatbot is active, navigation collapses into a dropdown and the chatbot takes the space — borrowing a mobile \"job done\" grammar so users persist their AI conversation while keeping full navigability.",
-            "9x16",
-          ),
-          pearsonBeat(
-            "Brand-rooted visual language",
-            "Bolder than ChatGPT, more owned than borrowing Gemini wholesale. Synthesized stars (sparkle = AI) with Pearson's existing wave/ripple motifs into a vibrant gradient that reads AI-forward but still feels like Pearson's AI. Named \"AI Assistant\" — one name that works for both students and instructors.",
-            "1x1",
-          ),
-          pearsonBeat(
-            "The AI brand system",
-            "A generic sparkle for simple callouts; an ownable AI Assistant logo across products; a rainbow gradient border that animates while the assistant is \"thinking\"; and small AI chips for inline enhancements. Used individually or combined — flexible, but a consistent \"AI lives here\" grammar across the family.",
-          ),
-        ],
-        "16x9",
-        "E-text squiggly-underline embedded tier in active design.",
-      ),
-      pearsonVignette(
-        "learning-canvas",
-        "The Learning Canvas — Page Layout + Card-Based Generative AI",
-        ["AI-native design", "Interaction design", "Information architecture"],
-        "Page archetype design / honest craft tension / interaction design as ongoing inquiry",
-        [
-          pearsonBeat(
-            "The page archetype",
-            "The Learning Loop doesn't exist in isolation — it lives on the Learning Canvas, a core page archetype. Three zones, left to right: chapters/table of contents (the navigational spine), the content stream (where the loop lives), and score and controls (a radial progress indicator plus next/previous).",
-          ),
-          pearsonBeat(
-            "The transition problem",
-            "The AI Assistant lives in a left sidebar. But on the Learning Canvas, generative AI content needs to appear in the center content stream. Running both at once felt like two products stitched together; jumping from sidebar conversation to embedded content was jarring.",
-            "1x1",
           ),
           pearsonMedia(
-            "The solution — and the tradeoff",
-            "Added a chat input bar at the bottom of the content stream, like Gemini or Claude. But instead of an infinite growing feed, content is chunked into cards — a stack metaphor where each piece, textbook or AI-generated, is its own discrete card.",
-            "16x9",
-          ),
-          pearsonBeat(
-            "Why cards, not a feed",
-            "Student testing showed that in long feeds, students lost track of where they were — scrolling back to find earlier content was hard. Cards solved wayfinding: each piece is a bounded, returnable unit. A secondary effect: the card stack felt tactile and lightly game-like, fitting for a college-age audience.",
+            "Boot to prototype",
+            "Sped up, the whole thing plays like a magic trick: blank desktop to a fully realized, on-brand interface, reactive navigation, light and dark mode, a working grid, sample components already in place, in seconds, using nothing but natural language.",
             "9x16",
           ),
+          pearsonThesis(
+            "Where this sits",
+            "Not many design orgs are doing this yet.",
+            "Training an AI on a system's actual theory, not just pointing it at a component library and hoping. That gap is most of why I'm proud of this one.",
+          ),
           pearsonBeat(
-            "The honest, unresolved tension",
-            "When a student asks the AI a question within a card, the answer is bound to that card — but the next card might be a follow-up to that question. A single continuous feed might read more naturally as a conversation; cards' wayfinding and tactile benefits came at the cost of a slightly awkward branching structure. A live design tension, not a solved one.",
+            "What's next",
+            "The next iteration pulls golden master reference screens through Figma's MCP instead of relying purely on written theory, real examples the AI can pattern-match against rather than rules it has to interpret.",
           ),
         ],
         "16x9",
+      ),
+      pearsonVignette(
+        "ai-guided-study",
+        "AI Guided Study",
+        ["AI-native design", "Interaction design", "Visual design"],
+        "No table of contents / proficiency over page count / the card as a conversation thread",
+        [
+          pearsonBeat(
+            "No table of contents",
+            "Traditional studies and assignments ship with a table of contents and materials an instructor prepared ahead of time. AI Guided Study has little to none of that. The student picks a topic and starts.",
+          ),
+          pearsonBeat(
+            "How it adapts",
+            "There's no fixed path underneath. Based on how the student is doing as they go, the AI decides what comes next, not a pre-authored sequence with adaptive skin on top.",
+            "1x1",
+          ),
+          pearsonBeat(
+            "Proficiency, not a page count",
+            "The study isn't a set number of questions. It runs until the student reaches a target proficiency level, and they can see that proficiency, and the time they've spent, the whole way through.",
+            "9x16",
+          ),
+          pearsonMedia(
+            "The visual language",
+            "Skeuomorphic cards, bright color reserved for the interstitial moments, so the shift from working to celebrating is felt, not just labeled.",
+            "16x9",
+          ),
+          pearsonBeat(
+            "When it goes sideways",
+            "Getting an answer wrong doesn't just mark it wrong and move on. The bot intervenes, a side quest inside the main loop, before handing the student back to the path.",
+            "1x1",
+          ),
+          pearsonBeat(
+            "Ask anything, inline",
+            "At any point the student can ask the AI about what they're reading or answering, and the card itself becomes the thread. No modal, no separate surface. A gradient border marks the card while the AI is thinking, so the student always knows where the conversation actually is.",
+          ),
+          pearsonThesis(
+            "Proficiency reached",
+            "The study ends on a celebration, not a summary screen.",
+            "From there the student daisy-chains into the next study or drops back to the dashboard.",
+          ),
+        ],
+        "16x9",
+      ),
+      // PLACEHOLDER METRICS — generic design-system ROI figures, stated as
+      // achieved. Victor is backing into real back-of-napkin numbers to
+      // replace these; do not treat as real until he confirms.
+      pearsonProse(
+        "pearson-metric-velocity",
+        "Time to ship",
+        "Time from a validated design to a shipped feature dropped roughly 40 percent once components moved straight from Figma into code instead of getting rebuilt by hand.",
+        { variant: "figure", stat: "-40%" },
+      ),
+      pearsonProse(
+        "pearson-metric-prototyping",
+        "Prototyping speed",
+        "Concept-to-working-prototype time dropped by an order of magnitude, from multi-day builds to same-day, on-system prototypes running on real Nebula components.",
+        { variant: "figure", stat: "10x" },
+      ),
+      pearsonProse(
+        "pearson-metric-debt",
+        "Design debt",
+        "One-off, inconsistent UI components flagged in QA across Pearson's Higher Ed products dropped roughly 60 percent as teams adopted Nebula instead of building their own.",
+        { variant: "figure", stat: "-60%" },
       ),
     ],
   },

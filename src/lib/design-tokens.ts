@@ -412,11 +412,12 @@ export const vignettePanelWidths = [
 ] as const;
 
 export const vignetteClientBrandPanels = clientBrandColorEntries.map(
-  ({ id, token, client, role, hex }) => ({
+  ({ id, token, client, role, hex, textOn }) => ({
     id,
     token,
     label: `${client} ${role.toLowerCase()}`,
     hex,
+    textOn,
   }),
 );
 
@@ -448,7 +449,7 @@ export const caseStudyDetailPatterns = [
     pattern: "Scroll snap",
     className: ".cs-detail",
     behavior:
-      "Desktop: one wheel/key step per hero, prose block, vignette panel, or footer. Mobile: natural scroll.",
+      "Desktop: native CSS scroll-snap, one wheel/key step per hero, prose block, vignette panel, or footer. Mobile: horizontal filmstrip with JS flick.",
   },
   {
     pattern: "Peek cursor",

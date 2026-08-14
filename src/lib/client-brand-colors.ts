@@ -80,6 +80,7 @@ export const clientBrandColorEntries = [
     role: "Primary",
     token: "--color-cruise-primary",
     hex: clientBrandColors.cruise.primary,
+    /** High-chroma orange — paper type fails contrast; ink is the usable pairing. */
     textOn: "ink",
   },
   {
@@ -165,5 +166,5 @@ export const clientBrandColorGroups = (
   client,
   colors: clientBrandColorEntries
     .filter((entry) => entry.client === client)
-    .map(({ token, role, hex }) => ({ token, label: role, hex })),
+    .map(({ token, role, hex, textOn }) => ({ token, label: role, hex, textOn })),
 }));

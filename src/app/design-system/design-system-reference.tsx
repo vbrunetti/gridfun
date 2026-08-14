@@ -177,21 +177,38 @@ function TokenSwatch({
   token,
   label,
   hex,
+  textOn,
 }: {
   token: string;
   label: string;
   hex?: string;
+  textOn?: "ink" | "paper";
 }) {
   return (
     <div className="grid-span-2 min-w-0 text-center">
       <div
-        className="h-8 w-full border border-[var(--rule-strong)]"
-        style={{ backgroundColor: `var(${token})` }}
+        className="flex h-16 w-full items-end border border-[var(--rule-strong)] p-2"
+        style={{
+          backgroundColor: `var(${token})`,
+          ...(textOn
+            ? {
+                color:
+                  textOn === "ink" ? "var(--color-ink)" : "var(--color-paper)",
+              }
+            : {}),
+        }}
         title={hex ?? `var(${token})`}
-      />
+      >
+        {textOn ? (
+          <span className="text-sm font-medium leading-none">Aa</span>
+        ) : null}
+      </div>
       <p className="text-meta mt-2 normal-case tracking-normal">{label}</p>
       {hex ? (
         <p className="font-mono text-[0.625rem] text-tertiary">{hex}</p>
+      ) : null}
+      {textOn ? (
+        <p className="font-mono text-[0.625rem] text-tertiary">{textOn} type</p>
       ) : null}
     </div>
   );
@@ -211,8 +228,8 @@ export function DesignSystemReference() {
           . Source of truth:{" "}
           <code className="font-mono text-xs text-primary">src/app/globals.css</code>
           . Breakpoint for grid/desktop chrome:{" "}
-          <strong className="text-primary">1024px (lg)</strong>; vignette
-          scroll-jack: <strong className="text-primary">768px (md)</strong>.
+          <strong className="text-primary">1024px (lg)</strong>. Desktop vignettes
+          use native CSS scroll-snap; mobile uses a horizontal flick gesture.
         </p>
       </SiteGridCell>
 
@@ -365,7 +382,11 @@ export function DesignSystemReference() {
         <p className="mt-2 text-sm text-secondary">
           Site-wide tokens — CSS vars, Tailwind utilities, inline styles, vignette{" "}
           <code className="font-mono text-xs">panelBg</code>, case-study brand fields.
-          E.g. <code className="font-mono text-xs">var(--color-cruise-primary)</code>,{" "}
+          Pairing is <code className="font-mono text-xs">textOn</code> from{" "}
+          <code className="font-mono text-xs">client-brand-colors.ts</code>: paper on
+          dark/saturated grounds, ink on high-chroma grounds that fail contrast with
+          white (Cruise primary, Google quaternary). E.g.{" "}
+          <code className="font-mono text-xs">var(--color-cruise-primary)</code>,{" "}
           <code className="font-mono text-xs">bg-google-tertiary</code>,{" "}
           <code className="font-mono text-xs">clientBrandColorVar(&quot;cruise-primary&quot;)</code>.
         </p>
@@ -375,8 +396,14 @@ export function DesignSystemReference() {
           <SiteGridCell span="content">
             <p className="text-meta">{client}</p>
           </SiteGridCell>
-          {colors.map(({ token, label, hex }) => (
-            <TokenSwatch key={token} token={token} label={label} hex={hex} />
+          {colors.map(({ token, label, hex, textOn }) => (
+            <TokenSwatch
+              key={token}
+              token={token}
+              label={label}
+              hex={hex}
+              textOn={textOn}
+            />
           ))}
         </SiteGridSubgrid>
       ))}
@@ -394,7 +421,7 @@ export function DesignSystemReference() {
         id="surfaces"
         meta="04 · Surfaces"
         title="Section surfaces"
-        description="Apply a theme class on any section wrapper. Text tokens flip automatically — ink on light grounds, paper on dark/saturated grounds. Google quaternary uses ink on yellow."
+        description="Apply a theme class on any section wrapper. Text tokens follow `textOn` — ink on light grounds, paper on dark/saturated grounds. High-chroma exceptions use ink for contrast: Cruise primary (orange) and Google quaternary (yellow)."
       />
       {surfaceGroups.map(({ id, label }) => (
         <SiteGridSubgrid key={id}>
@@ -471,7 +498,7 @@ export function DesignSystemReference() {
         id="case-study"
         meta="07 · Case study detail"
         title="Vignette chapters & reading"
-        description="Narrative vignettes on case study detail pages are horizontal filmstrips of abutted panels (.vframe). Each chapter opens with a title panel, then content frames from portfolio.ts. Desktop pins the strip and pages one panel per scroll notch; mobile stacks panels vertically."
+        description="Narrative vignettes on case study detail pages are horizontal filmstrips of abutted panels (.vframe). Each chapter opens with a title panel, then content frames from portfolio.ts. Desktop pins the strip with native CSS scroll-snap (one flick = one panel). Mobile keeps the filmstrip and pages with a flick gesture."
       />
 
       <SiteGridCell span="content">
@@ -541,23 +568,34 @@ export function DesignSystemReference() {
         <p className="mt-2 text-sm text-secondary">
           Set <code className="font-mono text-xs">panelBg</code> in{" "}
           <code className="font-mono text-xs">portfolio.ts</code>, or use any client brand
-          token elsewhere via CSS var / Tailwind. Trail inherits the last frame.
+          token elsewhere via CSS var / Tailwind. Trail inherits the last frame. Type
+          on a brand panel follows that color&apos;s{" "}
+          <code className="font-mono text-xs">textOn</code> — ink on Cruise, paper on
+          Pearson / McKinsey / most Google.
         </p>
       </SiteGridCell>
       <SiteGridSubgrid className="theme-dark pb-6">
-        {vignettePanelSurfaces.map((surface) => (
-          <div
-            key={surface.id}
-            className="grid-span-6 min-h-[5rem] border border-[var(--rule-light)] p-4 lg:grid-span-3"
-            style={{ background: `var(${surface.token})` }}
-          >
-            <p className="text-meta normal-case tracking-normal">{surface.label}</p>
-            <p className="mt-2 font-mono text-xs text-tertiary">{surface.token}</p>
-            <p className="mt-1 font-mono text-xs text-tertiary">
-              panelBg=&quot;{surface.id}&quot;
-            </p>
-          </div>
-        ))}
+        {vignettePanelSurfaces.map((surface) => {
+          const textOn = "textOn" in surface ? surface.textOn : undefined;
+          const brandTheme = textOn ? `theme-${surface.id}` : "";
+
+          return (
+            <div
+              key={surface.id}
+              className={`grid-span-6 min-h-[5rem] border border-[var(--rule-light)] p-4 lg:grid-span-3 ${brandTheme}`.trim()}
+              style={
+                brandTheme ? undefined : { background: `var(${surface.token})` }
+              }
+            >
+              <p className="text-meta normal-case tracking-normal">{surface.label}</p>
+              <p className="mt-2 font-mono text-xs text-tertiary">{surface.token}</p>
+              <p className="mt-1 font-mono text-xs text-tertiary">
+                panelBg=&quot;{surface.id}&quot;
+                {textOn ? ` · ${textOn} type` : ""}
+              </p>
+            </div>
+          );
+        })}
       </SiteGridSubgrid>
 
       <SiteGridCell span="content">

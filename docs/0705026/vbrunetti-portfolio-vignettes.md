@@ -3,6 +3,22 @@
 
 ---
 
+## SITE SYNC STATUS — updated 2026-08-13 (re-synced from live portfolio.ts)
+
+**Pearson — full rebuild this session, replacing the old 5-vignette structure that didn't map to Victor's real achievements.** Note: the vignettes.md at the Google Drive path (081326 folder) is the same stale original capture as the very first uploads-folder version, not more recent, don't treat it as a source for Pearson going forward.
+
+Victor named four actual achievements: (1) conceptualizing Nebula from the ground up, with two signature moments baked in, AI reachable from anywhere and a real celebration moment for student progress, told through Golden Copy mockups; (2) leading a team of Creative Technologists to ship v1 as a React/Tailwind package, told through Storybook video and Figma screenshots; (3) the AI prototyping kit, markdown files that trained Cursor to design like Nebula specifically rather than just teaching it to design, told through boot-to-prototype time-lapse video and markdown screenshots; (4) AI Guided Study, a no-table-of-contents, proficiency-gated adaptive study feature, told through Figma mockups.
+
+New structure: `pearson-intro` (lightly cleaned, no content change) → `nebula-design-system` "Building Nebula" (achievement 1, absorbs the old Learning Loop Organisms' celebration-card detail as the second signature moment) → `shipping-the-system` "Shipping the System" (achievement 2, new vignette, closes on a real stat: 35–45 Storybook components by end of Q2) → `nebula-tokens` (unchanged content, craft support) → `pearson-system-to-ai` bridge (trimmed down from the old full "AI Design Pattern Language" vignette, keeps the chat-belongs-on-the-left reasoning as a compact bridge into both AI vignettes) → `ai-prototyping-kit` "Design in Code" (achievement 3, pulled out standalone, closes on a thesis panel with Victor's own pride in it preserved: "Not many design orgs are doing this yet") → `ai-guided-study` "AI Guided Study" (achievement 4, brand new content from this conversation, absorbs the old Learning Canvas's card-thread mechanic as the "ask anything inline" beat).
+
+Retired as full vignettes (folded in elsewhere, not deleted from history): the old "AI-Native Prototyping Kit" vignette (was doing triple duty across achievements 1/2/3), "Opinionated Organisms: The Learning Loop" (celebration-card detail moved into Building Nebula), "AI Design Pattern Language" (trimmed into the system-to-ai bridge), "The Learning Canvas" (card-thread mechanic moved into AI Guided Study).
+
+Added `pearsonStat` and `pearsonThesis` helpers (direct mirrors of `cruiseStat`/`cruiseThesis`) since Pearson didn't have them yet.
+
+Still needed: all real assets. Every beat is still a placeholder color field, same starting point Cruise had before Victor dropped in real media, poster images, and Vimeo IDs.
+
+**Added a placeholder metrics close (2026-08-13):** three `figure`-variant stat panels after AI Guided Study, generic design-system ROI numbers stated as if achieved (time to ship -40%, prototyping speed 10x, design debt -60%), explicitly flagged in a code comment as placeholder. Victor is backing into real numbers to swap in. Do not treat these as real, do not let them ship as final without his sign-off.
+
 ## SITE SYNC STATUS — updated 2026-07-09 (re-synced from live portfolio.ts)
 
 **Cruise — Victor inputted full final content, real media, real Vimeo IDs across every vignette. Editorial pass done this session:**

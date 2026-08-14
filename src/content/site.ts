@@ -25,6 +25,10 @@ export type HomeCoverSection = {
 export type NavLink = {
   href: string;
   label: string;
+  /** Hidden from the overlay until the X-key lab nav is revealed. */
+  lab?: boolean;
+  /** Opens in a new tab; skip in-site active-state matching. */
+  external?: boolean;
 };
 
 export type NavSection = {
@@ -37,6 +41,10 @@ export type MenuNavItem = NavLink | NavSection;
 
 export function isNavSection(item: MenuNavItem): item is NavSection {
   return "children" in item;
+}
+
+export function isLabNavItem(item: MenuNavItem): boolean {
+  return !isNavSection(item) && item.lab === true;
 }
 
 export type ContactPerson = {
@@ -85,12 +93,17 @@ export const site = {
     menu: [
       { href: "/", label: "Home" },
       { href: "/case-studies", label: "Case Studies" },
+      {
+        href: "https://morning.vbrunetti.com/",
+        label: "Your Morning Briefing",
+        external: true,
+      },
       { href: "/craft", label: "Craft" },
       { href: "/about", label: "About" },
       { href: "/contact", label: "Contact" },
-      { href: "/effects", label: "Effects" },
-      { href: "/design-system", label: "Design System" },
-      { href: "/layout-experiments", label: "Layout Experiments" },
+      { href: "/effects", label: "Effects", lab: true },
+      { href: "/design-system", label: "Design System", lab: true },
+      { href: "/layout-experiments", label: "Layout Experiments", lab: true },
     ] satisfies MenuNavItem[],
     social: {
       linkedin: { href: "https://www.linkedin.com/in/brunetti/", label: "LinkedIn" },
