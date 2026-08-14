@@ -784,12 +784,12 @@ export const caseStudies: CaseStudy[] = [
     sections: [
       pearsonProse(
         "pearson-intro",
-        "The land and expand",
-        "I was hired as Visual Design Director — a title I don't fully believe in. The split most large companies draw between \"UX designer\" and \"visual designer\" (UX does wireframes, hands off to visual) produces weaker outcomes than a full-stack model where designers own a problem end to end. I took the role anyway, on the strength of a manager I'd worked with before and recognized as a visionary, herself new to Pearson and building a new culture.\n\nFrom day one the stance was explicit: the title didn't matter; building a team of builders did — a team that would own the design system outright, own the quality bar, and set the standard for modern UI across Pearson Higher Ed. Credibility was built incrementally, not claimed. Land a small proof point, use it to expand scope, use scope to develop people, use developed people to deliver the next proof point. Land and expand — applied to the mandate and the team at once.",
+        "Land and expand",
+        "I was hired as Visual Design Director — a title I don't fully believe in. The split most large companies draw between \"UX designer\" and \"visual designer\" (UX does wireframes, hands off to visual) produces weaker outcomes than a full-stack model where designers own a problem end to end. I took the role anyway, on the strength of a manager I'd worked with before and recognized as a visionary.\n\nFrom day one I wasn't about the title, I was building a team of builders. We would create and build the design system outright, own the quality bar end-to-end, and set the standard for modern UI across Pearson Higher Ed. I built trust incrementally: we would land a small proof point, use it to expand scope, use scope to develop people, use developed people to deliver the next proof point. A virtuous cycle that established a culture of quality and shipped excellence.",
       ),
       pearsonVignette(
         "nebula-design-system",
-        "Nebula — Design System + AI-Native Prototyping Kit",
+        "AI-Native Prototyping Kit",
         ["Design systems", "AI-native design", "Leadership"],
         "Design systems as infrastructure / AI-native design workflows / executive buy-in",
         [
