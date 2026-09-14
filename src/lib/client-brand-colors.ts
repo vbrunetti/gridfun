@@ -4,7 +4,7 @@
  */
 export const clientBrandColors = {
   pearson: {
-    primary: "#0F0051",
+    primary: "#0D0050",
     secondary: "#572CB2",
   },
   google: {

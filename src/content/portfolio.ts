@@ -419,7 +419,11 @@ function cruiseThesis(
 
 type VignetteTitlePanel = Pick<
   CraftVignette,
-  "titleTreatment" | "keyImageSrc" | "titleCoverBlur" | "titleCoverAlpha"
+  | "titleTreatment"
+  | "keyImageSrc"
+  | "titleCoverBlur"
+  | "titleCoverAlpha"
+  | "status"
 >;
 
 function cruiseVignette(
@@ -460,11 +464,10 @@ const googleAccent = "royalBlue" as const satisfies AccentKey;
 function googleBeat(
   label: string,
   body: string,
-  ratio: ImageRatio = "16x9",
   panelBg?: PanelBg,
 ): VignetteImage {
   return {
-    ratio,
+    ratio: "16x9",
     accent: googleAccent,
     colorField: true,
     label,
@@ -498,6 +501,60 @@ function googleMedia(
   };
 }
 
+function googleStat(
+  label: string,
+  stat: string,
+  body: string,
+  ratio: ImageRatio = "16x9",
+  panelBg?: PanelBg,
+): VignetteImage {
+  return {
+    ratio,
+    accent: googleAccent,
+    label,
+    stat,
+    body,
+    width: RATIO_PANEL_WIDTH[ratio],
+    ...(panelBg ? { panelBg } : {}),
+  };
+}
+
+function googleQuote(
+  label: string,
+  quote: string,
+  cite?: string,
+  ratio: ImageRatio = "1x1",
+  panelBg?: PanelBg,
+): VignetteImage {
+  return {
+    ratio,
+    accent: googleAccent,
+    label,
+    quote,
+    ...(cite ? { quoteCite: cite } : {}),
+    width: RATIO_PANEL_WIDTH[ratio],
+    ...(panelBg ? { panelBg } : {}),
+  };
+}
+
+function googleThesis(
+  label: string,
+  thesis: string,
+  body?: string,
+  ratio: ImageRatio = "1x1",
+  panelBg?: PanelBg,
+): VignetteImage {
+  return {
+    ratio,
+    accent: googleAccent,
+    label,
+    thesis,
+    ...(body ? { body } : {}),
+    width: RATIO_PANEL_WIDTH[ratio],
+    ...(panelBg ? { panelBg } : {}),
+  };
+}
+
 function googleVignette(
   slug: string,
   name: string,
@@ -505,7 +562,7 @@ function googleVignette(
   themeLine: string,
   images: VignetteImage[],
   keyImageRatio: ImageRatio = "16x9",
-  status?: string,
+  titlePanel?: VignetteTitlePanel,
 ): CraftVignette {
   return {
     type: "vignette",
@@ -515,9 +572,9 @@ function googleVignette(
     keyImageAccent: googleAccent,
     tags,
     themeLine,
-    ...(status ? { status } : {}),
     titlePanelWidth: TITLE_PANEL_WIDTH,
     images,
+    ...titlePanel,
   };
 }
 
@@ -536,11 +593,10 @@ const pearsonAccent = "hotPink" as const satisfies AccentKey;
 function pearsonBeat(
   label: string,
   body: string,
-  ratio: ImageRatio = "16x9",
   panelBg?: PanelBg,
 ): VignetteImage {
   return {
-    ratio,
+    ratio: "16x9",
     accent: pearsonAccent,
     colorField: true,
     label,
@@ -592,6 +648,24 @@ function pearsonStat(
   };
 }
 
+function pearsonQuote(
+  label: string,
+  quote: string,
+  cite?: string,
+  ratio: ImageRatio = "1x1",
+  panelBg?: PanelBg,
+): VignetteImage {
+  return {
+    ratio,
+    accent: pearsonAccent,
+    label,
+    quote,
+    ...(cite ? { quoteCite: cite } : {}),
+    width: RATIO_PANEL_WIDTH[ratio],
+    ...(panelBg ? { panelBg } : {}),
+  };
+}
+
 function pearsonThesis(
   label: string,
   thesis: string,
@@ -617,7 +691,7 @@ function pearsonVignette(
   themeLine: string,
   images: VignetteImage[],
   keyImageRatio: ImageRatio = "16x9",
-  status?: string,
+  titlePanel?: VignetteTitlePanel,
 ): CraftVignette {
   return {
     type: "vignette",
@@ -627,9 +701,9 @@ function pearsonVignette(
     keyImageAccent: pearsonAccent,
     tags,
     themeLine,
-    ...(status ? { status } : {}),
     titlePanelWidth: TITLE_PANEL_WIDTH,
     images,
+    ...titlePanel,
   };
 }
 
@@ -811,49 +885,137 @@ export const caseStudies: CaseStudy[] = [
     client: "Pearson",
     brand: {
       field: "pearson-primary",
-      logo: "/portfolio/logos/pearson.gif",
+      logo: "/portfolio/pearson/PLogo.jpeg",
     },
     location: "Remote",
     role: "Visual Design Director",
     tools: "Figma, Storybook, React, Cursor, Figma MCP",
-    clientLogo: "/portfolio/logos/pearson.svg",
+    clientLogo: "/portfolio/pearson/PLogo.jpeg",
+    heroVideo: {
+      vimeo: "1219725668",
+      opacity: 0.3,
+      poster: "/portfolio/pearson/CSOverview.jpg",
+    },
     sections: [
       pearsonProse(
         "pearson-intro",
         "Land and expand",
-        "I was hired as Visual Design Director, a title I don't fully believe in. The split most large companies draw between \"UX designer\" and \"visual designer\" (UX does wireframes, hands off to visual) produces weaker outcomes than a full-stack model where designers own a problem end to end. I took the role anyway, on the strength of a manager I'd worked with before and recognized as a visionary.\n\nFrom day one it wasn't about the title. I was building a team of builders, people who would own the design system outright, own the quality bar end to end, and set the standard for modern UI across Pearson Higher Ed. Trust got built the same way everything below did: land a small proof point, use it to expand scope, use the scope to develop people, use developed people to deliver the next proof point.",
+        "From day one, I made it clear I was building a team of builders. My team would own the design system outright, own the quality bar end to end, and set the standard for modern UI across Pearson Higher Ed. We built cross-functional trust by landing a small proof point, using it to expand scope, using the expanded scope to develop people, and using the developed people to deliver the next proof point. What began as a POC turned into a full design system across Higher Ed, with 80+ React components, and an AI-native prototyping pipeline. Rinse, repeat.",
       ),
       pearsonVignette(
         "nebula-design-system",
-        "Building Nebula",
+        "Booting Up Nebula",
         ["Design systems", "Visual design", "Leadership"],
         "Design systems as infrastructure / signature moments by design, not by accident / executive buy-in",
         [
           pearsonBeat(
             "No system existed",
-            "No design system existed when I arrived. My belief going in: a design system is infrastructure, as fundamental as electricity. The org ran old-school UX, wireframes handed to separate visual designers, with no systematized component library at all.",
+            "No design system existed when I arrived. My belief going in: a design system is infrastructure, as fundamental as electricity. The org ran an old-school pipeline — UX handed off wireframes to separate visual designers, who handed annotated mockups to front-end engineers — with no systematized component library at all, and thousands of one-off decisions getting made along the way.\n\nIt all came to a head right before I arrived with a corporate rebrand. Pearson went from teal to purple, and the cost of not cascading brand changes through tokens became really clear, really fast.",
           ),
           pearsonBeat(
             "The two signature moments",
-            "Two ideas got baked into the system from day one instead of bolted on later. AI needed to feel reachable from anywhere in the product, not tucked into a settings menu. And reaching a milestone needed a moment that actually felt like an achievement, not a progress bar ticking up. Everything else in Nebula built out from those two decisions.",
-            "1x1",
-          ),
-          pearsonBeat(
-            "Density, elevation, glass",
-            "Conceptual work came before a single component got drawn: density, elevation, glass, how a recent rebrand's colors and illustrations become a coherent system instead of a coat of paint on top of the old one.",
-            "9x16",
+            "Two ideas got baked into the system from day one instead of bolted on later. AI needed to feel reachable from anywhere in the product, not as an afterthought. And reaching a milestone needed to feel like a genuine achievement. We called these our signature moments: AI showing up somewhere logical, gracefully enhancing whatever interface a student was already on, and progress that made students feel genuinely supported and celebrated throughout their learning journey. Everything else in Nebula built around this.",
           ),
           pearsonMedia(
-            "Golden Copy",
-            "Early mockups explored the range. Final Golden Copy screens locked the direction, what a dashboard, a learning canvas, an e-text actually look like once density, color, and the AI and celebration moments are all resolved together, not designed separately and stitched on afterward.",
+            "Signature Moments",
+            "[xxx].",
+            "1x1",
+            {
+              sources: [
+                "/portfolio/pearson/xxx.jpg",
+                "/portfolio/pearson/xxx.jpg",
+                "/portfolio/pearson/xxx.jpg",
+              ],
+            },
+          ),
+          pearsonBeat(
+            "Primitives before pixels",
+            "Conceptual work came before a single component got drawn. We ran spikes on three primitives to nail the system down before building anything real.\n\n**Density** — padding, spacing, type size and leading — right-sizing the system for the kind of content Pearson actually displays.\n\n**Structure** — elevation, glass effects, surface colors and opacities — giving our learning canvases the right amount of structural separation.\n\n**Color theory** — accessible (WCAG 2.2 AA) color ramps built out of Pearson's new brand colors, fit for content and data visualization.\n\nThe result was the bones of what would become the Nebula Design System."          ),
+          pearsonMedia(
+            "Primitives, explored",
+            "Spikes on density, structural layering, and color ramps — the raw material the system got built from.",
+            "1x1",
+            {
+              sources: [
+                "/portfolio/pearson/xxx.jpg",
+                "/portfolio/pearson/xxx.jpg",
+                "/portfolio/pearson/xxx.jpg",
+              ],
+            },
+          ),
+          pearsonMedia(
+            "Primitives, explored",
+            "Early mockups explored the interaction model itself, eventually landing on a 3-zone layout with clear separation between navigation, content, and tools. Where to put an Assistive AI experience was tricky from the start. With navigation in Zone 1 on the left, putting AI there too made for a cluttered, confusing experience — is that nav or AI? What happened to the separation of Nav and Tools? Where's my nav when AI is open? However, putting AI on the right implied a less-than-primal position for it — it's literally the last thing the eye sees, yet it's supposed to be the most important thing on screen. So early concepts explored the whole range of placement.",
+            "16x9",
+            {
+              sources: [
+                "/portfolio/pearson/xxx.jpg",
+                "/portfolio/pearson/xxx.jpg",
+                "/portfolio/pearson/xxx.jpg",
+              ],
+            },
+          ),
+          pearsonMedia(
+            "Primitives, explored",
+            "Final Golden Copy screens got locked once we starting tuning the design system to our first product. We developed a canonical direction, including a dashboard, a learning canvas, an e-text, insights canvases, item lists and details, etc. Density, color, and the AI and celebration moments were all resolved together in one cohesive experience.",
+            "16x9",
+            {
+              sources: [
+                "/portfolio/pearson/xxx.jpg",
+                "/portfolio/pearson/xxx.jpg",
+                "/portfolio/pearson/xxx.jpg",
+              ],
+            },
+          ),
+          pearsonThesis(
+            "Outcome",
+            "Funding secured.",
+            "The culmination of all this work - building the Nebula foundation and booting up a design system, was Pearson funded us with the headcount needed for a real design systems team.",
+          ),
+        ],
+        "1x1",
+        {
+          titleTreatment: "cover",
+          keyImageSrc: "/portfolio/pearson/xxx.jpg",
+          titleCoverBlur: 0,
+          titleCoverAlpha: 0.7,
+        },
+      ),
+      pearsonVignette(
+        "nebula-tokens",
+        "Nebula Tokens (Craft Series, Part 1)",
+        ["Design systems", "Visual design"],
+        "Token theory / typographic baseline grids / extending a narrow brand into a full system",
+        [
+          pearsonBeat(
+            "Not a blank canvas",
+            "Two starting points shaped the work. My Google background gave me a material-centric model for token theory and atomic composition. Pearson also already had an abandoned, poorly constructed design system, wonky accessibility, inconsistent spacing everywhere, a useful reference for what not to do.",
+          ),
+          pearsonBeat(
+            "Building the baseline grid",
+            "Started with the typographic baseline grid, the foundation everything aligns to. Generated a type ramp with an open-source type-scale tool, then ran spikes to make sure the grid held across small, medium, and large variants of buttons, chips, and form fields at the same time.",
+          ),
+          pearsonBeat(
+            "Pragmatic font choices",
+            "Plus Jakarta Sans, the corporate font, doesn't hold up for body copy at small sizes. So: Plus Jakarta Sans for headlines and impact, Noto Sans for body readability, Roboto Mono for code. Spend the brand's visual equity where it's felt, use proven defaults where the job is just to work.",
+          ),
+          pearsonMedia(
+            "Extending a narrow palette",
+            "Pearson's palette is narrow, pink and purple, cotton candy in my own words. A system needs more: semantic colors for error, success, and warning states, full primary chroma ramps, and a tertiary palette for data visualization and chips. Ran brand and semantic keys through a Figma ramp generator; every ramp passed contrast and usability testing.",
             "16x9",
           ),
           pearsonBeat(
-            "The pitch",
-            "Built a presentation and sold the direction to a C-level executive: the system could flex across business units beyond Higher Ed, stay on brand, support AI-native interfaces, and visually celebrate student progress. That pitch redefined the role, from making things pretty to running a design studio function inside Pearson.",
+            "Spacing and geometry",
+            "Spacing and corner-radius tokens on a base-8 grid, a carryover from Material fluency, chosen because it's mathematically clean and scales predictably across component sizes.",
           ),
         ],
         "16x9",
+        {
+          titleTreatment: "cover",
+          keyImageSrc: "/portfolio/pearson/xxx.jpg",
+          titleCoverBlur: 0,
+          titleCoverAlpha: 0.7,
+        },
       ),
       pearsonVignette(
         "shipping-the-system",
@@ -878,7 +1040,6 @@ export const caseStudies: CaseStudy[] = [
           pearsonBeat(
             "Real infrastructure, not files",
             "The component library shipped as an installable npm package. Engineers consume it through props and arguments. They don't re-engineer what we hand them, they implement it. That was the actual unlock, moving Nebula from Figma files to code living in production.",
-            "1x1",
           ),
           pearsonStat(
             "Outcome",
@@ -888,38 +1049,12 @@ export const caseStudies: CaseStudy[] = [
           ),
         ],
         "16x9",
-      ),
-      pearsonVignette(
-        "nebula-tokens",
-        "Nebula Tokens (Craft Series, Part 1)",
-        ["Design systems", "Visual design"],
-        "Token theory / typographic baseline grids / extending a narrow brand into a full system",
-        [
-          pearsonBeat(
-            "Not a blank canvas",
-            "Two starting points shaped the work. My Google background gave me a material-centric model for token theory and atomic composition. Pearson also already had an abandoned, poorly constructed design system, wonky accessibility, inconsistent spacing everywhere, a useful reference for what not to do.",
-          ),
-          pearsonBeat(
-            "Building the baseline grid",
-            "Started with the typographic baseline grid, the foundation everything aligns to. Generated a type ramp with an open-source type-scale tool, then ran spikes to make sure the grid held across small, medium, and large variants of buttons, chips, and form fields at the same time.",
-            "1x1",
-          ),
-          pearsonBeat(
-            "Pragmatic font choices",
-            "Plus Jakarta Sans, the corporate font, doesn't hold up for body copy at small sizes. So: Plus Jakarta Sans for headlines and impact, Noto Sans for body readability, Roboto Mono for code. Spend the brand's visual equity where it's felt, use proven defaults where the job is just to work.",
-            "9x16",
-          ),
-          pearsonMedia(
-            "Extending a narrow palette",
-            "Pearson's palette is narrow, pink and purple, cotton candy in my own words. A system needs more: semantic colors for error, success, and warning states, full primary chroma ramps, and a tertiary palette for data visualization and chips. Ran brand and semantic keys through a Figma ramp generator; every ramp passed contrast and usability testing.",
-            "16x9",
-          ),
-          pearsonBeat(
-            "Spacing and geometry",
-            "Spacing and corner-radius tokens on a base-8 grid, a carryover from Material fluency, chosen because it's mathematically clean and scales predictably across component sizes.",
-          ),
-        ],
-        "16x9",
+        {
+          titleTreatment: "cover",
+          keyImageSrc: "/portfolio/pearson/xxx.jpg",
+          titleCoverBlur: 0,
+          titleCoverAlpha: 0.7,
+        },
       ),
       pearsonProse(
         "pearson-system-to-ai",
@@ -939,7 +1074,6 @@ export const caseStudies: CaseStudy[] = [
           pearsonBeat(
             "What I didn't try to do",
             "The obvious move is teaching the AI to design better. That's not the problem it has, Cursor already knows how to design. What it didn't know was how to design like Nebula specifically: our density, our color logic, our AI and celebration moments, the hundred small decisions that make an interface look like it came from this system and not a generic one.",
-            "1x1",
           ),
           pearsonMedia(
             "Two markdown files as guardrails",
@@ -962,6 +1096,12 @@ export const caseStudies: CaseStudy[] = [
           ),
         ],
         "16x9",
+        {
+          titleTreatment: "cover",
+          keyImageSrc: "/portfolio/pearson/xxx.jpg",
+          titleCoverBlur: 0,
+          titleCoverAlpha: 0.7,
+        },
       ),
       pearsonVignette(
         "ai-guided-study",
@@ -976,12 +1116,10 @@ export const caseStudies: CaseStudy[] = [
           pearsonBeat(
             "How it adapts",
             "There's no fixed path underneath. Based on how the student is doing as they go, the AI decides what comes next, not a pre-authored sequence with adaptive skin on top.",
-            "1x1",
           ),
           pearsonBeat(
             "Proficiency, not a page count",
             "The study isn't a set number of questions. It runs until the student reaches a target proficiency level, and they can see that proficiency, and the time they've spent, the whole way through.",
-            "9x16",
           ),
           pearsonMedia(
             "The visual language",
@@ -991,7 +1129,6 @@ export const caseStudies: CaseStudy[] = [
           pearsonBeat(
             "When it goes sideways",
             "Getting an answer wrong doesn't just mark it wrong and move on. The bot intervenes, a side quest inside the main loop, before handing the student back to the path.",
-            "1x1",
           ),
           pearsonBeat(
             "Ask anything, inline",
@@ -1004,6 +1141,12 @@ export const caseStudies: CaseStudy[] = [
           ),
         ],
         "16x9",
+        {
+          titleTreatment: "cover",
+          keyImageSrc: "/portfolio/pearson/xxx.jpg",
+          titleCoverBlur: 0,
+          titleCoverAlpha: 0.7,
+        },
       ),
       // PLACEHOLDER METRICS — generic design-system ROI figures, stated as
       // achieved. Victor is backing into real back-of-napkin numbers to
@@ -1736,7 +1879,6 @@ export const caseStudies: CaseStudy[] = [
           googleBeat(
             "The systems layer",
             "It wasn't just a point-of-sale tool — it was the coordination surface for several store roles at once: sales associates on the floor, runners in the back, back-of-house operations, and the repair team. One app, multiple roles, orchestrated workflows.",
-            "1x1",
           ),
           googleMedia(
             "The senior move",
@@ -1768,12 +1910,10 @@ export const caseStudies: CaseStudy[] = [
           googleBeat(
             "The privacy constraint",
             "Google had extensive user signals — browsing history, cookies, profile. The team deliberately chose not to use them. Funnel stage would be inferred from the query itself and nothing else. Both a privacy-respecting choice and a technical one — increasingly relevant in a post-cookie world.",
-            "1x1",
           ),
           googleBeat(
             "Three stages from the query",
             "Browsy — exploratory, no brand or model (\"fall fashion trends for men\"). Researchy — comparison with a category but no committed brand (\"best washing machines of 2023\"). Converty — specific brand, model, sometimes location (\"Air Jordan size 10 near me\").",
-            "9x16",
           ),
           googleMedia(
             "Three formats",
@@ -1783,7 +1923,6 @@ export const caseStudies: CaseStudy[] = [
           googleBeat(
             "The political landscape",
             "Google's whole-page approach created a double bind: the organic search team worried differentiated formats broke page cohesion, while the organic shopping team worried formats too similar to theirs confused ad vs. organic.",
-            "1x1",
           ),
           googleBeat(
             "Threading the needle",
@@ -1791,7 +1930,7 @@ export const caseStudies: CaseStudy[] = [
           ),
         ],
         "16x9",
-        "Richer advertiser-brand hover bumpers proposed but unshipped.",
+        { status: "Richer advertiser-brand hover bumpers proposed but unshipped." },
       ),
       googleProse(
         "google-ads-to-cc",
@@ -1811,17 +1950,14 @@ export const caseStudies: CaseStudy[] = [
           googleBeat(
             "The vision",
             "Transform the software telephone from a dialer into a fully contextualized agent workspace — everything needed to handle a customer intelligently, in one place, without tab-switching or hunting.",
-            "1x1",
           ),
           googleBeat(
             "Five capability layers",
             "Customer history surfaced on connect. AI-suggested KB solutions in real time. A live transcript for noisy environments and non-native speakers. Bot-conversation context, so agents knew what had already been tried. Omnichannel messaging — send links and articles mid-call without breaking voice.",
-            "9x16",
           ),
           googleBeat(
             "The quality layer",
             "SLA timers during the call. An After Session Work screen with CRM-transfer confirmation and a CSAT histogram. A between-calls leaderboard and reflection surface. And a concept — real-time sentiment tracking — letting an agent see a call going south and course-correct before losing the customer.",
-            "1x1",
           ),
           googleBeat(
             "Outcome",
@@ -1829,7 +1965,7 @@ export const caseStudies: CaseStudy[] = [
           ),
         ],
         "16x9",
-        "Shipped in phases; the fully unified workspace never shipped.",
+        { status: "Shipped in phases; the fully unified workspace never shipped." },
       ),
       googleVignette(
         "contact-center-chat-platform",
@@ -1844,7 +1980,6 @@ export const caseStudies: CaseStudy[] = [
           googleBeat(
             "The infrastructure partnership",
             "Partnered with the Google Business Messaging team to use their platform as the technical foundation, rather than building messaging infrastructure from scratch. The design sat on a proven layer.",
-            "1x1",
           ),
           googleMedia(
             "The design",
@@ -1854,7 +1989,6 @@ export const caseStudies: CaseStudy[] = [
           googleBeat(
             "The unshipped vision",
             "The intended end state: a unified surface — one app that flips between phone mode and chat mode seamlessly, an agent moving from a voice call to a chat without changing tools. That fusion never happened before I left, but the integration vision design exists.",
-            "9x16",
           ),
           googleBeat(
             "Outcome",
@@ -1862,7 +1996,7 @@ export const caseStudies: CaseStudy[] = [
           ),
         ],
         "16x9",
-        "Standalone chat shipped; unified phone-and-chat surface unbuilt.",
+        { status: "Standalone chat shipped; unified phone-and-chat surface unbuilt." },
       ),
       googleProse(
         "google-code-yellow-setup",
@@ -1882,7 +2016,6 @@ export const caseStudies: CaseStudy[] = [
           googleBeat(
             "The problem with the problem",
             "Internal telemetry came back fine. Automated MOS scores, routing analysis — a few minor international-routing optimizations, but nothing explaining the volume of complaints. Tested internally, the software telephone performed well. The handed-down diagnosis didn't match the evidence.",
-            "1x1",
           ),
           googleMedia(
             "Going to the field",
@@ -1892,12 +2025,10 @@ export const caseStudies: CaseStudy[] = [
           googleBeat(
             "What the field showed",
             "The offices were acoustically brutal — glass and concrete measuring, on a decibel meter, like the side of a highway. Headphones were outdated; in India, agents took foam ear pads home for hygiene, leaving colleagues pressing bare plastic to their ears. And \"the call was bad\" was a catch-all for supervisors, customers, and frustration — not audio.",
-            "9x16",
           ),
           googleBeat(
             "The instrumentation fix",
             "To separate real audio signal from everything else, the team added a post-call micro-survey to the After Session Work screen — a quick 1–5 rating of that specific call's audio, cross-referenced with automated MOS testing. When both flagged a call, the signal was reliable. Agents became precision instruments.",
-            "1x1",
           ),
           googleBeat(
             "The outcome",

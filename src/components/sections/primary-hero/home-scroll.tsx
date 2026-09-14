@@ -200,6 +200,8 @@ export function HomeScroll({
       (secondaryCovering && handoffProgress >= 0.88) ||
       root.style.getPropertyValue("--home-secondary-translate").trim() === "0px";
 
+    root.classList.toggle("home-hero-group", !onSecondaryStep);
+
     if (onSecondaryStep) {
       const nextStep = Math.max(
         1,
@@ -378,8 +380,8 @@ export function HomeScroll({
         ref={rootRef}
         className={
           reducedMotion
-            ? "home-scroll home-scroll--static"
-            : "home-scroll home-hero-cover-flow"
+            ? "home-scroll home-scroll--static home-hero-group"
+            : "home-scroll home-hero-cover-flow home-hero-group"
         }
         data-active-panel={activePanel}
       >

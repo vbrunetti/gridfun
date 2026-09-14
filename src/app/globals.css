@@ -41,7 +41,7 @@
   --color-royal-blue: #0033ff;
   --color-cruise-primary: #fe4a35;
   --color-cruise: var(--color-cruise-primary);
-  --color-pearson-primary: #0f0051;
+  --color-pearson-primary: #0d0050;
   --color-pearson-secondary: #572cb2;
   --color-google-primary: #3888ff;
   --color-google-secondary: #00ab3d;
@@ -264,7 +264,7 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   /* Client brand — Tailwind bg-pearson-primary, text-google-tertiary, etc. (sync client-brand-colors.ts) */
-  --color-pearson-primary: #0f0051;
+  --color-pearson-primary: #0d0050;
   --color-pearson-secondary: #572cb2;
   --color-google-primary: #3888ff;
   --color-google-secondary: #00ab3d;
@@ -3744,6 +3744,10 @@ a.craft-card:focus-visible {
 /* ── Chrome rail (fixed paper chrome) ── */
 .chrome-rail {
   border-right: 1px solid var(--rule-strong);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .chrome-rail.theme-light {
@@ -3756,6 +3760,29 @@ a.craft-card:focus-visible {
 
 .chrome-rail__logo-slot {
   min-height: calc(var(--chrome-hit) + var(--chrome-pad) * 2);
+  transition: background-color 0.2s ease;
+}
+
+/* Home — neon rail for the first chapter group (hero slates). */
+@media (min-width: 1024px) {
+  body:has(.home-scroll.home-hero-group) .chrome-rail {
+    background: var(--color-neon-lime);
+    color: var(--color-ink);
+    --text-primary: var(--color-ink);
+    --text-secondary: color-mix(in srgb, var(--color-ink) 75%, transparent);
+    --text-tertiary: color-mix(
+      in srgb,
+      var(--color-charcoal) 50%,
+      var(--color-medium-gray)
+    );
+    --rule-light: color-mix(in srgb, var(--color-ink) 18%, transparent);
+    --rule-strong: var(--color-ink);
+  }
+
+  body:has(.home-scroll.home-hero-group)
+    .chrome-rail__logo-slot:not(.theme-dark) {
+    background: var(--color-neon-lime);
+  }
 }
 
 /* ── Primary CTA — accent fill; ink label regardless of parent theme ── */
@@ -5355,10 +5382,13 @@ ul.cs-hero__subhead {
 }
 
 /* Main band is the query container (quote scales with panel width) and clips the
-   oversized background mark where it bleeds past the panel. */
-.vframe--quote .vframe__scroll {
+   oversized background mark where it bleeds past the band. Quote panels never
+   inner-scroll — the decorative mark would otherwise inflate scrollHeight. */
+.vframe--quote .vframe__scroll,
+.vframe--quote.is-active .vframe__scroll {
   justify-content: safe center;
   container-type: inline-size;
+  overflow: hidden;
 }
 
 /* Quote + attribution lockup — also the anchor + stacking context for the mark,
@@ -5371,13 +5401,7 @@ ul.cs-hero__subhead {
   display: flex;
   flex-direction: column;
   gap: clamp(0.75rem, 2.5cqw, 1.75rem);
-  /* Clip the giant background mark HERE rather than letting the scroll band do
-     it: browsers count the glyph's layout extent as the band's scrollable
-     overflow, which gave active quote panels a phantom ~50px inner scroll and
-     a bottom fade. overflow:clip zeroes that contribution. (No clip margin —
-     Chrome counts scrollable overflow up to the margin edge, resurrecting the
-     phantom; the mark now crops at the lockup box instead of the band edge.) */
-  overflow: clip;
+  overflow: visible;
 }
 
 /* Giant background quotation mark — anchored behind the first line of the quote
