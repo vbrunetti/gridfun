@@ -905,12 +905,12 @@ export const caseStudies: CaseStudy[] = [
       pearsonVignette(
         "nebula-design-system",
         "Booting Up Nebula",
-        ["Design systems", "Visual design", "Leadership"],
+        ["Design systems", "Visual design", "Leadership", "Accessibility"],
         "Design systems as infrastructure / signature moments by design, not by accident / executive buy-in",
         [
           pearsonBeat(
             "No system existed",
-            "No design system existed when I arrived. My belief going in: a design system is infrastructure, as fundamental as electricity. The org ran an old-school pipeline — UX handed off wireframes to separate visual designers, who handed annotated mockups to front-end engineers — with no systematized component library at all, and thousands of one-off decisions getting made along the way.\n\nIt all came to a head right before I arrived with a corporate rebrand. Pearson went from teal to purple, and the cost of not cascading brand changes through tokens became really clear, really fast.",
+            "No design system existed when I arrived. The org ran an old-school pipeline — UX handed off wireframes to separate visual designers, who handed annotated mockups to front-end engineers — with no systematized component library at all, and thousands of one-off decisions getting made along the way.\n\nIt all came to a head right before I arrived with a corporate rebrand. Pearson went from teal to purple, and the cost of not cascading brand changes through tokens became really clear, really fast.",
           ),
           pearsonBeat(
             "The two signature moments",
@@ -934,6 +934,22 @@ export const caseStudies: CaseStudy[] = [
           pearsonMedia(
             "Primitives, explored",
             "Spikes on density, structural layering, and color ramps — the raw material the system got built from.",
+            "1x1",
+            {
+              sources: [
+                "/portfolio/pearson/xxx.jpg",
+                "/portfolio/pearson/xxx.jpg",
+                "/portfolio/pearson/xxx.jpg",
+              ],
+            },
+          ),
+          pearsonBeat(
+            "Cotton candy wasn't built for this",
+            "Pearson's brand palette was narrow: pink, purple, and cotton-candy-core. Fine for marketing, but it lacked the space for semantics (error, success, and warning states), and had no headroom for the tertiary palette we'd need for charts and data visualizations. It also didn't clear WCAG 2.2 AA once it got stretched across real UI 🤦🏽‍♀️. To compensate, we generated a11y-safe ramps and created tight guardrails for data visualization colors and usage.",
+          ),
+          pearsonMedia(
+            "The color work",
+            "Brand and semantic ramps, tested for contrast before anything shipped.",
             "1x1",
             {
               sources: [
@@ -982,42 +998,6 @@ export const caseStudies: CaseStudy[] = [
         },
       ),
       pearsonVignette(
-        "nebula-tokens",
-        "Nebula Tokens (Craft Series, Part 1)",
-        ["Design systems", "Visual design"],
-        "Token theory / typographic baseline grids / extending a narrow brand into a full system",
-        [
-          pearsonBeat(
-            "Not a blank canvas",
-            "Two starting points shaped the work. My Google background gave me a material-centric model for token theory and atomic composition. Pearson also already had an abandoned, poorly constructed design system, wonky accessibility, inconsistent spacing everywhere, a useful reference for what not to do.",
-          ),
-          pearsonBeat(
-            "Building the baseline grid",
-            "Started with the typographic baseline grid, the foundation everything aligns to. Generated a type ramp with an open-source type-scale tool, then ran spikes to make sure the grid held across small, medium, and large variants of buttons, chips, and form fields at the same time.",
-          ),
-          pearsonBeat(
-            "Pragmatic font choices",
-            "Plus Jakarta Sans, the corporate font, doesn't hold up for body copy at small sizes. So: Plus Jakarta Sans for headlines and impact, Noto Sans for body readability, Roboto Mono for code. Spend the brand's visual equity where it's felt, use proven defaults where the job is just to work.",
-          ),
-          pearsonMedia(
-            "Extending a narrow palette",
-            "Pearson's palette is narrow, pink and purple, cotton candy in my own words. A system needs more: semantic colors for error, success, and warning states, full primary chroma ramps, and a tertiary palette for data visualization and chips. Ran brand and semantic keys through a Figma ramp generator; every ramp passed contrast and usability testing.",
-            "16x9",
-          ),
-          pearsonBeat(
-            "Spacing and geometry",
-            "Spacing and corner-radius tokens on a base-8 grid, a carryover from Material fluency, chosen because it's mathematically clean and scales predictably across component sizes.",
-          ),
-        ],
-        "16x9",
-        {
-          titleTreatment: "cover",
-          keyImageSrc: "/portfolio/pearson/xxx.jpg",
-          titleCoverBlur: 0,
-          titleCoverAlpha: 0.7,
-        },
-      ),
-      pearsonVignette(
         "shipping-the-system",
         "Shipping the System",
         ["Design systems", "Leadership", "Engineering"],
@@ -1025,12 +1005,49 @@ export const caseStudies: CaseStudy[] = [
         [
           pearsonBeat(
             "The team",
-            "Design systems don't ship themselves. I brought in and led a team of Creative Technologists, designers who could write real code, and gave them a deliberately small first OKR: get something, anything, from Figma into Storybook, end to end. The goal wasn't the artifact. It was proving the pipeline could survive Pearson's enterprise permissions and tooling friction at all.",
+            "Design systems don't ship themselves. Once funding was secured, I built out the team — the first truly cross-functional one I'd had: creative technologists, design system specialists, and visual designers, all under one roof. We controlled our own deliverables and our own quality bar, end to end. We were finally, actually full-stack.",
+          ),
+          pearsonBeat(
+            "Proving the model",
+            "We started small: a proof of concept shipping a handful of components from Figma into Storybook, end to end. Before scaling anything, we took it to the engineering teams who'd actually consume it and asked for real feedback on how we'd executed the components and the React packages. We got some notes back — better patterns for a few props here and there — but by and large, the model held.",
+          ),
+          pearsonBeat(
+            "Building it for real",
+            "With the model proven, we built out the full library — around sixty-five components to start. This time accessibility was built into the pipeline itself, not checked at the end: automated checks running inside our agentic coding pipeline, close collaboration with Pearson's accessibility team to hit their actual thresholds, and axe and Deque testing wired in from day one. We adopted their quality bar as our own, not a separate design-team standard nobody else had to meet.",
           ),
           pearsonMedia(
-            "Proof of pipeline",
-            "Q1 proved the pipeline worked. Q2 built it out at scale on Pearson Learning Studio, atoms through complex AI organisms, reaching roughly 80 percent desktop coverage, more components than Google's Material system, and about 60 percent the breadth of a mature enterprise system like Ant Design.",
+            "At enterprise scale",
+            "That work scaled into the real Pearson Learning Studio product build. Alongside the growing component library, we shipped around eight coded reference examples — complex, page-level templates we didn't ship as reusable components but as code for engineering to reference: this is the fit-and-finish bar, assembled on a real screen. That library, those references, and a full motion token layer together made up the first Nebula deliverable running at true enterprise scale.",
             "16x9",
+            {
+              sources: [
+                "/portfolio/pearson/xxx.jpg",
+                "/portfolio/pearson/xxx.jpg",
+                "/portfolio/pearson/xxx.jpg",
+              ],
+            },
+          ),
+          pearsonMedia(
+            "In motion",
+            "Motion tokens in action — hover, transition, and state changes, moving the same way everywhere in the system.",
+            "16x9",
+            {
+              sources: [
+                "/portfolio/pearson/xxx.jpg",
+              ],
+            },
+          ),
+          pearsonMedia(
+            "Storybook, live",
+            "Clicking through the alpha release, component by component.",
+            "9x16",
+            {
+              sources: [
+                "/portfolio/pearson/xxx.jpg",
+                "/portfolio/pearson/xxx.jpg",
+                "/portfolio/pearson/xxx.jpg",
+              ],
+            },
           ),
           pearsonMedia(
             "In Figma, in Storybook",
