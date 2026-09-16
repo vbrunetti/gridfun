@@ -9,6 +9,7 @@ import type { ChromeSurface } from "@/lib/chrome-surface";
 export type CaseStudiesStep = {
   id: string;
   surface: ChromeSurface;
+  label: string;
 };
 
 type CaseStudiesScrollProps = {
@@ -39,6 +40,7 @@ function useMobileIndexSteps(steps: CaseStudiesStep[]) {
 /**
  * Native scroll-snap for the case-studies index. usePanelDeck tracks the active
  * panel for dots + chrome surface; mobile skips the desktop-only intro band.
+ * The intro band never gets a dot — only study covers do.
  */
 export function CaseStudiesScroll({ steps, children }: CaseStudiesScrollProps) {
   const rootRef = useRef<HTMLElement>(null);
@@ -71,21 +73,26 @@ export function CaseStudiesScroll({ steps, children }: CaseStudiesScrollProps) {
     },
   });
 
+  const introInDeck = deckSteps[0]?.id === INTRO_STEP_ID;
+  const introOffset = introInDeck ? 1 : 0;
+  const dotSteps = introOffset ? deckSteps.slice(introOffset) : deckSteps;
+  const dotsActive = activeIndex < introOffset ? -1 : activeIndex - introOffset;
+
   const scrollToStep = useCallback(
     (index: number) => {
-      goTo(index);
+      goTo(index + introOffset);
     },
-    [goTo],
+    [goTo, introOffset],
   );
 
   const focusStep = introSkipped ? activeIndex + 1 : activeIndex;
-  const previewStep =
-    hoverStep !== null && introSkipped ? hoverStep + 1 : hoverStep;
+  const previewStep = hoverStep !== null ? hoverStep + 1 : null;
 
   useCaseStudiesScrollRegister(
     true,
-    deckSteps.length,
-    activeIndex,
+    dotSteps.length,
+    dotSteps.map((step) => step.label),
+    dotsActive,
     scrollToStep,
     dotsVisible,
     hoverStep,

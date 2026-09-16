@@ -12,6 +12,7 @@ import {
 
 export type CaseStudiesScrollState = {
   stepCount: number;
+  stepLabels: string[];
   activeStep: number;
   scrollToStep: (index: number) => void;
   visible: boolean;
@@ -52,6 +53,7 @@ export function useCaseStudiesScrollContext() {
 export function useCaseStudiesScrollRegister(
   enabled: boolean,
   stepCount: number,
+  stepLabels: string[],
   activeStep: number,
   scrollToStep: (index: number) => void,
   visible: boolean,
@@ -63,6 +65,7 @@ export function useCaseStudiesScrollRegister(
   scrollRef.current = scrollToStep;
   const setHoverRef = useRef(setHoverStep);
   setHoverRef.current = setHoverStep;
+  const labelsKey = stepLabels.join("\0");
 
   useEffect(() => {
     if (!enabled) {
@@ -72,6 +75,7 @@ export function useCaseStudiesScrollRegister(
 
     setState({
       stepCount,
+      stepLabels,
       activeStep,
       scrollToStep: (index) => scrollRef.current(index),
       visible,
@@ -80,5 +84,5 @@ export function useCaseStudiesScrollRegister(
     });
 
     return () => setState(null);
-  }, [enabled, stepCount, activeStep, visible, hoverStep, setState]);
+  }, [enabled, stepCount, labelsKey, activeStep, visible, hoverStep, setState]); // eslint-disable-line react-hooks/exhaustive-deps
 }

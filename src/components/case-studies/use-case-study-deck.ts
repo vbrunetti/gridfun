@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   computeActiveIndex,
   getTopInset,
@@ -29,6 +29,34 @@ function buildStops(steps: CaseStudyDetailStep[]): DeckStop[] {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
+}
+
+function hashFragment(hash: string): string {
+  try {
+    return decodeURIComponent(hash.replace(/^#/, "")).trim();
+  } catch {
+    return hash.replace(/^#/, "").trim();
+  }
+}
+
+/** Resolve `#slug` (and the legacy `#vignette-slug`) to a deck step. */
+function stepIndexFromHash(
+  hash: string,
+  steps: CaseStudyDetailStep[],
+): number {
+  const fragment = hashFragment(hash);
+  if (!fragment) return -1;
+  const exact = steps.findIndex((step) => step.id === fragment);
+  if (exact >= 0) return exact;
+  const bySlug = steps.findIndex((step) => step.vignetteSlug === fragment);
+  if (bySlug >= 0) return bySlug;
+  if (fragment.startsWith("vignette-")) {
+    const slug = fragment.slice("vignette-".length);
+    return steps.findIndex(
+      (step) => step.vignetteSlug === slug || step.id === slug,
+    );
+  }
+  return -1;
 }
 
 export type CaseStudyDeckOptions = {
@@ -121,18 +149,32 @@ export function useCaseStudyDeck({
   }, [stopSnapY]);
 
   const goToStop = useCallback(
-    (targetIndex: number) => {
+    (targetIndex: number, behavior: ScrollBehavior = "smooth") => {
       const stops = stopsRef.current;
       const target = stops[clamp(targetIndex, 0, stops.length - 1)];
       if (!target) return;
-      window.scrollTo({ top: stopSnapY(target), behavior: "smooth" });
+      window.scrollTo({ top: stopSnapY(target), behavior });
     },
     [stopSnapY],
   );
 
   const goToStep = useCallback(
-    (stepIndex: number) => goToStop(firstStopOfStep(stepIndex)),
+    (stepIndex: number, behavior: ScrollBehavior = "smooth") =>
+      goToStop(firstStopOfStep(stepIndex), behavior),
     [firstStopOfStep, goToStop],
+  );
+
+  const applyHash = useCallback(
+    (behavior: ScrollBehavior) => {
+      const idx = stepIndexFromHash(window.location.hash, stepsRef.current);
+      if (idx < 0) return false;
+      const step = stepsRef.current[idx];
+      if (!step || !document.getElementById(step.id)) return false;
+      goToStop(firstStopOfStep(idx), behavior);
+      setActiveStep(idx);
+      return true;
+    },
+    [firstStopOfStep, goToStop, setActiveStep],
   );
 
   const goToPanel = useCallback(
@@ -145,6 +187,50 @@ export function useCaseStudyDeck({
     if (stepIds.length === 0) return;
     setActiveStep(computeActiveIndex(stepIds, getTopInset()));
   }, [stepsKey, setActiveStep]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Land on `#slug` before paint; retry once in case Next.js resets scroll on hydrate.
+  // Instant (not smooth): a long tween through `scroll-snap-stop: always` gets
+  // eaten by intermediate panel stops.
+  useLayoutEffect(() => {
+    applyHash("auto");
+    const raf = requestAnimationFrame(() => applyHash("auto"));
+    const timeout = window.setTimeout(() => applyHash("auto"), 50);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.clearTimeout(timeout);
+    };
+  }, [stepsKey, applyHash]);
+
+  useEffect(() => {
+    const onHash = () => applyHash("auto");
+    const onClick = (event: MouseEvent) => {
+      const anchor = (event.target as HTMLElement | null)?.closest("a[href^='#']");
+      if (!anchor) return;
+      const href = anchor.getAttribute("href");
+      if (!href) return;
+      const idx = stepIndexFromHash(href, stepsRef.current);
+      if (idx < 0) return;
+      event.preventDefault();
+      const hash = href.startsWith("#") ? href : `#${href}`;
+      const next = `${window.location.pathname}${window.location.search}${hash}`;
+      const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+      if (current !== next) {
+        history.pushState(null, "", next);
+      }
+      goToStop(firstStopOfStep(idx), "auto");
+      setActiveStep(idx);
+    };
+
+    window.addEventListener("hashchange", onHash);
+    window.addEventListener("popstate", onHash);
+    document.addEventListener("click", onClick);
+
+    return () => {
+      window.removeEventListener("hashchange", onHash);
+      window.removeEventListener("popstate", onHash);
+      document.removeEventListener("click", onClick);
+    };
+  }, [applyHash, firstStopOfStep, goToStop, setActiveStep]);
 
   useEffect(() => {
     syncActive();

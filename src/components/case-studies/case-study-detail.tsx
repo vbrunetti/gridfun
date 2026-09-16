@@ -14,7 +14,7 @@ import {
   type CaseStudy,
   type CraftVignette,
 } from "@/content/portfolio";
-import { buildCaseStudyDetailSteps } from "@/lib/case-study-detail-steps";
+import { buildCaseStudyDetailSteps, vignetteSectionId } from "@/lib/case-study-detail-steps";
 
 /** A vignette is a "chapter" once it carries narrative beats or a theme line. */
 function isNarrativeVignette(vignette: CraftVignette): boolean {
@@ -109,7 +109,7 @@ export function CaseStudyDetail({
             return (
               <section
                 key={section.slug}
-                id={`vignette-${section.slug}`}
+                id={vignetteSectionId(section.slug)}
                 data-cs-detail-row
                 className="cs-focus-section cs-section cs-section--vignette keyline-b"
                 data-chrome-surface="dark"

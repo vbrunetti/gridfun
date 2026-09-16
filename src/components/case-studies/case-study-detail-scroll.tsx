@@ -50,8 +50,8 @@ type CaseStudyDetailScrollProps = {
   steps: CaseStudyDetailStep[];
   children: ReactNode;
   /**
-   * Dot granularity. Omit (case-study detail) for one dot per section/vignette;
-   * set for a single-vignette craft detail to get one dot per panel.
+   * Dot granularity. Omit (case-study detail) for one dot per vignette;
+   * set for a single-vignette craft detail to get one dot per panel on mobile.
    */
   panelDots?: boolean;
 };

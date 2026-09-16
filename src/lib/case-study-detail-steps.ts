@@ -5,6 +5,11 @@ import {
 } from "@/content/portfolio";
 import type { CaseStudyDetailStep } from "@/components/case-studies/case-study-detail-scroll-context";
 
+/** DOM id / URL hash fragment for a vignette row on a detail deck. */
+export function vignetteSectionId(slug: string): string {
+  return slug;
+}
+
 /**
  * A vignette is a horizontal "chapter" (filmstrip) once it carries narrative
  * beats or a theme line — otherwise it renders as a single static grid row.
@@ -17,7 +22,7 @@ function isNarrativeVignette(vignette: CraftVignette): boolean {
   );
 }
 
-/** Ordered right-rail dots: hero · sections · footer. */
+/** Ordered detail-deck steps: hero · sections · footer. Rail dots are vignettes only. */
 export function buildCaseStudyDetailSteps(study: CaseStudy): CaseStudyDetailStep[] {
   const steps: CaseStudyDetailStep[] = [
     { id: "cs-hero", kind: "hero", label: study.name, panelCount: 1 },
@@ -32,7 +37,7 @@ export function buildCaseStudyDetailSteps(study: CaseStudy): CaseStudyDetailStep
         ? section.images.length + 1
         : 1;
       steps.push({
-        id: `vignette-${section.slug}`,
+        id: vignetteSectionId(section.slug),
         kind: "vignette",
         label: section.name,
         vignetteSlug: section.slug,

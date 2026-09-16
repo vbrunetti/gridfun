@@ -127,7 +127,7 @@ export type VignetteImage = {
 
 export type CraftVignette = {
   type: "vignette";
-  /** Unique across the whole site — powers /craft/[vignette]. */
+  /** Unique across the whole site — powers /craft/[vignette] and case-study `#slug` anchors. */
   slug: string;
   name: string;
   /**
@@ -986,7 +986,7 @@ export const caseStudies: CaseStudy[] = [
           pearsonThesis(
             "Outcome",
             "Funding secured.",
-            "The culmination of all this work - building the Nebula foundation and booting up a design system, was Pearson funded us with the headcount needed for a real design systems team.",
+            "The culmination of all this work — building the Nebula foundation and booting up a design system — was Pearson funding us with the headcount needed for a real design systems team.",
           ),
         ],
         "1x1",
@@ -1013,11 +1013,11 @@ export const caseStudies: CaseStudy[] = [
           ),
           pearsonBeat(
             "Building it for real",
-            "With the model proven, we built out the full library — around sixty-five components to start. This time accessibility was built into the pipeline itself, not checked at the end: automated checks running inside our agentic coding pipeline, close collaboration with Pearson's accessibility team to hit their actual thresholds, and axe and Deque testing wired in from day one. We adopted their quality bar as our own, not a separate design-team standard nobody else had to meet.",
+            "With the model proven, we built out the full library. ~65 components to start. Accessibility was built into the pipeline itself, not checked at the end. We had automated checks running inside our agentic coding pipeline, close collaboration with Pearson's accessibility team to hit their actual thresholds, and axe and Deque testing wired in from day one.",
           ),
           pearsonMedia(
             "At enterprise scale",
-            "That work scaled into the real Pearson Learning Studio product build. Alongside the growing component library, we shipped around eight coded reference examples — complex, page-level templates we didn't ship as reusable components but as code for engineering to reference: this is the fit-and-finish bar, assembled on a real screen. That library, those references, and a full motion token layer together made up the first Nebula deliverable running at true enterprise scale.",
+            "That work scaled into the Pearson Learning Studio production build. Alongside the growing component library, we shipped around eight coded reference examples — complex, page-level templates we didn't ship as reusable components but as code for engineering to reference.",
             "16x9",
             {
               sources: [
@@ -1029,7 +1029,7 @@ export const caseStudies: CaseStudy[] = [
           ),
           pearsonMedia(
             "In motion",
-            "Motion tokens in action — hover, transition, and state changes, moving the same way everywhere in the system.",
+            "Motion tokens in action.",
             "16x9",
             {
               sources: [
@@ -1048,11 +1048,6 @@ export const caseStudies: CaseStudy[] = [
                 "/portfolio/pearson/xxx.jpg",
               ],
             },
-          ),
-          pearsonMedia(
-            "In Figma, in Storybook",
-            "Every component got built twice: once in Figma as the source of design truth, once in Storybook as the source of engineering truth, kept in lockstep by the team, not by hope.",
-            "9x16",
           ),
           pearsonBeat(
             "Real infrastructure, not files",
@@ -1086,30 +1081,51 @@ export const caseStudies: CaseStudy[] = [
         [
           pearsonBeat(
             "The real question",
-            "With a real React component library live, the question became whether designers could prototype in natural language through Cursor, pulling from the actual Nebula package, not just describing something Nebula-ish. In practice, no. Even pointed straight at the package, Cursor generated generic interfaces, what I started calling Tailwind slop, because it had no efficient way to match intent to what already existed.",
+            "Once we had a real React component library live, I wanted to know if we could actually prototype in natural language through Cursor — pulling from the real Nebula package, not just describing something that was Nebula-ish. Turned out the answer was no. Even when I pointed it straight at the package, Cursor kept generating generic interfaces, what I started calling Tailwind slop, because it had no efficient way to match intent to what already existed.",
           ),
           pearsonBeat(
             "What I didn't try to do",
-            "The obvious move is teaching the AI to design better. That's not the problem it has, Cursor already knows how to design. What it didn't know was how to design like Nebula specifically: our density, our color logic, our AI and celebration moments, the hundred small decisions that make an interface look like it came from this system and not a generic one.",
+            "My first instinct was to try to teach the AI to design better. But that's not actually the problem it has — Cursor already knows how to design. What it didn't know was how to design like Nebula specifically: our density, our color logic, our AI and celebration moments, the hundred small decisions that make an interface look like it came from this system and not a generic one.",
           ),
           pearsonMedia(
             "Two markdown files as guardrails",
-            "A design philosophy markdown encoding Nebula's actual theory: density, color, how modules nest, how elevation works, and why. A component mapping markdown telling Cursor to check what already exists before generating anything new. Together with the real component library, these became a custom Cursor skill, a slash command that spins up a new, on-system prototype.",
+            "We began trying to encode our entire design philosophy into a single markdown file (design.md). Density, color, how modules nest, how elevation works, and why — it was a lot. We paired it with a second file that just mapped out our components, telling the agent to go check what already existed before it tried to generate something new. Combined with the real component library, that became a custom skill for both Cursor and Claude — a slash command that spins up a whole new, on-system prototype in whatever folder you're working in.",
             "16x9",
+          ),
+          pearsonBeat(
+            "It kept evolving",
+            "That single design.md file got unwieldy fast, honestly. So I worked with Claude to break it apart: one primary file with the rules that actually mattered most, plus a handful of separate look-up docs the agent only pulls in when it actually needs them, instead of chewing through one giant file every single turn. It ended up smaller, more targeted, and a lot cheaper to run.",
           ),
           pearsonMedia(
             "Boot to prototype",
-            "Sped up, the whole thing plays like a magic trick: blank desktop to a fully realized, on-brand interface, reactive navigation, light and dark mode, a working grid, sample components already in place, in seconds, using nothing but natural language.",
+            "This is me going from a blank folder to a working prototype, sped up so you can actually sit through it. Reactive navigation, light and dark mode, a real grid, sample pages showing how common interfaces are supposed to snap together — all of it generated from nothing but natural language.",
             "9x16",
+            {
+              sources: [
+                "/portfolio/pearson/xxx.jpg",
+              ],
+            },
+          ),
+          pearsonMedia(
+            "The results",
+            "Me clicking around one of the prototypes the kit spit out, just to show it's a real, working, on-system thing and not a mockup.",
+            "1x1",
+            {
+              sources: [
+                "/portfolio/pearson/xxx.jpg",
+                "/portfolio/pearson/xxx.jpg",
+                "/portfolio/pearson/xxx.jpg",
+              ],
+            },
           ),
           pearsonThesis(
             "Where this sits",
             "Not many design orgs are doing this yet.",
-            "Training an AI on a system's actual theory, not just pointing it at a component library and hoping. That gap is most of why I'm proud of this one.",
+            "Training an AI on a system's actual theory, not just pointing it at a component library and hoping for the best. That's most of why I'm proud of this one.",
           ),
           pearsonBeat(
             "What's next",
-            "The next iteration pulls golden master reference screens through Figma's MCP instead of relying purely on written theory, real examples the AI can pattern-match against rather than rules it has to interpret.",
+            "The next iteration pulls golden master reference screens straight through Figma's MCP, instead of relying purely on written theory — giving the AI real examples to pattern-match against instead of just rules to interpret.",
           ),
         ],
         "16x9",
@@ -1124,37 +1140,47 @@ export const caseStudies: CaseStudy[] = [
         "ai-guided-study",
         "AI Guided Study",
         ["AI-native design", "Interaction design", "Visual design"],
-        "No table of contents / proficiency over page count / the card as a conversation thread",
+        "Signature moments, shipped / celebrating achievement through motion and color / AI as a chatbar, not a rail",
         [
           pearsonBeat(
-            "No table of contents",
-            "Traditional studies and assignments ship with a table of contents and materials an instructor prepared ahead of time. AI Guided Study has little to none of that. The student picks a topic and starts.",
+            "Nebula supports learning science",
+            "Pearson has genuinely excellent learning scientists, and Guided Study runs on their proprietary adaptive learning techniques — that expertise is theirs, not mine. What the design system contributed sits on top of that: visual and motion design built specifically to celebrate real achievement, not just mark it, and a UI chrome that brings generative AI in through a completely different pattern than anywhere else in Pearson — embedded contextually on the card itself instead of parked in a persistent rail. It's the only Pearson application built this way.",
           ),
           pearsonBeat(
-            "How it adapts",
-            "There's no fixed path underneath. Based on how the student is doing as they go, the AI decides what comes next, not a pre-authored sequence with adaptive skin on top.",
-          ),
-          pearsonBeat(
-            "Proficiency, not a page count",
-            "The study isn't a set number of questions. It runs until the student reaches a target proficiency level, and they can see that proficiency, and the time they've spent, the whole way through.",
+            "The rhythm of the loop",
+            "The loop itself is simple: an intro card sets up the lesson, the student works through readings and assessments, then either lands on a celebration screen or gets redirected into extra help. The visual design leans hard into that shape. Intro and outcome moments get color and motion — the actual working state, reading, answering, thinking, stays deliberately quiet, almost boring, on purpose. Even the redirect screen, when a student needs more help, stays in that same colorful, supportive register rather than reading as a failure state. So when the color and confetti do show up, it means something. It's the signature-moments idea from Nebula, shipped inside one very specific loop.",
           ),
           pearsonMedia(
-            "The visual language",
-            "Skeuomorphic cards, bright color reserved for the interstitial moments, so the shift from working to celebrating is felt, not just labeled.",
-            "16x9",
+            "The four beats of a lesson",
+            "Intro, working, celebration, redirect — the visual register shifts with each one.",
+            "1x1",
+            {
+              sources: [
+                "/portfolio/pearson/xxx.jpg",
+                "/portfolio/pearson/xxx.jpg",
+                "/portfolio/pearson/xxx.jpg",
+                "/portfolio/pearson/xxx.jpg",
+              ],
+            },
           ),
           pearsonBeat(
-            "When it goes sideways",
-            "Getting an answer wrong doesn't just mark it wrong and move on. The bot intervenes, a side quest inside the main loop, before handing the student back to the path.",
+            "A different kind of AI surface",
+            "Everywhere else in Nebula, AI lives in a persistent rail on the left — always visible, always primary. Here it doesn't. The loop is linear by nature, one card at a time, so AI shows up instead as a chatbar at the bottom of the card: as-needed, not always-on. Ask about what you're reading, ask it to explain a concept, and the card itself becomes the thread. No modal, no separate surface. A gradient border marks the card while the AI is thinking, so you always know where the conversation actually lives. Same philosophy as the rest of the system — AI should feel reachable, not tucked away — just a different shape for a different context.",
           ),
-          pearsonBeat(
-            "Ask anything, inline",
-            "At any point the student can ask the AI about what they're reading or answering, and the card itself becomes the thread. No modal, no separate surface. A gradient border marks the card while the AI is thinking, so the student always knows where the conversation actually is.",
+          pearsonMedia(
+            "The chatbar",
+            "As-needed AI, right on the card — a gradient border marking the thread while it thinks.",
+            "9x16",
+            {
+              sources: [
+                "/portfolio/pearson/xxx.jpg",
+              ],
+            },
           ),
           pearsonThesis(
-            "Proficiency reached",
-            "The study ends on a celebration, not a summary screen.",
-            "From there the student daisy-chains into the next study or drops back to the dashboard.",
+            "Full circle",
+            "The signature moments made it into production.",
+            "Every celebration screen, every color shift, every as-needed AI thread traces straight back to the two bets we made on day one of Nebula. This is what those bets looked like once they actually shipped.",
           ),
         ],
         "16x9",

@@ -18,11 +18,11 @@ export function CaseStudiesDotsRail() {
     return null;
   }
 
-  const { stepCount, activeStep, scrollToStep, setHoverStep } = state;
+  const { stepCount, stepLabels, activeStep, scrollToStep, setHoverStep } = state;
 
   const steps = Array.from({ length: stepCount }, (_, i) => ({
     id: `cs-index-${i}`,
-    label: `step ${i + 1} of ${stepCount}`,
+    label: stepLabels[i] ?? `Step ${i + 1}`,
   }));
 
   return (
@@ -30,7 +30,11 @@ export function CaseStudiesDotsRail() {
       steps={steps}
       activeStep={activeStep}
       scrollToStep={scrollToStep}
-      ariaLabel={`Case studies progress, step ${activeStep + 1} of ${stepCount}`}
+      ariaLabel={
+        activeStep >= 0
+          ? `Case studies progress, step ${activeStep + 1} of ${stepCount}`
+          : `Case studies progress, ${stepCount} ${stepCount === 1 ? "study" : "studies"}`
+      }
       onMouseEnter={() => document.body.classList.add(CS_INDEX_NAV_HOVER_CLASS)}
       onMouseLeave={() => {
         document.body.classList.remove(CS_INDEX_NAV_HOVER_CLASS);

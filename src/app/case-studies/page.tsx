@@ -13,10 +13,11 @@ export const metadata: Metadata = {
 export default async function CaseStudiesPage() {
   const studies = visibleCaseStudies(await isUnlocked());
   const steps = [
-    { id: "cs-index-intro", surface: "dark" as const },
+    { id: "cs-index-intro", surface: "dark" as const, label: "Case Studies" },
     ...studies.map((study) => ({
       id: `cs-index-${study.slug}`,
       surface: clientBrandChromeSurface(study.brand.field),
+      label: study.name,
     })),
   ];
 

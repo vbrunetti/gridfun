@@ -39,8 +39,8 @@ export type CaseStudyDetailScrollState = {
   /** Scroll to a specific panel within a vignette row (per-panel dot nav). */
   scrollToPanel: (stepIndex: number, panelIndex: number) => void;
   /**
-   * Dot granularity. false (default, case-study detail) = one dot per section/
-   * vignette. true (single-vignette craft detail) = one dot per panel.
+   * Dot granularity. false (default, case-study detail) = one dot per vignette.
+   * true (single-vignette craft detail) = one dot per panel on mobile.
    */
   panelDots: boolean;
   visible: boolean;

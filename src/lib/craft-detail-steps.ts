@@ -1,12 +1,13 @@
 import type { CraftVignette } from "@/content/portfolio";
 import type { CaseStudyDetailStep } from "@/components/case-studies/case-study-detail-scroll-context";
+import { vignetteSectionId } from "@/lib/case-study-detail-steps";
 
-/** Ordered right-rail dots: hero · vignette filmstrip · footer. */
+/** Ordered detail-deck steps: hero · vignette filmstrip · footer. Rail dots are vignettes only. */
 export function buildCraftDetailSteps(vignette: CraftVignette): CaseStudyDetailStep[] {
   return [
     { id: "craft-hero", kind: "hero", label: vignette.name, panelCount: 1 },
     {
-      id: `vignette-${vignette.slug}`,
+      id: vignetteSectionId(vignette.slug),
       kind: "vignette",
       label: vignette.name,
       vignetteSlug: vignette.slug,

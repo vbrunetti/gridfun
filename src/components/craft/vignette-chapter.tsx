@@ -31,6 +31,7 @@ import { CraftTagList } from "@/components/craft/vignette-media";
 import { VignettePanelCarousel } from "@/components/craft/vignette-panel-carousel";
 import { VframeScroll } from "@/components/craft/vframe-scroll";
 import { attachHorizontalGestures } from "@/components/deck/gestures";
+import { vignetteSectionId } from "@/lib/case-study-detail-steps";
 /** Grid-width panel layout — lg+ only; mobile uses CSS widths + pin padding. */
 const GRID_LAYOUT_QUERY = "(min-width: 1024px)";
 /** Horizontal filmstrip gestures — active on all viewports. */
@@ -818,7 +819,7 @@ export function VignetteChapter({
     <section
       ref={sectionRef}
       className={`cs-focus-section vchapter ${themeClass}`}
-      id={`vignette-${vignette.slug}`}
+      id={vignetteSectionId(vignette.slug)}
       data-cs-detail-row
       data-scroll-pin={controlled ? "" : undefined}
       data-chrome-surface={chromeSurface}
@@ -876,7 +877,14 @@ export function VignetteChapter({
                   {String(chapterNumber).padStart(2, "0")}
                 </p>
               ) : null}
-              <h2 className="display-2xl vchapter__title">{vignette.name}</h2>
+              <h2 className="display-2xl vchapter__title">
+                <a
+                  href={`#${vignetteSectionId(vignette.slug)}`}
+                  className="vchapter__anchor"
+                >
+                  {vignette.name}
+                </a>
+              </h2>
             </div>
             <footer className="vframe__foot vframe__foot--title">
               <CraftTagList

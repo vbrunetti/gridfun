@@ -33,7 +33,7 @@ function buildHomeScrollSteps(
   const hero: HomeScrollStep = {
     id: "home-hero",
     kind: "hero",
-    label: "Home",
+    label: "My Journey",
     subChapterCount: slateCount,
   };
 
