@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { CaseStudyDetail } from "@/components/case-studies/case-study-detail";
+import { clientBrandColorVar } from "@/lib/client-brand-colors";
 import type {
   CaseStudy,
   CraftVignette,
+  MosaicCell,
   ProseSection,
 } from "@/content/portfolio";
 
@@ -189,6 +191,139 @@ const panelInventory: CraftVignette = {
   ],
 };
 
+/* Experiment fill: a seeded (stable across reloads) random mix of grid
+   placeholders, big impact numbers, and flat fields derived from the brand
+   color. Every frame gets at least one of each, extras are random. */
+const BRAND = clientBrandColorVar("cruise-primary");
+const FIELD_TONES = [
+  BRAND,
+  `color-mix(in srgb, ${BRAND} 65%, black)`,
+  `color-mix(in srgb, ${BRAND} 35%, black)`,
+  `color-mix(in srgb, ${BRAND} 55%, white)`,
+  `color-mix(in srgb, ${BRAND} 14%, black)`,
+];
+const STATS: { stat: string; label: string }[] = [
+  { stat: ">20%", label: "Faster context" },
+  { stat: "3 sec.", label: "First action" },
+  { stat: "-38%", label: "Recovery events" },
+  { stat: "12x", label: "Fleet per advisor" },
+  { stat: "94%", label: "Task success" },
+  { stat: "2.1M", label: "Rides supported" },
+  { stat: "4.6", label: "Advisor CSAT" },
+];
+
+function mulberry32(seed: number) {
+  let a = seed;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const rand = mulberry32(20260929);
+const pick = <T,>(list: readonly T[]): T => list[Math.floor(rand() * list.length)]!;
+
+function mosaicCell(kind: "media" | "stat" | "field"): MosaicCell {
+  if (kind === "media") {
+    return { kind: "media", accent: pick(["charcoal", "cruise"] as const) };
+  }
+  if (kind === "stat") return { kind: "stat", ...pick(STATS) };
+  return { kind: "field", color: pick(FIELD_TONES) };
+}
+
+function randomCells(count: number): MosaicCell[] {
+  const kinds: ("media" | "stat" | "field")[] = ["media", "stat", "field"];
+  kinds.sort(() => rand() - 0.5);
+  while (kinds.length < count) kinds.push(pick(["media", "stat", "field"] as const));
+  return kinds.slice(0, count).map(mosaicCell);
+}
+
+/** Simulated /case-studies index row: a title panel followed by empty mosaic
+ *  frames — geometry only (ratios, widths, cell presets), no content. */
+const mosaicGeometry: CraftVignette = {
+  type: "vignette",
+  slug: "mosaic-geometry",
+  name: "Autonomous Vehicle Tele-Operations",
+  keyImageRatio: "16x9",
+  keyImageAccent: "cruise",
+  titleTreatment: "index",
+  titleIndex: {
+    client: "Cruise",
+    subhead: "Designing the human component of an autonomous fleet.",
+    href: "/case-studies/cruise-teleops",
+    brand: { field: "cruise-primary", logo: "/portfolio/logos/cruise.png" },
+    railTint: "black",
+  },
+  tags: [
+    "Visual design",
+    "Data visualization",
+    "Interaction design",
+    "Human factors",
+    "Information architecture",
+    "Research",
+    "Motion",
+    "Workflow & ops",
+    "Systems thinking",
+    "Communication design",
+    "AI-native design",
+  ],
+  themeLine: "Index row: title panel + empty mosaic frames",
+  titlePanelWidth: { desktop: 8, mobile: 6 },
+  images: [
+    {
+      ratio: "16x9",
+      accent: CRUISE,
+      label: "Mosaic — feature",
+      mosaic: randomCells(3).map((cell, i) =>
+        i === 0
+          ? {
+              kind: "quote",
+              label: "Proof It Worked",
+              quote: "[This] gives me information in a much more intuitive way.",
+              cite: "Remote Advisor Research Participant",
+            }
+          : cell,
+      ),
+      mosaicLayout: "feature",
+    },
+    {
+      ratio: "16x9",
+      accent: CRUISE,
+      label: "Mosaic — feature-stack",
+      mosaic: randomCells(4),
+      mosaicLayout: "feature-stack",
+    },
+    {
+      ratio: "16x9",
+      accent: CRUISE,
+      label: "Mosaic — quad",
+      mosaic: randomCells(4).map((cell, i) =>
+        i === 2
+          ? {
+              kind: "stat",
+              label:
+                "As a result of the improved context-awareness work, Remote Advisors improved their time to first action (TTFA) by about twenty percent, with greater accuracy than before.",
+              stat: "~20%",
+            }
+          : cell,
+      ),
+      mosaicLayout: "quad",
+    },
+    {
+      ratio: "1x1",
+      accent: CRUISE,
+      label: "Cruise",
+      panelBg: "cruise-primary",
+      cta: {
+        label: "View case study",
+        href: "/case-studies/cruise-teleops",
+      },
+    },
+  ],
+};
+
 /** Second chapter — same filmstrip, but a full-bleed cover-image title panel. */
 const titleCoverDemo: CraftVignette = {
   type: "vignette",
@@ -232,7 +367,7 @@ const experimentsStudy: CaseStudy = {
   role: "Reference",
   tools: "Source of truth",
   brand: { field: "cruise-primary" },
-  sections: [...proseVariants, panelInventory, titleCoverDemo],
+  sections: [...proseVariants, panelInventory, mosaicGeometry, titleCoverDemo],
 };
 
 export default function LayoutExperimentsPage() {

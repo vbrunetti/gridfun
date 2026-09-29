@@ -49,6 +49,34 @@ export type PanelBg =
 export type PanelWidth = { desktop: number; mobile: number };
 
 /**
+ * Preset cell arrangement for a mosaic panel. A mosaic is always the full
+ * 12-column content column (its subdivisions are the point), so presets are
+ * designed for that one landscape canvas: `split` = two cells side by side ·
+ * `feature` = one large cell spanning the full height + two stacked beside it ·
+ * `feature-stack` = the same lead cell + three stacked beside it (4 cells) ·
+ * `quad` = 2×2. Omit to pick by cell count (2 → split, 3 → feature, 4 → quad).
+ */
+export type MosaicLayout = "split" | "feature" | "feature-stack" | "quad";
+
+/**
+ * One cell of a mosaic panel — a miniature of an existing panel voice.
+ * `media` = image, cover-cropped to the cell (accent placeholder when no
+ * `src`) · `stat` = small quantified figure with an optional kicker · `text` =
+ * one short sentence with an optional kicker. No video cells by design — a
+ * mosaic is a glanceable summary, not a stage.
+ */
+export type MosaicCell =
+  | { kind: "media"; src?: string; accent?: AccentKey; alt?: string }
+  | { kind: "stat"; stat: string; label?: string }
+  | { kind: "text"; text: string; label?: string }
+  /** Pull-quote: label kicker on top, large quote + attribution at the foot, ghost quote mark behind. */
+  | { kind: "quote"; quote: string; cite?: string; label?: string }
+  /** Blank cell — panel ground only. For geometry studies and reserved slots. */
+  | { kind: "empty" }
+  /** Flat color block — any CSS color (e.g. a `color-mix()` of a brand token). */
+  | { kind: "field"; color: string };
+
+/**
  * One frame in a vignette's horizontal chapter.
  *
  * A frame is either a *media* frame (image / gif via `src`, or Vimeo via `vimeo`)
@@ -123,6 +151,26 @@ export type VignetteImage = {
    * short supporting lede under it. The word-as-graphic sibling of `stat`.
    */
   thesis?: string;
+  /**
+   * 2–4 cells composed inside one frame. Presence turns the frame into a
+   * *mosaic panel*: a full-bleed bento built from miniatures of the existing
+   * panel voices (media / stat / short text), separated by keyline gaps. The
+   * mosaic IS the panel — no kicker band, no caption. It is always the full
+   * 12-col content column: `ratio` and `width` are ignored, and `label` only
+   * names the panel for assistive tech.
+   * Designed as the glanceable opener of an index filmstrip — dense at a
+   * glance where a sequence of panels needs a swipe.
+   */
+  mosaic?: MosaicCell[];
+  /** Cell arrangement preset — see `MosaicLayout`. Omit to pick by cell count. */
+  mosaicLayout?: MosaicLayout;
+  /**
+   * Presence turns the frame into a *call-to-action panel*: the whole panel is
+   * a link, with a giant arrow and `label` (e.g. "View case study") set huge at
+   * the foot. `label` on the frame is the kicker (e.g. the client). The closing
+   * panel of an index filmstrip — pair with `panelBg` set to the client brand.
+   */
+  cta?: { label: string; href: string };
 };
 
 export type CraftVignette = {
@@ -152,7 +200,22 @@ export type CraftVignette = {
    * `color` = accent color field + oversized chapter number.
    * `cover` = full-bleed `keyImageSrc` with the number/title/tags overlaid.
    */
-  titleTreatment?: "color" | "cover";
+  titleTreatment?: "color" | "cover" | "index";
+  /**
+   * `index` only — the portfolio-index opener: the `/case-studies` slide fused
+   * into one filmstrip panel. Ground is the client `brand` color, the brand logo
+   * sits vertically centered in the upper region, and the `name` title, subhead
+   * and optional "View case study →" link anchor the bottom region above the
+   * `tags`. Omit `href` for entries with no case study behind them.
+   */
+  titleIndex?: {
+    client: string;
+    subhead: string;
+    href?: string;
+    brand: CaseStudyBrand;
+    /** Left-rail tint while the strip is in view: the client `brand` color (default) or `black`. */
+    railTint?: "brand" | "black";
+  };
   /** `cover` only — Gaussian blur radius (px) on the photo. Omit/0 for a sharp image. */
   titleCoverBlur?: number;
   /** `cover` only — photo opacity, 0–1 (screens it back over black). Omit = fully opaque. */
@@ -877,7 +940,7 @@ function facebookVignette(
 export const caseStudies: CaseStudy[] = [
   {
     slug: "pearson",
-    gated: true,
+    // gated: true, // suppressed: Pearson is public for now; restore to hide behind ?p=true
     name: "The Nebula Design System",
     subhead:
       "Building an AI-native design system from tokens to a natural-language prototyping pipeline.",

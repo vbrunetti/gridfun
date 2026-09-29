@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import {
   useCallback,
   useEffect,
@@ -12,14 +13,22 @@ import {
 import type {
   CraftVignette,
   ImageRatio,
+  MosaicCell,
+  MosaicLayout,
   PanelBg,
   PanelWidth,
   VignetteImage,
 } from "@/content/portfolio";
 import {
+  clientBrandChromeSurface,
   clientBrandColorVar,
+  clientBrandTextOn,
   isClientBrandColor,
+  type ClientBrandColorId,
 } from "@/lib/client-brand-colors";
+import { CaseStudyBrandField } from "@/components/case-studies/case-study-brand-field";
+import { isMobileChromeBand } from "@/lib/chrome-band-sample";
+import { setChromeRailTint, type ChromeRailTint } from "@/lib/chrome-rail-tint";
 import { InlineText, stripInlineMarkup } from "@/lib/inline-text";
 import { vignetteFrameSrc } from "@/lib/portfolio-assets";
 import { vignetteTitleColor } from "@/lib/vignette-title";
@@ -139,6 +148,113 @@ function statEmWidth(stat: string): number {
   return Math.max(em * 0.96, 1);
 }
 
+/** Default mosaic arrangement by cell count — see `MosaicLayout`. */
+function mosaicLayoutFor(frame: VignetteImage): MosaicLayout {
+  if (frame.mosaicLayout) return frame.mosaicLayout;
+  const count = frame.mosaic?.length ?? 0;
+  if (count <= 2) return "split";
+  if (count === 3) return "feature";
+  return "quad";
+}
+
+function MosaicCellContent({
+  cell,
+  frame,
+  priority,
+}: {
+  cell: MosaicCell;
+  frame: VignetteImage;
+  priority: boolean;
+}) {
+  if (cell.kind === "empty") {
+    return <div className="vframe__mosaic-cell" aria-hidden />;
+  }
+
+  if (cell.kind === "field") {
+    return (
+      <div
+        className="vframe__mosaic-cell"
+        style={{ background: cell.color }}
+        aria-hidden
+      />
+    );
+  }
+
+  if (cell.kind === "media") {
+    const src = cell.src ?? vignetteFrameSrc(cell.accent ?? frame.accent, "1x1");
+    return (
+      <div className="vframe__mosaic-cell vframe__mosaic-cell--media">
+        <Image
+          src={src}
+          alt={cell.alt ?? ""}
+          fill
+          draggable={false}
+          priority={priority}
+          unoptimized={src.startsWith("data:")}
+          className="vframe__mosaic-media"
+          sizes="(max-width: 767px) 92vw, 40vw"
+        />
+      </div>
+    );
+  }
+
+  if (cell.kind === "quote") {
+    return (
+      <div className="vframe__mosaic-cell vframe__mosaic-cell--quote">
+        {cell.label ? (
+          <p className="vframe__mosaic-label text-label-sm text-mono-label">
+            <InlineText text={cell.label} />
+          </p>
+        ) : null}
+        <blockquote className="vframe__mosaic-quote">
+          <span className="vframe__mosaic-quote-mark" aria-hidden>
+            &ldquo;
+          </span>
+          <p className="vframe__mosaic-quote-text">
+            <InlineText text={cell.quote} />
+          </p>
+          {cell.cite ? (
+            <footer className="vframe__mosaic-quote-cite text-label-sm text-mono-label">
+              <InlineText text={cell.cite} />
+            </footer>
+          ) : null}
+        </blockquote>
+      </div>
+    );
+  }
+
+  if (cell.kind === "stat") {
+    return (
+      <div className="vframe__mosaic-cell vframe__mosaic-cell--stat">
+        {cell.label ? (
+          <p className="vframe__mosaic-label text-label-sm text-mono-label">
+            <InlineText text={cell.label} />
+          </p>
+        ) : null}
+        <p
+          className="vframe__mosaic-stat"
+          style={{ "--stat-em": statEmWidth(cell.stat) } as React.CSSProperties}
+        >
+          {cell.stat}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="vframe__mosaic-cell vframe__mosaic-cell--text">
+      {cell.label ? (
+        <p className="vframe__mosaic-label text-label-sm text-mono-label">
+          <InlineText text={cell.label} />
+        </p>
+      ) : null}
+      <p className="vframe__mosaic-text">
+        <InlineText text={cell.text} />
+      </p>
+    </div>
+  );
+}
+
 function FrameContent({
   vignette,
   frame,
@@ -151,6 +267,69 @@ function FrameContent({
   active: boolean;
 }) {
   const aspect = ratioAspect(frame.ratio);
+  const indexHref = vignette.titleIndex?.href;
+
+  if (frame.cta) {
+    return (
+      <>
+        <header className="vframe__kicker">
+          {frame.label ? (
+            <p className="vframe__kicker-text text-meta">
+              <InlineText text={frame.label} />
+            </p>
+          ) : null}
+        </header>
+        <Link
+          href={frame.cta.href}
+          className="vframe__cta"
+          tabIndex={active ? 0 : -1}
+        >
+          <span className="vframe__cta-label">{frame.cta.label}</span>
+        </Link>
+      </>
+    );
+  }
+
+  if (frame.mosaic?.length) {
+    // Full-bleed: the mosaic IS the panel — no kicker band, no caption, cells
+    // edge to edge with only the keyline gaps. `label` survives as the
+    // accessible name. In an index strip (`titleIndex.href`) the whole grid is
+    // one link to the case study, so every cell is clickable.
+    const cells = frame.mosaic.map((cell, i) => (
+      <MosaicCellContent
+        key={i}
+        cell={cell}
+        frame={frame}
+        priority={index === 0}
+      />
+    ));
+    const layout = mosaicLayoutFor(frame);
+
+    if (indexHref) {
+      return (
+        <Link
+          href={indexHref}
+          className="vframe__mosaic"
+          data-mosaic-layout={layout}
+          aria-label={`View case study: ${vignette.name}`}
+          tabIndex={active ? 0 : -1}
+        >
+          {cells}
+        </Link>
+      );
+    }
+
+    return (
+      <div
+        className="vframe__mosaic"
+        data-mosaic-layout={layout}
+        role="group"
+        aria-label={frame.label ? stripInlineMarkup(frame.label) : undefined}
+      >
+        {cells}
+      </div>
+    );
+  }
 
   if (frame.stat) {
     return (
@@ -383,10 +562,12 @@ export function VignetteChapter({
   );
 
   const panelKinds = useMemo<PanelKind[]>(
-    () =>
-      showTitlePanel
-        ? ["title", ...frames.map((f) => (f.colorField ? "field" : f.ratio))]
-        : frames.map((f) => (f.colorField ? "field" : f.ratio)),
+    () => {
+      const kinds = frames.map<PanelKind>((f) =>
+        f.mosaic?.length ? "16x9" : f.colorField ? "field" : f.ratio,
+      );
+      return showTitlePanel ? ["title", ...kinds] : kinds;
+    },
     [frames, showTitlePanel],
   );
 
@@ -394,10 +575,11 @@ export function VignetteChapter({
   // to the ratio/title default in panelColSpan. Title panel width comes from the
   // vignette; frame widths from each image.
   const panelWidths = useMemo<(PanelWidth | undefined)[]>(
-    () =>
-      showTitlePanel
-        ? [vignette.titlePanelWidth, ...frames.map((f) => f.width)]
-        : frames.map((f) => f.width),
+    () => {
+      // Mosaics are always the full 12-col content column — never overridden.
+      const widths = frames.map((f) => (f.mosaic?.length ? undefined : f.width));
+      return showTitlePanel ? [vignette.titlePanelWidth, ...widths] : widths;
+    },
     [frames, showTitlePanel, vignette.titlePanelWidth],
   );
 
@@ -443,6 +625,70 @@ export function VignetteChapter({
   );
 
   useCaseStudyVignetteProgressRegister(vignetteProgress);
+
+  // Brand grounds per panel (aligned with panelKinds): the index cover and any
+  // frame whose panelBg is a client brand color.
+  const panelBrands = useMemo<(ClientBrandColorId | null)[]>(() => {
+    const frameBrands = frames.map<ClientBrandColorId | null>((f) =>
+      f.panelBg && isClientBrandColor(f.panelBg) ? f.panelBg : null,
+    );
+    const title: ClientBrandColorId | null =
+      vignette.titleTreatment === "index" && vignette.titleIndex
+        ? vignette.titleIndex.brand.field
+        : null;
+    return showTitlePanel ? [title, ...frameBrands] : frameBrands;
+  }, [frames, showTitlePanel, vignette.titleIndex, vignette.titleTreatment]);
+
+  // The right-hand chrome (menu + dots) takes the surface of the panel that is
+  // physically UNDER it — not the active panel. On a wide window the active panel
+  // stops short of the chrome column and a neighbor (possibly the opposite color
+  // space) sits beneath it; keying to the active panel would leave ink on black or
+  // paper on Cruise orange (paper on it is ~2.9:1, ink ~6.3:1). Past the last
+  // panel the trail repeats its ground, so the last panel's surface applies.
+  useEffect(() => {
+    // Desktop only — the mobile band samples the painted color under itself.
+    if (!chapterActive || isMobileChromeBand()) return;
+    const stage = stageRef.current;
+    const chrome = document.querySelector<HTMLElement>(".floating-chrome");
+    if (!stage || !chrome) return;
+
+    const chromeRect = chrome.getBoundingClientRect();
+    // Chrome centre in track space (undo the stage offset + the track translate).
+    const x =
+      chromeRect.left +
+      chromeRect.width / 2 -
+      stage.getBoundingClientRect().left -
+      translate;
+
+    let under = -1;
+    panelRefs.current.forEach((panel, i) => {
+      if (!panel) return;
+      if (panel.offsetLeft <= x) under = i;
+    });
+    if (under < 0) under = 0;
+
+    const brand = panelBrands[under] ?? null;
+    const surface = brand
+      ? clientBrandChromeSurface(brand)
+      : colorway === "white"
+        ? "light"
+        : "dark";
+    document.body.dataset.chromeSurface = surface;
+    document.body.dataset.chromeDotsSurface = surface;
+  }, [chapterActive, translate, panelBrands, colorway]);
+
+  // Branded index strip: tint the left rail while the strip is in view (settled
+  // + focused); release it when the visitor scrolls away.
+  const stripRailTint: ChromeRailTint | null = vignette.titleIndex
+    ? vignette.titleIndex.railTint === "black"
+      ? "black"
+      : vignette.titleIndex.brand.field
+    : null;
+  useEffect(() => {
+    if (!chapterActive || !stripRailTint) return;
+    setChromeRailTint(stripRailTint);
+    return () => setChromeRailTint(null);
+  }, [chapterActive, stripRailTint]);
 
   useEffect(() => {
     const mq = window.matchMedia(VERTICAL_STACK_QUERY);
@@ -848,6 +1094,11 @@ export function VignetteChapter({
             className={`vframe vframe--title${index === 0 ? " is-active" : ""}`}
             data-vframe-index={0}
             data-title-treatment={vignette.titleTreatment}
+            data-brand-text-on={
+              vignette.titleTreatment === "index" && vignette.titleIndex
+                ? clientBrandTextOn(vignette.titleIndex.brand.field)
+                : undefined
+            }
             style={{
               ...panelWidthVars(
                 vignette.titlePanelWidth,
@@ -857,6 +1108,13 @@ export function VignetteChapter({
               ...(vignette.titleTreatment === "color"
                 ? { ["--panel-bg" as string]: vignetteTitleColor(vignette) }
                 : {}),
+              ...(vignette.titleTreatment === "index" && vignette.titleIndex
+                ? {
+                    ["--panel-bg" as string]: clientBrandColorVar(
+                      vignette.titleIndex.brand.field,
+                    ),
+                  }
+                : {}),
             }}
           >
             <VignetteTitleBackdrop
@@ -864,28 +1122,63 @@ export function VignetteChapter({
               coverClassName="vframe__title-cover"
               scrimClassName="vframe__title-scrim"
             />
-            <header className="vframe__kicker">
-              {!vignette.titleTreatment ? (
-                <p className="vframe__kicker-text text-meta vchapter__index">
-                  {String(chapterNumber).padStart(2, "0")}
-                </p>
-              ) : null}
-            </header>
-            <div className="vframe__main vframe__main--title">
-              {vignette.titleTreatment ? (
-                <p className="vchapter__index-big">
-                  {String(chapterNumber).padStart(2, "0")}
-                </p>
-              ) : null}
-              <h2 className="display-2xl vchapter__title">
-                <a
-                  href={`#${vignetteSectionId(vignette.slug)}`}
-                  className="vchapter__anchor"
-                >
-                  {vignette.name}
-                </a>
-              </h2>
-            </div>
+            {vignette.titleTreatment === "index" && vignette.titleIndex ? (
+              <>
+                <header className="vframe__kicker">
+                  <p className="vframe__kicker-text text-label-sm text-mono-label">
+                    {vignette.titleIndex.client}
+                  </p>
+                </header>
+                <div className="vframe__main vframe__main--title">
+                  <CaseStudyBrandField
+                    brand={vignette.titleIndex.brand}
+                    className="vframe__index-logo"
+                  />
+                  <div className="vframe__index-core">
+                    <h2 className="display-lg vchapter__title">
+                      {vignette.titleIndex.href ? (
+                        <Link
+                          href={vignette.titleIndex.href}
+                          className="vchapter__anchor"
+                        >
+                          {vignette.name}
+                        </Link>
+                      ) : (
+                        vignette.name
+                      )}
+                    </h2>
+                    <p className="body-lg text-secondary vframe__index-subhead">
+                      {vignette.titleIndex.subhead}
+                    </p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <header className="vframe__kicker">
+                  {!vignette.titleTreatment ? (
+                    <p className="vframe__kicker-text text-meta vchapter__index">
+                      {String(chapterNumber).padStart(2, "0")}
+                    </p>
+                  ) : null}
+                </header>
+                <div className="vframe__main vframe__main--title">
+                  {vignette.titleTreatment ? (
+                    <p className="vchapter__index-big">
+                      {String(chapterNumber).padStart(2, "0")}
+                    </p>
+                  ) : null}
+                  <h2 className="display-2xl vchapter__title">
+                    <a
+                      href={`#${vignetteSectionId(vignette.slug)}`}
+                      className="vchapter__anchor"
+                    >
+                      {vignette.name}
+                    </a>
+                  </h2>
+                </div>
+              </>
+            )}
             <footer className="vframe__foot vframe__foot--title">
               <CraftTagList
                 tags={vignette.tags}
@@ -905,22 +1198,30 @@ export function VignetteChapter({
                 ref={(node) => {
                   panelRefs.current[idx] = node;
                 }}
-                className={`vframe vframe--${frame.ratio} ${
-                  frame.colorField
-                    ? "vframe--field"
-                    : frame.stat
-                      ? "vframe--stat"
-                      : frame.quote
-                        ? "vframe--quote"
-                        : frame.thesis
-                          ? "vframe--thesis"
-                          : "vframe--media"
+                className={`vframe vframe--${frame.mosaic?.length ? "16x9" : frame.ratio} ${
+                  frame.cta
+                    ? "vframe--cta"
+                    : frame.mosaic?.length
+                    ? "vframe--mosaic"
+                    : frame.colorField
+                      ? "vframe--field"
+                      : frame.stat
+                        ? "vframe--stat"
+                        : frame.quote
+                          ? "vframe--quote"
+                          : frame.thesis
+                            ? "vframe--thesis"
+                            : "vframe--media"
                 }${idx === index ? " is-active" : ""}`}
                 data-vframe-index={idx}
                 data-panel-bg={panelBg}
                 style={{
                   ["--panel-bg" as string]: panelBgVar(panelBg, colorway),
-                  ...panelWidthVars(frame.width, "--frame-cols", "--frame-cols-mobile"),
+                  ...panelWidthVars(
+                    frame.mosaic?.length ? undefined : frame.width,
+                    "--frame-cols",
+                    "--frame-cols-mobile",
+                  ),
                 }}
                 aria-hidden={verticalMode ? undefined : idx !== index}
               >

@@ -3789,6 +3789,37 @@ a.craft-card:focus-visible {
   background: var(--section-dark-bg);
 }
 
+/* Brand tint — set by setChromeRailTint() while a branded strip is in view
+   (src/lib/chrome-rail-tint.ts). Ink brands keep the light rail's ink type;
+   paper brands take the dark rail's paper tokens. Fades back on release. */
+body[data-rail-tint] .chrome-rail {
+  background: var(--rail-tint);
+}
+
+body[data-rail-tint="ink"] .chrome-rail {
+  /* Small rail labels need >=4.5:1 on the brand ground; the default tertiary
+     (ink 60%) is ~3.6:1 on Cruise orange, so lift the muted tones. */
+  --text-primary: var(--color-ink);
+  --text-secondary: color-mix(in srgb, var(--color-ink) 88%, transparent);
+  --text-tertiary: color-mix(in srgb, var(--color-ink) 80%, transparent);
+  --rule-light: color-mix(in srgb, var(--color-ink) 18%, transparent);
+  --rule-strong: color-mix(in srgb, var(--color-ink) 38%, transparent);
+  color: var(--color-ink);
+}
+
+body[data-rail-tint="paper"] .chrome-rail {
+  --text-primary: var(--color-paper);
+  --text-secondary: color-mix(in srgb, var(--color-paper) 88%, transparent);
+  --text-tertiary: color-mix(in srgb, var(--color-paper) 80%, transparent);
+  --rule-light: color-mix(in srgb, var(--color-paper) 18%, transparent);
+  --rule-strong: color-mix(in srgb, var(--color-paper) 40%, transparent);
+  color: var(--color-paper);
+}
+
+body[data-rail-tint] .chrome-rail__logo-slot {
+  background: transparent;
+}
+
 .chrome-rail__logo-slot {
   min-height: calc(var(--chrome-hit) + var(--chrome-pad) * 2);
   transition: background-color 0.2s ease;
@@ -5012,6 +5043,13 @@ ul.cs-hero__subhead {
   --panel-main-inset-top: clamp(1.25rem, 3vh, 2rem);
   --panel-foot: clamp(5.25rem, 14vh, 8.5rem);
   --panel-foot-pad: clamp(0.85rem, 2vh, 1.35rem);
+  /* Where the LAST BASELINE of bottom-anchored type sits above the panel edge:
+     the foot pad (+3px) plus the strapline's own line-box slack under its
+     baseline (~0.47em of body-lg). Big figures and the CTA label align to this so
+     every bottom-anchored line shares one baseline height. */
+  --panel-baseline-inset: calc(
+    var(--panel-foot-pad) + 3px + var(--type-body-lg) * 0.47
+  );
   /* Mobile: panels fill from viewport edge; --panel-pad = --grid-margin aligns
      text with prose AND gives breathing room from the colored panel edge.
      Desktop: panels start at grid col 1 (JS inset); --panel-pad is overridden
@@ -5280,6 +5318,124 @@ ul.cs-hero__subhead {
 .vframe--title[data-title-treatment] .vframe__foot {
   position: relative;
   z-index: 1;
+}
+
+/* Index treatment — the /case-studies slide fused into one filmstrip opener
+   (see .cs-index-panel__*). Ground is the client brand color (--panel-bg, set
+   inline) bled left to the chrome rail like the `color` treatment. Main band is
+   a column: the brand logo centered in the upper region (flex: 1), then the
+   title + subhead + CTA block anchored to the bottom; tags sit in the foot.
+   Type colors follow the brand's `textOn` (paper or ink). */
+.vframe--title[data-title-treatment="index"] {
+  background: var(--panel-bg, var(--panel-surface));
+  overflow: visible; /* let the ground bleed left; the pin still clips at the rail */
+  color: var(--color-paper);
+}
+
+.vframe--title[data-title-treatment="index"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 100%;
+  width: var(--title-bleed, var(--grid-margin));
+  background: var(--panel-bg, var(--panel-surface));
+}
+
+.vframe--title[data-title-treatment="index"][data-brand-text-on="paper"] {
+  --text-primary: var(--color-paper);
+  --text-secondary: color-mix(in srgb, var(--color-paper) 80%, transparent);
+  --text-tertiary: color-mix(in srgb, var(--color-paper) 58%, transparent);
+  --rule-light: color-mix(in srgb, var(--color-paper) 22%, transparent);
+  color: var(--color-paper);
+}
+
+.vframe--title[data-title-treatment="index"][data-brand-text-on="ink"] {
+  --text-primary: var(--color-ink);
+  --text-secondary: color-mix(in srgb, var(--color-ink) 72%, transparent);
+  --text-tertiary: color-mix(in srgb, var(--color-ink) 52%, transparent);
+  --rule-light: color-mix(in srgb, var(--color-ink) 18%, transparent);
+  color: var(--color-ink);
+}
+
+.vframe--title[data-title-treatment="index"][data-brand-text-on="paper"]
+  .craft-filter-chip--on {
+  border-color: color-mix(in srgb, var(--color-paper) 72%, transparent);
+  color: var(--color-paper);
+  background: color-mix(in srgb, var(--color-paper) 10%, transparent);
+}
+
+.vframe--title[data-title-treatment="index"][data-brand-text-on="paper"]
+  .craft-filter-chip--on
+  .craft-filter-chip__dot {
+  background: var(--color-paper);
+}
+
+.vframe--title[data-title-treatment="index"][data-brand-text-on="ink"]
+  .craft-filter-chip--on {
+  border-color: color-mix(in srgb, var(--color-ink) 72%, transparent);
+  color: var(--color-ink);
+  background: color-mix(in srgb, var(--color-ink) 6%, transparent);
+}
+
+.vframe--title[data-title-treatment="index"][data-brand-text-on="ink"]
+  .craft-filter-chip--on
+  .craft-filter-chip__dot {
+  background: var(--color-ink);
+}
+
+/* Logo zone: takes all the room the bottom block leaves, logo centered in it.
+   The brand-field component paints its own ground — same color, so hidden. */
+.vframe--title[data-title-treatment="index"] .vframe__main--title {
+  justify-content: flex-end;
+}
+
+.vframe__index-logo {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  background: transparent;
+  justify-content: flex-start;
+}
+
+.vframe__index-logo .cs-index-brand-field__logo {
+  width: clamp(9rem, 55cqi, 22rem);
+  max-height: 100%;
+}
+
+.vframe__index-logo .cs-index-brand-field__placeholder {
+  width: clamp(7rem, 40cqi, 16rem);
+}
+
+.vframe__index-core {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: clamp(1rem, 2.5vh, 1.5rem);
+  min-width: 0;
+  max-width: 38rem;
+  padding-bottom: clamp(1rem, 2.5vh, 1.5rem);
+}
+
+.vframe__index-core .vchapter__title,
+.vframe__index-subhead {
+  margin: 0;
+}
+
+/* Craft tags on the index cover — TEMPORARILY hidden (markup and data intact).
+   Delete this rule to bring them back. */
+.vframe--title[data-title-treatment="index"] .vframe__foot {
+  display: none;
+}
+
+/* With the foot gone, drop its reserved track and sit the title block on the
+   standard panel bottom inset. Delete alongside the rule above. */
+.vframe--title[data-title-treatment="index"] {
+  grid-template-rows: var(--panel-kicker) 1fr;
+}
+
+.vframe--title[data-title-treatment="index"] .vframe__index-core {
+  padding-bottom: calc(var(--panel-foot-pad) + 3px);
 }
 
 .vchapter__track {
@@ -6030,6 +6186,258 @@ ul.cs-hero__subhead {
   /* Carousel figure: full width; its viewport already derives height from aspect. */
   .vframe__figure {
     width: 100%;
+  }
+}
+
+/* ── Mosaic panel — 2–4 cells composed inside one frame ──────────────────────
+   A bento summary built from miniatures of the existing panel voices: media
+   (cover-cropped), a small stat, a short sentence. Full-bleed: the mosaic IS
+   the panel — no kicker band, no foot — cells run edge to edge. The 1px gaps
+   read as keylines (the grid ground is the rule color; each cell paints the
+   panel ground back on top), continuing the site's butted-panel seams. */
+.vframe--mosaic {
+  grid-template-rows: 1fr;
+}
+
+.vframe__mosaic {
+  display: grid;
+  gap: 1px;
+  background: var(--vrule);
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+/* Column-based arrangement presets — see MosaicLayout in portfolio.ts. */
+.vframe__mosaic[data-mosaic-layout="split"] {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* Feature: a lead cell spanning the full height + a side column of stacked
+   cells — 2 for `feature`, 3 for `feature-stack` (--mosaic-side-rows). */
+.vframe__mosaic[data-mosaic-layout="feature"],
+.vframe__mosaic[data-mosaic-layout="feature-stack"] {
+  --mosaic-side-rows: 2;
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: repeat(var(--mosaic-side-rows), 1fr);
+}
+
+.vframe__mosaic[data-mosaic-layout="feature-stack"] {
+  --mosaic-side-rows: 3;
+}
+
+.vframe__mosaic[data-mosaic-layout="feature"] > .vframe__mosaic-cell:first-child,
+.vframe__mosaic[data-mosaic-layout="feature-stack"]
+  > .vframe__mosaic-cell:first-child {
+  grid-row: 1 / span var(--mosaic-side-rows);
+}
+
+.vframe__mosaic[data-mosaic-layout="quad"] {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.vframe__mosaic-cell {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--panel-bg, var(--panel-surface, var(--section-dark-bg)));
+  container-type: size;
+}
+
+/* Linked mosaic (index strip): the grid is an <a>, so every cell is a click
+   target. Cells get a faint currentColor wash on hover to signal it. */
+a.vframe__mosaic {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+a.vframe__mosaic:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -4px;
+}
+
+a.vframe__mosaic .vframe__mosaic-cell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: currentColor;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+}
+
+a.vframe__mosaic .vframe__mosaic-cell:hover::after {
+  opacity: 0.07;
+}
+
+/* Cells crop (cover), unlike full media panels (contain) — bento cells are
+   texture, not exhibits; the full frame belongs to a media panel. */
+.vframe__mosaic-media {
+  object-fit: cover;
+}
+
+.vframe__mosaic-cell--stat,
+.vframe__mosaic-cell--text,
+.vframe__mosaic-cell--quote {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.5rem;
+  /* Same insets as the panels' own bands: --panel-pad on the sides, the foot
+     pad (+3px) at the bottom, so cell text lines up with panel text. */
+  padding: var(--panel-foot-pad) var(--panel-pad) var(--panel-baseline-inset);
+}
+
+.vframe__mosaic-label {
+  margin: 0;
+}
+
+/* Same fit-to-one-line trick as the big stat panel: the figure fills the
+   cell width (capped at 20rem), so it scales with the cell. */
+.vframe__mosaic-stat {
+  /* Pull the figure down by its line-height slack (~0.096em under the baseline)
+     so the digit baseline, not the empty line box, sits on the padding edge. */
+  margin: 0 0 -0.096em;
+  min-width: 0;
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  font-size: min(20rem, calc(88cqw / var(--stat-em, 4)));
+}
+
+/* Quote cell — the stat cell's structure (label pinned top, big type at the
+   foot) with a pull-quote; a giant ghost quotation mark sits behind the type,
+   bleeding up-left from the quote block, cropped by the cell. */
+.vframe__mosaic-quote-mark {
+  position: absolute;
+  top: -0.3em;
+  left: -0.05em;
+  z-index: -1;
+  font-weight: 700;
+  line-height: 0.8;
+  letter-spacing: -0.04em;
+  opacity: 0.18;
+  pointer-events: none;
+  font-size: min(85cqw, 30rem);
+}
+
+/* Quote block is centered in the whole cell; the label leaves the flow and
+   pins to the top-left at the cell padding, so it can't skew the centering. */
+.vframe__mosaic-cell--quote {
+  justify-content: center;
+}
+
+.vframe__mosaic-cell--quote > .vframe__mosaic-label {
+  position: absolute;
+  top: var(--panel-foot-pad);
+  left: var(--panel-pad);
+  z-index: 1;
+}
+
+.vframe__mosaic-quote {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.75rem, 2.5cqmin, 1.5rem);
+}
+
+.vframe__mosaic-quote-text {
+  margin: 0;
+  min-width: 0;
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  font-size: min(6.5rem, calc(8.5cqw + 0.5rem));
+}
+
+.vframe__mosaic-quote-cite {
+  margin: 0;
+}
+
+/* A short sentence at cell scale — the text sibling of a thesis line. */
+.vframe__mosaic-text {
+  margin: 0;
+  min-width: 0;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  font-size: min(var(--type-display-sm), calc(7.5cqw + 0.35rem));
+}
+
+@supports not (font-size: 1cqi) {
+  .vframe__mosaic-stat {
+    font-size: var(--type-display-md);
+  }
+
+  .vframe__mosaic-text {
+    font-size: var(--type-display-sm);
+  }
+}
+
+/* Mobile: the stacked panel is content-driven height, so `height: 100%` has
+   nothing to fill — rows get an explicit height instead (media cells need one
+   to paint; cell size containment keeps `auto` rows from growing past the
+   min). Preset selectors repeated so this outranks their `1fr` template rows. */
+/* ── CTA panel — closing panel of an index strip ─────────────────────────────
+   The whole panel is one link: the label set huge at the foot (client brand ground via panelBg; ink/paper follow the brand). */
+.vframe--cta {
+  grid-template-rows: var(--panel-kicker) 1fr;
+}
+
+.vframe__cta {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 0;
+  padding: var(--panel-main-inset-top) var(--panel-pad)
+    var(--panel-baseline-inset);
+  color: inherit;
+  text-decoration: none;
+}
+
+.vframe__cta:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -4px;
+}
+
+.vframe__cta-label {
+  display: block;
+  /* Pull down by the line box's slack under the baseline so the baseline sits on
+     the padding edge (see --panel-baseline-inset). */
+  margin-bottom: -0.163em;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+  font-size: min(var(--type-display-xl), calc(11cqw + 0.5rem));
+}
+
+@media (max-width: 1023px) {
+  .vframe__cta {
+    flex: 1 1 auto;
+    min-height: clamp(16rem, 50vh, 28rem);
+  }
+}
+
+@media (max-width: 1023px) {
+  .vframe__mosaic,
+  .vframe__mosaic[data-mosaic-layout="split"],
+  .vframe__mosaic[data-mosaic-layout="feature"],
+  .vframe__mosaic[data-mosaic-layout="feature-stack"],
+  .vframe__mosaic[data-mosaic-layout="quad"] {
+    height: auto;
+    grid-template-rows: none;
+    grid-auto-rows: minmax(clamp(7.5rem, 34vw, 11rem), auto);
   }
 }
 

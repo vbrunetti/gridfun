@@ -25,10 +25,23 @@ export function ChromeLogo() {
     return () => mq.removeEventListener("change", sync);
   }, []);
 
+  // A rail tinted for paper type (see setChromeRailTint) needs the reversed mark.
+  const [railPaper, setRailPaper] = useState(false);
+  useEffect(() => {
+    const sync = () => setRailPaper(document.body.dataset.railTint === "paper");
+    sync();
+    const observer = new MutationObserver(sync);
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["data-rail-tint"],
+    });
+    return () => observer.disconnect();
+  }, []);
+
   const darkRail =
     menuOpen ||
     (desktop
-      ? pathname === "/about" || pathname === "/contact"
+      ? pathname === "/about" || pathname === "/contact" || railPaper
       : mobileSurface === "dark");
 
   return (
