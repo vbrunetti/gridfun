@@ -77,7 +77,7 @@ export function CaseStudyDetailDotsRail() {
   const usePanelDots = panelDots && !desktop;
 
   const dots: VignetteDot[] = usePanelDots
-    ? entries.flatMap(({ step, stepIndex }) => {
+    ? entries.flatMap<VignetteDot>(({ step, stepIndex }) => {
         if (step.panelCount > 1) {
           return Array.from({ length: step.panelCount }, (_, panelIndex) => ({
             id: `${step.id}:${panelIndex}`,
