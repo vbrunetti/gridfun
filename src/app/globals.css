@@ -6383,10 +6383,6 @@ a.vframe__mosaic .vframe__mosaic-cell:hover::after {
   }
 }
 
-/* Mobile: the stacked panel is content-driven height, so `height: 100%` has
-   nothing to fill — rows get an explicit height instead (media cells need one
-   to paint; cell size containment keeps `auto` rows from growing past the
-   min). Preset selectors repeated so this outranks their `1fr` template rows. */
 /* ── CTA panel — closing panel of an index strip ─────────────────────────────
    The whole panel is one link: the label set huge at the foot (client brand ground via panelBg; ink/paper follow the brand). */
 .vframe--cta {
@@ -6429,15 +6425,50 @@ a.vframe__mosaic .vframe__mosaic-cell:hover::after {
   }
 }
 
+/* Mobile: one mosaic panel = one screen. The panel is exactly the app viewport
+   (its chrome-clearing top pad and bottom band come from the shared stack rules)
+   and the grid fills what's left, so only one mosaic is ever in view. Layouts
+   reflow for a portrait canvas: the lead cell goes on top at full width, the rest
+   share the row(s) below; split stacks; quad stays 2×2. Text belongs in the wide
+   slots (lead / half-width cells) — the one-third cells of feature-stack are for
+   media, color and stats. */
 @media (max-width: 1023px) {
-  .vframe__mosaic,
-  .vframe__mosaic[data-mosaic-layout="split"],
-  .vframe__mosaic[data-mosaic-layout="feature"],
-  .vframe__mosaic[data-mosaic-layout="feature-stack"],
-  .vframe__mosaic[data-mosaic-layout="quad"] {
+  .vframe--mosaic {
+    height: var(--app-vh);
+    min-height: var(--app-vh);
+  }
+
+  .vframe--mosaic > .vframe__mosaic {
+    flex: 1 1 auto;
     height: auto;
-    grid-template-rows: none;
-    grid-auto-rows: minmax(clamp(7.5rem, 34vw, 11rem), auto);
+    min-height: 0;
+  }
+
+  .vframe__mosaic[data-mosaic-layout="split"] {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+
+  .vframe__mosaic[data-mosaic-layout="feature"] {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 3fr 2fr;
+  }
+
+  .vframe__mosaic[data-mosaic-layout="feature-stack"] {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 3fr 2fr;
+  }
+
+  .vframe__mosaic[data-mosaic-layout="feature"] > .vframe__mosaic-cell:first-child,
+  .vframe__mosaic[data-mosaic-layout="feature-stack"]
+    > .vframe__mosaic-cell:first-child {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .vframe__mosaic[data-mosaic-layout="quad"] {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
   }
 }
 
