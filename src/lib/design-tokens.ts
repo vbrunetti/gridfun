@@ -452,9 +452,10 @@ export const caseStudyDetailPatterns = [
       "Desktop: native CSS scroll-snap, one wheel/key step per hero, prose block, vignette panel, or footer. Mobile: horizontal filmstrip with JS flick.",
   },
   {
-    pattern: "Peek cursor",
-    className: ".cs-peek-cursor",
-    behavior: "200×200 plus on dimmed sections/panels; click jumps like dot nav.",
+    pattern: "Jump on click",
+    className: ".cs-focus-section",
+    behavior:
+      "Dimmed sections and idle panels use the plain pointer; click/tap jumps to them like the dot nav. No custom cursor.",
   },
   {
     pattern: "Optional hero reel",

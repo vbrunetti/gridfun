@@ -1068,6 +1068,7 @@ export function VignetteChapter({
       id={vignetteSectionId(vignette.slug)}
       data-cs-detail-row
       data-scroll-pin={controlled ? "" : undefined}
+      data-index-strip={vignette.titleIndex?.href ? "" : undefined}
       data-chrome-surface={chromeSurface}
       data-colorway={colorway}
       aria-roledescription="vignette chapter"
@@ -1186,6 +1187,14 @@ export function VignetteChapter({
                 variant="filter-link"
               />
             </footer>
+            {vignette.titleTreatment === "index" && vignette.titleIndex?.href ? (
+              <Link
+                href={vignette.titleIndex.href}
+                className="vframe__title-overlay"
+                aria-hidden
+                tabIndex={-1}
+              />
+            ) : null}
           </article>
           ) : null}
 
@@ -1234,14 +1243,27 @@ export function VignetteChapter({
               </article>
             );
           })}
-          <div
-            className={`vchapter__trail${
-              index === steps - 1 ? " is-active" : ""
-            }`}
-            aria-hidden
-            data-panel-bg={lastFrameBg}
-            style={{ background: panelBgVar(lastFrameBg, colorway) }}
-          />
+          {vignette.titleIndex?.href ? (
+            <Link
+              href={vignette.titleIndex.href}
+              className={`vchapter__trail vchapter__trail--link${
+                index === steps - 1 ? " is-active" : ""
+              }`}
+              aria-hidden
+              tabIndex={-1}
+              data-panel-bg={lastFrameBg}
+              style={{ background: panelBgVar(lastFrameBg, colorway) }}
+            />
+          ) : (
+            <div
+              className={`vchapter__trail${
+                index === steps - 1 ? " is-active" : ""
+              }`}
+              aria-hidden
+              data-panel-bg={lastFrameBg}
+              style={{ background: panelBgVar(lastFrameBg, colorway) }}
+            />
+          )}
         </div>
       </div>
       {controlled ? (

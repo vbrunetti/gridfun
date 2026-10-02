@@ -4019,47 +4019,14 @@ body:has(.floating-chrome[data-chrome-state="default"]:hover)
   opacity: 1;
 }
 
-/* Dimmed sections — hide system cursor; render a 100×100 plus follower. */
-.cs-detail.is-peek-cursor,
-.cs-detail.is-peek-cursor * {
-  cursor: none !important;
-}
-
-.cs-peek-cursor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 90;
-  width: 100px;
-  height: 100px;
-  margin: -50px 0 0 -50px;
-  pointer-events: none;
-  color: var(--color-paper);
-}
-
-.cs-peek-cursor[data-surface="light"] {
-  color: var(--color-ink);
-}
-
-.cs-peek-cursor::before,
-.cs-peek-cursor::after {
-  content: "";
-  position: absolute;
-  background: currentColor;
-}
-
-.cs-peek-cursor::before {
-  top: 0;
-  left: calc(50% - 0.5px);
-  width: 1px;
-  height: 100px;
-}
-
-.cs-peek-cursor::after {
-  top: calc(50% - 0.5px);
-  left: 0;
-  width: 100px;
-  height: 1px;
+/* Dimmed sections and idle panels are click-to-jump targets (see
+   CaseStudyDetailScroll). The plain pointer marks them — no custom cursor on the
+   deck. Index strips are links end to end and set their own cursor. */
+.cs-detail .cs-focus-section:not(.is-focused):not([data-index-strip]),
+.cs-detail
+  .cs-focus-section.is-focused:not([data-index-strip])
+  .vframe:not(.is-active) {
+  cursor: pointer;
 }
 
 .cs-section {
@@ -5163,6 +5130,28 @@ ul.cs-hero__subhead {
   .vchapter__trail.is-active {
     opacity: 1;
   }
+}
+
+/* Index strips are links end to end: the cover is covered by an overlay link, and
+   the trailing space (normally pointer-transparent) becomes one too. The pointer
+   is the single cursor style throughout — the peek plus is off here. */
+.vframe__title-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  cursor: pointer;
+}
+
+@media (min-width: 768px) {
+  .vchapter__trail--link {
+    pointer-events: auto;
+    cursor: pointer;
+  }
+}
+
+[data-index-strip] a,
+[data-index-strip] .vframe {
+  cursor: pointer;
 }
 
 .vchapter__ruler,

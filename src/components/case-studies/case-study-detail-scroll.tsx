@@ -15,19 +15,13 @@ import {
 import {
   CHROME_SURFACE_ATTR,
   type ChromeSurface,
-  peekCursorSurface,
 } from "@/lib/chrome-surface";
 import { isMobileChromeBand } from "@/lib/chrome-band-sample";
 import { useCaseStudyDeck } from "@/components/case-studies/use-case-study-deck";
 
-const PEEK_DESKTOP_QUERY = "(min-width: 768px)";
-
-type PeekTarget = {
-  surface: "light" | "dark";
-} & (
+type JumpTarget =
   | { type: "section"; sectionId: string }
-  | { type: "panel"; sectionId: string; panelIndex: number }
-);
+  | { type: "panel"; sectionId: string; panelIndex: number };
 
 function syncChromeSurfaceFromStep(
   steps: CaseStudyDetailStep[],
@@ -40,8 +34,21 @@ function syncChromeSurfaceFromStep(
 
   const step = steps[stepIndex];
   const el = step ? document.getElementById(step.id) : null;
-  const surface =
+  let surface =
     (el?.getAttribute(CHROME_SURFACE_ATTR) as ChromeSurface | null) ?? "dark";
+
+  // The closing "next case study / next vignette" row is short: it fills only the
+  // bottom of the viewport, so the right-hand chrome (menu + dots) sits over the
+  // row ABOVE it, not over the footer's own ground (canvas lime, ink type). Take
+  // the surface of that row, or the chrome would go ink on a dark page.
+  if (step?.kind === "footer" && el && el.offsetHeight < window.innerHeight * 0.5) {
+    const above = steps[stepIndex - 1];
+    const aboveEl = above ? document.getElementById(above.id) : null;
+    surface =
+      (aboveEl?.getAttribute(CHROME_SURFACE_ATTR) as ChromeSurface | null) ??
+      surface;
+  }
+
   document.body.dataset.chromeSurface = surface;
   document.body.dataset.chromeDotsSurface = surface;
 }
@@ -68,8 +75,6 @@ export function CaseStudyDetailScroll({
 }: CaseStudyDetailScrollProps) {
   const rootRef = useRef<HTMLElement>(null);
   const [hoverStep, setHoverStep] = useState<number | null>(null);
-  const [peekTarget, setPeekTarget] = useState<PeekTarget | null>(null);
-  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
 
   const { activeIndex, goToStep, goToPanel } = useCaseStudyDeck({
     steps,
@@ -112,22 +117,25 @@ export function CaseStudyDetailScroll({
     steps.length > 1,
   );
 
-  // Dimmed sections + vignette panels: plus cursor, hover preview, click to jump.
+  // Dimmed sections + idle vignette panels: click/tap jumps to them (like the dot
+  // nav). The pointer is the only cursor style on the deck — jumpable areas just
+  // get `cursor: pointer` in CSS; there is no custom follower.
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
 
-    const canPeek = () =>
-      window.matchMedia(`${PEEK_DESKTOP_QUERY} and (pointer: fine)`).matches;
-
-    const suppressesPeekCursor = (target: EventTarget | null) =>
+    const isInteractive = (target: EventTarget | null) =>
       (target as HTMLElement | null)?.closest(
         ".floating-chrome, a, button, input, textarea, select, [contenteditable='true']",
       );
 
-    const resolvePeekTarget = (target: EventTarget | null): PeekTarget | null => {
+    const resolveJumpTarget = (target: EventTarget | null): JumpTarget | null => {
       const el = target as HTMLElement | null;
       if (!el || !root.contains(el)) return null;
+
+      // Index strips (data-index-strip) are links end to end — a click anywhere
+      // opens the case study, so don't intercept it as a jump.
+      if (el.closest("[data-index-strip]")) return null;
 
       const panel = el.closest<HTMLElement>(".vframe");
       if (panel) {
@@ -140,61 +148,24 @@ export function CaseStudyDetailScroll({
             10,
           );
           if (Number.isFinite(panelIndex)) {
-            return {
-              type: "panel",
-              sectionId: section.id,
-              panelIndex,
-              surface: peekCursorSurface(section.dataset.chromeSurface),
-            };
+            return { type: "panel", sectionId: section.id, panelIndex };
           }
         }
       }
 
       const section = el.closest<HTMLElement>(".cs-focus-section");
       if (section && !section.classList.contains("is-focused")) {
-        return {
-          type: "section",
-          sectionId: section.id,
-          surface: peekCursorSurface(section.dataset.chromeSurface),
-        };
+        return { type: "section", sectionId: section.id };
       }
 
       return null;
     };
 
-    const clearPeek = () => {
-      setPeekTarget(null);
-      root.classList.remove("is-peek-cursor");
-    };
-
-    const onPointerMove = (event: PointerEvent) => {
-      if (!canPeek()) {
-        clearPeek();
-        return;
-      }
-
-      if (suppressesPeekCursor(event.target)) {
-        clearPeek();
-        return;
-      }
-
-      const target = resolvePeekTarget(event.target);
-      if (!target) {
-        clearPeek();
-        return;
-      }
-
-      setPeekTarget(target);
-      setCursorPos({ x: event.clientX, y: event.clientY });
-      root.classList.add("is-peek-cursor");
-    };
-
-    // Click/tap on a dimmed section or peeked panel jumps to it — ALL pointer
-    // types (the hover peek-cursor above stays desktop-only): on touch, tapping
-    // the peeked next panel is the expected way to advance it into view.
+    // Works for ALL pointer types: on touch, tapping the peeked next panel is the
+    // expected way to advance it into view.
     const onClick = (event: MouseEvent) => {
-      const target = resolvePeekTarget(event.target);
-      if (!target || suppressesPeekCursor(event.target)) return;
+      const target = resolveJumpTarget(event.target);
+      if (!target || isInteractive(event.target)) return;
 
       event.preventDefault();
 
@@ -209,29 +180,13 @@ export function CaseStudyDetailScroll({
       goToStep(stepIndex);
     };
 
-    document.addEventListener("pointermove", onPointerMove, { passive: true });
     root.addEventListener("click", onClick);
-
-    return () => {
-      document.removeEventListener("pointermove", onPointerMove);
-      root.removeEventListener("click", onClick);
-      root.classList.remove("is-peek-cursor");
-    };
+    return () => root.removeEventListener("click", onClick);
   }, [goToStep, goToPanel, steps]);
 
   return (
     <article ref={rootRef} className="cs-detail">
       {children}
-      {peekTarget ? (
-        <div
-          className="cs-peek-cursor"
-          data-surface={peekTarget.surface}
-          style={{
-            transform: `translate3d(${cursorPos.x}px, ${cursorPos.y}px, 0)`,
-          }}
-          aria-hidden
-        />
-      ) : null}
     </article>
   );
 }
