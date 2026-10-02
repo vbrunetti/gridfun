@@ -195,7 +195,7 @@ export const site = {
           company: "Google",
           detail:
             "Led teams across Core, Ads, and Devices & Services — contributing as both a Design Manager and Staff UX Designer.",
-          href: "/case-studies/google",
+          href: "/case-studies/google-shopping-ads",
         },
         {
           company: "Vitals",

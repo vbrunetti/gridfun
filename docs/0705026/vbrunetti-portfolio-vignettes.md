@@ -3,6 +3,25 @@
 
 ---
 
+## SITE SYNC STATUS — updated 2026-09-30 (re-synced from live portfolio.ts)
+
+**Google — split one munged case study into three, sourced from Victor's "VBS: Presentation Deck" PDF.** The old `slug: "google"` case study ("Store, Search, and Support") combined three genuinely separate Google teams — physical retail, search ads, and contact-center tooling — that the deck treats as entirely distinct engagements with their own scope, timeline, and metrics slides. Confirmed with Victor before executing (split as proposed, recommended option).
+
+New structure, three case studies replacing the one:
+- `google-contact-center` (2018–2021, full case study) — software telephone, chat platform, and the CEO-escalated code-yellow investigation, in that order. New intro prose (`google-cct-intro`, "Someone has to support all of this") replaces the old three-team intro. Closes on three real `figure`-variant metrics from the deck's outcomes slide: Customer SAT +12%, Agent SAT +23%, Headcount Flat.
+- `google-shopping-ads` (2021–2022, full case study) — the funnel-aware ad formats vignette, unchanged in content. New intro prose (`google-ads-intro`, "The Big Flip") covers the real deck context: shopping discovery flipping to Amazon/TikTok, $237.9B in ad revenue at stake. Closes on a real stat panel inside the vignette itself (last image, 1x1): +$500M in annualized ad revenue lift, from the deck's "hundreds of experiments" close.
+- `google-store` (2022, standalone: true, same pattern as McKinsey/Facebook) — the Clover POS vignette, unchanged, demoted out of case-study status since the deck doesn't treat Store as its own timed narrative (it's a single line in the career-progression slide, not a scoped section like CCT/Ads).
+
+Old transitional prose sections that referenced Store as connective tissue (`google-store-to-ads`, `google-ads-to-cc`) were removed since they no longer make sense once the three are split; replaced by the two new per-case-study intros above.
+
+Roles/dates corrected to match the deck exactly (previously the combined chapter said "2020–2023" for everything): CCT 2018–2021, Ads 2021–2022, Store 2022. Role changed from "Senior product designer" to "UX Design Manager" across all three (matches Victor's resume: Google UX Design Manager, 2018–2023).
+
+Fixed one stale link: `src/content/site.ts`'s "superpower" examples list had `href: "/case-studies/google"` pointing at the now-deleted slug — repointed to `/case-studies/google-shopping-ads`.
+
+Verified via subagent: no other hardcoded references to the old "google" slug anywhere in the codebase; prev/next case-study nav, `/case-studies` index, brand-logo resolution, and `/craft` vignette surfacing all key off `slug`/`standalone`, not client name, so three Google entries behave exactly like the existing McKinsey/Facebook standalone pattern. `tsc`/`eslint` clean (same pre-existing warnings only, plus `googleQuote`/`googleThesis` now also unused since neither new intro needed them — harmless, same tolerated pattern as `pearsonQuote`).
+
+Not yet extended to these three: the "last panel is 1x1" treatment (still Cruise-only), real media assets (all three Google case studies were already placeholder-media before this split and remain so).
+
 ## SITE SYNC STATUS — updated 2026-08-13 (re-synced from live portfolio.ts)
 
 **Pearson — full rebuild this session, replacing the old 5-vignette structure that didn't map to Victor's real achievements.** Note: the vignettes.md at the Google Drive path (081326 folder) is the same stale original capture as the very first uploads-folder version, not more recent, don't treat it as a source for Pearson going forward.

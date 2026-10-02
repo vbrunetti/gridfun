@@ -367,118 +367,7 @@ const RATIO_PANEL_WIDTH = {
   "9x16": { desktop: 6, mobile: 6 },
 } as const satisfies Record<ImageRatio, PanelWidth>;
 
-/* ── Cruise content helpers (beats + glue prose) ───────────────── */
-const cruiseAccent = "charcoal" as const satisfies AccentKey;
-
-/**
- * A color-field text beat. Always spans the "field" column width and has no
- * media box, so it carries no author-facing aspect ratio — `ratio` is set to a
- * fixed inert value only to satisfy the shared `VignetteImage` shape.
- */
-function cruiseBeat(
-  label: string,
-  body: string,
-  panelBg?: PanelBg,
-): VignetteImage {
-  return {
-    ratio: "16x9",
-    accent: cruiseAccent,
-    colorField: true,
-    label,
-    body,
-    ...(panelBg ? { panelBg } : {}),
-  };
-}
-
-function cruiseMedia(
-  label: string,
-  caption: string,
-  ratio: ImageRatio = "16x9",
-  media?:
-    | string
-    | Pick<
-        VignetteImage,
-        "src" | "sources" | "autoplayMs" | "vimeo" | "vimeoBackground" | "vimeoHasAudio" | "poster"
-      >,
-  panelBg?: PanelBg,
-): VignetteImage {
-  const mediaFields =
-    typeof media === "string" ? { src: media } : (media ?? {});
-
-  return {
-    ratio,
-    accent: cruiseAccent,
-    label,
-    caption,
-    ...mediaFields,
-    ...(panelBg ? { panelBg } : {}),
-  };
-}
-
-function cruiseStat(
-  label: string,
-  stat: string,
-  body: string,
-  ratio: ImageRatio = "16x9",
-  panelBg?: PanelBg,
-): VignetteImage {
-  return {
-    ratio,
-    accent: cruiseAccent,
-    label,
-    stat,
-    body,
-    width: RATIO_PANEL_WIDTH[ratio],
-    ...(panelBg ? { panelBg } : {}),
-  };
-}
-
-/**
- * A pull-quote proof-point panel — the testimonial sibling of `cruiseStat`.
- * `label` is the kicker, `quote` the verbatim hero line (no surrounding quote
- * marks — the panel adds its own), `cite` the footer attribution. Defaults to a
- * square (`1x1`) block, which reads best for a testimonial.
- */
-function cruiseQuote(
-  label: string,
-  quote: string,
-  cite?: string,
-  ratio: ImageRatio = "1x1",
-  panelBg?: PanelBg,
-): VignetteImage {
-  return {
-    ratio,
-    accent: cruiseAccent,
-    label,
-    quote,
-    ...(cite ? { quoteCite: cite } : {}),
-    width: RATIO_PANEL_WIDTH[ratio],
-    ...(panelBg ? { panelBg } : {}),
-  };
-}
-
-/**
- * A few-word billboard panel — the word-as-graphic sibling of `cruiseStat`.
- * `label` is the kicker, `thesis` the short hero line (2–6 words, wraps),
- * optional `body` a short supporting lede under it. Defaults to square (`1x1`).
- */
-function cruiseThesis(
-  label: string,
-  thesis: string,
-  body?: string,
-  ratio: ImageRatio = "1x1",
-  panelBg?: PanelBg,
-): VignetteImage {
-  return {
-    ratio,
-    accent: cruiseAccent,
-    label,
-    thesis,
-    ...(body ? { body } : {}),
-    width: RATIO_PANEL_WIDTH[ratio],
-    ...(panelBg ? { panelBg } : {}),
-  };
-}
+/* ── Client content helpers (beats + glue prose) ───────────────── */
 
 type VignetteTitlePanel = Pick<
   CraftVignette,
@@ -489,295 +378,187 @@ type VignetteTitlePanel = Pick<
   | "status"
 >;
 
-function cruiseVignette(
-  slug: string,
-  name: string,
-  tags: string[],
-  themeLine: string,
-  images: VignetteImage[],
-  keyImageRatio: ImageRatio = "16x9",
-  titlePanel?: VignetteTitlePanel,
-): CraftVignette {
+/**
+ * The shared authoring vocabulary for a client's case study: one implementation
+ * of every panel type, parameterized only by the client's placeholder `accent`.
+ * Cruise, Google and Pearson all build their panels from this, so a panel
+ * authored for one client renders identically for the others — never fork these
+ * per client. Argument order is the contract:
+ *
+ *  - `beat(label, body, panelBg?)` — color-field text beat; carries no ratio
+ *    (`ratio` is set to a fixed inert value only to satisfy `VignetteImage`).
+ *  - `media(label, caption, ratio?, media?, panelBg?)`
+ *  - `stat(label, stat, body, ratio?, panelBg?)` — oversized quantified figure.
+ *  - `quote(label, quote, cite?, ratio?, panelBg?)` — pull-quote proof point, the
+ *    testimonial sibling of `stat`. `quote` is the verbatim hero line (no
+ *    surrounding quote marks — the panel adds its own). Defaults to `1x1`.
+ *  - `thesis(label, thesis, body?, ratio?, panelBg?)` — few-word billboard, the
+ *    word-as-graphic sibling of `stat`: `thesis` is the short hero line (2–6
+ *    words, wraps) and the optional `body` a short lede under it. Defaults to
+ *    `1x1`. NB: `body` precedes `ratio` — don't pass `"1x1"` as the third arg.
+ */
+function clientPanelHelpers(accent: AccentKey) {
   return {
-    type: "vignette",
-    slug,
-    name,
-    keyImageRatio,
-    keyImageAccent: cruiseAccent,
-    tags,
-    themeLine,
-    titlePanelWidth: TITLE_PANEL_WIDTH,
-    images,
-    ...titlePanel,
+    beat(label: string, body: string, panelBg?: PanelBg): VignetteImage {
+      return {
+        ratio: "16x9",
+        accent,
+        colorField: true,
+        label,
+        body,
+        ...(panelBg ? { panelBg } : {}),
+      };
+    },
+
+    media(
+      label: string,
+      caption: string,
+      ratio: ImageRatio = "16x9",
+      media?:
+        | string
+        | Pick<
+            VignetteImage,
+            | "src"
+            | "sources"
+            | "autoplayMs"
+            | "vimeo"
+            | "vimeoBackground"
+            | "vimeoHasAudio"
+            | "poster"
+          >,
+      panelBg?: PanelBg,
+    ): VignetteImage {
+      const mediaFields =
+        typeof media === "string" ? { src: media } : (media ?? {});
+
+      return {
+        ratio,
+        accent,
+        label,
+        caption,
+        ...mediaFields,
+        ...(panelBg ? { panelBg } : {}),
+      };
+    },
+
+    stat(
+      label: string,
+      stat: string,
+      body: string,
+      ratio: ImageRatio = "16x9",
+      panelBg?: PanelBg,
+    ): VignetteImage {
+      return {
+        ratio,
+        accent,
+        label,
+        stat,
+        body,
+        width: RATIO_PANEL_WIDTH[ratio],
+        ...(panelBg ? { panelBg } : {}),
+      };
+    },
+
+    quote(
+      label: string,
+      quote: string,
+      cite?: string,
+      ratio: ImageRatio = "1x1",
+      panelBg?: PanelBg,
+    ): VignetteImage {
+      return {
+        ratio,
+        accent,
+        label,
+        quote,
+        ...(cite ? { quoteCite: cite } : {}),
+        width: RATIO_PANEL_WIDTH[ratio],
+        ...(panelBg ? { panelBg } : {}),
+      };
+    },
+
+    thesis(
+      label: string,
+      thesis: string,
+      body?: string,
+      ratio: ImageRatio = "1x1",
+      panelBg?: PanelBg,
+    ): VignetteImage {
+      return {
+        ratio,
+        accent,
+        label,
+        thesis,
+        ...(body ? { body } : {}),
+        width: RATIO_PANEL_WIDTH[ratio],
+        ...(panelBg ? { panelBg } : {}),
+      };
+    },
+
+    vignette(
+      slug: string,
+      name: string,
+      tags: string[],
+      themeLine: string,
+      images: VignetteImage[],
+      keyImageRatio: ImageRatio = "16x9",
+      titlePanel?: VignetteTitlePanel,
+    ): CraftVignette {
+      return {
+        type: "vignette",
+        slug,
+        name,
+        keyImageRatio,
+        keyImageAccent: accent,
+        tags,
+        themeLine,
+        titlePanelWidth: TITLE_PANEL_WIDTH,
+        images,
+        ...titlePanel,
+      };
+    },
+
+    prose(
+      id: string,
+      heading: string,
+      body: string,
+      extras?: ProseExtras,
+    ): ProseSection {
+      return { type: "prose", id, heading, body, ...extras };
+    },
   };
 }
 
-function cruiseProse(
-  id: string,
-  heading: string,
-  body: string,
-  extras?: ProseExtras,
-): ProseSection {
-  return { type: "prose", id, heading, body, ...extras };
-}
-
-/* ── Google content helpers (beats + glue prose) ───────────────── */
+const cruiseAccent = "charcoal" as const satisfies AccentKey;
 const googleAccent = "royalBlue" as const satisfies AccentKey;
-
-function googleBeat(
-  label: string,
-  body: string,
-  panelBg?: PanelBg,
-): VignetteImage {
-  return {
-    ratio: "16x9",
-    accent: googleAccent,
-    colorField: true,
-    label,
-    body,
-    ...(panelBg ? { panelBg } : {}),
-  };
-}
-
-function googleMedia(
-  label: string,
-  caption: string,
-  ratio: ImageRatio = "16x9",
-  media?:
-    | string
-    | Pick<
-        VignetteImage,
-        "src" | "sources" | "autoplayMs" | "vimeo" | "vimeoBackground" | "vimeoHasAudio" | "poster"
-      >,
-  panelBg?: PanelBg,
-): VignetteImage {
-  const mediaFields =
-    typeof media === "string" ? { src: media } : (media ?? {});
-
-  return {
-    ratio,
-    accent: googleAccent,
-    label,
-    caption,
-    ...mediaFields,
-    ...(panelBg ? { panelBg } : {}),
-  };
-}
-
-function googleStat(
-  label: string,
-  stat: string,
-  body: string,
-  ratio: ImageRatio = "16x9",
-  panelBg?: PanelBg,
-): VignetteImage {
-  return {
-    ratio,
-    accent: googleAccent,
-    label,
-    stat,
-    body,
-    width: RATIO_PANEL_WIDTH[ratio],
-    ...(panelBg ? { panelBg } : {}),
-  };
-}
-
-function googleQuote(
-  label: string,
-  quote: string,
-  cite?: string,
-  ratio: ImageRatio = "1x1",
-  panelBg?: PanelBg,
-): VignetteImage {
-  return {
-    ratio,
-    accent: googleAccent,
-    label,
-    quote,
-    ...(cite ? { quoteCite: cite } : {}),
-    width: RATIO_PANEL_WIDTH[ratio],
-    ...(panelBg ? { panelBg } : {}),
-  };
-}
-
-function googleThesis(
-  label: string,
-  thesis: string,
-  body?: string,
-  ratio: ImageRatio = "1x1",
-  panelBg?: PanelBg,
-): VignetteImage {
-  return {
-    ratio,
-    accent: googleAccent,
-    label,
-    thesis,
-    ...(body ? { body } : {}),
-    width: RATIO_PANEL_WIDTH[ratio],
-    ...(panelBg ? { panelBg } : {}),
-  };
-}
-
-function googleVignette(
-  slug: string,
-  name: string,
-  tags: string[],
-  themeLine: string,
-  images: VignetteImage[],
-  keyImageRatio: ImageRatio = "16x9",
-  titlePanel?: VignetteTitlePanel,
-): CraftVignette {
-  return {
-    type: "vignette",
-    slug,
-    name,
-    keyImageRatio,
-    keyImageAccent: googleAccent,
-    tags,
-    themeLine,
-    titlePanelWidth: TITLE_PANEL_WIDTH,
-    images,
-    ...titlePanel,
-  };
-}
-
-function googleProse(
-  id: string,
-  heading: string,
-  body: string,
-  extras?: ProseExtras,
-): ProseSection {
-  return { type: "prose", id, heading, body, ...extras };
-}
-
-/* ── Pearson content helpers (beats + glue prose) ──────────────── */
 const pearsonAccent = "hotPink" as const satisfies AccentKey;
 
-function pearsonBeat(
-  label: string,
-  body: string,
-  panelBg?: PanelBg,
-): VignetteImage {
-  return {
-    ratio: "16x9",
-    accent: pearsonAccent,
-    colorField: true,
-    label,
-    body,
-    ...(panelBg ? { panelBg } : {}),
-  };
-}
+const cruise = clientPanelHelpers(cruiseAccent);
+const cruiseBeat = cruise.beat;
+const cruiseMedia = cruise.media;
+const cruiseStat = cruise.stat;
+const cruiseQuote = cruise.quote;
+const cruiseThesis = cruise.thesis;
+const cruiseVignette = cruise.vignette;
+const cruiseProse = cruise.prose;
 
-function pearsonMedia(
-  label: string,
-  caption: string,
-  ratio: ImageRatio = "16x9",
-  media?:
-    | string
-    | Pick<
-        VignetteImage,
-        "src" | "sources" | "autoplayMs" | "vimeo" | "vimeoBackground" | "vimeoHasAudio" | "poster"
-      >,
-  panelBg?: PanelBg,
-): VignetteImage {
-  const mediaFields =
-    typeof media === "string" ? { src: media } : (media ?? {});
+const google = clientPanelHelpers(googleAccent);
+const googleBeat = google.beat;
+const googleMedia = google.media;
+const googleStat = google.stat;
+const googleQuote = google.quote;
+const googleThesis = google.thesis;
+const googleVignette = google.vignette;
+const googleProse = google.prose;
 
-  return {
-    ratio,
-    accent: pearsonAccent,
-    label,
-    caption,
-    ...mediaFields,
-    ...(panelBg ? { panelBg } : {}),
-  };
-}
-
-function pearsonStat(
-  label: string,
-  stat: string,
-  body: string,
-  ratio: ImageRatio = "16x9",
-  panelBg?: PanelBg,
-): VignetteImage {
-  return {
-    ratio,
-    accent: pearsonAccent,
-    label,
-    stat,
-    body,
-    width: RATIO_PANEL_WIDTH[ratio],
-    ...(panelBg ? { panelBg } : {}),
-  };
-}
-
-function pearsonQuote(
-  label: string,
-  quote: string,
-  cite?: string,
-  ratio: ImageRatio = "1x1",
-  panelBg?: PanelBg,
-): VignetteImage {
-  return {
-    ratio,
-    accent: pearsonAccent,
-    label,
-    quote,
-    ...(cite ? { quoteCite: cite } : {}),
-    width: RATIO_PANEL_WIDTH[ratio],
-    ...(panelBg ? { panelBg } : {}),
-  };
-}
-
-function pearsonThesis(
-  label: string,
-  thesis: string,
-  body?: string,
-  ratio: ImageRatio = "1x1",
-  panelBg?: PanelBg,
-): VignetteImage {
-  return {
-    ratio,
-    accent: pearsonAccent,
-    label,
-    thesis,
-    ...(body ? { body } : {}),
-    width: RATIO_PANEL_WIDTH[ratio],
-    ...(panelBg ? { panelBg } : {}),
-  };
-}
-
-function pearsonVignette(
-  slug: string,
-  name: string,
-  tags: string[],
-  themeLine: string,
-  images: VignetteImage[],
-  keyImageRatio: ImageRatio = "16x9",
-  titlePanel?: VignetteTitlePanel,
-): CraftVignette {
-  return {
-    type: "vignette",
-    slug,
-    name,
-    keyImageRatio,
-    keyImageAccent: pearsonAccent,
-    tags,
-    themeLine,
-    titlePanelWidth: TITLE_PANEL_WIDTH,
-    images,
-    ...titlePanel,
-  };
-}
-
-function pearsonProse(
-  id: string,
-  heading: string,
-  body: string,
-  extras?: ProseExtras,
-): ProseSection {
-  return { type: "prose", id, heading, body, ...extras };
-}
+const pearson = clientPanelHelpers(pearsonAccent);
+const pearsonBeat = pearson.beat;
+const pearsonMedia = pearson.media;
+const pearsonStat = pearson.stat;
+const pearsonQuote = pearson.quote;
+const pearsonThesis = pearson.thesis;
+const pearsonVignette = pearson.vignette;
+const pearsonProse = pearson.prose;
 
 /* ── McKinsey content helpers (beats + glue prose) ─────────────── */
 const mckinseyAccent = "mediumBlue" as const satisfies AccentKey;
@@ -1952,126 +1733,81 @@ export const caseStudies: CaseStudy[] = [
     ],
   },
   {
-    slug: "google",
-    name: "Store, Search, and Support",
+    slug: "google-contact-center",
+    name: "Customer Support Tools",
     subhead:
-      "Enterprise surfaces across three teams — the retail floor, the search page, and the contact center.",
-    date: "2020–2023",
+      "Building a customer support agent's AI-powered workspace across phone and chat.",
+    date: "2018-2021",
     client: "Google",
     brand: {
       field: "google-primary",
       logo: "/portfolio/logos/google.gif",
     },
-    location: "Mountain View, CA",
-    role: "Senior product designer",
+    location: "New York, NY",
+    role: "UX Design Manager",
     tools: "Figma, prototyping, contextual research",
     clientLogo: "/portfolio/logos/google.svg",
     sections: [
       googleProse(
-        "google-intro",
-        "Three teams, one question",
-        "After the single, custom-built world of an autonomous vehicle, Google was the opposite kind of problem: enterprise products at planetary scale, spread across three teams that barely touched each other — the physical retail Store, Shopping Ads on the search page, and the Contact Center tools support agents lean on.\n\nWhat connected them wasn't a product area. It was a habit: find the information a system already has, and surface it to the person who needs it — a runner on the store floor, a shopper mid-decision, an agent on a hard call.",
-      ),
-      googleVignette(
-        "google-store-clover-pos",
-        "Google Store — Clover POS App",
-        ["Systems thinking", "Mobile"],
-        "Role orchestration / systems design / knowing when not to redesign",
-        [
-          googleBeat(
-            "The scope",
-            "A full Android app redesign running on Clover Flex handhelds for Google's physical retail stores. The app carried the entire retail workflow: inventory lookup, runner requests from back-of-house, SKU scanning, sales, promotions, returns, phone trade-ins, and BOPIS.",
-          ),
-          googleBeat(
-            "The systems layer",
-            "It wasn't just a point-of-sale tool — it was the coordination surface for several store roles at once: sales associates on the floor, runners in the back, back-of-house operations, and the repair team. One app, multiple roles, orchestrated workflows.",
-          ),
-          googleMedia(
-            "The senior move",
-            "Rather than design everything from scratch, partnered with the Google Store web team to repurpose existing assets — product configuration flows, PDP patterns, cart logic. Where contexts diverged (native vs. responsive, sales rep vs. public), modified; where they didn't, reused. Knowing when to build vs. borrow — and having the relationships to make borrowing work.",
-            "16x9",
-          ),
-          googleMedia(
-            "Walkthrough",
-            "Full Figma prototype tap-through demonstrating the complete app flow across roles.",
-            "9x16",
-          ),
-        ],
-      ),
-      googleProse(
-        "google-store-to-ads",
-        "From the floor to the feed",
-        "The Store app was about orchestrating people around a transaction in a physical room. Shopping Ads was the same instinct pointed at the opposite environment: millions of anonymous shoppers, no staff, no room — just a query and the few seconds before attention moves on.",
-      ),
-      googleVignette(
-        "funnel-aware-ad-formats",
-        "Google Shopping Ads — Funnel-Aware Ad Formats",
-        ["Strategy", "Data visualization", "Web"],
-        "Funnel-stage design / query intelligence / privacy-safe personalization",
-        [
-          googleBeat(
-            "The insight",
-            "Every shopping ad looked identical — the same rectangular tile whether someone was idly browsing or ready to buy. The opportunity: serve a different ad format depending on where the user was in their shopping journey.",
-          ),
-          googleBeat(
-            "The privacy constraint",
-            "Google had extensive user signals — browsing history, cookies, profile. The team deliberately chose not to use them. Funnel stage would be inferred from the query itself and nothing else. Both a privacy-respecting choice and a technical one — increasingly relevant in a post-cookie world.",
-          ),
-          googleBeat(
-            "Three stages from the query",
-            "Browsy — exploratory, no brand or model (\"fall fashion trends for men\"). Researchy — comparison with a category but no committed brand (\"best washing machines of 2023\"). Converty — specific brand, model, sometimes location (\"Air Jordan size 10 near me\").",
-          ),
-          googleMedia(
-            "Three formats",
-            "Browsy: image-forward, details on hover. Researchy: tabular, specs forward, with authoritative third-party content (Wirecutter, YouTube) interspersed — a research surface, not just a product card. Converty: inventory and urgency — colorways, sizes, delivery windows, pickup proximity.",
-            "16x9",
-          ),
-          googleBeat(
-            "The political landscape",
-            "Google's whole-page approach created a double bind: the organic search team worried differentiated formats broke page cohesion, while the organic shopping team worried formats too similar to theirs confused ad vs. organic.",
-          ),
-          googleBeat(
-            "Threading the needle",
-            "Adopted the organic shopping team's visual language for the tiles themselves — same proportions, same signal patterns. Differentiation came from the carousel container and explicit \"Shopping Ads\" labeling, not from making each tile scream. Users could tell they were looking at ads without the tiles needing to.",
-          ),
-        ],
-        "16x9",
-        { status: "Richer advertiser-brand hover bumpers proposed but unshipped." },
-      ),
-      googleProse(
-        "google-ads-to-cc",
-        "After the click, the call",
-        "Shopping Ads ends at the buy. The Contact Center begins where buying breaks — the support call, the agent, the customer who needs a human. Three projects here, one belief: an agent is only as good as the context they're handed.",
+        "google-cct-intro",
+        "Someone has to support all of this",
+        "By 2018, the actual cost of supporting Alphabet's products was climbing past what leadership had budgeted for, and the fix wasn't more headcount, it was better tools, backed by AI. Doing more with less. A support agent's day was split across a dozen disconnected surfaces: a software telephone, a messaging tool, call scripts, QA coaching feedback, supervisor messages, etc. Our goal was to create super-agents, backed by AI.",
       ),
       googleVignette(
         "software-telephone-redesign",
-        "Google Contact Center — Software Telephone",
+        "Software Telephone Redesign",
         ["AI-native design", "Communication design", "Web"],
         "Agent empowerment / context surfacing / AI-assisted service",
         [
           googleMedia(
             "The before state",
-            "A basic phone dialer. A dial pad, call controls, and little else — customer history, prior interactions, knowledge base, and notes all lived in separate tabs and systems. (Animated GIFs of the original dialer exist.)",
+            "A basic phone dialer. A dial pad, call controls, and little else. Customer history, prior interactions, knowledge base, and notes all lived in separate tabs and systems.",
+            "1x1",
+            {
+              sources: [
+                "/portfolio/googleCCT/GoogleCCT_1.jpg",
+              ],
+            },
           ),
-          googleBeat(
+          googleMedia(
             "The vision",
             "Transform the software telephone from a dialer into a fully contextualized agent workspace — everything needed to handle a customer intelligently, in one place, without tab-switching or hunting.",
+            "1x1",
+            {
+              sources: [
+                "/portfolio/googleCCT/GoogleCCT_1.jpg",
+                "/portfolio/googleCCT/GoogleCCT_2.jpg",
+                "/portfolio/googleCCT/GoogleCCT_3.jpg",
+                "/portfolio/googleCCT/GoogleCCT_4.jpg",
+                "/portfolio/googleCCT/GoogleCCT_5.jpg",
+                "/portfolio/googleCCT/GoogleCCT_6.jpg",
+              ],
+            },
           ),
-          googleBeat(
-            "Five capability layers",
-            "Customer history surfaced on connect. AI-suggested KB solutions in real time. A live transcript for noisy environments and non-native speakers. Bot-conversation context, so agents knew what had already been tried. Omnichannel messaging — send links and articles mid-call without breaking voice.",
+          googleThesis(
+            "Approach",
+            "An integrated, extensible footprint.",
+            "Making the vision work within the Agent's toolchain, we focused on integrating with the CRM (where the  eyeballs were). We built the Agent Desktop to be flexible so that it could be packaged into: The Chrome browser, Salesforce, Google Cases (Google's own CRM), or live as a standalone desktop application.",
+            "16x9",
           ),
-          googleBeat(
-            "The quality layer",
-            "SLA timers during the call. An After Session Work screen with CRM-transfer confirmation and a CSAT histogram. A between-calls leaderboard and reflection surface. And a concept — real-time sentiment tracking — letting an agent see a call going south and course-correct before losing the customer.",
-          ),
-          googleBeat(
-            "Outcome",
-            "Shipped in phases: messaging as a standalone platform, the dialer with customer history and KB suggestions. The grand unified vision — every capability in one compact footprint — never fully shipped before I moved on.",
+          googleMedia(
+            "Exploring different footprints",
+            "AI insights were presented inline as a feed, with deep integration into the BU's CRM of choice.",
+            "16x9",
+            {
+              sources: [
+                "/portfolio/googleCCT/GoogleCCT_1.jpg",
+              ],
+            },
           ),
         ],
-        "16x9",
-        { status: "Shipped in phases; the fully unified workspace never shipped." },
+        "1x1",
+        {
+          titleTreatment: "cover",
+          keyImageSrc: "/portfolio/googleCCT/GoogleCCT_cover.jpg",
+          titleCoverBlur: 0,
+          titleCoverAlpha: 0.7,
+        },
       ),
       googleVignette(
         "contact-center-chat-platform",
@@ -2142,6 +1878,133 @@ export const caseStudies: CaseStudy[] = [
           ),
         ],
         "16x9",
+      ),
+      googleProse(
+        "google-cct-metric-csat",
+        "Customer satisfaction",
+        "Across the phone platform's phased rollout and the acoustic fixes that came out of the code yellow, customer satisfaction climbed 12 percent.",
+        { variant: "figure", stat: "+12%" },
+      ),
+      googleProse(
+        "google-cct-metric-agentsat",
+        "Agent satisfaction",
+        "Agents felt it more than customers did. Context on connect, fewer tabs, a workspace built around the call instead of around the dialer — agent satisfaction rose 23 percent.",
+        { variant: "figure", stat: "+23%" },
+      ),
+      googleProse(
+        "google-cct-metric-headcount",
+        "Headcount",
+        "The original mandate was do more with what you have. Three years and three shipped surfaces later, the team did more support, at higher satisfaction, on the same headcount it started with.",
+        { variant: "figure", stat: "Flat" },
+      ),
+    ],
+  },
+  {
+    slug: "google-shopping-ads",
+    name: "Google Shopping Ads — Funnel-Aware Formats",
+    subhead:
+      "Redesigning ad formats around what a query implies about intent — without using a single signal about the person who typed it.",
+    date: "2021–2022",
+    client: "Google",
+    brand: {
+      field: "google-primary",
+      logo: "/portfolio/logos/google.gif",
+    },
+    location: "Mountain View, CA",
+    role: "UX Design Manager",
+    tools: "Figma, prototyping, contextual research",
+    clientLogo: "/portfolio/logos/google.svg",
+    sections: [
+      googleProse(
+        "google-ads-intro",
+        "The Big Flip",
+        "By 2021, online shopping discovery was flipping away from search — more people were starting on Amazon or TikTok than on Google. With $237.9 billion in ad revenue on the line, the mandate was to make Google the first stop again, without touching the trust built into a page people already knew.\n\nThe starting insight: every shopping ad looked identical, the same rectangular tile, whether someone was idly browsing or ready to buy.",
+      ),
+      googleVignette(
+        "funnel-aware-ad-formats",
+        "Google Shopping Ads — Funnel-Aware Ad Formats",
+        ["Strategy", "Data visualization", "Web"],
+        "Funnel-stage design / query intelligence / privacy-safe personalization",
+        [
+          googleBeat(
+            "The insight",
+            "Every shopping ad looked identical — the same rectangular tile whether someone was idly browsing or ready to buy. The opportunity: serve a different ad format depending on where the user was in their shopping journey.",
+          ),
+          googleBeat(
+            "The privacy constraint",
+            "Google had extensive user signals — browsing history, cookies, profile. The team deliberately chose not to use them. Funnel stage would be inferred from the query itself and nothing else. Both a privacy-respecting choice and a technical one — increasingly relevant in a post-cookie world.",
+          ),
+          googleBeat(
+            "Three stages from the query",
+            "Browsy — exploratory, no brand or model (\"fall fashion trends for men\"). Researchy — comparison with a category but no committed brand (\"best washing machines of 2023\"). Converty — specific brand, model, sometimes location (\"Air Jordan size 10 near me\").",
+          ),
+          googleMedia(
+            "Three formats",
+            "Browsy: image-forward, details on hover. Researchy: tabular, specs forward, with authoritative third-party content (Wirecutter, YouTube) interspersed — a research surface, not just a product card. Converty: inventory and urgency — colorways, sizes, delivery windows, pickup proximity.",
+            "16x9",
+          ),
+          googleBeat(
+            "The political landscape",
+            "Google's whole-page approach created a double bind: the organic search team worried differentiated formats broke page cohesion, while the organic shopping team worried formats too similar to theirs confused ad vs. organic.",
+          ),
+          googleBeat(
+            "Threading the needle",
+            "Adopted the organic shopping team's visual language for the tiles themselves — same proportions, same signal patterns. Differentiation came from the carousel container and explicit \"Shopping Ads\" labeling, not from making each tile scream. Users could tell they were looking at ads without the tiles needing to.",
+          ),
+          googleStat(
+            "Outcome",
+            "+$500M",
+            "Hundreds of experiments across the three funnel-aware formats, run against organic and ad teams who both had reasons to say no. The combined lift: north of $500 million in annualized ad revenue.",
+            "1x1",
+          ),
+        ],
+        "16x9",
+        { status: "Richer advertiser-brand hover bumpers proposed but unshipped." },
+      ),
+    ],
+  },
+  {
+    slug: "google-store",
+    standalone: true,
+    name: "Google Store — Clover POS",
+    subhead:
+      "A point-of-sale rebuild for Google's physical retail stores, running on handhelds and coordinating four different roles on the floor.",
+    date: "2022",
+    client: "Google",
+    location: "Mountain View, CA",
+    role: "UX Design Manager",
+    tools: "Figma, prototyping, contextual research",
+    brand: {
+      field: "google-primary",
+      logo: "/portfolio/logos/google.gif",
+    },
+    clientLogo: "/portfolio/logos/google.svg",
+    sections: [
+      googleVignette(
+        "google-store-clover-pos",
+        "Google Store — Clover POS App",
+        ["Systems thinking", "Mobile"],
+        "Role orchestration / systems design / knowing when not to redesign",
+        [
+          googleBeat(
+            "The scope",
+            "A full Android app redesign running on Clover Flex handhelds for Google's physical retail stores. The app carried the entire retail workflow: inventory lookup, runner requests from back-of-house, SKU scanning, sales, promotions, returns, phone trade-ins, and BOPIS.",
+          ),
+          googleBeat(
+            "The systems layer",
+            "It wasn't just a point-of-sale tool — it was the coordination surface for several store roles at once: sales associates on the floor, runners in the back, back-of-house operations, and the repair team. One app, multiple roles, orchestrated workflows.",
+          ),
+          googleMedia(
+            "The senior move",
+            "Rather than design everything from scratch, partnered with the Google Store web team to repurpose existing assets — product configuration flows, PDP patterns, cart logic. Where contexts diverged (native vs. responsive, sales rep vs. public), modified; where they didn't, reused. Knowing when to build vs. borrow — and having the relationships to make borrowing work.",
+            "16x9",
+          ),
+          googleMedia(
+            "Walkthrough",
+            "Full Figma prototype tap-through demonstrating the complete app flow across roles.",
+            "9x16",
+          ),
+        ],
       ),
     ],
   },
